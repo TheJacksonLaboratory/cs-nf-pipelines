@@ -67,13 +67,13 @@ Note: For exact versioning of tools you will need to see the release information
   </ul>
 </ul>
 <hr>
-<h3>Part A: Login to Sumner</h3>
+<h3>Part A:<br>Login to Sumner</h3>
 
 ```bash
   ssh login.sumner.jax.org
 ```
 <hr>
-<h3>Part B: Pull this Repo and Move Some Files</h3>
+<h3>Part B:<br>Pull this Repo and Move Some Files</h3>
 
 Pull this repo from bitbucket and be sure to copy the shell scripts in this folder to your working directory.
 ```bash
@@ -94,7 +94,7 @@ cp make_hg38_config_run_RNASeq_PE_stranded.sh [/your/working/directory]/make_hg3
 
 <hr>
 
-<h3>Part C: Edit run_hg38_RNASeq_PE_stranded.sh</h3>
+<h3>Part C:<br>Edit run_hg38_RNASeq_PE_stranded.sh</h3>
 This file is responible for setting up the Slurm job and running the Nextflow command.
 <br><br>
 Change the email from first.last@jax.org to match your name or jax email.
@@ -109,7 +109,7 @@ nano run_hg38_RNASeq_PE_stranded.sh
 
 <hr>
 
-<h3>Part D: Run Script</h3>
+<h3>Part D:<br>Run Script</h3>
 You have completed the setup, now it is time to run the script and submit the job to slurm. Below is a sample command that you can run to test the environment.
 
 ```bash
