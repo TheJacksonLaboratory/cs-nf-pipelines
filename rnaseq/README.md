@@ -16,10 +16,16 @@ Before jumping into too much detail please be aware of the basic use of Nextflow
 </ul>
 <hr>
 <h2>User Process (High Level)</h2>
-<img src="../static/imgs/general_workflow.png" alt="hi" class="inline"/> figure 1
+
+![Scheme](/static/imgs/general_workflow.png)
+
+figure 1
 <hr>
 <h2>RNASeq Nextflow Script Process (High Level)</h2>
-<img src="../static/imgs/general_workflow.png" alt="hi" class="inline"/>
+* To Be Drawn
+
+![Scheme](/static/imgs/general_workflow.png)
+
 figure 2
 <hr>
 <h2>Singularity Container</h2>
@@ -90,7 +96,7 @@ cd [/your/working/directory]
 nano run_hg38_RNASeq_PE_stranded.sh
 ```
 
-<img src="../static/imgs/run_hg38.png" alt="hg38" class="inline"/>
+![Scheme](/static/imgs/run_hg38.png)
 
 <h3>Part D: Run Script</h3>
 You have completed the setup, now it is time to run the script and submit the job to slurm. Below is a sample command that you can run to test the environment.
@@ -100,4 +106,4 @@ sbatch make_hg38_config_run_RNASeq_PE_stranded.sh /projects/compsci/USERS/paisic
 ```
 <h3>What Did We Ask the System to Do?</h3>
 
-<h3>xpected Outputs</h3>
+<h3>Expected Outputs</h3>

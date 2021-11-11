@@ -17,4 +17,4 @@ Here are some quick links to learn more about the core technologies used here:
 
 # General Workflow
 
-<img src="static/imgs/general_workflow.png" alt="WorkFlow" class="inline"/>
+![Scheme](/static/imgs/general_workflow.png)
