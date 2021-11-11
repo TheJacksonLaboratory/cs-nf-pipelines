@@ -22,7 +22,6 @@ Before jumping into too much detail please be aware of the basic use of Nextflow
 figure 1
 <hr>
 <h2>RNASeq Nextflow Script Process (High Level)</h2>
-* To Be Drawn
 
 ![Scheme](../static/imgs/RNASeq_NF.png)
 
