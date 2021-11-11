@@ -17,4 +17,4 @@ Here are some quick links to learn more about the core technologies used here:
 
 # General Workflow
 
-![Scheme](/static/imgs/general_workflow.png)
+![Scheme](static/imgs/general_workflow.png)
