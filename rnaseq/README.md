@@ -17,14 +17,14 @@ Before jumping into too much detail please be aware of the basic use of Nextflow
 <hr>
 <h2>User Process (High Level)</h2>
 
-![Scheme](/static/imgs/general_workflow.png)
+![Scheme](static/imgs/general_workflow.png)
 
 figure 1
 <hr>
 <h2>RNASeq Nextflow Script Process (High Level)</h2>
 * To Be Drawn
 
-![Scheme](/static/imgs/general_workflow.png)
+![Scheme](static/imgs/general_workflow.png)
 
 figure 2
 <hr>
@@ -96,7 +96,7 @@ cd [/your/working/directory]
 nano run_hg38_RNASeq_PE_stranded.sh
 ```
 
-![Scheme](/static/imgs/run_hg38.png)
+![Scheme](static/imgs/run_hg38.png)
 
 <h3>Part D: Run Script</h3>
 You have completed the setup, now it is time to run the script and submit the job to slurm. Below is a sample command that you can run to test the environment.
