@@ -6,7 +6,7 @@ Please see the individual README.md files for deeper descriptions about each pip
 <ul>
 <li><a href = "#">Whole Genome Sequencing (WGS)</a></li>
 <li><a href = "#">Whole Exome Sequencing (WES)</a></li>
-<li><a href = "#">RNA Sequencing (RNASeq)</a></li>
+<li><a href = "/rnaseq/README.md">RNA Sequencing (RNASeq)</a></li>
 </ul>
 <hr>
 Here are some quick links to learn more about the core technologies used here:
@@ -14,3 +14,7 @@ Here are some quick links to learn more about the core technologies used here:
 <li><a href = "#">About Nextflow</a></li>
 <li><a href = "#">About Singularity</a></li>
 </ul>
+
+# General Workflow
+
+<img src="static/imgs/general_workflow.png" alt="WorkFlow" class="inline"/>
