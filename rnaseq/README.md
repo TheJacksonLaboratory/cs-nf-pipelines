@@ -105,8 +105,11 @@ cd [/your/working/directory]
 nano run_hg38_RNASeq_PE_stranded.sh
 ```
 
+<center>
+
 ![Scheme](../static/imgs/run_hg38.png)
 
+</center>
 <hr>
 
 <h3>Part D:<br>Run Script</h3>
@@ -122,3 +125,8 @@ sbatch make_hg38_config_run_RNASeq_PE_stranded.sh /projects/compsci/USERS/paisic
 <hr>
 
 <h3>Expected Outputs</h3>
+<hr>
+<h3>All Optional Inputs</h3>
+<hr>
+<h3>Config On Other Systems</h3>
+<hr>
