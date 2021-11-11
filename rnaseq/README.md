@@ -17,13 +17,20 @@ Before jumping into too much detail please be aware of the basic use of Nextflow
 <hr>
 <h2>User Process (High Level)</h2>
 
+<center>
+
 ![Scheme](../static/imgs/general_workflow.png)
 
+</center>
 figure 1
 <hr>
 <h2>RNASeq Nextflow Script Process (High Level)</h2>
 
+<center>
+
 ![Scheme](../static/imgs/RNASeq_NF.png)
+
+</center>
 
 figure 2
 <hr>
