@@ -1,6 +1,6 @@
 # RNASeq Pipeline
 
-This RNASeq pipeline has been optimized for use on Sumner HPC, however due to the modular nature of Nextflow and our Singularity container it is easy to repurpose the code to be used in the cloud or on alternative servers.
+This RNASeq pipeline has been optimized for use on Sumner HPC. Thanks to the modular nature of Nextflow and our Singularity container it is easy to repurpose the code to be used in the cloud or on alternative servers.
 
 This introduction will first cover a use case on Sumner. See the Quick Start section for a brief walk through. We will then cover some of the necessary configuration changes required on separate systems, though this will not be an exhaustive explanation.
 
@@ -24,7 +24,7 @@ figure 1
 <h2>RNASeq Nextflow Script Process (High Level)</h2>
 * To Be Drawn
 
-![Scheme](../static/imgs/general_workflow.png)
+![Scheme](../static/imgs/RNASeq_NF.png)
 
 figure 2
 <hr>
@@ -60,13 +60,13 @@ Note: For exact versioning of tools you will need to see the release information
   <li>*_R2*.fastq.gz (reverse read, if doing paired-end)
   </ul>
 </ul>
-
+<hr>
 <h3>Part A: Login to Sumner</h3>
 
 ```bash
   ssh login.sumner.jax.org
 ```
-
+<hr>
 <h3>Part B: Pull this Repo and Move Some Files</h3>
 
 Pull this repo from bitbucket and be sure to copy the shell scripts in this folder to your working directory.
@@ -85,6 +85,9 @@ Please make sure that the following shell scripts are in the working directory y
 cp run_hg38_RNASeq_PE_stranded.sh [/your/working/directory]/run_hg38_RNASeq_PE_stranded.sh
 cp make_hg38_config_run_RNASeq_PE_stranded.sh [/your/working/directory]/make_hg38_config_run_RNASeq_PE_stranded.sh
 ```
+
+<hr>
+
 <h3>Part C: Edit run_hg38_RNASeq_PE_stranded.sh</h3>
 This file is responible for setting up the Slurm job and running the Nextflow command.
 <br><br>
@@ -98,12 +101,18 @@ nano run_hg38_RNASeq_PE_stranded.sh
 
 ![Scheme](../static/imgs/run_hg38.png)
 
+<hr>
+
 <h3>Part D: Run Script</h3>
 You have completed the setup, now it is time to run the script and submit the job to slurm. Below is a sample command that you can run to test the environment.
 
 ```bash
 sbatch make_hg38_config_run_RNASeq_PE_stranded.sh /projects/compsci/USERS/paisic/hsa_fastq_RNA_seq/PE /projects/compsci/USERS/paisic/hsa_hg38_RNASeq_testing_PE/ /fastscratch/paisic/hsa_hg38_RNASeq_testing_PE/ 50 PE stranded 25
 ```
+
+<hr>
+
 <h3>What Did We Ask the System to Do?</h3>
+<hr>
 
 <h3>Expected Outputs</h3>
