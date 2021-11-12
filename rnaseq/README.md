@@ -52,7 +52,7 @@ Note: For exact versioning of tools you will need to see the release information
 <ul>
 <li>Access to Sumner HPC</li>
 <li>Nextflow Version 21.04 or later in home directory. (<a href = '#'>For instillation see this link</a>)</li>
-<li>module load singularity</li>
+<li>module load singularity (requires being on a compute node)</li>
 <li>A clean working directory</li>
 <li>This folder of the reopo must be present on the file system</li>
 <li>Access to our Quay.io Singularity containers</li>
