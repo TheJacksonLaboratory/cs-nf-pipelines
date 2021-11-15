@@ -1,0 +1,7 @@
+2021-11-15 14:12:11	3.7s	suspicious_bose	ERR	6b82abb8026e990f7ca05e102d03fecb	000937b3-376f-4b30-8208-1885caef71d5	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:28:38	3.6s	marvelous_gates	ERR	6b82abb8026e990f7ca05e102d03fecb	b7e1fde8-2dc6-4b26-8671-343ba7db6c74	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:31:00	3.1s	clever_cuvier	ERR	6b82abb8026e990f7ca05e102d03fecb	abf5db26-db34-4832-8fbf-2d8c13db06ff	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:32:31	3.9s	tiny_shannon	ERR	6b82abb8026e990f7ca05e102d03fecb	aed25863-846a-4254-8ed8-1221b0aeb59a	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:33:05	5.2s	boring_pauling	ERR	6b82abb8026e990f7ca05e102d03fecb	aebe6dd4-2a05-4f8c-beb7-901d685b696f	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:36:16	3.1s	modest_wiles	ERR	6b82abb8026e990f7ca05e102d03fecb	392e16c7-88e8-4818-8331-701ed5d7bd7a	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
+2021-11-15 14:55:38	3.4s	dreamy_keller	ERR	6b82abb8026e990f7ca05e102d03fecb	32285e4d-25e0-4ddd-8a77-f81e3396f3e3	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path

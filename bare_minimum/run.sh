@@ -59,7 +59,8 @@ cp $CONFIG_FILE $OUTDIR/$CONFIG_FILE
 # RUN NEXTFLOW PIPELINE USING OUR CONFIGS AND FILE LOCATIONS
 ~/nextflow \
 -c $CONFIG_FILE \
---outdir $OUTDIR \
 run \
-RNASeq.nf
+minimum.nf \
+--outdir $OUTDIR \
+--fq_path $FQ_PATH
 # -profile slurm,singularity
