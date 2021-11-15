@@ -3,3 +3,6 @@
 test/
 output/
 bare_minimum/.nextflow*
+bare_minimum/cache/
+bare_minimum/work/
+

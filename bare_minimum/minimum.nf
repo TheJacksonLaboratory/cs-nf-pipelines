@@ -8,13 +8,14 @@ println params.fq_path
 process foo {
   println "success"
   '''
-  do this
+  echo hello
+
   '''
 }
 
 process bar {
   println "or so we think"
   '''
-  do that
+  echo world
   '''
 }
