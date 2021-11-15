@@ -65,25 +65,24 @@ do
     esac
 done
 
-# SHARED CACHE FOR CONTAINER IMAGES
+# SHARED CACHE
 CACHE='/projects/omics_share/meta/containers/'
+
 # SET VARIABLES TO DEFAULT IF BLANK
 if [ -z "${FQ_PATH}" ]; then Help; echo "No FASTQ PATH"; echo "Use -h for help, options and defaults"; exit 1; fi
 if [ -z "${OUTDIR}" ]; then OUTDIR='./output';mkdir output || echo "Re-Writing 'output' Folder"; fi
 if [ -z "${CONFIG_FILE}" ]; then CONFIG_FILE="nextflow.config"; fi
 if [ -z "${TMP_DIR}" ]; then TMP_DIR=$OUTDIR; fi
-# COPY CONFIG FILE TO OUTDIR
+if [ -z "${MIN_PCT_HQ_READS}" ]; then MIN_PCT_HQ_READS='50'; fi
+if [ -z "${SEED_LENGTH}" ]; then SEED_LENGTH='25'; fi
+if [ -z "${EXTENSION}" ]; then EXTENSION='.fastq.gz'; fi
+if [ -z "${READ_PREP}" ]; then READ_PREP='stranded'; fi
+if [ -z "${READS}" ]; then READS='PE'; fi
+if [ -z "${SKIP_MAKE}" ]; then SKIP_MAKE='false'; fi
+
+# MAKE COPY NF CONFIG FILE
 cp $CONFIG_FILE $OUTDIR/$CONFIG_FILE
-# MAKE CHANGES TO CONFIG IF NECESSARY
-sed -i '' 's/hey/bob/' $OUTDIR/$CONFIG_FILE
-if [ ! -z "${MIN_PCT_HQ_READS}" ]; then
-  sed -i '' "s/EXAMPLE=this/EXAMPLE=${MIN_PCT_HQ_READS}/" $OUTDIR/$CONFIG_FILE;
-fi
-if [ ! -z "${SEED_LENGTH}" ]; then SEED_LENGTH='25'; fi
-if [ ! -z "${EXTENSION}" ]; then EXTENSION='.fastq.gz'; fi
-if [ ! -z "${READ_PREP}" ]; then READ_PREP='stranded'; fi
-if [ ! -z "${READS}" ]; then READS='PE'; fi
-if [ ! -z "${SKIP_MAKE}" ]; then SKIP_MAKE='false'; fi
+
 # depth of coverage and such (pdx specific) need to be removed from RNASeq.nf
 # variant calling optional -- need to add this in (v2)
 # keeping images sepeate (modularize)
@@ -93,8 +92,8 @@ if [ ! -z "${SKIP_MAKE}" ]; then SKIP_MAKE='false'; fi
   # default cache = /projects/omics_share/meta/containers/
 
 # RUN NEXTFLOW PIPELINE USING OUR CONFIGS AND FILE LOCATIONS
-# ~/nextflow \
-# -c ${pc_name}_hg38_params.config \
-# run \
-# RNASeq.nf \
+~/nextflow \
+-c $CONFIG_FILE \
+run \
+RNASeq.nf
 # -profile slurm,singularity
