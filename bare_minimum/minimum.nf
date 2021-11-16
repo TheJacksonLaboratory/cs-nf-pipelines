@@ -1,14 +1,10 @@
 #!/usr/bin/env nextflow
 
-params.fq_path_test = "$HOME/bitbucket/nf_dsl2_testing/bare_minimum/cache/rnaseqs" // default
-params.fq_path
-params.outdir = "."
-println params.fq_path
-println params.fq_path
+println params.contact
 
-process bar {
+process trim {
   println "Trimmomatic"
-  
+
 """
 trimmomatic PE \
 '${params.fq_path_test}'/SRR1641108.1_R1.fastq.gz \
