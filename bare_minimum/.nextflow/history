@@ -1,2 +1,0 @@
-2021-11-15 15:26:17	7.5s	extravagant_visvesvaraya	OK	ca57557e2cea239e095dd7dcfeb42ab0	aabfdc66-6193-428c-b0bd-549a7741c231	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
-2021-11-15 15:36:34	7s	crazy_curie	OK	ca57557e2cea239e095dd7dcfeb42ab0	d8326c23-ecbf-4275-9439-f50acf7327ae	nextflow -c nextflow.config run minimum.nf --outdir ./output --fq_path /this/path
