@@ -1,13 +1,16 @@
 #!/usr/bin/env nextflow
 
+// enable DSL2
+nextflow.enable.dsl=2
+
 // print a param from config
-println params.description
+println "${params.fq_path}/*_R{1,2}${params.extension}"
 
 // create a channel of pair reads
 read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}${params.extension}")
 
 // just a test
-println reads_ch.view()
+println read_ch.view()
 
 /*
   define process: keep it one tool and one container per process
@@ -17,7 +20,7 @@ println reads_ch.view()
 process trim {
   // required: this is where you define the channel to be used and variable names
   input:
-  file sampleId, reads from read_ch
+  set sampleId, file(reads) from read_ch
 
 /*
   required: this is where you define the channel to be created from variables
