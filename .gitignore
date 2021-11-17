@@ -2,7 +2,7 @@
 *test*
 test/
 output/
-bare_minimum/.nextflow*
-bare_minimum/cache/
-bare_minimum/work/
+min/.nextflow*
+min/cache/
+min/work/
 

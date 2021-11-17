@@ -15,6 +15,6 @@ process trim {
 
   script:  
   """
-  echo fuck
+  echo ouch
   """
 }
