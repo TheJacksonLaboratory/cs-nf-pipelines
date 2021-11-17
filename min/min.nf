@@ -1,7 +1,7 @@
 #!/usr/bin/env nextflow
 
 // enable DSL2
-nextflow.enable.dsl=2
+// nextflow.enable.dsl=2
 
 // log important info
 log.info """\
@@ -21,7 +21,7 @@ read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}${params.extension}",
 
 process trim {
   
-  publishDir params.outdir, mode: 'copy', pattern:'*.txt'
+  publishDir "output"
   
   // required: this is where you define the channel to be used and variable names
   input:
@@ -33,8 +33,7 @@ process trim {
 */
 
   output:
-  file("*.txt") into file_ch
-
+  file "*.txt" into file_ch
   /*
   required: the script/command entered here will be run by the container
   note that you can surround the script in """echo here""" or you can point
@@ -43,11 +42,12 @@ process trim {
 
   script:
   """
-  trimmomatic -h > help.txt
   echo $reads > ${sampleId}.txt
   """
 
 }
+file_ch.subscribe { println "Received: " + it }
+
 workflow.onComplete {
 	log.info ( workflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : "Oops .. something went wrong" )
 }
