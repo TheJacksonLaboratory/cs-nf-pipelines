@@ -39,9 +39,7 @@ process trim {
   */
 
   script:
-  """
-  echo $reads > ${sampleId}.txt
-  """
+  template "trim.sh"
 
 }
 workflow{

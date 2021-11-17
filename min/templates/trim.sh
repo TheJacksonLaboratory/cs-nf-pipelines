@@ -1,1 +1,2 @@
-echo params.description > description.txt
+echo ${reads} > ${sampleId}.txt
+
