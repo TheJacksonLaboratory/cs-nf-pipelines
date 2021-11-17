@@ -1,8 +1,7 @@
 #!/usr/bin/env nextflow
 
-// from this commit everything works dsl1 now I am updating to dsl2
 // enable DSL2
-//nextflow.enable.dsl=2
+nextflow.enable.dsl=2
 
 // log important info
 log.info """\
@@ -26,7 +25,7 @@ process trim {
   
   // required: this is where you define the channel to be used and variable names
   input:
-  set sampleId, file(reads) from read_ch
+  tuple val(sampleId), file(reads)
 
 /*
   required: this is where you define the channel to be created from variables
@@ -34,7 +33,7 @@ process trim {
 */
 
   output:
-  file "*.txt" into file_ch
+  file "*.txt"
   /*
   required: the script/command entered here will be run by the container
   note that you can surround the script in """echo here""" or you can point
@@ -47,7 +46,10 @@ process trim {
   """
 
 }
-file_ch.subscribe { println "Received: " + it }
+workflow{
+ data=read_ch
+ trim(data)
+}
 
 workflow.onComplete {
 	log.info ( workflow.success ? "\nDone! Open the following report in your browser --> $params.outdir/multiqc_report.html\n" : "Oops .. something went wrong" )
