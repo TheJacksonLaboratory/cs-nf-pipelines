@@ -1,10 +1,10 @@
 #!/bin/bash
-#SBATCH --job-name=nf_hg38_RNA_Exp_Est_PE_stranded
+#SBATCH --job-name=min_nextflow
 #SBATCH --mail-type=END
-#SBATCH --mail-user=first.last@jax.org
+#SBATCH --mail-user=barry.guglielmo@jax.org
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 48:00:00
+#SBATCH -t 00:10:00
 #SBATCH --mem=2000
 
 # LOAD SINGULARITY
@@ -59,7 +59,6 @@ cp $CONFIG_FILE $OUTDIR/$CONFIG_FILE
 ~/nextflow \
 -c $CONFIG_FILE \
 run \
-minimum.nf \
+min.nf \
 --outdir $OUTDIR \
 --fq_path $FQ_PATH
-# -profile slurm,singularity
