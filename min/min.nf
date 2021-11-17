@@ -1,7 +1,8 @@
 #!/usr/bin/env nextflow
 
+// from this commit everything works dsl1 now I am updating to dsl2
 // enable DSL2
-// nextflow.enable.dsl=2
+//nextflow.enable.dsl=2
 
 // log important info
 log.info """\
