@@ -19,7 +19,9 @@ than this example. Once you understand the basics here you can move on to see ou
 ## Primary Resources
 
 <ul>
-<li><a href=https://www.nextflow.io/docs/latest/dsl2.html">Link to DSL2 Documentation</a></li>
+<li><a href="https://www.nextflow.io/docs/latest/dsl2.html">Link to DSL2 Documentation</a></li>
+<li><a href="https://github.com/nf-core/hic">Link to HiC NF-Core</a></li>
+<li><a href="https://github.com/nf-core/rnafusion">Link to RNA Fusion NF-Core</a></li>
 </ul
 <hr>
 
@@ -31,3 +33,5 @@ RSEM process to quantify the trimmed reads. The expected output can be found in 
 <hr>
 
 ## Other Things to Note
+
+decision making logic (some do specify some do not) need to figure out dsl2 RNA fusion and hic pipeline.

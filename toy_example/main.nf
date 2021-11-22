@@ -34,18 +34,32 @@ process trim {
   */
 
   output:
-  file "*.txt"
+  file "*.fastq.gz"
 
   /*
      4.c.) required: the script/command entered here will be run by the container
      note that you can surround the script in """echo here""" or you can point
      at a script in the templates folder (folder must be named templates)
 
-     
+
   */
 
   script:
-  template "trim.sh"
+  """
+  echo ${params.t_lead} > ${sampleId}.txt
+
+  trimmomatic \
+  PE \
+  /home/guglib/rnaseqs/PE/${reads[0]} \
+  /home/guglib/rnaseqs/PE/${reads[1]} \
+  /home/guglib/test/output_forward_paired.fastq.gz \
+  /home/guglib/test/output_forward_unpaired.fastq.gz \
+  /home/guglib/test/output_reverse_paired.fastq.gz \
+  /home/guglib/test/output_reverse_unpaired.fastq.gz \
+  LEADING:${t_lead} \
+  TRAILING:${t_trail} \
+  MINLEN:${min_len}
+  """
 
 }
 
