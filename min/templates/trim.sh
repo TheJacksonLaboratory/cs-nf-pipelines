@@ -1,2 +1,0 @@
-echo ${reads} > ${sampleId}.txt
-
