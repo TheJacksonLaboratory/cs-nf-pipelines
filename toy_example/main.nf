@@ -6,7 +6,7 @@ nextflow.enable.dsl=2
 // 2.) log important info
 
 log.info """\
- TOY R N A S E Q - N F   P I P E L I N E
+ TOY EXAMPLE   P I P E L I N E
  ===================================
  fq_path        : ${params.fq_path}
  outdir         : ${params.outdir}
@@ -18,13 +18,15 @@ read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}${params.extension}",
 
 /*
    4.) define trimming process: keep it one tool and one container per process
-   the process container and publishDir (output directory) are defined in nextflow.config
+   the process container is defined in nextflow.config
 */
 
 process trim {
 
   // 4.a.) required: this is where you define the channel to be used and variable names
 
+  publishDir "${params.outdir}/trimmed"
+  
   input:
   tuple val(sampleId), file(reads)
 
@@ -34,7 +36,8 @@ process trim {
   */
 
   output:
-  file "*.fastq.gz"
+  tuple val(sampleId),file('*.fastq')
+ 
 
   /*
      4.c.) required: the script/command entered here will be run by the container
@@ -46,19 +49,17 @@ process trim {
 
   script:
   """
-  echo ${params.t_lead} > ${sampleId}.txt
-
   trimmomatic \
   PE \
-  /home/guglib/rnaseqs/PE/${reads[0]} \
-  /home/guglib/rnaseqs/PE/${reads[1]} \
-  /home/guglib/test/output_forward_paired.fastq.gz \
-  /home/guglib/test/output_forward_unpaired.fastq.gz \
-  /home/guglib/test/output_reverse_paired.fastq.gz \
-  /home/guglib/test/output_reverse_unpaired.fastq.gz \
-  LEADING:${t_lead} \
-  TRAILING:${t_trail} \
-  MINLEN:${min_len}
+  ${params.fq_path}/${reads[0]} \
+  ${params.fq_path}/${reads[1]} \
+  ${sampleId}_R1_paired${params.extension} \
+  ${sampleId}_R1_unpaired${params.extension} \
+  ${sampleId}_R2_paired${params.extension} \
+  ${sampleId}_R2_unpaired${params.extension} \
+  LEADING:${params.t_lead} \
+  TRAILING:${params.t_trail} \
+  MINLEN:${params.min_len}
   """
 
 }
@@ -66,15 +67,27 @@ process trim {
 // 5. Use RSEM for quantification
 
 process quant{
-input:
-tuple val(sampleId), file(reads)
-output:
-file "*.txt"
+  publishDir "${params.outdir}/RSEM"   
+  
+  input:
+  tuple val(sampleId),file(trimmed)
+  
+  
+  output:
+  file "*.txt"
+
+  script:
+  
+  '''
+  echo hello > world.txt
+  '''
 }
 
+// trim_ch = Channel.fromFilePairs("${params.outdir}/*_R{1,2}*${params.extension}")
+
 workflow{
- data=read_ch
- trim(data)
+ trim_ch=trim(read_ch)
+ quant(trim_ch)
 }
 
 workflow.onComplete {

@@ -1,0 +1,6 @@
+/usr/local/bin/trimmomatic: line 6: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8): No such file or directory
+TrimmomaticPE: Started with arguments:
+ /projects/compsci/guglib/rnaseqs/PE/short/SRR2048278.1_R1.fastq /projects/compsci/guglib/rnaseqs/PE/short/SRR2048278.1_R2.fastq SRR2048278.1_R1_paired.fastq SRR2048278.1_R1_unpaired.fastq SRR2048278.1_R2_paired.fastq SRR2048278.1_R2_unpaired.fastq LEADING:3 TRAILING:3 MINLEN:36
+Quality encoding detected as phred33
+Input Read Pairs: 100000 Both Surviving: 90521 (90.52%) Forward Only Surviving: 9193 (9.19%) Reverse Only Surviving: 196 (0.20%) Dropped: 90 (0.09%)
+TrimmomaticPE: Completed successfully

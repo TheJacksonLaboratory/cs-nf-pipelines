@@ -1,0 +1,70 @@
+Nov-22 21:53:45.558 [main] DEBUG nextflow.cli.Launcher - $> nextflow main.nf
+Nov-22 21:53:45.711 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 21.04.3
+Nov-22 21:53:45.737 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [kickass_chandrasekhar] - revision: e42802dd7c
+Nov-22 21:53:45.750 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/guglib/bitbucket/nf/toy_example/nextflow.config
+Nov-22 21:53:45.751 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/guglib/bitbucket/nf/toy_example/nextflow.config
+Nov-22 21:53:45.782 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Nov-22 21:53:46.607 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/home/guglib/.nextflow/plugins
+Nov-22 21:53:46.609 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-22 21:53:46.610 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins local root: .nextflow/plr/empty
+Nov-22 21:53:46.619 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-22 21:53:46.620 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-22 21:53:46.623 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Nov-22 21:53:46.630 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-22 21:53:46.675 [main] DEBUG nextflow.Session - Session uuid: 2375c1d9-d07f-4e08-89aa-a6bbeaff7d01
+Nov-22 21:53:46.675 [main] DEBUG nextflow.Session - Run name: kickass_chandrasekhar
+Nov-22 21:53:46.676 [main] DEBUG nextflow.Session - Executor pool size: 2
+Nov-22 21:53:46.688 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 21.04.3 build 5560
+  Created: 21-07-2021 15:09 UTC (11:09 EDT)
+  System: Linux 3.10.0-1062.1.2.el7.x86_64
+  Runtime: Groovy 3.0.7 on OpenJDK 64-Bit Server VM 1.8.0_222-b10
+  Encoding: UTF-8 (UTF-8)
+  Process: 83484@sumner101 [10.5.34.101]
+  CPUs: 1 - Mem: 754.6 GB (84 GB) - Swap: 63.9 GB (62.7 GB)
+Nov-22 21:53:46.716 [main] DEBUG nextflow.Session - Work-dir: /home/guglib/bitbucket/nf/toy_example/work [nfs]
+Nov-22 21:53:46.716 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /home/guglib/bitbucket/nf/toy_example/bin
+Nov-22 21:53:46.726 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-22 21:53:46.735 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-22 21:53:46.905 [main] DEBUG nextflow.Session - Session start invoked
+Nov-22 21:53:47.316 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Nov-22 21:53:47.328 [main] INFO  nextflow.Nextflow -  TOY EXAMPLE   P I P E L I N E
+ ===================================
+ fq_path        : /projects/compsci/guglib/rnaseqs/PE/short
+ outdir         : /projects/compsci/guglib/toy-example
+ 
+Nov-22 21:53:47.521 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: trim, quant
+Nov-22 21:53:47.588 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:trim` matches process trim
+Nov-22 21:53:47.599 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Nov-22 21:53:47.599 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Nov-22 21:53:47.606 [main] DEBUG nextflow.executor.Executor - [warm up] executor > slurm
+Nov-22 21:53:47.612 [main] DEBUG n.processor.TaskPollingMonitor - Creating task monitor for executor 'slurm' > capacity: 100; pollInterval: 5s; dumpInterval: 5m 
+Nov-22 21:53:47.615 [main] DEBUG n.executor.AbstractGridExecutor - Creating executor 'slurm' > queue-stat-interval: 1m
+Nov-22 21:53:47.694 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:quant` matches process quant
+Nov-22 21:53:47.694 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Nov-22 21:53:47.695 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Nov-22 21:53:47.698 [main] DEBUG nextflow.Session - Ignite dataflow network (3)
+Nov-22 21:53:47.704 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > trim
+Nov-22 21:53:47.704 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > quant
+Nov-22 21:53:47.706 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /projects/compsci/guglib/rnaseqs/PE/short/; pattern: *_R{1,2}.fastq; options: [:]
+Nov-22 21:53:47.709 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Nov-22 21:53:47.709 [main] DEBUG nextflow.Session - Session await
+Nov-22 21:53:47.820 [Actor Thread 5] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=docker://quay.io/biocontainers/trimmomatic:0.35--6; path=/home/guglib/cache/quay.io-biocontainers-trimmomatic-0.35--6.img
+Nov-22 21:53:47.990 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process trim (1) > jobId: 11800734; workDir: /home/guglib/bitbucket/nf/toy_example/work/17/5950fdd51ba3a32bb9b226068cae3a
+Nov-22 21:53:47.993 [Task submitter] INFO  nextflow.Session - [17/5950fd] Submitted process > trim (1)
+Nov-22 21:53:48.034 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process trim (2) > jobId: 11800735; workDir: /home/guglib/bitbucket/nf/toy_example/work/07/b5e61c316b36fc4da5084b7aa8bf73
+Nov-22 21:53:48.035 [Task submitter] INFO  nextflow.Session - [07/b5e61c] Submitted process > trim (2)
+Nov-22 21:54:22.647 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800734; id: 1; name: trim (1); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/17/5950fdd51ba3a32bb9b226068cae3a started: 1637636062630; exited: 2021-11-23T02:54:07.074817Z; ]
+Nov-22 21:54:22.666 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Process `trim (1)` is unable to find [UnixPath]: `/home/guglib/bitbucket/nf/toy_example/work/17/5950fdd51ba3a32bb9b226068cae3a/*${params.extension}` (pattern: `*${params.extension}`)
+Nov-22 21:54:22.674 [Task monitor] INFO  nextflow.processor.TaskProcessor - [17/5950fd] NOTE: Missing output file(s) `*${params.extension}` expected by process `trim (1)` -- Error is ignored
+Nov-22 21:54:22.725 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800735; id: 2; name: trim (2); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/07/b5e61c316b36fc4da5084b7aa8bf73 started: 1637636062707; exited: 2021-11-23T02:54:06.516896Z; ]
+Nov-22 21:54:22.727 [Task monitor] DEBUG nextflow.processor.TaskProcessor - Process `trim (2)` is unable to find [UnixPath]: `/home/guglib/bitbucket/nf/toy_example/work/07/b5e61c316b36fc4da5084b7aa8bf73/*${params.extension}` (pattern: `*${params.extension}`)
+Nov-22 21:54:22.728 [Task monitor] INFO  nextflow.processor.TaskProcessor - [07/b5e61c] NOTE: Missing output file(s) `*${params.extension}` expected by process `trim (2)` -- Error is ignored
+Nov-22 21:54:22.792 [main] DEBUG nextflow.Session - Session await > all process finished
+Nov-22 21:54:27.621 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Nov-22 21:54:27.626 [main] INFO  nextflow.Nextflow - 
+Done! Output in : /projects/compsci/guglib/toy-example
+
+Nov-22 21:54:27.636 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=0; failedCount=2; ignoredCount=2; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=0ms; failedDuration=33ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Nov-22 21:54:27.777 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Nov-22 21:54:27.802 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye

@@ -1,0 +1,19 @@
+2021-11-22 19:42:37	36.8s	hungry_golick	ERR	ecee5c06873848bd4b4758b6354ece3e	0a04f696-2653-411e-8e0a-59f243bb43b3	nextflow main.nf
+2021-11-22 19:49:39	1m 36s	nice_hypatia	ERR	ecee5c06873848bd4b4758b6354ece3e	ba4adb18-e416-4fef-ab8a-53ffc8abd2fd	nextflow main.nf
+2021-11-22 21:08:36	1m 16s	extravagant_volhard	OK	ecee5c06873848bd4b4758b6354ece3e	9c4d36fb-b3f6-423d-b420-8f6aa7233158	nextflow main.nf
+2021-11-22 21:11:50	41.6s	small_mestorf	OK	ecee5c06873848bd4b4758b6354ece3e	194ca6c8-8643-4e8e-9681-b9ca201e22e2	nextflow main.nf
+2021-11-22 21:19:36	-	scruffy_bardeen	-	7c6b2eab5e689474c90936983f7e1c5f	9e1749c1-dee1-4d7f-b873-486768b304e5	nextflow main.nf
+2021-11-22 21:20:54	21.1s	condescending_church	ERR	a29c9db1c5ffbb0cb662a8cb418f5201	59376b70-cb63-4451-b214-af3381217599	nextflow main.nf
+2021-11-22 21:21:46	-	kickass_elion	-	599acf840d8cf6966f364f81340fef1e	772b23df-9b85-4f12-80fa-391cebc6d906	nextflow main.nf
+2021-11-22 21:22:36	41.2s	naughty_crick	OK	a1b5bb553ff6172472e5d6bf72f06a5e	5cdab8ed-351a-4b70-9b6a-0e7e64fd28c1	nextflow main.nf
+2021-11-22 21:23:42	41.3s	exotic_mendel	OK	a1b5bb553ff6172472e5d6bf72f06a5e	fa86d424-bf49-4495-823c-35aeb5ac65d3	nextflow main.nf
+2021-11-22 21:26:39	42.1s	jolly_wozniak	OK	276afd3ed2bcea26e7d65672bbd5607f	d80b4ac3-e060-45a7-b96c-04d672229d20	nextflow main.nf
+2021-11-22 21:35:08	-	mad_albattani	-	a94ec9eca217872c4ec76ed878c76fd5	ca01ac47-70c9-487b-aec6-cbee36096248	nextflow main.nf
+2021-11-22 21:37:15	-	insane_descartes	-	783af40991170ddab4b8a7503557eebf	8c8c6bcb-1022-4181-b2ce-dd087e94b527	nextflow main.nf
+2021-11-22 21:38:09	1m 12s	intergalactic_poincare	OK	f1248edc3b8cc565b7d617a860306c47	bf038e6e-3931-4175-a398-9cc3d32339f4	nextflow main.nf
+2021-11-22 21:40:23	3m 56s	fabulous_poincare	OK	5c813c13031aa7ab700c1e232129c2d5	bb2494e5-a107-4b67-b60a-16a7921d2e8b	nextflow main.nf
+2021-11-22 21:47:56	42.1s	sleepy_wilson	OK	4ef9ec3c124b17cfdd21159bb4a4f0ae	a9f50e8e-b43e-4c0f-a967-8321385c2aea	nextflow main.nf
+2021-11-22 21:49:04	1m 12s	golden_pare	OK	4ef9ec3c124b17cfdd21159bb4a4f0ae	981eb97b-bd2d-463f-8925-771632565006	nextflow main.nf
+2021-11-22 21:53:46	41.8s	kickass_chandrasekhar	OK	e42802dd7caa153948e331ea0ff17b73	2375c1d9-d07f-4e08-89aa-a6bbeaff7d01	nextflow main.nf
+2021-11-22 21:56:32	2m 12s	irreverent_faggin	OK	898a08f1841c00cb06e60fc94745f3b0	4df2af70-1a49-4f08-8801-0f124ea1e1c0	nextflow main.nf
+2021-11-22 22:00:30	2m 16s	goofy_ekeblad	OK	9f0cfa1bc17cebd721eb58cc7b31601c	e1d6e195-3c87-474e-9c9d-3c8c40006848	nextflow main.nf

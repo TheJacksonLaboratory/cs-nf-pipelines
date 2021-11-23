@@ -1,0 +1,80 @@
+Nov-22 21:49:03.398 [main] DEBUG nextflow.cli.Launcher - $> nextflow main.nf
+Nov-22 21:49:03.545 [main] INFO  nextflow.cli.CmdRun - N E X T F L O W  ~  version 21.04.3
+Nov-22 21:49:03.572 [main] INFO  nextflow.cli.CmdRun - Launching `main.nf` [golden_pare] - revision: 4ef9ec3c12
+Nov-22 21:49:03.585 [main] DEBUG nextflow.config.ConfigBuilder - Found config local: /home/guglib/bitbucket/nf/toy_example/nextflow.config
+Nov-22 21:49:03.585 [main] DEBUG nextflow.config.ConfigBuilder - Parsing config file: /home/guglib/bitbucket/nf/toy_example/nextflow.config
+Nov-22 21:49:03.616 [main] DEBUG nextflow.config.ConfigBuilder - Applying config profile: `standard`
+Nov-22 21:49:04.442 [main] DEBUG nextflow.plugin.PluginsFacade - Setting up plugin manager > mode=prod; plugins-dir=/home/guglib/.nextflow/plugins
+Nov-22 21:49:04.443 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins default=[]
+Nov-22 21:49:04.445 [main] DEBUG nextflow.plugin.PluginsFacade - Plugins local root: .nextflow/plr/empty
+Nov-22 21:49:04.453 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Enabled plugins: []
+Nov-22 21:49:04.454 [main] INFO  org.pf4j.DefaultPluginStatusProvider - Disabled plugins: []
+Nov-22 21:49:04.458 [main] INFO  org.pf4j.DefaultPluginManager - PF4J version 3.4.1 in 'deployment' mode
+Nov-22 21:49:04.465 [main] INFO  org.pf4j.AbstractPluginManager - No plugins
+Nov-22 21:49:04.509 [main] DEBUG nextflow.Session - Session uuid: 981eb97b-bd2d-463f-8925-771632565006
+Nov-22 21:49:04.509 [main] DEBUG nextflow.Session - Run name: golden_pare
+Nov-22 21:49:04.509 [main] DEBUG nextflow.Session - Executor pool size: 2
+Nov-22 21:49:04.522 [main] DEBUG nextflow.cli.CmdRun - 
+  Version: 21.04.3 build 5560
+  Created: 21-07-2021 15:09 UTC (11:09 EDT)
+  System: Linux 3.10.0-1062.1.2.el7.x86_64
+  Runtime: Groovy 3.0.7 on OpenJDK 64-Bit Server VM 1.8.0_222-b10
+  Encoding: UTF-8 (UTF-8)
+  Process: 82657@sumner101 [10.5.34.101]
+  CPUs: 1 - Mem: 754.6 GB (83.7 GB) - Swap: 63.9 GB (62.7 GB)
+Nov-22 21:49:04.549 [main] DEBUG nextflow.Session - Work-dir: /home/guglib/bitbucket/nf/toy_example/work [nfs]
+Nov-22 21:49:04.550 [main] DEBUG nextflow.Session - Script base path does not exist or is not a directory: /home/guglib/bitbucket/nf/toy_example/bin
+Nov-22 21:49:04.559 [main] DEBUG nextflow.executor.ExecutorFactory - Extension executors providers=[]
+Nov-22 21:49:04.567 [main] DEBUG nextflow.Session - Observer factory: DefaultObserverFactory
+Nov-22 21:49:04.749 [main] DEBUG nextflow.Session - Session start invoked
+Nov-22 21:49:05.158 [main] DEBUG nextflow.script.ScriptRunner - > Launching execution
+Nov-22 21:49:05.170 [main] INFO  nextflow.Nextflow -  TOY EXAMPLE   P I P E L I N E
+ ===================================
+ fq_path        : /projects/compsci/guglib/rnaseqs/PE/short
+ outdir         : /projects/compsci/guglib/toy-example
+ 
+Nov-22 21:49:05.365 [main] DEBUG nextflow.Session - Workflow process names [dsl2]: trim, quant
+Nov-22 21:49:05.413 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:trim` matches process trim
+Nov-22 21:49:05.417 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Nov-22 21:49:05.417 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Nov-22 21:49:05.428 [main] DEBUG nextflow.executor.Executor - [warm up] executor > slurm
+Nov-22 21:49:05.434 [main] DEBUG n.processor.TaskPollingMonitor - Creating task monitor for executor 'slurm' > capacity: 100; pollInterval: 5s; dumpInterval: 5m 
+Nov-22 21:49:05.437 [main] DEBUG n.executor.AbstractGridExecutor - Creating executor 'slurm' > queue-stat-interval: 1m
+Nov-22 21:49:05.528 [main] DEBUG nextflow.script.ProcessConfig - Config settings `withName:quant` matches process quant
+Nov-22 21:49:05.531 [main] DEBUG nextflow.executor.ExecutorFactory - << taskConfig executor: slurm
+Nov-22 21:49:05.531 [main] DEBUG nextflow.executor.ExecutorFactory - >> processorType: 'slurm'
+Nov-22 21:49:05.535 [main] DEBUG nextflow.Session - Ignite dataflow network (4)
+Nov-22 21:49:05.541 [PathVisitor-1] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /projects/compsci/guglib/rnaseqs/PE/short/; pattern: *_R{1,2}.fastq; options: [:]
+Nov-22 21:49:05.544 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > trim
+Nov-22 21:49:05.545 [main] DEBUG nextflow.processor.TaskProcessor - Starting process > quant
+Nov-22 21:49:05.546 [PathVisitor-2] DEBUG nextflow.file.PathVisitor - files for syntax: glob; folder: /projects/compsci/guglib/toy-example/; pattern: *_R{1,2}*.fastq; options: [:]
+Nov-22 21:49:05.548 [main] DEBUG nextflow.script.ScriptRunner - > Await termination 
+Nov-22 21:49:05.548 [main] DEBUG nextflow.Session - Session await
+Nov-22 21:49:05.682 [Actor Thread 9] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=docker://quay.io/biocontainers/rsem:1.3.3--pl5262h3198e80_2; path=/home/guglib/cache/quay.io-biocontainers-rsem-1.3.3--pl5262h3198e80_2.img
+Nov-22 21:49:05.697 [Actor Thread 10] DEBUG nextflow.container.SingularityCache - Singularity found local store for image=docker://quay.io/biocontainers/trimmomatic:0.35--6; path=/home/guglib/cache/quay.io-biocontainers-trimmomatic-0.35--6.img
+Nov-22 21:49:05.863 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process quant (2) > jobId: 11800570; workDir: /home/guglib/bitbucket/nf/toy_example/work/65/8fdb21f95c9d8139aeed20140a88bb
+Nov-22 21:49:05.866 [Task submitter] INFO  nextflow.Session - [65/8fdb21] Submitted process > quant (2)
+Nov-22 21:49:05.903 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process quant (1) > jobId: 11800571; workDir: /home/guglib/bitbucket/nf/toy_example/work/d9/30d96ae139c7c8af311c28384e03a0
+Nov-22 21:49:05.903 [Task submitter] INFO  nextflow.Session - [d9/30d96a] Submitted process > quant (1)
+Nov-22 21:49:05.940 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process trim (2) > jobId: 11800572; workDir: /home/guglib/bitbucket/nf/toy_example/work/59/6691eb873acf2f06ca5fea4d74d0be
+Nov-22 21:49:05.940 [Task submitter] INFO  nextflow.Session - [59/6691eb] Submitted process > trim (2)
+Nov-22 21:49:05.972 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process trim (1) > jobId: 11800573; workDir: /home/guglib/bitbucket/nf/toy_example/work/e7/71d2c56784622c45ff308d55e6ea76
+Nov-22 21:49:05.973 [Task submitter] INFO  nextflow.Session - [e7/71d2c5] Submitted process > trim (1)
+Nov-22 21:49:06.006 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process quant (3) > jobId: 11800574; workDir: /home/guglib/bitbucket/nf/toy_example/work/e8/eee6635b123e03d1ceb8581160b590
+Nov-22 21:49:06.006 [Task submitter] INFO  nextflow.Session - [e8/eee663] Submitted process > quant (3)
+Nov-22 21:49:06.051 [Task submitter] DEBUG nextflow.executor.GridTaskHandler - [SLURM] submitted process quant (4) > jobId: 11800575; workDir: /home/guglib/bitbucket/nf/toy_example/work/a1/88dea2f3be07c8f453d02897daaa50
+Nov-22 21:49:06.051 [Task submitter] INFO  nextflow.Session - [a1/88dea2] Submitted process > quant (4)
+Nov-22 21:49:35.457 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800574; id: 5; name: quant (3); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/e8/eee6635b123e03d1ceb8581160b590 started: 1637635775446; exited: 2021-11-23T02:49:32.046188Z; ]
+Nov-22 21:49:40.458 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800572; id: 3; name: trim (2); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/59/6691eb873acf2f06ca5fea4d74d0be started: 1637635780448; exited: 2021-11-23T02:49:34.083399Z; ]
+Nov-22 21:49:40.480 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800573; id: 1; name: trim (1); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/e7/71d2c56784622c45ff308d55e6ea76 started: 1637635780472; exited: 2021-11-23T02:49:33.829054Z; ]
+Nov-22 21:49:40.506 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800575; id: 6; name: quant (4); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/a1/88dea2f3be07c8f453d02897daaa50 started: 1637635780497; exited: 2021-11-23T02:49:32.253963Z; ]
+Nov-22 21:50:10.455 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800571; id: 2; name: quant (1); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/d9/30d96ae139c7c8af311c28384e03a0 started: 1637635810446; exited: 2021-11-23T02:50:04.226214Z; ]
+Nov-22 21:50:15.478 [Task monitor] DEBUG n.processor.TaskPollingMonitor - Task completed > TaskHandler[jobId: 11800570; id: 4; name: quant (2); status: COMPLETED; exit: 0; error: -; workDir: /home/guglib/bitbucket/nf/toy_example/work/65/8fdb21f95c9d8139aeed20140a88bb started: 1637635815468; exited: 2021-11-23T02:50:04.210074Z; ]
+Nov-22 21:50:15.490 [main] DEBUG nextflow.Session - Session await > all process finished
+Nov-22 21:50:15.500 [main] DEBUG nextflow.Session - Session await > all barriers passed
+Nov-22 21:50:15.503 [main] INFO  nextflow.Nextflow - 
+Done! Output in : /projects/compsci/guglib/toy-example
+
+Nov-22 21:50:15.511 [main] DEBUG nextflow.trace.WorkflowStatsObserver - Workflow completed > WorkflowStats[succeededCount=6; failedCount=0; ignoredCount=0; cachedCount=0; pendingCount=0; submittedCount=0; runningCount=0; retriesCount=0; abortedCount=0; succeedDuration=54ms; failedDuration=0ms; cachedDuration=0ms;loadCpus=0; loadMemory=0; peakRunning=1; peakCpus=1; peakMemory=0; ]
+Nov-22 21:50:15.696 [main] DEBUG nextflow.CacheDB - Closing CacheDB done
+Nov-22 21:50:15.728 [main] DEBUG nextflow.script.ScriptRunner - > Execution complete -- Goodbye
