@@ -35,3 +35,4 @@ RSEM process to quantify the trimmed reads. The expected output can be found in 
 ## Other Things to Note
 
 decision making logic (some do specify some do not) need to figure out dsl2 RNA fusion and hic pipeline.
+srun -p compute -t 02:00:00 --mem 2G --pty bash

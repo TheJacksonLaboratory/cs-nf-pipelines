@@ -26,7 +26,7 @@ process trim {
   // 4.a.) required: this is where you define the channel to be used and variable names
 
   publishDir "${params.outdir}/trimmed"
-  
+
   input:
   tuple val(sampleId), file(reads)
 
@@ -36,15 +36,13 @@ process trim {
   */
 
   output:
-  tuple val(sampleId),file('*.fastq')
- 
+  tuple val(sampleId),file('*.fastq.gz')
+
 
   /*
      4.c.) required: the script/command entered here will be run by the container
      note that you can surround the script in """echo here""" or you can point
      at a script in the templates folder (folder must be named templates)
-
-
   */
 
   script:
@@ -53,10 +51,10 @@ process trim {
   PE \
   ${params.fq_path}/${reads[0]} \
   ${params.fq_path}/${reads[1]} \
-  ${sampleId}_R1_paired${params.extension} \
-  ${sampleId}_R1_unpaired${params.extension} \
-  ${sampleId}_R2_paired${params.extension} \
-  ${sampleId}_R2_unpaired${params.extension} \
+  ${sampleId}_R1_paired.fastq.gz \
+  ${sampleId}_R1_unpaired.fastq.gz \
+  ${sampleId}_R2_paired.fastq.gz \
+  ${sampleId}_R2_unpaired.fastq.gz \
   LEADING:${params.t_lead} \
   TRAILING:${params.t_trail} \
   MINLEN:${params.min_len}
@@ -67,23 +65,22 @@ process trim {
 // 5. Use RSEM for quantification
 
 process quant{
-  publishDir "${params.outdir}/RSEM"   
-  
+  publishDir "${params.outdir}/rsem"
+
   input:
-  tuple val(sampleId),file(trimmed)
-  
-  
+  tuple val(sampleId), file(trimmed)
+
+
   output:
   file "*.txt"
 
   script:
-  
+
   '''
   echo hello > world.txt
   '''
 }
 
-// trim_ch = Channel.fromFilePairs("${params.outdir}/*_R{1,2}*${params.extension}")
 
 workflow{
  trim_ch=trim(read_ch)
