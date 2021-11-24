@@ -62,29 +62,41 @@ process trim {
 
 }
 
-// 5. Use RSEM for quantification
+// 5. Use RSEM for quantification 
 
-process quant{
-  publishDir "${params.outdir}/rsem"
+// 5.a.1. Create Reference (this container does not have bowtie2)
+
+process rsem_ref_p1 {
+  publishDir "${params.outdir}/rsem/ref"
+
+  output:
+  file "*"
+  
+  when:
+  params.create_ref=='true'
+
+  script:
+
+  """
+  wget ftp://ftp.ensembl.org/pub/release-82/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
+  wget ftp://ftp.ensembl.org/pub/release-82/gtf/mus_musculus/Mus_musculus.GRCm38.82.chr.gtf.gz
+  gunzip Mus_musculus.GRCm38.dna.toplevel.fa.gz
+  gunzip Mus_musculus.GRCm38.82.chr.gtf.gz
+  
+  rsem-prepare-reference --gtf Mus_musculus.GRCm38.82.chr.gtf   
+  
+  """
+}
+/* process rsem_ref_p2 {
+  publishDir "${params.outdir}/rsem/ref"
 
   input:
   tuple val(sampleId), file(trimmed)
 
-
-  output:
-  file "*.txt"
-
-  script:
-
-  '''
-  echo hello > world.txt
-  '''
-}
-
-
+}*/
 workflow{
  trim_ch=trim(read_ch)
- quant(trim_ch)
+ rsem_ref_p1()
 }
 
 workflow.onComplete {
