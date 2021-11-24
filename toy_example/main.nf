@@ -3,8 +3,6 @@
 // 1.) enable DSL2
 nextflow.enable.dsl=2
 
-// 2.) log important info
-
 log.info """\
  TOY EXAMPLE   P I P E L I N E
  ===================================
@@ -12,38 +10,16 @@ log.info """\
  outdir         : ${params.outdir}
  """
 
-// 3.) create a channel of pair reads
-
 read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}${params.extension}",checkExists:true )
 
-/*
-   4.) define trimming process: keep it one tool and one container per process
-   the process container is defined in nextflow.config
-*/
-
 process trim {
-
-  // 4.a.) required: this is where you define the channel to be used and variable names
-
   publishDir "${params.outdir}/trimmed"
 
   input:
   tuple val(sampleId), file(reads)
 
-  /*
-     4.b.) required: this is where you define the channel to be created from variables
-     output will be specific to the container so you must know how the container functions
-  */
-
   output:
-  tuple val(sampleId),file('*.fastq.gz')
-
-
-  /*
-     4.c.) required: the script/command entered here will be run by the container
-     note that you can surround the script in """echo here""" or you can point
-     at a script in the templates folder (folder must be named templates)
-  */
+  tuple val(sampleId), file('*R1_paired.fastq.gz'), file('*R2_paired.fastq.gz')
 
   script:
   """
@@ -64,39 +40,71 @@ process trim {
 
 // 5. Use RSEM for quantification 
 
-// 5.a.1. Create Reference (this container does not have bowtie2)
-
-process rsem_ref_p1 {
+process rsem_ref_pull {
   publishDir "${params.outdir}/rsem/ref"
-
+ 
   output:
-  file "*"
-  
+  tuple file("*.gtf"), file("*.fa")
+ 
   when:
-  params.create_ref=='true'
-
+  params.ref_pull=='true'
+ 
   script:
-
   """
   wget ftp://ftp.ensembl.org/pub/release-82/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
   wget ftp://ftp.ensembl.org/pub/release-82/gtf/mus_musculus/Mus_musculus.GRCm38.82.chr.gtf.gz
   gunzip Mus_musculus.GRCm38.dna.toplevel.fa.gz
-  gunzip Mus_musculus.GRCm38.82.chr.gtf.gz
-  
-  rsem-prepare-reference --gtf Mus_musculus.GRCm38.82.chr.gtf   
-  
+  gunzip Mus_musculus.GRCm38.82.chr.gtf.gz   
   """
 }
-/* process rsem_ref_p2 {
+
+process rsem_ref_build {
   publishDir "${params.outdir}/rsem/ref"
+  
+  input:
+  tuple file(gtf), file(fa)
+  
+  when:
+  params.ref_build=='true'
+  
+  output:
+  tuple file("*")
+  
+  script:
+  """
+  rsem-prepare-reference \
+  --gtf ${gtf} \
+  --bowtie2 \
+  ${fa} \
+  ${params.species}
+ 
+  """
+}
+
+process rsem_expression {
+  publishDir "${params.outdir}/rsem/exp"
 
   input:
-  tuple val(sampleId), file(trimmed)
+  tuple val(sampleId), file(R1), file(R2)
+  tuple file(ref_files)
 
-}*/
+  script:
+  """
+  rsem-calculate-expression -p 8 --paired-end \
+  --bowtie2 \
+  --estimate-rspd \
+  --append-names \
+  --output-genome-bam \
+  ${R1} ${R2} \
+  ${params.species} \
+  LPS_6h
+  """
+}
+
 workflow{
- trim_ch=trim(read_ch)
- rsem_ref_p1()
+  ref_files=rsem_ref_build(rsem_ref_pull())
+  trim_ch=trim(read_ch)
+  rsem_expression(trim_ch, ref_files)
 }
 
 workflow.onComplete {
