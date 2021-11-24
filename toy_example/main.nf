@@ -68,7 +68,7 @@ process rsem_ref_build {
   params.ref_build=='true'
   
   output:
-  tuple file("*")
+  file("*")
   
   script:
   """
@@ -86,7 +86,10 @@ process rsem_expression {
 
   input:
   tuple val(sampleId), file(R1), file(R2)
-  tuple file(ref_files)
+  file(ref_files)
+
+  output:
+  file "*"
 
   script:
   """
@@ -97,7 +100,7 @@ process rsem_expression {
   --output-genome-bam \
   ${R1} ${R2} \
   ${params.species} \
-  LPS_6h
+  Toy_Ex
   """
 }
 
