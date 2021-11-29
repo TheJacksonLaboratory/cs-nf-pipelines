@@ -52,22 +52,18 @@ process RSEM_REF_BUILD {
   input:
   tuple file(gtf), file(fa)
 
-  when:
-  params.ref_build=='true'
-
   output:
   file("*")
 
   script:
-    """
-    rsem-prepare-reference \
-    --gtf ${gtf} \
-    --bowtie2 \
-    ${fa} \
-    ${params.species}
+        """
+        rsem-prepare-reference \
+        --gtf ${gtf} \
+        --bowtie2 \
+        ${fa} \
+        ${params.species}
 
-    """
-
+        """
 }
 
 process RSEM_EXPRESSION {
