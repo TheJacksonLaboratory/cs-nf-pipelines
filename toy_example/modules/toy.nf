@@ -59,14 +59,15 @@ process RSEM_REF_BUILD {
   file("*")
 
   script:
-  """
-  rsem-prepare-reference \
-  --gtf ${gtf} \
-  --bowtie2 \
-  ${fa} \
-  ${params.species}
+    """
+    rsem-prepare-reference \
+    --gtf ${gtf} \
+    --bowtie2 \
+    ${fa} \
+    ${params.species}
 
-  """
+    """
+
 }
 
 process RSEM_EXPRESSION {
