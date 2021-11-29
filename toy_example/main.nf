@@ -12,6 +12,7 @@ log.info """\
 
 read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}${params.extension}",checkExists:true )
 
+// 2.) Trim The Reads
 process trim {
   publishDir "${params.outdir}/trimmed"
 
@@ -38,38 +39,39 @@ process trim {
 
 }
 
-// 5. Use RSEM for quantification 
+// 3. Use RSEM for quantification:
+// Three parts: pull reference genome, make reference files, then quantify
 
 process rsem_ref_pull {
   publishDir "${params.outdir}/rsem/ref"
- 
+
   output:
   tuple file("*.gtf"), file("*.fa")
- 
+
   when:
   params.ref_pull=='true'
- 
+
   script:
   """
   wget ftp://ftp.ensembl.org/pub/release-82/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
   wget ftp://ftp.ensembl.org/pub/release-82/gtf/mus_musculus/Mus_musculus.GRCm38.82.chr.gtf.gz
   gunzip Mus_musculus.GRCm38.dna.toplevel.fa.gz
-  gunzip Mus_musculus.GRCm38.82.chr.gtf.gz   
+  gunzip Mus_musculus.GRCm38.82.chr.gtf.gz
   """
 }
 
 process rsem_ref_build {
   publishDir "${params.outdir}/rsem/ref"
-  
+
   input:
   tuple file(gtf), file(fa)
-  
+
   when:
   params.ref_build=='true'
-  
+
   output:
   file("*")
-  
+
   script:
   """
   rsem-prepare-reference \
@@ -77,7 +79,7 @@ process rsem_ref_build {
   --bowtie2 \
   ${fa} \
   ${params.species}
- 
+
   """
 }
 
@@ -104,12 +106,14 @@ process rsem_expression {
   """
 }
 
+// The main workflow
 workflow{
   ref_files=rsem_ref_build(rsem_ref_pull())
   trim_ch=trim(read_ch)
   rsem_expression(trim_ch, ref_files)
 }
 
+// Message on Complete
 workflow.onComplete {
 	log.info ( workflow.success ? "\nDone! Output in : $params.outdir\n" : "Oops .. something went wrong" )
 }

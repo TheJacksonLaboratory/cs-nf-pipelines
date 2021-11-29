@@ -6,6 +6,8 @@ Nextflow is a wrapper for working with linux containers. DSL2 stands for
 domain specific language number 2. This is because the syntax from DSL1 has changed.
 This means we are standardizing to DSL2 and will update old scripts to
 meet its requirements.
+<br><br>
+The rough_start branch contains the code to run these minimally. The modular branch will be the branch where modularization of these tools takes place.
 <hr>
 
 ## Key Take Aways
