@@ -60,7 +60,7 @@ params {
 
 The workflow itself is designed for use in `SLURM` based HPC environments with `Singularity`, or in local environments with `Singularity` availability. See [https://singularity.lbl.gov/](https://singularity.lbl.gov/) for Singularity install information. 
 
-The HPC Sumner has the required modules for running the workflow. The workflow can be launched using a wrapper script e.g., `run_mmrSVD_slurm.sh` 
+The workflow can be launched using a wrapper script e.g., `run_mmrSVD_slurm.sh` 
 
 ```
 #!/bin/bash
