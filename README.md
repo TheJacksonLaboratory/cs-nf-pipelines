@@ -12,7 +12,7 @@ The PacBio based long-read data are mapped to a provided reference with [PBMM2](
 
 For PacBio data, called SVs from `PBSV` and `Sniffles` are merged with `SURVIVOR`, and compared with mm10 SV annotations from Ensembl and Sanger to generate a table that shows whether each identified SV is present in previously published results and/or annotated genes and exons.
 
-All tools for both short- and long-read data are obtained from publicly available software container repositories (e.g., [quay.io/biocontainers](quay.io/biocontainers)). We have included the ability to use a local FASTA based genome reference file, or to pull available genome references from iGenomes ([https://support.illumina.com/sequencing/sequencing_software/igenome.html](https://support.illumina.com/sequencing/sequencing_software/igenome.html)). 
+All tools for both short- and long-read data are obtained from publicly available software container repositories (e.g., [quay.io/biocontainers](https://quay.io/biocontainers)). We have included the ability to use a local FASTA based genome reference file, or to pull available genome references from iGenomes ([https://support.illumina.com/sequencing/sequencing_software/igenome.html](https://support.illumina.com/sequencing/sequencing_software/igenome.html)). 
 
 ## Running mmrSVD
 
