@@ -4,27 +4,28 @@
 
 Nextflow is a wrapper for working with linux containers. DSL2 stands for
 domain specific language number 2. This is because the syntax from DSL1 has changed.
+<br><br>
 This means we are standardizing to DSL2 and will update old scripts to
 meet its requirements.
 <br><br>
-The rough_start branch contains the code to run these minimally. The modular branch will be the branch where modularization of these tools takes place.
+The rough_start branch contains the code to run these minimally. The modular branch branch is where modularization of these tools takes place.
 <hr>
 
 ## Key Take Aways
 
 This toy example will help you get up and started on the key structure that the
-NF-Core uses. Such as how to configure your parameters, start a process, get an output,
-push the output to the next process. There are much more advanced use cases
-than this example. Once you understand the basics here you can move on to see our RNASeq Pipeline that utilizes some advanced features and structures.
+NF-Core uses. Such as how to configure your parameters, start a process, get an output, push the output to the next process. There are much more advanced use cases than this example. Once you understand the basics here you can move on to see our RNASeq Pipeline that utilizes some advanced features and structures.
 <hr>
 
 ## Primary Resources
 
 <ul>
+<li><a href="#">JAX Container Repo</a></li>
+<li><a href="#">JAX Nextflow Pipeline Repo</a></li>
 <li><a href="https://www.nextflow.io/docs/latest/dsl2.html">Link to DSL2 Documentation</a></li>
 <li><a href="https://github.com/nf-core/hic">Link to HiC NF-Core</a></li>
 <li><a href="https://github.com/nf-core/rnafusion">Link to RNA Fusion NF-Core</a></li>
-</ul
+</ul>
 <hr>
 
 ## What This Script Does
