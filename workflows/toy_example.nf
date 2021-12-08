@@ -4,13 +4,14 @@
 nextflow.enable.dsl=2
 
 // 2.) bring in modules
+include {TRIM} from '../modules/trimmomatic'
 include {RSEM_REF_PULL;RSEM_REF_BUILD;RSEM_EXPRESSION} from '../modules/rsem'
 
 // 3.) reads channel
 read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}_*${params.extension}",checkExists:true )
 
 // 4.) The main workflow
-workflow{
+workflow TOY_EXAMPLE {
  if( params.ref_build == 'true')
    ref_files = RSEM_REF_BUILD(RSEM_REF_PULL())
  else if ( params.ref_build == 'false' )
