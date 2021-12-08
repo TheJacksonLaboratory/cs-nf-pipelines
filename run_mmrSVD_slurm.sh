@@ -1,7 +1,7 @@
 #!/bin/bash
 #SBATCH --job-name=nf_mmrSVD
 #SBATCH -p compute
-#SBATCH -q batch
+#SBATCH -q long
 #SBATCH -t 7-00:00:00
 #SBATCH --mem=2000
 
