@@ -1,4 +1,3 @@
-<center>
 <div style="max-width:500px;text-align:left;">
 
 <h1 style="text-align:center;">JAX Nextflow DSL2 Pipelines</h1>
@@ -130,4 +129,3 @@ The output comes in two general formats. The first is the work directory "workDi
 </ul>
 </div>
 </div>
-</center>
