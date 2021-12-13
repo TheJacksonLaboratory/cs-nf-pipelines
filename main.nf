@@ -737,7 +737,7 @@ if (params.seqmode == 'illumina') {
    
 	  script:
 	  """
-	  bam2cfg.pl -q 30 -n 10000 $bamf > ${bamf.baseName}.cfg
+	  /usr/bin/env perl bam2cfg.pl -q 30 -n 10000 $bamf > ${bamf.baseName}.cfg
 	  breakdancer-max ${bamf.baseName}.cfg > ${bamf.baseName}.calls
 	  """
 	}
@@ -1115,11 +1115,11 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		script:
 		log.info "Calling Manta SV"
 		"""
-		configManta.py \
+		/usr/bin/env python configManta.py \
 			--runDir mantaSVOut \
 			--bam ${bamf} \
 			--referenceFasta ${fasta}
-		./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
+		/usr/bin/env python ./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
 		mv mantaSVOut/results/variants/candidateSV.vcf.gz ./manta_candidateSV.vcf.gz
 		"""
 	}
@@ -1140,8 +1140,8 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 	  script:
 	  """
 	  echo "sample1\t$bamf" > samples.txt
-	  make_hydra_config.py -i samples.txt -s 100000 -n 16 > samples.conf
-	  extract_discordants.py -c samples.conf -d sample1 
+	  /usr/bin/env python make_hydra_config.py -i samples.txt -s 100000 -n 16 > samples.conf
+	  /usr/bin/env python extract_discordants.py -c samples.conf -d sample1 
 	  mkdir routed
 	  cd routed
 	  ln -s ../${bamf} .
@@ -1193,10 +1193,10 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		file "hydra*" into asm_sv
 	  script:
 	  """
-	  combine-assembled-files.sh . all.assembled
-	  forceOneClusterPerPairMem.py -i all.assembled -o hydra.calls
-	  frequency.py -c $conf -f hydra.calls.final -d hydra.calls.detail > hydra.calls.freq
-	  grep -v "#" all-sv.calls.freq | hydraToBreakpoint.py -i stdin > hydra.calls.bkpts
+	  /usr/bin/env bash combine-assembled-files.sh . all.assembled
+	  /usr/bin/env python forceOneClusterPerPairMem.py -i all.assembled -o hydra.calls
+	  /usr/bin/env python frequency.py -c $conf -f hydra.calls.final -d hydra.calls.detail > hydra.calls.freq
+	  grep -v "#" all-sv.calls.freq | /usr/bin/env python hydraToBreakpoint.py -i stdin > hydra.calls.bkpts
 	  """
 	}
 
@@ -1222,7 +1222,7 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		file "${asm.baseName}.vcf" into hydra_vcf
 	  script:
 	  """
-	  hydra_to_vcf.py $asm $fasta
+	  /usr/bin/env python hydra_to_vcf.py $asm $fasta
 	  """
 	}
 
@@ -1300,7 +1300,7 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		file "cnvnator.vcf"
 	  script:
 	  """
-	  cnvnator2VCF.pl -reference $fasta $calls ${params.genome} > cnvnator.vcf
+	  /usr/bin/env perl cnvnator2VCF.pl -reference $fasta $calls ${params.genome} > cnvnator.vcf
 	  
 	  """
 	}
