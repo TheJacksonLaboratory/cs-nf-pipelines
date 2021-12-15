@@ -737,7 +737,7 @@ if (params.seqmode == 'illumina') {
    
 	  script:
 	  """
-	  /usr/bin/env perl bam2cfg.pl -q 30 -n 10000 $bamf > ${bamf.baseName}.cfg
+	  bam2cfg.pl -q 30 -n 10000 $bamf > ${bamf.baseName}.cfg
 	  breakdancer-max ${bamf.baseName}.cfg > ${bamf.baseName}.calls
 	  """
 	}
