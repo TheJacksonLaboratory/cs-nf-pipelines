@@ -1,5 +1,6 @@
 process TRIM {
   publishDir "${params.outdir}/trimmed"
+  container "quay.io/biocontainers/trimmomatic:0.35--6"
 
   input:
   tuple val(sampleId), file(reads)

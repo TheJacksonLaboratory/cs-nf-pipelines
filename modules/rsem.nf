@@ -18,6 +18,7 @@ process RSEM_REF_PULL {
 
 process RSEM_REF_BUILD {
   publishDir "${params.outdir}/rsem/ref"
+  container "dceoy/rsem"
 
   input:
   tuple file(gtf), file(fa)
@@ -38,6 +39,7 @@ process RSEM_REF_BUILD {
 
 process RSEM_EXPRESSION {
   publishDir "${params.outdir}/rsem/exp"
+  container "dceoy/rsem"
 
   input:
   tuple val(sampleId), file(R1), file(R2)
@@ -56,5 +58,21 @@ process RSEM_EXPRESSION {
   ${R1} ${R2} \
   ${params.species} \
   Toy_Ex
+  """
+}
+
+process RSEM_SIMULATE_READS{
+  publishDir "${params.outdir}/rsem/sim"
+  container "dceoy/rsem"
+  
+  input:
+  tuple file(estimated_model_file), file(estimated_isoform_results)
+
+  output:
+  file "*"
+
+  script:
+  """
+  reference_name ${estimated_model_file} ${estimated_isoform_results} 0.2 50000000 simulated_reads
   """
 }
