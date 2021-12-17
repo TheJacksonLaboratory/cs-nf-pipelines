@@ -1,3 +1,60 @@
+// RNASEQ CAROLYN
+process RSEM_ALIGNMENT_EXPRESSION {
+
+  tag "sampleID"
+
+  cpus 12
+  memory 30.GB
+  time '24:00:00'
+  clusterOptions '-q batch'
+
+  container 'rsem_bowtie2_samtools_picard.v2.sif'
+
+  // ? are these cleared out? how necessary?
+  publishDir "${sample_tmpdir}_tmp", pattern: "*stats", mode: 'copy'
+  publishDir "${sample_tmpdir}_tmp", pattern: "*results*", mode: 'copy'
+
+  input:
+  tuple val(sampleID), file(trimmed)
+
+  output:
+  file "*stats"
+  file "*results*"
+  tuple sampleID, file("*genome.bam")
+  tuple sampleID, file("*aln.stats")
+  tuple sampleID, file("*genes.results")
+  tuple sampleID, file("*isoforms.results")
+
+  script:
+  log.info "-----Genome Alignment Running on: ${sampleID} -----"
+
+  if (params.read_prep == "stranded"){
+    prob="--forward-prob 0"
+  }
+  if (params.read_prep == "non_stranded"){
+    prob="--forward-prob 0.5"
+  }
+
+  if (params.reads == "PE"){
+    frag=""
+    trimmedfq="--paired-end ${trimmed[0]} ${trimmed[1]}"
+  }
+  if (params.reads == "SE"){
+    frag="--fragment-length-mean 280 --fragment-length-sd 50"
+    trimmedfq="${trimmed[0]}"
+  }
+
+  """
+  rsem-calculate-expression -p 12 \
+  --phred33-quals $frag \
+  --seed-length ${params.seed_length} $prob \
+  --time \
+  --output-genome-bam ${params.aligner} \
+  $trimmedfq ${params.rsem_ref_prefix} ${sampleID} \
+  2> ${sampleID}_rsem_aln.stats
+  """
+}
+
 process RSEM_REF_PULL {
   publishDir "${params.outdir}/rsem/ref"
 
@@ -64,7 +121,7 @@ process RSEM_EXPRESSION {
 process RSEM_SIMULATE_READS{
   publishDir "${params.outdir}/rsem/sim"
   container "dceoy/rsem"
-  
+
   input:
   tuple file(estimated_model_file), file(estimated_isoform_results)
 
