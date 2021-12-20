@@ -1,5 +1,5 @@
 // part A
-process GATK_COV_STATS_A {
+process GATK_STATS_A {
 
   tag "sampleID"
 
@@ -14,8 +14,8 @@ process GATK_COV_STATS_A {
   tuple sampleID, file(reord_sorted_bam)
 
   output:
-  tuple sampleID, file("*gatk_temp3*")
-  tuple sampleID, file("*gatk_temp6*")
+  tuple sampleID, file("*gatk_temp3*"), emit: gatk_3
+  tuple sampleID, file("*gatk_temp6*"), emit: gatk_6
 
   when:
   params.gen_org == "human"
@@ -69,10 +69,11 @@ process GATK_STATS_B {
 
   container 'python_2_7_3'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
+  publishDir "${outdir}/gatk", pattern: "*.*", mode: 'copy'
 
   input:
-  tuple sampleID, file(gatk_temp3), file(gatk_temp6)
+  tuple sampleID, file(gatk_3)
+  tuple sampleID, file(gatk_6)
 
   output:
   file "*CCP_interval_avg_median_coverage.bed"

@@ -12,4 +12,4 @@ cd $SLURM_SUBMIT_DIR
 
 # LOAD SINGULARITY
 ml singularity
-~/nextflow ../main.nf
+~/nextflow main.nf

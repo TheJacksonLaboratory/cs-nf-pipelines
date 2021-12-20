@@ -10,23 +10,24 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   container 'rsem_bowtie2_samtools_picard.v2.sif'
 
-  // ? are these cleared out? how necessary?
-  publishDir "${sample_tmpdir}_tmp", pattern: "*stats", mode: 'copy'
-  publishDir "${sample_tmpdir}_tmp", pattern: "*results*", mode: 'copy'
+  // ** are these cleared out? how necessary?
+  publishDir "${outdir}/rsem/stats", pattern: "*stats", mode: 'copy'
+  publishDir "${outdir}/rsem/results", pattern: "*results*", mode: 'copy'
 
   input:
-  tuple val(sampleID), file(trimmed)
+  tuple val(sampleID), file(reads)
 
   output:
   file "*stats"
   file "*results*"
-  tuple sampleID, file("*genome.bam")
-  tuple sampleID, file("*aln.stats")
-  tuple sampleID, file("*genes.results")
-  tuple sampleID, file("*isoforms.results")
+  tuple sampleID, file("*aln.stats"), emit: rsem_stats
+  tuple sampleID, file("*genes.results"), emit: rsem_genes
+  tuple sampleID, file("*isoforms.results"), emit: rsem_isoforms
+  tuple sampleID, file("*genome.bam"), emit: genome_sorted_bam
+
 
   script:
-  log.info "-----Genome Alignment Running on: ${sampleID} -----"
+  log.info "----- Genome Alignment Running on: ${sampleID} -----"
 
   if (params.read_prep == "stranded"){
     prob="--forward-prob 0"
@@ -35,13 +36,13 @@ process RSEM_ALIGNMENT_EXPRESSION {
     prob="--forward-prob 0.5"
   }
 
-  if (params.reads == "PE"){
+  if (params.read_type == "PE"){
     frag=""
-    trimmedfq="--paired-end ${trimmed[0]} ${trimmed[1]}"
+    trimmedfq="--paired-end ${reads[0]} ${reads[1]}"
   }
-  if (params.reads == "SE"){
+  if (params.read_type == "SE"){
     frag="--fragment-length-mean 280 --fragment-length-sd 50"
-    trimmedfq="${trimmed[0]}"
+    trimmedfq="${reads[0]}"
   }
 
   """
@@ -55,6 +56,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   """
 }
 
+// Toy Example RSEM below
 process RSEM_REF_PULL {
   publishDir "${params.outdir}/rsem/ref"
 

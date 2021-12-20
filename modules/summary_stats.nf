@@ -1,4 +1,4 @@
-process summ_stats {
+process SUMMARY_STATS {
     tag "sampleID"
 
     cpus = 1
@@ -6,12 +6,12 @@ process summ_stats {
     clusterOptions = '-q batch'
     container
 
-    publishDir "${sample_tmpdir}_tmp", pattern: "*stats.txt", mode: 'copy'
+    publishDir "${outdir}/summary_stats", pattern: "*stats.txt", mode: 'copy'
 
     input:
-    tuple sampleID, file(fq_stat)
-    tuple sampleID, file(aln_stat)
-    tuple sampleID, file(mets_stat)
+    tuple sampleID, file(rsem_stats)
+    tuple sampleID, file(quality_stats)
+    tuple sampleID, file(picard_metrics)
 
     output:
     tuple sampleID, file("*.txt")
@@ -26,7 +26,7 @@ process summ_stats {
 
       """
       perl ${params.summary_mets_PE} \
-      ${fq_stat} \
+      ${quality_stats} \
       ${aln_stat} \
       ${mets_stat} > ${sampleID}_summary_stats.txt
       """
@@ -35,7 +35,7 @@ process summ_stats {
 
       """
       perl ${params.summary_mets_SE} \
-      ${fq_stat} \
+      ${quality_stats} \
       ${aln_stat} \
       ${mets_stat}  > ${sampleID}_summary_stats.txt
 

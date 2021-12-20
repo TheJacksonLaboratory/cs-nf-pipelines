@@ -9,26 +9,25 @@ process QUALITY_STATISTICS {
 
   container 'python_2.7.sif'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*fastq.gz_stat", mode: 'copy'
+  publishDir "${outdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
 
   input:
-  tuple val(sampleID), file(read1), file(read2)
+  tuple val(sampleID), file(reads)
 
   output:
-  file "*.fastq.gz_stat"
-  tuple sampleID, file("*.fastq.gz_stat")
-  tuple sampleID, file("${sampleID}_R{1,2}*filtered_trimmed")
+  tuple val(sampleID), file("*.fastq.gz_stat"), emit: quality_stats
+  tuple val(sampleID), file("${sampleID}_R{1,2}*filtered_trimmed"), emit: trimmed_fastq
 
   script:
   log.info "----- Quality Stats Running on: ${sampleID} -----"
 
   if (params.reads == "SE"){
     mode_HQ="-S -M"
-    inputfq="${read1}"
+    inputfq="${reads}"
   }
   if (params.reads == "PE"){
     mode_HQ="-M"
-    inputfq="${read1} ${read2}"
+    inputfq="${reads[0]} ${reads[1]}"
   }
 
   """

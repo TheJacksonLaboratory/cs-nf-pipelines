@@ -11,20 +11,21 @@ process PICARD_ALN_METRICS_A {
   container 'java_samtools_python_R_picard_bamtools.sif'
 
   input:
-  tuple sampleID, file(gen_sort_bam), file(read_grp)
+  tuple sampleID, file(read_groups)
+  tuple sampleID, file(genome_sorted_bam)
 
   output:
-  tuple sampleID, file("*group_reorder.bam")
+  tuple sampleID, file("*group_reorder.bam"), emit: reordered_sorted_bam
 
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
 
   """
   java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar AddOrReplaceReadGroups \
-  INPUT=${gen_sort_bam} \
-  OUTPUT=${sampleID}_genome_bam_with_read_group.bam \
+  INPUT=${genome_sorted_bam} \
+  OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
-  $(cat $read_grp) \
+  $(cat $read_groups) \
   CREATE_INDEX=true
 
   java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar ReorderSam \
@@ -47,14 +48,14 @@ process PICARD_ALN_METRICS_B {
 
   container 'java_samtools_python_R_picard_bamtools.sif'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*.txt", mode: 'copy'
+  publishDir "${params.outdir}/picard", pattern: "*.txt", mode: 'copy'
 
   input:
-  tuple sampleID, file(reord_sort_bam)
+  tuple sampleID, file(reordered_sorted_bam)
 
   output:
   file "*.*"
-  tuple sampleID, file("*metrics.txt")
+  tuple sampleID, file("*metrics.txt"), emit: picard_metrics
 
   script:
   log.info "----- Alignment Metrics Running on: ${sampleID} -----"
@@ -64,13 +65,13 @@ process PICARD_ALN_METRICS_B {
     """
     java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar SortSam \
     SO=coordinate \
-    INPUT=${reord_sort_bam} \
+    INPUT=${reordered_sorted_bam} \
     OUTPUT=${sampleID}_reorder_sort.bam \
     VALIDATION_STRINGENCY=SILENT \
     CREATE_INDEX=true
 
     java -Djava.io.tmpdir=$TMPDIR -Xmx4g -jar /picard.jar CollectRnaSeqMetrics \
-    I=${reord_sort_bam} \
+    I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
@@ -83,13 +84,13 @@ process PICARD_ALN_METRICS_B {
     """
     java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar SortSam \
     SO=coordinate \
-    INPUT=${reord_sort_bam} \
+    INPUT=${reordered_sorted_bam} \
     OUTPUT=${sampleID}_reorder_sort.bam \
     VALIDATION_STRINGENCY=SILENT \
     CREATE_INDEX=true
 
     java -Djava.io.tmpdir=$TMPDIR -Xmx4g -jar /picard.jar CollectRnaSeqMetrics \
-    I=${reord_sort_bam} \
+    I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
@@ -100,13 +101,13 @@ process PICARD_ALN_METRICS_B {
   else if (params.gen_org == "mouse" && params.reads == "PE")
 
     """
-    bamtools stats -insert -in ${reord_sort_bam} > ${sampleID}_aln_metrics.txt
+    bamtools stats -insert -in ${reordered_sorted_bam} > ${sampleID}_aln_metrics.txt
     """
 
   else if (params.gen_org == "mouse" && params.reads != "PE")
 
     """
-    bamtools stats -in ${reord_sort_bam} > ${sampleID}_aln_metrics.txt
+    bamtools stats -in ${reordered_sorted_bam} > ${sampleID}_aln_metrics.txt
     """
 
   }

@@ -1,5 +1,5 @@
-process READ_GROUP {
-
+process READ_GROUPS {
+  // ** why is only one read used here?
   tag "sampleID"
 
   cpus 1
@@ -9,13 +9,13 @@ process READ_GROUP {
 
   container 'python_2.7.sif'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*read_group.txt", mode: 'copy'
+  publishDir "${outdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
 
   input:
-  tuple sampleID, file(read)
+  tuple val(sampleID), file(read)
 
   output:
-  tuple sampleID, file("*.txt")
+  tuple val(sampleID), file("*.txt"), emit: read_group
 
   script:
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
