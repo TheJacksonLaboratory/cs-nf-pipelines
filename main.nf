@@ -2,10 +2,17 @@
 
 nextflow.enable.dsl=2
 
-include { $"{params.workflow}" } from './workflows/$"{params.workflow_file}"'
-includeConfig $"{params.config}"
-include {find} from './bin/shared/groovy_helper'
 
-workflow{
-  $"{params.workflow}"()
+if (params.workflow == "toy_example"){
+  include {TOY_EXAMPLE} from './workflows/toy_example'
+  workflow{
+    TOY_EXAMPLE()
+  }
+}
+
+if (params.workflow == "RNASEQ"){
+  include {RNASEQ} from './workflows/rnaseq'
+  workflow{
+    RNASEQ()
+  }
 }
