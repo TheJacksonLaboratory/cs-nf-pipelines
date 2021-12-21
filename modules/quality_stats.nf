@@ -9,7 +9,7 @@ process QUALITY_STATISTICS {
 
   container 'python_2.7.sif'
 
-  publishDir "${outdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
+  publishDir "${params.outdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
 
   input:
   tuple val(sampleID), file(reads)
@@ -21,11 +21,11 @@ process QUALITY_STATISTICS {
   script:
   log.info "----- Quality Stats Running on: ${sampleID} -----"
 
-  if (params.reads == "SE"){
+  if (params.read_type == "SE"){
     mode_HQ="-S -M"
     inputfq="${reads}"
   }
-  if (params.reads == "PE"){
+  if (params.read_type == "PE"){
     mode_HQ="-M"
     inputfq="${reads[0]} ${reads[1]}"
   }

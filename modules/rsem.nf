@@ -20,10 +20,10 @@ process RSEM_ALIGNMENT_EXPRESSION {
   output:
   file "*stats"
   file "*results*"
-  tuple sampleID, file("*aln.stats"), emit: rsem_stats
-  tuple sampleID, file("*genes.results"), emit: rsem_genes
-  tuple sampleID, file("*isoforms.results"), emit: rsem_isoforms
-  tuple sampleID, file("*genome.bam"), emit: genome_sorted_bam
+  tuple val(sampleID), file("*aln.stats"), emit: rsem_stats
+  tuple val(sampleID), file("*genes.results"), emit: rsem_genes
+  tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
+  tuple val(sampleID), file("*genome.bam"), emit: genome_sorted_bam
 
 
   script:

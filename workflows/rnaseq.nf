@@ -2,15 +2,16 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {READ_GROUPS} from '../modules/read_groups'
-include {SUMMARY_STATS} from '../modules/summary_stats'
+// include {READ_GROUPS} from '../modules/read_groups'
+// include {SUMMARY_STATS} from '../modules/summary_stats'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
-include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
+// include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
-include {TRANSFER_FILES_HSA;TRANSFER_FILES_MMU} from './sub/rnaseq_file_transfer'
+// include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
+// include {TRANSFER_FILES_HSA;TRANSFER_FILES_MMU} from './sub/rnaseq_file_transfer'
 
-// prepare reads channel
+
+// prepare reads channel *
 if (params.read_type == 'PE'){
   read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}_*${params.extension}",checkExists:true )
 }
@@ -19,23 +20,24 @@ else if (params.read_type == 'SE'){
 }
 
 // main workflow
-workflow RNASEQ{
+workflow RNASEQ {
+  println(params.cwd)
 
-  // Step 1: Qual_Stat
+  // Step 1: Qual_Stat *
   QUALITY_STATISTICS(read_ch)
 
   // Step 2: RSEM
   RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq)
-
-  // Step 3: Get Read Group Information ** why is only one read used here?
-  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
+}
+  /* Step 3: Get Read Group Information ** why is only one read used here?
+//  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
 
   // Step 4a: Picard Alignment Metrics
-  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
+//  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
                        RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
 
   // Step 4b: Picard Alignment Metrics
-  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
+//  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
 
   if (${params.gen_org} == 'human'){
 
@@ -57,3 +59,4 @@ workflow RNASEQ{
 workflow.onComplete {
   // add logic here
 }
+*/
