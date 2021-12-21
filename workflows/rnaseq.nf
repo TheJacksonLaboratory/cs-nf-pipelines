@@ -11,10 +11,12 @@ include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
 include {TRANSFER_FILES_HSA;TRANSFER_FILES_MMU} from './sub/rnaseq_file_transfer'
 
 // prepare reads channel
-if (params.read_type == 'PE'):
+if (params.read_type == 'PE'){
   read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}_*${params.extension}",checkExists:true )
-else if (params.read_type == 'SE'):
+}
+else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.fq_path}/*${params.extension}",checkExists:true, size:1 )
+}
 
 // main workflow
 workflow RNASEQ{
