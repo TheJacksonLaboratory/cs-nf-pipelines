@@ -1222,7 +1222,7 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		file "${asm.baseName}.vcf" into hydra_vcf
 	  script:
 	  """
-	  hydra_to_vcf.py $asm $fasta
+	  /usr/bin/env python ${projectDir}/bin/hydra_to_vcf.py $asm $fasta
 	  """
 	}
 
@@ -1300,7 +1300,7 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		file "cnvnator.vcf"
 	  script:
 	  """
-	  cnvnator2VCF.pl -reference $fasta $calls ${params.genome} > cnvnator.vcf
+	  /usr/bin/env perl ${projectDir}/bin/cnvnator2VCF.pl -reference $fasta $calls ${params.genome} > cnvnator.vcf
 	  
 	  """
 	}
