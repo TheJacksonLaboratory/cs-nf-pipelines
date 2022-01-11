@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-// include {READ_GROUPS} from '../modules/read_groups'
+include {READ_GROUPS} from '../modules/read_groups'
 // include {SUMMARY_STATS} from '../modules/summary_stats'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
 // include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
@@ -21,6 +21,7 @@ else if (params.read_type == 'SE'){
 
 // downstream resources (only load once so do it here)
 rsem_ref_files = file("${params.rsem_ref_files}/*")
+read_group_pyfile = file("${params.read_group_pyfile}")
 
 // main workflow
 workflow RNASEQ {
@@ -31,11 +32,11 @@ workflow RNASEQ {
   println(QUALITY_STATISTICS.out.trimmed_fastq.view())
   // Step 2: RSEM
   RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
-}
-  /* Step 3: Get Read Group Information ** why is only one read used here?
-//  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
 
-  // Step 4a: Picard Alignment Metrics
+  //Step 3: Get Read Group Information ** why is only one read used here?
+  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, read_group_pyfile)
+}
+  /* Step 4a: Picard Alignment Metrics
 //  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
                        RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
 

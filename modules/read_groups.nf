@@ -9,10 +9,11 @@ process READ_GROUPS {
 
   container 'python_2.7.sif'
 
-  publishDir "${outdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
+  publishDir "${params.outdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
 
   input:
   tuple val(sampleID), file(read)
+  file(read_group_pyfile)
 
   output:
   tuple val(sampleID), file("*.txt"), emit: read_group
@@ -21,6 +22,6 @@ process READ_GROUPS {
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
 
   """
-  python ${params.read_grp_det} -p -o ${sampleID}_read_group.txt ${read[0]}
+  python ${read_group_pyfile} -p -o ${sampleID}_read_group.txt ${read[0]}
   """
   }
