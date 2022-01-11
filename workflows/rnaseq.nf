@@ -19,15 +19,18 @@ else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.fq_path}/*${params.extension}",checkExists:true, size:1 )
 }
 
+// downstream resources (only load once so do it here)
+rsem_ref_files = file("${params.rsem_ref_files}/*")
+
 // main workflow
 workflow RNASEQ {
   println(params.cwd)
 
   // Step 1: Qual_Stat *
   QUALITY_STATISTICS(read_ch)
-
+  println(QUALITY_STATISTICS.out.trimmed_fastq.view())
   // Step 2: RSEM
-  RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq)
+  RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
 }
   /* Step 3: Get Read Group Information ** why is only one read used here?
 //  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)

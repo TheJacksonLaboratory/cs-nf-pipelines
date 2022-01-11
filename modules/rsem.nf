@@ -11,16 +11,17 @@ process RSEM_ALIGNMENT_EXPRESSION {
   container 'rsem_bowtie2_samtools_picard.v2.sif'
 
   // ** are these cleared out? how necessary?
-  publishDir "${outdir}/rsem/stats", pattern: "*stats", mode: 'copy'
-  publishDir "${outdir}/rsem/results", pattern: "*results*", mode: 'copy'
+  publishDir "${params.outdir}/rsem/stats", pattern: "*stats", mode: 'copy'
+  publishDir "${params.outdir}/rsem/results", pattern: "*results*", mode: 'copy'
 
   input:
   tuple val(sampleID), file(reads)
+  file(rsem_ref_files)
 
   output:
   file "*stats"
   file "*results*"
-  tuple val(sampleID), file("*aln.stats"), emit: rsem_stats
+  tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
   tuple val(sampleID), file("*genes.results"), emit: rsem_genes
   tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
   tuple val(sampleID), file("*genome.bam"), emit: genome_sorted_bam
@@ -38,21 +39,28 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   if (params.read_type == "PE"){
     frag=""
-    trimmedfq="--paired-end ${reads[0]} ${reads[1]}"
+    stype="--paired-end"
+    trimmedfq="${reads[0]} ${reads[1]}"
   }
   if (params.read_type == "SE"){
     frag="--fragment-length-mean 280 --fragment-length-sd 50"
+    stype=""
     trimmedfq="${reads[0]}"
   }
 
   """
   rsem-calculate-expression -p 12 \
-  --phred33-quals $frag \
-  --seed-length ${params.seed_length} $prob \
-  --time \
-  --output-genome-bam ${params.aligner} \
-  $trimmedfq ${params.rsem_ref_prefix} ${sampleID} \
-  2> ${sampleID}_rsem_aln.stats
+  ${prob} \
+  ${stype} \
+  ${frag} \
+  --${params.rsem_aligner} \
+  --append-names \
+  --seed-length ${params.seed_length} \
+  --output-genome-bam \
+  ${trimmedfq} \
+  ${params.rsem_ref_prefix} \
+  ${sampleID} \
+  2> rsem_aln_${sampleID}.stats
   """
 }
 

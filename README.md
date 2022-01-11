@@ -76,37 +76,16 @@ Workflows are the heart of the Nextflow process. This is where modules are calle
   <a href="">See This Documentation</a>
 </li>
 
-<li>Start Session on Compute Node<br>
-  <code>srun -p compute -t 02:00:00 --mem 2G -n 2 --pty bash </code>
-</li>
-
-<li>Load Singularity<br>
-  <code>ml singularity</code>
-</li>
-
 <li>Clone Repo (or Pull Updated Repo)<br>
   <code>
-  cd /your/directory
+  cd ~
 
-  git clone https://dirName
+  git clone https://bitbucket.jax.org/scm/~sandeb/nf_dsl2_testing.git
   </code>
 </li>
-
-<li>Go to Repo Directory<br>
-  <code>cd dirName</code>
-</li>
-
-<li>Make Changes to nextflow.config File<br>
-  <code>nano nextflow.config</code><br>
-  **Add Image of Changes to Be Made **<br>
-  Save Changes: Press "ctr+x" Followed by "y" and hit "Enter"
-</li>
 <li>Run the Script<br>
-  <code>~/nextflow main.nf</code>
-</li>
-<li>View Results<br>
-  <a href="">Link to Expeced Results</a><br>
-  ** Add image of exected output here **
+  <code>sbatch run.sh</code>
+NOTE: This is the only file we suggest changing when progressing from the toy_example
 </li>
 
 <li>Move on to More Complex Tasks!<br>
