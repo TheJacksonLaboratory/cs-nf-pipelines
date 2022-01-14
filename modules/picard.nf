@@ -10,19 +10,18 @@ process PICARD_ALN_METRICS_A {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-//  publishDir "${params.outdir}/picard", pattern: "*.bam", mode: 'copy'
-//  publishDir "${params.outdir}/picard", pattern: "*.bai", mode: 'copy'
+  publishDir "${params.outdir}/picard", pattern: "*.bam", mode: 'copy'
+  publishDir "${params.outdir}/picard", pattern: "*.bai", mode: 'copy'
 
   input:
   tuple val(sampleID), file(read_groups)
   tuple val(sampleID), file(genome_sorted_bam)
   file(picard_dict)
  
- // output:
- // tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
- // tuple val(sampleID), file("*group_reorder.bai") 
- // file(picard_dict)
- 
+  output:
+  tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
+  tuple val(sampleID), file("*group_reorder.bai") 
+  
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
 
@@ -36,11 +35,11 @@ process PICARD_ALN_METRICS_A {
 
   echo "picard 4a.1"
 
-#  picard ReorderSam \
-#  INPUT=${sampleID}_genome_bam_with_read_groups.bam \
-#  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
-#  SEQUENCE_DICTIONARY=$picard_dict \
-#  CREATE_INDEX=true
+  picard ReorderSam \
+  INPUT=${sampleID}_genome_bam_with_read_groups.bam \
+  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
+  SEQUENCE_DICTIONARY=${params.picard_dict} \
+  CREATE_INDEX=true
 
   echo "picard 4a.2"
 
