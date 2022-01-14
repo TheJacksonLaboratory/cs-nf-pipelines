@@ -10,6 +10,9 @@ Alternatively, they can be found in the cloud at ** Add repo here **
 <br><br>
 
 <hr>
+
+# Pipeline Level Documentation
+
 Please see the following doccumentation for working with each pipeline.
 <ul>
 <li><a href = "/rnaseq/README.md">RNA Sequencing (RNASeq)</a></li>
@@ -95,50 +98,24 @@ Workflows are the heart of the Nextflow process. This is where modules are calle
 
 </ul>
 
-### How to Run Toy Example on Sumner
-
-<ol>
-</li>
-
-<li>SSH into Sumner<br>
-  <code>
-  ssh login.sumner.jax.org
-  </code>
-</li>
-
-<li>Install Nextflow in Home Directory<br>
-  <a href="">See This Documentation</a>
-</li>
-
-<li>Clone Repo (or Pull Updated Repo)<br>
-  <code>
-  cd ~
-
-  git clone https://bitbucket.jax.org/scm/~sandeb/nf_dsl2_testing.git
-  </code>
-</li>
-<li>Run the Script<br>
-  <code>sbatch run.sh</code>
-NOTE: This is the only file we suggest changing when progressing from the toy_example
-</li>
-
-<li>Move on to More Complex Tasks!<br>
-Now that you understand how to use the toy example you can move on to more complex pipelines. See the links at the top of this page for specific pipeline documentation.
-</li>
-</ol>
 
 ### About the Output
 
-The output comes in two general formats. The first is the work directory "workDir" where all of the processes function out of. The other is the specified "publishDir" where symlinks and an easy read file tree can be structured. Be careful to make sure the workDir is set to a space with enough memory.
+The output comes in two general formats. 
+The first is the work directory "workDir" where all of the processes function out of.
+By default this is set to fastscratch because it requires large amounts of memory and 
+most of these files will not need to be saved permanently.<br><br>
 
-** Add more information here **
+The other is the specified "publishDir" where final outputs that want to be saved indefinatley are sent.
+Though publishDir will be much smaller than the workDir we highly encourage setting this to a space
+that can handle many gigabytes of data.<br><br>
 
-<hr>
-<div id="additional_references">
-<h1 style="text-align:center;">Additional Resources</h1>
+Output will also be put into one folder per sample rather than one folder per analysis.
+
+# Additional Resourrces
+
 <ul>
-<li><a href = "#">About Nextflow</a></li>
-<li><a href = "#">About Singularity</a></li>
+<li><a href='#'>Nextflow</a></li>
+<li><a href='#'>Singularity</a></li>
 </ul>
-</div>
 </div>
