@@ -54,6 +54,7 @@ Now that you understand how to use the toy example you can move on to more compl
 tasks. Continue reading for more information, or <a href='#'>click here for a short video.</a></li>
 </ol>
 
+<hr>
 
 # General Workflow
 
