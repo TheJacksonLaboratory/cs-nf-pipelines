@@ -20,6 +20,8 @@ Please see the following doccumentation for working with each pipeline.
 <li><a href = "#">Whole Exome Sequencing (WES)</a></li>
 </ul>
 
+<hr>
+
 # Quick Start
 
 <ol>
@@ -43,7 +45,7 @@ Please see the following doccumentation for working with each pipeline.
 <li>Run the Script<br>
   <code>sbatch *our_super_cool_repo_name*/run.sh</code><br>
   By default you ran the toy_example. To run RNASEQ with defaults and test data
-  simply add `--workflow rnaseq` to the last line of run.sh<br><br> Alternatively,
+  simply add `--workflow rnaseq` to the last line of run.sh<br>Alternatively,
   you can edit a script in run_scripts folder and simpy do `sbatch *script_name*.sh` 
 </li>
 
@@ -98,6 +100,7 @@ Workflows are the heart of the Nextflow process. This is where modules are calle
 
 </ul>
 
+<hr>
 
 ### About the Output
 
@@ -111,6 +114,8 @@ Though publishDir will be much smaller than the workDir we highly encourage sett
 that can handle many gigabytes of data.<br><br>
 
 Output will also be put into one folder per sample rather than one folder per analysis.
+
+<hr>
 
 # Additional Resourrces
 
