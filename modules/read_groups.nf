@@ -16,7 +16,7 @@ process READ_GROUPS {
   file(read_group_pyfile)
 
   output:
-  tuple val(sampleID), file("*.txt"), emit: read_group
+  tuple val(sampleID), file("*.txt"), emit: read_groups
 
   script:
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"

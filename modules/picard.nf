@@ -8,32 +8,44 @@ process PICARD_ALN_METRICS_A {
   time '12:00:00'
   clusterOptions '-q batch'
 
-  container 'java_samtools_python_R_picard_bamtools.sif'
+  container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
+
+//  publishDir "${params.outdir}/picard", pattern: "*.bam", mode: 'copy'
+//  publishDir "${params.outdir}/picard", pattern: "*.bai", mode: 'copy'
 
   input:
-  tuple sampleID, file(read_groups)
-  tuple sampleID, file(genome_sorted_bam)
-
-  output:
-  tuple sampleID, file("*group_reorder.bam"), emit: reordered_sorted_bam
-
+  tuple val(sampleID), file(read_groups)
+  tuple val(sampleID), file(genome_sorted_bam)
+  file(picard_dict)
+ 
+ // output:
+ // tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
+ // tuple val(sampleID), file("*group_reorder.bai") 
+ // file(picard_dict)
+ 
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar AddOrReplaceReadGroups \
+  picard AddOrReplaceReadGroups \
   INPUT=${genome_sorted_bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
-  $(cat $read_groups) \
+  \$(cat $read_groups) \
   CREATE_INDEX=true
 
-  java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar ReorderSam \
-  INPUT=${sampleID}_genome_bam_with_read_group.bam \
-  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
-  REFERENCE=${params.ref_fa} \
-  CREATE_INDEX=true
+  echo "picard 4a.1"
+
+#  picard ReorderSam \
+#  INPUT=${sampleID}_genome_bam_with_read_groups.bam \
+#  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
+#  SEQUENCE_DICTIONARY=$picard_dict \
+#  CREATE_INDEX=true
+
+  echo "picard 4a.2"
+
   """
+
   }
 
 // part B

@@ -13,7 +13,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   // ** are these cleared out? how necessary?
   publishDir "${params.outdir}/rsem/stats", pattern: "*stats", mode: 'copy'
   publishDir "${params.outdir}/rsem/results", pattern: "*results*", mode: 'copy'
-
+  publishDir "${params.outdir}/rsem/bam", pattern: "*.bam", mode: 'copy'
+  
   input:
   tuple val(sampleID), file(reads)
   file(rsem_ref_files)

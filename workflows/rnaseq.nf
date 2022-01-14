@@ -7,7 +7,7 @@ include {READ_GROUPS} from '../modules/read_groups'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
 // include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
-// include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
+include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
 // include {TRANSFER_FILES_HSA;TRANSFER_FILES_MMU} from './sub/rnaseq_file_transfer'
 
 
@@ -22,25 +22,26 @@ else if (params.read_type == 'SE'){
 // downstream resources (only load once so do it here)
 rsem_ref_files = file("${params.rsem_ref_files}/*")
 read_group_pyfile = file("${params.read_group_pyfile}")
-
+ref_fa = file("${params.ref_fa}")
+picard_dict=file("${params.picard_dict}")
 // main workflow
 workflow RNASEQ {
-  println(params.cwd)
 
   // Step 1: Qual_Stat *
   QUALITY_STATISTICS(read_ch)
-  println(QUALITY_STATISTICS.out.trimmed_fastq.view())
-  // Step 2: RSEM
+
+  // Step 2: RSEM *
   RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
 
-  //Step 3: Get Read Group Information ** why is only one read used here?
+  //Step 3: Get Read Group Information *
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, read_group_pyfile)
-}
-  /* Step 4a: Picard Alignment Metrics
-//  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
-                       RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
 
-  // Step 4b: Picard Alignment Metrics
+  // Step 4a: Picard Alignment Metrics
+  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
+                       RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam,
+                       picard_dict)
+}
+  /* Step 4b: Picard Alignment Metrics
 //  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
 
   if (${params.gen_org} == 'human'){

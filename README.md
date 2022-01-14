@@ -31,6 +31,36 @@ Please see the following doccumentation for working with each pipeline.
 We have set up a "toy_example" in order to make this repo more transparent and to standardize development. The toy_example is simple, it trims RNASeq reads using Trimmomatic then does an expression analysis using RSEM.
 <br><br>
 
+### How to Run Toy Example on Sumner
+
+<ol>
+</li>
+
+<li>SSH into Sumner<br>
+  <code>
+  ssh login.sumner.jax.org
+  </code>
+</li>
+
+<li>Install Nextflow in Home Directory<br>
+  <a href="">See This Documentation</a>
+</li>
+
+<li>Clone Repo (or Pull Updated Repo)<br>
+  <code>
+  git clone https://bitbucket.jax.org/scm/~sandeb/nf_dsl2_testing.git
+  </code>
+</li>
+<li>Run the Script<br>
+  <code>sbatch pipelines/run.sh</code><br>
+NOTE: run.sh is the only file we suggest changing when progressing from the toy_e$
+</li>
+
+<li>Move on to More Complex Tasks!<br>
+Now that you understand how to use the toy example you can move on to more comp$
+</li>
+</ol>
+
 ![Scheme](static/imgs/toy_example_flow.png)
 
 <br><br>
