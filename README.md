@@ -5,7 +5,7 @@
 From this repo you will be able to utilize all of the production pipelines. For JAX pipeline development we will be working with Nextflow in order to standardize and modularize the use of Singularity containers.
 <br><br>
 In essence, Nextflow is a wrapper for working with linux containers. This repo requires using Nextflow's Domain Specific Language 2 (DSL2). See <a href="#additional_references">Additional References</a> for more information.<br><br>
-Singularity containers are found on Sumner at /projects/compsci/nextflow/containers <br>
+Singularity containers are found on Sumner at /projects/omics_share/meta/containers <br>
 Alternatively, they can be found in the cloud at ** Add repo here **
 <br><br>
 
@@ -15,23 +15,9 @@ Please see the following doccumentation for working with each pipeline.
 <li><a href = "/rnaseq/README.md">RNA Sequencing (RNASeq)</a></li>
 <li><a href = "#">Whole Genome Sequencing (WGS)</a></li>
 <li><a href = "#">Whole Exome Sequencing (WES)</a></li>
-
 </ul>
 
-# General Workflow
-
-![Scheme](static/imgs/general_workflow.png)
-
-
-
-<hr>
-
-<h1 style="text-align:center;">Toy Example</h1>
-
-We have set up a "toy_example" in order to make this repo more transparent and to standardize development. The toy_example is simple, it trims RNASeq reads using Trimmomatic then does an expression analysis using RSEM.
-<br><br>
-
-### How to Run Toy Example on Sumner
+# Quick Start
 
 <ol>
 </li>
@@ -52,14 +38,32 @@ We have set up a "toy_example" in order to make this repo more transparent and t
   </code>
 </li>
 <li>Run the Script<br>
-  <code>sbatch pipelines/run.sh</code><br>
-NOTE: run.sh is the only file we suggest changing when progressing from the toy_e$
+  <code>sbatch *our_super_cool_repo_name*/run.sh</code><br>
+  By default you ran the toy_example. To run RNASEQ with defaults and test data
+  simply add `--workflow rnaseq` to the last line of run.sh<br><br> Alternatively,
+  you can edit a script in run_scripts folder and simpy do `sbatch *script_name*.sh` 
 </li>
 
 <li>Move on to More Complex Tasks!<br>
-Now that you understand how to use the toy example you can move on to more comp$
-</li>
+Now that you understand how to use the toy example you can move on to more complex
+tasks. Continue reading for more information, or <a href='#'>click here for a short video.</a></li>
 </ol>
+
+
+# General Workflow
+
+![Scheme](static/imgs/general_workflow.png)
+
+
+
+<hr>
+
+<h1 style="text-align:center;">Toy Example</h1>
+
+We have set up a "toy_example" in order to make this repo more transparent and to standardize development. The toy_example is simple, it trims RNASeq reads using Trimmomatic then does an expression analysis using RSEM.
+<br><br>
+
+### Behind the Scenes of a Toy Example on Sumner
 
 ![Scheme](static/imgs/toy_example_flow.png)
 
