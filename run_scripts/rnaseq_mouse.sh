@@ -14,7 +14,7 @@ cd $SLURM_SUBMIT_DIR
 ml singularity
 
 # RUN TEST PIPELINE
-~/nextflow main.nf \
+~/nextflow ../main.nf \
 --workflow rnaseq \
 --fq_path *PATH_TO_YOUR_SEQUENCES* \
 --gen_org mouse

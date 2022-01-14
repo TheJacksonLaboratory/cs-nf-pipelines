@@ -16,7 +16,7 @@ process PICARD_ALN_METRICS_A {
   input:
   tuple val(sampleID), file(read_groups)
   tuple val(sampleID), file(genome_sorted_bam)
-  file(picard_dict)
+
  
   output:
   tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam

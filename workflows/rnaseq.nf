@@ -22,8 +22,7 @@ else if (params.read_type == 'SE'){
 // downstream resources (only load once so do it here)
 rsem_ref_files = file("${params.rsem_ref_files}/*")
 read_group_pyfile = file("${params.read_group_pyfile}")
-ref_fa = file("${params.ref_fa}")
-picard_dict=file("${params.picard_dict}")
+
 // main workflow
 workflow RNASEQ {
 
@@ -36,15 +35,14 @@ workflow RNASEQ {
   //Step 3: Get Read Group Information *
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, read_group_pyfile)
 
-  // Step 4a: Picard Alignment Metrics
+  // Step 4a: Picard Alignment Metrics * do i still need picard_dict?
   PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
-                       RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam,
-                       picard_dict)
+                       RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
 }
   /* Step 4b: Picard Alignment Metrics
-//  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
-
-  if (${params.gen_org} == 'human'){
+  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
+}
+ if (${params.gen_org} == 'human'){
 
     // Step 5: Summary Stats
     SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
