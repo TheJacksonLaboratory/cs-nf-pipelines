@@ -9,13 +9,6 @@ process QUALITY_STATISTICS {
 
   container 'python_2.7.sif'
 
-  if (params.organize_by=='analysis'){
-    publishDir "${params.pubdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
-  }
-  else if (params.organize_by=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*fastq.gz_stat", mode: 'copy'
-  }
-
   input:
   tuple val(sampleID), file(reads)
 
@@ -26,6 +19,13 @@ process QUALITY_STATISTICS {
   script:
   log.info "----- Quality Stats Running on: ${sampleID} -----"
 
+  if (params.organize_by=='analysis'){
+    publishDir "${params.pubdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
+  }
+  else if (params.organize_by=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*fastq.gz_stat", mode: 'copy'
+  }
+  
   if (params.read_type == "SE"){
     mode_HQ="-S -M"
     inputfq="${reads}"
