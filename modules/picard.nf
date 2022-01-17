@@ -10,18 +10,22 @@ process PICARD_ALN_METRICS_A {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.outdir}/picard", pattern: "*.bam", mode: 'copy'
-  publishDir "${params.outdir}/picard", pattern: "*.bai", mode: 'copy'
+  if (${params.organize_by}=='analysis'){
+    publishDir "${params.pubdir}/picard", pattern: "*.ba*", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.ba*", mode: 'copy'
+  }
 
   input:
   tuple val(sampleID), file(read_groups)
   tuple val(sampleID), file(genome_sorted_bam)
 
- 
+
   output:
   tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
-  tuple val(sampleID), file("*group_reorder.bai") 
-  
+  tuple val(sampleID), file("*group_reorder.bai")
+
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
 
@@ -44,7 +48,7 @@ process PICARD_ALN_METRICS_A {
 
 // part B
 process PICARD_ALN_METRICS_B {
-  
+
   // human only for mouse see bamtools
   tag "sampleID"
 
@@ -55,7 +59,7 @@ process PICARD_ALN_METRICS_B {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.outdir}/picard", pattern: "*.txt", mode: 'copy'
+  publishDir "${params.pubdir}/picard", pattern: "*.txt", mode: 'copy'
 
   input:
   tuple val(sampleID), file(reordered_sorted_bam)

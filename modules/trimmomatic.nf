@@ -1,5 +1,5 @@
 process TRIM {
-  publishDir "${params.outdir}/trimmed"
+  publishDir "${params.pubdir}/trimmed"
   container "quay.io/biocontainers/trimmomatic:0.35--6"
 
   input:

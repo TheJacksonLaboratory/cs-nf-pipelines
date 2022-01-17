@@ -10,11 +10,17 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   container 'rsem_bowtie2_samtools_picard.v2.sif'
 
-  // ** are these cleared out? how necessary?
-  publishDir "${params.outdir}/rsem/stats", pattern: "*stats", mode: 'copy'
-  publishDir "${params.outdir}/rsem/results", pattern: "*results*", mode: 'copy'
-  publishDir "${params.outdir}/rsem/bam", pattern: "*.bam", mode: 'copy'
-  
+  if (${params.organize_by}=='analysis'){
+    publishDir "${params.pubdir}/rsem", pattern: "*stats", mode: 'copy'
+    publishDir "${params.pubdir}/rsem", pattern: "*results*", mode: 'copy'
+    publishDir "${params.pubdir}/rsem", pattern: "*.bam", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*stats", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*results*", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.bam", mode: 'copy'
+  }
+
   input:
   tuple val(sampleID), file(reads)
   file(rsem_ref_files)
@@ -67,7 +73,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
 // Toy Example RSEM below
 process RSEM_REF_PULL {
-  publishDir "${params.outdir}/rsem/ref"
+  publishDir "${params.pubdir}/rsem/ref"
 
   output:
   tuple file("*.gtf"), file("*.fa")
@@ -85,7 +91,7 @@ process RSEM_REF_PULL {
 }
 
 process RSEM_REF_BUILD {
-  publishDir "${params.outdir}/rsem/ref"
+  publishDir "${params.pubdir}/rsem/ref"
   container "dceoy/rsem"
 
   input:
@@ -106,7 +112,7 @@ process RSEM_REF_BUILD {
 }
 
 process RSEM_EXPRESSION {
-  publishDir "${params.outdir}/rsem/exp"
+  publishDir "${params.pubdir}/rsem/exp"
   container "dceoy/rsem"
 
   input:
@@ -130,7 +136,7 @@ process RSEM_EXPRESSION {
 }
 
 process RSEM_SIMULATE_READS{
-  publishDir "${params.outdir}/rsem/sim"
+  publishDir "${params.pubdir}/rsem/sim"
   container "dceoy/rsem"
 
   input:

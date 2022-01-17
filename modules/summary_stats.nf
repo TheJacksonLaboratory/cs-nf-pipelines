@@ -6,7 +6,7 @@ process SUMMARY_STATS {
     clusterOptions = '-q batch'
     container
 
-    publishDir "${outdir}/summary_stats", pattern: "*stats.txt", mode: 'copy'
+    publishDir "${pubdir}/summary_stats", pattern: "*stats.txt", mode: 'copy'
 
     input:
     tuple sampleID, file(rsem_stats)

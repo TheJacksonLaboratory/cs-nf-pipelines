@@ -9,8 +9,13 @@ process READ_GROUPS {
 
   container 'python_2.7.sif'
 
-  publishDir "${params.outdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
-
+  if (${params.organize_by}=='analysis'){
+    publishDir "${params.pubdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*read_group.txt", mode: 'copy'
+  }
+  
   input:
   tuple val(sampleID), file(read)
   file(read_group_pyfile)

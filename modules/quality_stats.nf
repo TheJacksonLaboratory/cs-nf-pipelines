@@ -9,8 +9,13 @@ process QUALITY_STATISTICS {
 
   container 'python_2.7.sif'
 
-  publishDir "${params.outdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
-
+  if (${params.organize_by}=='analysis'){
+    publishDir "${params.pubdir}/quality_stats", pattern: "*fastq.gz_stat", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*fastq.gz_stat", mode: 'copy'
+  }
+  
   input:
   tuple val(sampleID), file(reads)
 

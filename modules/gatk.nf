@@ -69,7 +69,7 @@ process GATK_STATS_B {
 
   container 'python_2_7_3'
 
-  publishDir "${outdir}/gatk", pattern: "*.*", mode: 'copy'
+  publishDir "${pubdir}/gatk", pattern: "*.*", mode: 'copy'
 
   input:
   tuple sampleID, file(gatk_3)
