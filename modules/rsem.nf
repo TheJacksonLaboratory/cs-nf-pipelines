@@ -10,16 +10,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   container 'rsem_bowtie2_samtools_picard.v2.sif'
 
-  if (params.organize_by=='analysis'){
-    publishDir "${params.pubdir}/rsem", pattern: "*stats", mode: 'copy'
-    publishDir "${params.pubdir}/rsem", pattern: "*results*", mode: 'copy'
-    publishDir "${params.pubdir}/rsem", pattern: "*.bam", mode: 'copy'
-  }
-  else if (params.organize_by=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*stats", mode: 'copy'
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*results*", mode: 'copy'
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*.bam", mode: 'copy'
-  }
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*stats", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(reads)

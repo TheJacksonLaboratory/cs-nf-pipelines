@@ -10,12 +10,7 @@ process PICARD_ALN_METRICS_A {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  if (params.organize_by=='analysis'){
-    publishDir "${params.pubdir}/picard", pattern: "*.ba*", mode: 'copy'
-  }
-  else if (${params.organize_by}=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*.ba*", mode: 'copy'
-  }
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(read_groups)
