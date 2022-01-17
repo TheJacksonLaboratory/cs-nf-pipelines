@@ -3,12 +3,13 @@ nextflow.enable.dsl=2
 
 // import modules
 include {READ_GROUPS} from '../modules/read_groups'
-// include {SUMMARY_STATS} from '../modules/summary_stats'
+include {BAMTOOLS_RNASEQ_MOUSE} from '../modules/bamtools'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
-// include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
-// include {TRANSFER_FILES_HSA;TRANSFER_FILES_MMU} from './sub/rnaseq_file_transfer'
+
+// include {SUMMARY_STATS} from '../modules/summary_stats'
+// include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
 
 
 // prepare reads channel *
@@ -26,23 +27,29 @@ read_group_pyfile = file("${params.read_group_pyfile}")
 // main workflow
 workflow RNASEQ {
 
-  // Step 1: Qual_Stat *
+  // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
 
-  // Step 2: RSEM *
+  // Step 2: RSEM
   RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
 
-  //Step 3: Get Read Group Information *
+  //Step 3: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, read_group_pyfile)
 
-  // Step 4a: Picard Alignment Metrics * do i still need picard_dict?
+  // Step 4a: Picard Alignment Metrics
   PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
                        RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
-}
-  /* Step 4b: Picard Alignment Metrics
-  PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
-}
- if (${params.gen_org} == 'human'){
+  
+  if ("${params.gen_org}" == 'mouse'){
+    // Step 4b: Bamtools
+    BAMTOOLS_RNASEQ_MOUSE(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)  
+  }
+
+  //HUMAN NEEDS TO BE FLUSHED OUT
+  if ("${params.gen_org}" == 'human'){
+
+    // Step 4b: Picard Alignment Metrics
+    PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
 
     // Step 5: Summary Stats
     SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
@@ -58,8 +65,3 @@ workflow RNASEQ {
 
   }
 }
-
-workflow.onComplete {
-  // add logic here
-}
-*/

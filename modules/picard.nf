@@ -33,23 +33,19 @@ process PICARD_ALN_METRICS_A {
   \$(cat $read_groups) \
   CREATE_INDEX=true
 
-  echo "picard 4a.1"
-
   picard ReorderSam \
   INPUT=${sampleID}_genome_bam_with_read_groups.bam \
   OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
   SEQUENCE_DICTIONARY=${params.picard_dict} \
   CREATE_INDEX=true
-
-  echo "picard 4a.2"
-
   """
 
   }
 
 // part B
 process PICARD_ALN_METRICS_B {
-
+  
+  // human only for mouse see bamtools
   tag "sampleID"
 
   cpus 1
@@ -57,31 +53,30 @@ process PICARD_ALN_METRICS_B {
   time '12:00:00'
   clusterOptions '-q batch'
 
-  container 'java_samtools_python_R_picard_bamtools.sif'
+  container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   publishDir "${params.outdir}/picard", pattern: "*.txt", mode: 'copy'
 
   input:
-  tuple sampleID, file(reordered_sorted_bam)
+  tuple val(sampleID), file(reordered_sorted_bam)
 
   output:
-  file "*.*"
-  tuple sampleID, file("*metrics.txt"), emit: picard_metrics
+  tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
-  log.info "----- Alignment Metrics Running on: ${sampleID} -----"
+  log.info "----- Alignment Metrics B Human Running on: ${sampleID} -----"
 
-  if (params.read_prep == "stranded" && params.gen_org == "human")
+  if (params.read_prep == "stranded")
 
     """
-    java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar SortSam \
+    picard SortSam \
     SO=coordinate \
     INPUT=${reordered_sorted_bam} \
     OUTPUT=${sampleID}_reorder_sort.bam \
     VALIDATION_STRINGENCY=SILENT \
     CREATE_INDEX=true
 
-    java -Djava.io.tmpdir=$TMPDIR -Xmx4g -jar /picard.jar CollectRnaSeqMetrics \
+    picard CollectRnaSeqMetrics \
     I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
@@ -90,35 +85,23 @@ process PICARD_ALN_METRICS_B {
     CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
     """
 
-  else if (params.read_prep != "stranded" && params.gen_org == "human")
+  else if (params.read_prep != "stranded")
 
     """
-    java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /picard.jar SortSam \
+    picard SortSam \
     SO=coordinate \
     INPUT=${reordered_sorted_bam} \
     OUTPUT=${sampleID}_reorder_sort.bam \
     VALIDATION_STRINGENCY=SILENT \
     CREATE_INDEX=true
 
-    java -Djava.io.tmpdir=$TMPDIR -Xmx4g -jar /picard.jar CollectRnaSeqMetrics \
+    picard CollectRnaSeqMetrics \
     I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
     STRAND=NONE \
     CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
-    """
-
-  else if (params.gen_org == "mouse" && params.reads == "PE")
-
-    """
-    bamtools stats -insert -in ${reordered_sorted_bam} > ${sampleID}_aln_metrics.txt
-    """
-
-  else if (params.gen_org == "mouse" && params.reads != "PE")
-
-    """
-    bamtools stats -in ${reordered_sorted_bam} > ${sampleID}_aln_metrics.txt
     """
 
   }
