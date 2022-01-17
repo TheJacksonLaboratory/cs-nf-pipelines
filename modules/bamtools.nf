@@ -9,13 +9,6 @@ process BAMTOOLS_RNASEQ_MOUSE {
 
   container 'quay.io/biocontainers/bamtools:2.5.1--h9a82719_9'
 
-  if (${params.organize_by}=='analysis'){
-    publishDir "${params.pubdir}/picard", pattern: "*.txt", mode: 'copy'
-  }
-  else if (${params.organize_by}=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*.txt", mode: 'copy'
-  }
-
   input:
   tuple val(sampleID), file(reordered_sorted_bam)
 
@@ -23,6 +16,13 @@ process BAMTOOLS_RNASEQ_MOUSE {
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
+  
+  if (${params.organize_by}=='analysis'){
+    publishDir "${params.pubdir}/picard", pattern: "*.txt", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.txt", mode: 'copy'
+  }
 
   if (params.read_type == "PE")
 
