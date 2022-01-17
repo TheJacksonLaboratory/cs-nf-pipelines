@@ -9,6 +9,13 @@ process READ_GROUPS {
 
   container 'python_2.7.sif'
 
+  if (params.organize_by=='analysis'){
+    publishDir "${params.pubdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
+  }
+  else if (params.organize_by=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*read_group.txt", mode: 'copy'
+  }
+
   input:
   tuple val(sampleID), file(read)
   file(read_group_pyfile)
@@ -19,13 +26,6 @@ process READ_GROUPS {
   script:
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
 
-  if (${params.organize_by}=='analysis'){
-    publishDir "${params.pubdir}/read_groups", pattern: "*read_group.txt", mode: 'copy'
-  }
-  else if (${params.organize_by}=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*read_group.txt", mode: 'copy'
-  }
-  
   """
   python ${read_group_pyfile} -p -o ${sampleID}_read_group.txt ${read[0]}
   """

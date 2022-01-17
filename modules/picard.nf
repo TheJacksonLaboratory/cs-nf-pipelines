@@ -10,6 +10,13 @@ process PICARD_ALN_METRICS_A {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
+  if (params.organize_by=='analysis'){
+    publishDir "${params.pubdir}/picard", pattern: "*.ba*", mode: 'copy'
+  }
+  else if (${params.organize_by}=='sample'){
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.ba*", mode: 'copy'
+  }
+
   input:
   tuple val(sampleID), file(read_groups)
   tuple val(sampleID), file(genome_sorted_bam)
@@ -22,13 +29,6 @@ process PICARD_ALN_METRICS_A {
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
 
-  if (${params.organize_by}=='analysis'){
-    publishDir "${params.pubdir}/picard", pattern: "*.ba*", mode: 'copy'
-  }
-  else if (${params.organize_by}=='sample'){
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*.ba*", mode: 'copy'
-  }
-  
   """
   picard AddOrReplaceReadGroups \
   INPUT=${genome_sorted_bam} \
