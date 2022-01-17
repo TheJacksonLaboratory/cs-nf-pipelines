@@ -18,7 +18,6 @@ process BAMTOOLS_RNASEQ_MOUSE {
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
-  publishDir "${params.pubdir}/${sampleID}", pattern: "*.txt", mode: 'copy'
   if (params.read_type == "PE")
 
     """
