@@ -33,6 +33,12 @@ params.surv_supp = 1
 params.surv_type = 1
 params.surv_strand = 1
 params.surv_min = 30
+def sample_name = params.names
+def abs_outdir = params.outdir
+params.threads = 8
+params.keep_intermediate = false
+
+// ========================================= Long Read Alignment Processes =====
 
 if (params.seqmode == 'pacbio') {
 	
@@ -514,7 +520,7 @@ if (params.seqmode == 'pacbio') {
 	
 }  // END OF if params.seqmode == 'pacbio'
 
-
+// ======================================= Short Read Alignment Proccesses =====
 if (params.seqmode == 'illumina') {
 	if (params.fastq1){
 	params.bwa = params.genome && params.fasta && params.fastq1 ? params.genomes[params.genome].bwa ?: null : null
@@ -589,12 +595,12 @@ if (params.seqmode == 'illumina') {
 	  label 'cpus_8'
 	  input:
 		file bamf from ch_bam_und
+		val sample_name from params.names
 	  output:
-		file "${bamf.baseName}.md.bam" into ch_bam
-		file "${bamf.baseName}.md.bam.bai" into ch_bam_bai
+	  	tuple sample_name, file("${bamf.baseName}.md.bam"), file("${bamf.baseName}.md.bam.bai") into ch_sample_name_bam_bai
 		file "${bamf.baseName}.metrics" into bam_markd_m
 	  script:
-	  markdup_java_options = task.memory.toGiga() > 8 ? params.markdup_java_options : "\"-Xms" +  (task.memory.toGiga() / 2).trunc() + "g -Xmx" + (task.memory.toGiga() - 1) + "g\""
+	  	markdup_java_options = task.memory.toGiga() > 8 ? params.markdup_java_options : "\"-Xms" +  (task.memory.toGiga() / 2).trunc() + "g -Xmx" + (task.memory.toGiga() - 1) + "g\""
 	  """
 	  gatk --java-options ${markdup_java_options} \
 			MarkDuplicates \
@@ -604,6 +610,7 @@ if (params.seqmode == 'illumina') {
 			--TMP_DIR . \
 			--ASSUME_SORT_ORDER coordinate \
 			--CREATE_INDEX true \
+			--REMOVE_DUPLICATES true \
 			--OUTPUT ${bamf.baseName}.md.bam
 	
 		mv ${bamf.baseName}.md.bai ${bamf.baseName}.md.bam.bai
@@ -684,12 +691,12 @@ if (params.seqmode == 'illumina') {
 	  publishDir params.outdir, mode:'copy'
 	  label 'samtools'
 	  input:
-		file bamf from ch_bam
+		tuple sample_name, bam_input, bam_index from ch_sample_name_bam_bai
 	  output:
 		file "insert_size.txt" into ins_size_ch
 	  script:
 	  """
-	  samtools stats $bamf |grep "^IS" |awk '{a = a + \$2*\$3; b = b + \$3}END{print int(a/b)}' > insert_size.txt
+	  samtools stats $bam_input |grep "^IS" |awk '{a = a + \$2*\$3; b = b + \$3}END{print int(a/b)}' > insert_size.txt
 	  """
 	}
 
@@ -708,396 +715,256 @@ if (params.seqmode == 'illumina') {
 	  """
 	}
 
+	ch_sample_name_bam_bai.into {
+  		in_brkdncr
+  		in_delly
+  		in_lumpy
+  		in_manta
+	}
+
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lumpy SV ~~~~~
+	/* 
+		TODO:
+			- encapsulate "black regions" tsv in container
+			- check input/output flow to ensure it plays
+	*/ 
+	
+	/* OLD VERSION
 	process lumpy{
-	  publishDir params.outdir, mode:'copy'
-	  label 'cpus_8'
-	  label 'lumpy'
-	  input:
-		file bamf from ch_bam
+		publishDir params.outdir, mode:'copy'
+		label 'cpus_8'
+		label 'lumpy'
+		input:
+			file bamf from ch_bam
 
-	  output:
-		file "lumpy_output.vcf" into lumpy_out
-	  script:
-	  """
-	  lumpyexpress -B $bamf -P -m 2 -o lumpy_output.vcf -v
-	  """
+		output:
+			file "lumpy_output.vcf" into lumpy_out
+		script:
+		"""
+		lumpyexpress -B $bamf -P -m 2 -o lumpy_output.vcf -v
+		"""
+	*/
+	process lumpy_mapping {
+		tag "$sample_name"
+		label 'lumpy'
+		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
+		cpus params.threads
+
+		input:
+			tuple sample_name, bam_input, bam_index from in_lumpy
+
+		output:
+			tuple sample_name, path(bam_bwa_lumpy) into ( bam_bwa_lumpy_ch, bam_bwa_lumpy_splits_ch )
+			tuple sample_name, path(dis_unsorted_bam) into dis_unsorted_bam_ch
+
+		script:
+			log.info "Mapping Lumpy (Map clipped reads, read group info, extract discordant alignments)"
+
+			// Lumpy File Names:
+			bam_name_sort      = sample_name + "_alignBWA_ReadNameSort"
+			bam_name_sort_full = sample_name + "_alignBWA_ReadNameSort.bam"
+			bam_bwa_lumpy      = sample_name + "_alignBWA_lumpy.bam"
+			bam_bwa_lumpy_sort = sample_name + "_alignBWA_lumpySort.bam"
+			dis_unsorted_bam   = sample_name + "_discordants.unsorted.bam"
+			dis_sorted_bam     = sample_name + "_discordants.sorted.bam"
+			split_unsorted_bam = sample_name + "_splitters.unsorted.bam"
+			split_sorted_bam   = sample_name + "_splitters.sorted.bam"
+			"""
+			# Clipped_rc reads mapping to Genome
+			samtools sort -n ${bam_input} -o ${bam_name_sort_full} -@ ${params.threads}
+			# manual read group info
+			samtools view -h ${bam_name_sort_full} \
+			| samblaster --acceptDupMarks --excludeDups --addMateTags \
+						--ignoreUnmated --maxSplitCount 2 --minNonOverlap 20 \
+			| samtools view -@ ${params.threads} -S -b - > ${bam_bwa_lumpy}
+			# Extract the discordant pairedend alignments
+			samtools view -@ ${params.threads} -b -F 1294 ${bam_bwa_lumpy} > ${dis_unsorted_bam}
+		"""
 	}
 
+	//exit 0
 
-	process breakdancer{
-	  publishDir params.outdir, mode:'copy'
-	  label 'cpus_8'
-	  label 'breakdancer'
-	  input:
-		file bamf from ch_bam
+	process lumpy_bwa_sort {
+		tag "$sample_name"
+		label 'picard'
 
-	  output:
-		file "${bamf.baseName}.cfg" into bd_cfg
-		file "${bamf.baseName}.calls" into bd_calls
-   
-	  script:
-	  """
-	  bam2cfg.pl -q 30 -n 10000 $bamf > ${bamf.baseName}.cfg
-	  breakdancer-max ${bamf.baseName}.cfg > ${bamf.baseName}.calls
-	  """
+		input:
+		tuple sample_name, path(bam_bwa_lumpy) from bam_bwa_lumpy_ch
+
+		output:
+		tuple sample_name, path("${bam_bwa_lumpy_sort}.ba[mi]") into bam_bwa_lumpy_sort_ch
+
+		script:
+		log.info "Mapping Lumpy (bam sort)"
+		bam_bwa_lumpy_sort = sample_name + "_alignBWA_lumpySort" //+ .bam
+		"""
+		picard SortSam I=${bam_bwa_lumpy} O=${bam_bwa_lumpy_sort}.bam \
+			SORT_ORDER=coordinate VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true
+		"""
+	}
+	process lumpy_discordant_sort {
+		tag "$sample_name"
+		label 'picard'
+
+		input:
+		tuple sample_name, path(dis_unsorted_bam) from dis_unsorted_bam_ch
+
+		output:
+		tuple sample_name, path("${dis_sorted_bam}.ba[mi]") into dis_sorted_bam_ch
+
+		script:
+		log.info "Mapping Lumpy (discordant sort)"
+		dis_sorted_bam = sample_name + "_discordants.sorted" //+ .bam
+		"""
+		picard SortSam I=${dis_unsorted_bam} O=${dis_sorted_bam}.bam \
+			SORT_ORDER=coordinate VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true
+		"""
+	}
+	process lumpy_extract_splits {
+		tag "$sample_name"
+		label 'lumpy'
+
+		input:
+		tuple sample_name, path(bam_bwa_lumpy) from bam_bwa_lumpy_splits_ch
+
+		output:
+		tuple sample_name, path("${split_unsorted_bam}.ba[mi]") into split_unsorted_bam_ch
+
+		script:
+		log.info "Mapping Lumpy (extract the splitread alignments)"
+		extractSplitReads_BwaMem = "extractSplitReads_BwaMem"
+		split_unsorted_bam = sample_name + "_splitters.unsorted" //+ .bam
+		"""
+		samtools view -h ${bam_bwa_lumpy} \
+		| ${extractSplitReads_BwaMem} -i stdin \
+		| samtools view -Sb - > ${split_unsorted_bam}.bam
+		"""
+	}
+	process lumpy_split_bam_sort {
+		tag "$sample_name"
+		label 'picard'
+		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_splitters.sorted.ba*", mode: 'copy'
+
+		input:
+		tuple sample_name, path(split_unsorted_bam) from split_unsorted_bam_ch
+
+		output:
+		tuple sample_name, path("${split_sorted_bam}.ba[mi]") into split_sorted_bam_ch
+
+		script:
+		log.info "Mapping Lumpy (sort split reads)"
+		split_sorted_bam = sample_name + "_splitters.sorted" //+ .bam
+		"""
+		picard SortSam I=${split_unsorted_bam[0]} O=${split_sorted_bam}.bam \
+			SORT_ORDER=coordinate VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true
+		"""
+	}
+	process lumpy_call_sv {
+		tag "$sample_name"
+		label 'lumpy'
+		publishDir "${params.outdir}/lumpySVOut", pattern: "*_lumpySort.vcf", mode: 'move'
+		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
+
+		//errorStrategy { task.exitStatus=141 ? 'ignore' : 'terminate' } // validExitStatus 141 for pairend_distro
+
+		input:
+		tuple sample_name, path(bam_bwa_lumpy_sort) from bam_bwa_lumpy_sort_ch
+		tuple sample_name, path(split_sorted_bam) from split_sorted_bam_ch
+		tuple sample_name, path(dis_sorted_bam) from dis_sorted_bam_ch
+		val abs_outdir from abs_outdir
+
+		output:
+	//    path(dis_sorted_bam, includeInputs=true) 
+	// NOTE: The above statement was causing issues in the run. Not entirely sure that we need the sorted bam as output. 
+	//       It has been turned off for now. 
+
+		path(lumpy_sort_vcf)
+		path("vcf_path") into vcf_lumpy
+
+		shell:
+		log.info "Call SV by Lumpy, sort vcf"
+		pairend_distro = "pairend_distro.py"
+		histo          = sample_name + "_alignBWA_lumpySort.lib1.histo"
+		lumpy_vcf      = sample_name + "_lumpyOut.vcf"
+		lumpy_sort_vcf = sample_name + "_lumpySort.vcf"
+		exclude_regions = "/ref_data/mm10.gaps.centro_telo.scafold.exclude.bed"
+		'''
+		RG_ID=$(samtools view -H !{bam_bwa_lumpy_sort[1]} | grep '^@RG' | sed "s/.*ID:\\([^\\t]*\\).*/\\1/g")
+		#orig: metrics=$(samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>&1
+		samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 > pre_metrics 2>/dev/null
+		metrics=$(cat pre_metrics | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>/dev/null \
+			&& [ $? = 141 ] && echo 'metrics to pairend_distro had exitcode: '$?;
+		mean=$(echo "${metrics}" | cut -d " " -f 1)
+		mean=$(echo "${mean}"    | cut -d ":" -f 2)
+		std_dev=$(echo "${metrics}" | cut -d " " -f 2)
+		std_dev=$(echo "${std_dev}" | cut -d ":" -f 2)
+		rm pre_metrics;
+
+		lumpy \
+			-mw 4 \
+			-x !{exclude_regions} \
+			-pe id:"${RG_ID}",bam_file:!{dis_sorted_bam[1]},histo_file:!{histo},mean:"${mean}",stdev:"${std_dev}",read_length:150,min_non_overlap:150,discordant_z:5,back_distance:10,weight:1,min_mapping_threshold:20 \
+			-sr id:"${RG_ID}",bam_file:!{split_sorted_bam[1]},back_distance:10,weight:1,min_mapping_threshold:20 \
+			> !{lumpy_vcf}
+
+		vcfSort.sh !{lumpy_vcf} !{lumpy_sort_vcf}
+		echo !{abs_outdir}/lumpySVOut/!{lumpy_sort_vcf} > vcf_path # for later merging
+		'''
 	}
 
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BreakDancer SV ~~~~~
+	process breakdancer_calling_sv {
+    tag "$sample_name"
+    label 'breakdancer'
+    publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancer-SV", mode: 'move'
 
-	process bd_to_vcf{
-	  publishDir params.outdir, mode:'copy'
-	  label 'cpu_1'
-	  label 'python'
+    input:
+		tuple sample_name, bam_input, bam_index from in_brkdncr
+		val abs_outdir from abs_outdir
 
-	  input:
-		file calls from bd_calls
+    output:
+		path(breakdancer_sv_out) into ch_breakdancer_sv
 
-	  output:
-		file "${calls.baseName}.vcf" into bd_vcf
+    script:
+		breakdancer_config   = sample_name + "_config"
+		breakdancer_sv_out   = sample_name + "_BreakDancer-SV"
 
-	// This code was taken from the original SVE: https://github.com/TheJacksonLaboratory/SVE/blob/abb75e4a8269b75478e08ea18f05a2cb8b3b2521/stages/utils/breakdancer2vcf.py
-	  script:
-	  """
-#!/usr/bin/env python
-import time
-from time import strftime
-
-#input arguments: sys.argv[n]
-#1-script.py, 2-refname 3-bd_calls.txt 4-outputname
-
-# opens a valid file breakdancer output file
-def read_breakdancer(path):
-   file = open(path)  #open file connection
-   h,raw,table = False,[],[] #init variables
-   #scan file for header, read raw rows
-   for line in file:
-      if h:
-         s = line.replace('\\n','')
-         raw.append(s) 
-      elif line.rfind('#Chr') != -1:
-         s = line.replace('\\n','')
-         h = True
-   file.close()
-   #split each row by the \\t and store in table variable
-   for row in raw:
-      table.append(row.split('\\t'))     
-   #CTX type issue makes the number of columns 11 instead of 12....
-#   for i in range(1,len(table)):
-#      if (len(table[i-1]) != len(table[i])):
-#         return "Break Dancer Format Error:\\nMissmatched Dimensions"
-   return table
-
-# writes a new .vcf file from a formatted table
-def write_vcf(path,header,vcf_table):
-    with open(path,'w') as f:
-        s = header
-        s = header + '\\n'.join(['\\t'.join(i) for i in vcf_table])
-        f.write(s)        
-
-#Build the VCF4.0 Header
-def vcf_header(ref):
-    form = '##fileformat=VCFv4.1\\n'
-    date = '##fileDate=' + strftime('%Y%m%d',time.localtime()) + '\\n' 
-    src  = '##source=BreakDancer_Max-1.4.5\\n'
-    ref  = '##reference=' + ref + '\\n'
-    inf1 = '##INFO=<ID=END,Number=1,Type=Integer,Description="End position of the variant described in this record">\\n'
-    inf2 = '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description="Imprecise structural variation">\\n'
-    inf3 = '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description="Difference in length between REF and ALT alleles">\\n'
-    inf4 = '##INFO=<ID=SVTYPE,Number=1,Type=String,Description="Type of structural variant">\\n'
-    alt1 = '##ALT=<ID=CNV,Description="Copy number variable region">\\n'
-    alt2 = '##ALT=<ID=DEL,Description="Deletion">\\n'
-    alt3 = '##ALT=<ID=INS,Description="Insertion">\\n'
-    alt4 = '##ALT=<ID=TRA,Description="Translocation Event">\\n' #this should be updated to a BND event?
-    alt5 = '##ALT=<ID=DUP,Description="Duplication Event">\\n'
-    t_hd = '#CHROM\\tPOS\\tID\\tREF\\tALT\\tQUAL\\tFILTER\\tINFO\\n'
-    return (form+date+src+ref+inf1+inf2+inf3+inf4+alt1+alt2+alt3+alt4+alt5+t_hd)
-
-#selects needed fields and converts what is needed to make a .vcf
-#:::TO DO::: include additional CHR2 VCF tags in the INFO field
-def build_vcf(table):
-   vcf_table = []
-   #main loop to work through the rows...
-   for i in range(0,len(table)):
-      CHR = table[i][0]
-      POS = table[i][1]
-      ID = 'breakdancer_' + str(i)
-      REF = 'N'
-      #convert breakdancer type to vcf type
-      t = table[i][6]
-      SVTYPE  = 'CNV' #default type
-      if   t == 'DEL': SVTYPE = 'DEL'
-      elif t == 'INS': SVTYPE = 'INS'
-      elif t == 'INV': SVTYPE = 'INV'
-      elif t == 'ITX': SVTYPE = 'DUP' #intrachromasomal translocation chrx->chrx
-      elif t == 'CTX': SVTYPE = 'TRA' #interchromasomal translocation chrx->chry
-      elif t == 'DUP': SVTYPE = 'DUP'
-      elif t == 'CNV': SVTYPE = 'CNV'
-      ALT = '<' + SVTYPE + '>'
-      QUAL  = table[i][8]
-      FILTER = 'PASS'
-      END = table[i][4]
-      SVLEN = table[i][7]
-      INFO = 'END='+END+';SVTYPE='+SVTYPE+';SVLEN='+SVLEN+';IMPRECISE'
-      vcf_table += [[CHR,POS,ID,REF,ALT,QUAL,FILTER,INFO]]
-   max_seq = max([len(i[0]) for i in vcf_table])
-   vcf_table = sorted(vcf_table,key=lambda x: (x[0].zfill(max_seq),int(x[1])))
-   return vcf_table
-
-#Test Code Here
-#input arguments: sys.argv[n]
-#0-script.py, 1-refname 2-bd_calls_dir
-glob_path = '/Users/tbecker/Documents/CourseWork/16_2016_Spring/S4_clean/'
-call = '$calls'
-table = read_breakdancer(call)
-write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(table))
-	  """
+		log.info "Calling BreakDancer SV"
+		"""
+		bam2cfg.pl ${bam_input} > ${breakdancer_config}
+		breakdancer-max -r 5 -s 50 -h ${breakdancer_config} > ${breakdancer_sv_out}
+		"""
 	}
-// END OF PYTHON SCRIPT
+	process breakdancer_sv_to_vcf {
+    tag "$sample_name"
+    label 'python'
+    publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'move'
 
-	process run_cnmops{
-	  publishDir params.outdir, mode:'copy'
-	  label 'cnmops'
-	  label 'cpus_8'
-	  stageInMode 'copy'
+    input:
+		tuple sample_name, bam_input, bam_index from in_brkdncr
+		val abs_outdir from abs_outdir
+		path(breakdancer_sv_out) from ch_breakdancer_sv
 
-	  input:
-		file bamf from ch_bam
-		file bamfbai from ch_bam_bai
-		file fastaf from ch_fasta
+    output:
+		path(breakdancer_sv_out)
+		path(breakdancer_sort_vcf)
+		path("vcf_path") into vcf_breakdancer
 
-	  output:
-		file "cnmops_output_calls.vcf" into cnmops_out
-	  script:
-	  """
-	#!/usr/bin/env Rscript
-	library(cn.mops)
-	library(Rsamtools)
-	mode <- 3
-	in_bams <- strsplit("${bamf}", " ") [[1]]
-	normal  <- 'quant'
-	window <- 1000
-	ref_min_len <- 10000 # Used to remove ERCC and other unlocalized
-	cir_seg <- 'DNAcopy'
-	out_vcf <- "cnmops_output_calls.vcf"
-	outputdir = "./"
-	outputprefix = "cnmops"
+    script:
+		breakdancer_2_vcf    = sample_name + "_BreakDancer2VCF.vcf"
+		breakdancer_sort_vcf = sample_name + "_BreakDancerSortVCF.vcf"
 
-	f_names <- in_bams;
-	cat('bam input files are: ',f_names,'\\n');
+		log.info "Converting BreakDancer SV calls to VCF"
+		"""
 
-	s_names <- as.vector(matrix('',nrow=length(in_bams),ncol=1))
-	for(i in 1:length(in_bams)){ 
-		s_in_bam   <- strsplit(in_bams[i],'/')[[1]]
-		s_in_bam   <- s_in_bam[length(s_in_bam)]
-		s_names[i] <- strsplit(s_in_bam,'.bam')[[1]]
+		breakdancer2vcfHeader.py -i ${breakdancer_sv_out} -o ${breakdancer_2_vcf}
+		vcfSort.sh ${breakdancer_2_vcf} ${breakdancer_sort_vcf}
+		echo ${abs_outdir}/BreakDancerSVOut/${breakdancer_sort_vcf} > vcf_path # for later merging
+		"""
 	}
-	cat('sample labels are: ');
-	cat(paste(s_names));
-
-	#foreach chrom in the union of bam file set...
-	ref <- c();
-	for(i in 1:length(f_names)){
-		header <- scanBamHeader(f_names[i]);
-		ref <- union(ref,names(header[[1]]\$targets)[header[[1]]\$targets >= ref_min_len]);
-	}
-
-	res <- GRanges(); #empty place holder for error catching
-	#calculate copy variation number regions   
-	if(mode==0){ #mode = 0 -> cn.mops(regular multi sample WGS) 
-		#try to make this more robust or alter input ref seq list = ref	
-		tryCatch({
-			cat('----------using cn.mops->multi sample WGS mode\\n');
-			data <- getReadCountsFromBAM(BAMFiles=f_names, sampleNames=s_names, 
-										 refSeqName = ref, WL=window);              
-			cat(paste('----------finished reading ',dim(mcols(data))[1],' bins\\n',sep=''));
-			#cleaning routine to suppress zero count issues.....cnmopsBUG
-			for(contig in ref){ #remove from ref before runing anlaysis...
-				if(sum(mcols(data[seqnames(data)%in%contig])[,1])==0){
-					ref <- setdiff(ref,contig);
-				}
-			}
-			cat('cleaned sequences are:')
-			cat(paste(ref,sep=','))
-			cat('\\n')
-			data <- data[seqnames(data)%in%ref]; #adjust data using cleaned ref seqs
-			seqlevels(data) <- ref;
-			seqnames(data)  <- droplevels(seqnames(data));
-			res  <- suppressWarnings(cn.mops(data,
-									 I = c(0.025, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4),
-									 classes = paste('CN',seq(0,8,1),sep=''),
-									 priorImpact = prior,
-									 normType = normal, normQu = cutoff, norm = 1,
-									 upperThreshold = upper, lowerThreshold = lower,
-									 minWidth = min_seg, minReadCount = min_cnt)); #took out DNAcopy
-			cat(paste('----------found ',dim(mcols(cnvr(res)))[1],' variations\n',sep=''));
-		}, error = function(err){
-			cat(paste(err));
-			cat('\\n-------------------------------error----------------------------\\n')
-			#save and debug the image here...
-			image_m <- strsplit(out_vcf,'.vcf')[[1]]
-			image_n <- sub('.bam','',image_m[length(image_m)])
-			outimage <- paste(image_n,'.RData',sep='');
-			save.image(file=outimage); #saves objects for remote debugging/ect..
-		}, finally = {});
-		cat(warnings());            	
-	}
-
-	if(mode==3){ #mode = 3 -> singlecn.mops(single sample WGS)
-		#try to make this more robust or alter input ref seq list = ref	
-			cat("BAM file: ", f_names, " ", s_names, " ", ref, " ", window)
-			cat("\\n")
-		tryCatch({
-			cat('----------using singlecn.mops->single sample WGS mode\\n');
-			data <- getReadCountsFromBAM(BAMFiles=f_names, sampleNames=s_names, 
-										 refSeqName = ref, WL=window);              
-			cat(paste('----------finished reading ',dim(mcols(data))[1],' bins\n',sep=''));
-			#cleaning routine to suppress zero count issues.....cnmopsBUG
-			for(contig in ref){ #remove from ref before runing anlaysis...
-				if(sum(mcols(data[seqnames(data)%in%contig])[,1])==0){
-					ref <- setdiff(ref,contig);
-				}
-			}
-			cat('cleaned sequences are:')
-			cat(paste(ref,sep=','))
-			cat('\\n')
-			data <- data[seqnames(data)%in%ref]; #adjust data using cleaned ref seqs
-			seqlevels(data) <- ref;
-			seqnames(data)  <- droplevels(seqnames(data));
-			res  <- suppressWarnings(singlecn.mops(data,
-									 I = c(0.025, 0.5, 1, 1.5, 2, 2.5, 3, 3.5, 4),
-									 classes = paste('CN',seq(0,8,1),sep=''),
-									 normType = normal, norm = 1))
-			cat(paste('----------found ',dim(mcols(cnvr(res)))[1],' variations\\n',sep=''));
-		}, error = function(err){
-			cat(paste(err));
-			cat('\\n-------------------------------error----------------------------\\n')
-			#save and debug the image here...
-			image_m <- strsplit(out_vcf,'.vcf')[[1]]
-			image_n <- sub('.bam','',image_m[length(image_m)])
-			outimage <- paste(image_n,'.RData',sep='');
-			save.image(file=outimage); #saves objects for remote debugging/ect..
-		}, finally = {});
-		cat(warnings());         	
-	}
-
-
-	len <- 0;
-	if(class(res)[1]=="CNVDetectionResult"){
-		len <- dim(mcols(cnvr(res)))[1][1]; #number of CNV reported by cn.mops
-	}
-	if(len > 0){
-		#estimate the integer copy number over the CNVRs and store in the CNVDetectionResult->res               
-		res_icn <- calcIntegerCopyNumbers(res);                
-		cnvrs <- cnvr(res_icn); #GRanges object
-		chr <- as.vector(seqnames(cnvrs));
-		cnr <- as.data.frame(ranges(cnvrs)); #get the start, end, width of CNV regions
-		ics <- as.data.frame(mcols(cnvrs));
-		icn <- as.data.frame(matrix(0,nrow=len,ncol=length(s_names)));
-		colnames(ics) <- s_names;
-		colnames(icn) <- colnames(ics);
-		#convert 'CN0'->0, 'CN1'->1, etc...s_names<-labels has the correct info here
-		for(i in 1:len){
-			for(j in s_names){
-				icn[i,j] <- as.numeric(strsplit(toString(ics[i,j]),'CN')[[1]][2]);
-			}
-		}
-		ctype<- matrix('',nrow=len,ncol=1);
-		colnames(icn) <- s_names; #sample names
-		d_r <- dim(cnr)[1]; #number of cnv regions
-		s_n <- dim(icn)[2]; #number of samples read
 	
-		#count up duplications, deletions or uncertain calls...IE genotyping...
-		if(mode==3){ #each mode have to do del, dup or cnv
-			dupn <- icn[,1] > 2;
-			deln <- icn[,1] < 2;
-			eqn  <- icn[,1] == 2;
-		}
-		if(mode==1){ #each mode have to do del, dup or cnv
-			dupn <- icn[,1] < icn[,2];
-			deln <- icn[,1] > icn[,2];
-			eqn  <- icn[,1] == icn[,2];
-		}
-	
-		for(i in 1:len){
-			if(dupn[i]){ ctype[i] <- 'DUP'; }
-			if(deln[i]){ ctype[i] <- 'DEL'; }
-			if(eqn[i]) { ctype[i] <- 'CNV'; }
-		}
-		#convert 'CN0'->0, 'CN1'->1, etc...s_names<-labels has the correct info here
-	
-		#build the default vectors to be inserted into the final table
-		CHROM <- matrix(chr,nrow=len, ncol=1);
-		POS   <- cnr[,'start']; #copy over start values
-		ID    <- matrix('',nrow=len, ncol=1);
-		ID    <- as.matrix(paste('cnmops_',seq(1,len,1),ID,sep=''));
-		REF   <- matrix('N',nrow=len, ncol=1); #N for a DEL, full seq ACGT...AAACT for ref
-		ALT   <- matrix(paste('<',ctype,'>',sep=''),nrow=len, ncol=1);
-		QUAL  <- matrix('.',nrow=len, ncol=1);
-		FILTER<- matrix('PASS',nrow=len, ncol=1);
-		INFO  <- matrix('IMPRECISE',nrow=len, ncol=1);
-		FORMAT<- matrix('CN',nrow=len, ncol=1);
-		#SAMPLES already have in result matrix
-		SVTYPE<- gsub('<','',ALT);
-		SVTYPE<- gsub('>','',SVTYPE);
-		#make the INFO field with the meta tags and END position
-		for(i in 1:len){
-			INFO[i] <-paste('END=',cnr[i,'end'],';SVTYPE=',SVTYPE[i],';SVLEN=',
-							cnr[i,'width'],';IMPRECISE',sep=''); #no seperation on values
-		}
-
-		#bind the colums into a new table
-		table <- data.frame(cbind(CHROM,POS,ID,REF,ALT,QUAL,FILTER,INFO),
-							row.names=seq(1,len,1));
-		d_t   <- dim(table)[2]; #default table size ~9
-		#table[,(d_t+1):(d_t+s_n-1)] <- icn[2]; #insert integer copy numbers into the table
-		#rename the colums for proper VCF compatibility
-		c_n   <- c('#CHROM','POS','ID','REF','ALT','QUAL','FILTER','INFO'); 
-		colnames(table) <- c_n; #attach the column names to the table
-		#sort by chrom,pos the table if multi chrom...
-		#table <- table[order(table[,'CHROM'],-table[,'POS']),];
-		#redo the cmops_ids...
-		#table[,'ID'] <- ID;
-	} else { table <- data.frame(); } #empty data frame -> no calls...
-
-	#VCF 4.0 Header construction-------------------------------------------------------
-	# '.' => don't know the value like <NA> or unknown
-	l01 <- '##fileformat=VCFv4.1\\n';
-	l02 <- paste('##fileDate=',format(Sys.time(),'%Y%m%d'),'\\n',sep='');
-	l03 <- '##source=cn.mops_CNV_calling\\n';
-	l04 <- paste('##reference=',s_names[1],'\\n',sep='');
-	l05 <- '##INFO=<ID=IMPRECISE,Number=0,Type=Flag,Description=\\"Imprecise structural variation\">\\n';
-	l06 <- '##INFO=<ID=END,Number=1,Type=Integer,Description=\\"End position of the variant described in this record\\">\\n';
-	l07 <- '##INFO=<ID=SVTYPE,Number=1,Type=String,Description=\\"Type of structural variant\\">\\n';
-	l08 <- '##INFO=<ID=SVLEN,Number=1,Type=Integer,Description=\\"Difference in length between REF and ALT alleles\\">\\n';
-	l09 <- '##ALT=<ID=CNV,Description=\\"Copy number variable region\\">\\n';
-	l10 <- '##ALT=<ID=DEL,Description=\\"Deletion\\">\\n';
-	l11 <- '##ALT=<ID=DUP,Description=\\"Duplication\\">'; #put back \\n if adding format
-	#l12 <- '##FORMAT=<ID=CN,Number=1,Type=Integer,Description="Copy number genotype for imprecise events">';
-	header <- paste(l01,l02,l03,l04,l05,l06,l07,l08,l09,l10,l11,sep='');
-	#VCF 4.0 Header construction-------------------------------------------------------
-
-	#write the header and then append the finished table
-	#outvcf <- paste(outputdir,outputprefix,'.vcf',sep='');
-	write(header,file=out_vcf,append=F);
-	write.table(table,file=out_vcf,quote=F,append=T,col.names=T,row.names=F,sep='\\t');
-
-	#save the plots...
-	#seg_plot <- paste(outputdir,outputprefix,'_segplot.pdf',sep='');
-	#pdf.options(width=8, height=10.5,onefile=T,paper='letter')
-	#pdf(file=seg_plot)
-	#segplot(res, seqname = chrom, sampleIdx = (1:n_sample))
-	#dev.off()
-
-	#read_plot <- paste(outputdir,outputprefix,'_readplot.pdf',sep='');	
-	#plot(res, which = (1:n_sample),toFile=T,filename=read_plot)
-
-	cat('\\ncn.mops cnv calling complete........')
-	#END of cn.mops() cnv calling and visualization ===================================
-
-	"""
-	}
-	// END OF RSCRIPT
-
-	process manta_calling_sv {
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Manta SV ~~~~~
+	/*process manta_calling_sv {
 		label 'manta'
 		label 'cpus_8'
 		
@@ -1122,111 +989,43 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 		./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
 		mv mantaSVOut/results/variants/candidateSV.vcf.gz ./manta_candidateSV.vcf.gz
 		"""
+	}*/
+	process manta_calling_sv {
+		tag "$sample_name"
+		label 'manta'
+		publishDir "${params.outdir}/mantaSVout", pattern: "*candidateSV.vcf*", mode: 'move', \
+			saveAs: { vcf -> "${sample_name}_manta_${vcf}" }
+		publishDir "${params.outdir}/temps", pattern: "mantaSVOut", enabled: params.keep_intermediate
+		cpus params.threads
+
+		input:
+			tuple sample_name, bam_input, bam_index from in_manta
+			file fasta from ch_fasta
+			file fastfai from fasta_fai_ch
+			val abs_outdir from abs_outdir
+
+		output:
+			path("*candidateSV.vcf*")
+			path("vcf_path") into vcf_manta
+
+		script:
+			log.info "Calling Manta SV"
+			"""
+			/usr/local/bin/configManta.py \
+				--runDir mantaSVOut \
+				--bam ${bam_input} \
+				--referenceFasta ${fasta}
+			./mantaSVOut/runWorkflow.py -m local -j ${params.threads}
+			mv mantaSVOut/results/variants/candidateSV.vcf.gz ./
+			gunzip candidateSV.vcf.gz
+			echo ${abs_outdir}/mantaSVout/${sample_name}_manta_candidateSV.vcf > vcf_path # for later merging
+			"""
 	}
 
-	process hydra{
-	  label 'hydra'
-	  label 'cpus_8'
-	  stageInMode 'copy'
-	  input:
-		file bamf from ch_bam
-		file bamif from ch_bam_bai
-	  output:
-		path "routed/*" into hydra_out_all
-		file "samples.conf" into conf_out, conf_out2
-		file "$bamf" into bamc, bamc2
-		file "$bamif" into bamci, bamci2
-		file "${bamf}.bedpe" into bampe, bampe2
-	  script:
-	  """
-	  echo "sample1\t$bamf" > samples.txt
-	  make_hydra_config.py -i samples.txt -s 100000 -n 16 > samples.conf
-	  extract_discordants.py -c samples.conf -d sample1 
-	  mkdir routed
-	  cd routed
-	  ln -s ../${bamf} .
-	  ln -s ../${bamif} .
-	  ln -s ../${bamf}.bedpe .
-	  hydra-router -config ../samples.conf -routedList ../samples.routed
-	  rm ${bamf}
-	  rm ${bamif}
-	  rm ${bamf}.bedpe
-	  #assemble-routed-files.sh samples.conf samples.routed 1 60
-	  """
-	}
-
-	process hydra_asm{
-	  label 'hydra'
-	  label 'cpu_1'
-	  input:
-		each file(rt) from hydra_out_all
-		file conf from conf_out
-		file bamf from bamc
-		file bamif from bamci
-		file bamp from bampe
-	  output:
-		file "${rt}.posSorted.posClusters.assembled" into asm_out   
-		file "${rt}.posSorted.posClusters.punted" into pun_out   
-
-	  script:
-	  """
-	  echo "$rt"
-	  hydra-assembler -config $conf -routed "$rt" -maxMappings 60
-	  """
-	}
-
-	process hydra_collect{
-	  publishDir params.outdir, mode:'copy'
-	  label 'hydra'
-	  label 'cpus_8'
-	  input:
-		file asm from asm_out.collect()
-		file punt from pun_out.collect()
-		file conf from conf_out2
-		file bamf from bamc2
-		file bamif from bamci2
-		file bamp from bampe2
-
-	  output:
-		file "all.assembled" into asm_all
-		file "hydra.calls.final" into asm_final
-		file "hydra*" into asm_sv
-	  script:
-	  """
-	  combine-assembled-files.sh . all.assembled
-	  forceOneClusterPerPairMem.py -i all.assembled -o hydra.calls
-	  frequency.py -c $conf -f hydra.calls.final -d hydra.calls.detail > hydra.calls.freq
-	  grep -v "#" all-sv.calls.freq | hydraToBreakpoint.py -i stdin > hydra.calls.bkpts
-	  """
-	}
-
-	process fatobit{
-	  label 'ucsc'
-	  input:
-		file fasta from ch_fasta  
-	  output:
-		file "${fasta}.2bit" into ch_2bit
-	  script:
-	  """
-	  faToTwoBit $fasta ${fasta}.2bit
-	  """
-	}
-
-	process hydra_vcf{
-	  publishDir params.outdir, mode:'copy'
-	  label 'bxpython'  
-	  input:
-		file fasta from ch_2bit
-		file asm from asm_final
-	  output:
-		file "${asm.baseName}.vcf" into hydra_vcf
-	  script:
-	  """
-	  /usr/bin/env python ${projectDir}/bin/hydra_to_vcf.py $asm $fasta
-	  """
-	}
+	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Delly SV ~~~~~
 
 	// Run delly
+	/*
 	params.delly_exc = params.delly_genome ? "${params.delly_base}${params.delly_genome}.excl.tsv" : null
 	dex = params.delly_exc ? Channel.value(file(params.delly_exc)) : "null"
 	//type_list = Channel.from('DEL', 'DUP', 'INV', 'BND', 'INS')
@@ -1260,48 +1059,229 @@ write_vcf('${calls.baseName}.vcf',vcf_header('human_g1k_v37_decoy'),build_vcf(ta
 	  """
 	  bcftools view delly.bcf > delly.vcf
 	  """
+	} */
+
+	process delly_calling_sv {
+    tag "$sample_name"
+    label 'delly'
+
+    input:
+		tuple sample_name, bam_input, bam_index from in_delly
+		file fasta from ch_fasta
+		file fastfai from fasta_fai_ch
+    
+    output:
+    	tuple sample_name, path(delly_bcf) into delly_bcf_out
+
+    script:
+    	delly_bcf = sample_name + "_Dellybcf.bcf"
+    	log.info "Calling Delly SV"
+		exclude_regions = "/ref_data/mouse.mm10.excl.tsv"
+    """
+    delly call \
+          -q 40 \
+          -x ${exclude_regions} \
+          -s 500 \
+          -o ${delly_bcf} \
+          -g ${fasta} ${bam_input}
+    """
+	}
+	process delly_bcf2vcf_sort {
+		tag "$sample_name"
+		label 'bcftools'
+		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'move'
+
+		input:
+			tuple sample_name, path(delly_bcf) from delly_bcf_out
+			val abs_outdir from abs_outdir
+
+		output:
+			path(delly_sort_vcf)
+			path("vcf_path") into vcf_delly
+
+		script:
+			delly_vcf      = sample_name + "_DellyVCF.vcf"
+			delly_sort_vcf = sample_name + "_dellySort.vcf"
+
+			log.info "Delly bcf2vcf to Sorted VCF"
+			"""
+			bcftools view ${delly_bcf} > ${delly_vcf}
+			vcfSort.sh ${delly_vcf} ${delly_sort_vcf}
+			echo ${abs_outdir}/DellySVOut/${delly_sort_vcf} > vcf_path # for later merging
+			"""
 	}
 
-	process cnvpytor{
-	  publishDir params.outdir, mode:'copy'
-	  label 'cnvpytor'
-	  label 'cpus_8'
-	  input:
-		file bamf from ch_bam
-		file bami from ch_bam_bai
-		file fasta from ch_fasta
-	  output:
-		file "cnvpytor.calls" into cnvpytor_calls
-	  script:
-	  """
-	  #cnvnator -root tree.root -tree $bamf
-	  #cnvnator -his ${params.cnvpytor_bin} -root tree.root -fasta $fasta
-	  #cnvnator -root tree.root -stat ${params.cnvpytor_bin}
-	  #cnvnator -root tree.root -partition ${params.cnvpytor_bin}
-	  #cnvnator -root tree.root -call ${params.cnvpytor_bin} > cnvnator.calls
-	  
-	  cnvpytor -root file.pytor -rd $bamf
-	  cnvpytor -root file.pytor -his ${params.cnvpytor_bin}
-	  cnvpytor -root file.pytor -partition ${params.cnvpytor_bin}
-	  cnvpytor -root file.pytor -call ${params.cnvpytor_bin} > cnvpytor.calls
-	  
-	  
-	  """
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Collect all VCF file Paths  ~~~~~
+	// NOTE: merged extension contains 'BDLM' => Breakdancer + Delly + Lumpy + Manta
+	vcf_breakdancer.concat(
+	vcf_delly,
+	vcf_lumpy,
+	vcf_manta
+	)
+	.collectFile(name: "sample.vcfs.txt", sort: true)
+	.set { sample_vcfs_paths }
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
+	process survivor_merge_sv_vcf {
+		tag "$sample_name"
+		label 'survivor'
+		label 'survivor'
+		publishDir "${params.outdir}", pattern: "*_mergedCall.BDLM.vcf", mode: "copy"
+		publishDir "${params.outdir}/temps", pattern: "*.vcfs.txt", enabled: params.keep_intermediate
+
+		input:
+			path(vcf_paths) from sample_vcfs_paths
+
+		output:
+			tuple sample_name, path(outMerged) into ( vcf_merged, vcf_mrg_annot )
+
+		script:
+			log.info "Merging SV Call VCFs with SURVIVOR"
+
+			maxBreak   = params.mergeMaxBreakDist
+			minSupp    = params.mergeMinSupportCaller
+			takeType   = params.mergeTakeTypeAccount
+			takeStrand = params.mergeTakeStrandAccount
+			estDist    = params.mergeEstDistSizeSV
+			minSizeSV  = params.mergeMinSizeSV
+			outMerged  = sample_name + "_mergedCall.BDLM.vcf"
+			"""
+			SURVIVOR merge  \
+				$vcf_paths  \
+				$maxBreak   \
+				$minSupp    \
+				$takeType   \
+				$takeStrand \
+				$estDist    \
+				$minSizeSV  \
+				$outMerged;
+			"""
 	}
 
-	process cnv2vcf{
-	  publishDir params.outdir, mode:'copy'
-	  label 'perl'
-	  label 'high_mem'
-	  input:
-		file calls from cnvpytor_calls
-		file fasta from ch_fasta
-	  output:
-		file "cnvnator.vcf"
-	  script:
-	  """
-	  /usr/bin/env perl ${projectDir}/bin/cnvnator2VCF.pl -reference $fasta $calls ${params.genome} > cnvnator.vcf
-	  
-	  """
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Annotate if in Exon  ~~~~~
+	/*
+	process survivor_vcf_to_bed {
+		tag "$sample_name"
+		label 'survivor'
+		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
+
+		when:
+		params.annotateMergedSVifExon == true
+
+		input:
+			tuple sample_name, path(in_vcf) from vcf_merged
+
+		output:
+			tuple sample_name, path(out_bedpe) into vcf_bedpe
+
+		script:
+			log.info "Preparing for annotation by converting VCF to BED with SURVIVOR"
+			minSizeBed = params.vcftoBedMinSize
+			maxSizeBed = params.vcftoBedMaxSize
+			out_bedpe  = in_vcf + ".bedpe"
+			"""
+			SURVIVOR vcftobed \
+				$in_vcf \
+				$minSizeBed \
+				$maxSizeBed \
+				$out_bedpe;
+			"""
 	}
+	process annot_bedpe_to_multi {
+		tag "$sample_name"
+		label 'python3'
+		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
+
+		when:
+		params.annotateMergedSVifExon == true
+
+		input:
+			tuple sample_name, path(in_bedpe) from vcf_bedpe
+
+		output:
+			tuple sample_name, path(out_bedpe) into annot_bedpe
+
+		script:
+			log.info "Convert TRA calls from single line to multi-line to facilitate bedtools intersect"
+			out_bedpe = in_bedpe.getBaseName() + ".annot.bedpe"
+			"""
+			python3 ${workflow.projectDir}/bin/bedpe_annot_para.py \
+				${in_bedpe} ${out_bedpe}
+			"""
+	}
+	process bedtools_intersect {
+		tag "$sample_name"
+		label 'bedtools'
+		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
+
+		when:
+		params.annotateMergedSVifExon == true
+
+		input:
+			tuple sample_name, path(in_bedpe) from annot_bedpe
+			path(mm10_exon_list) from mm10_exon_list
+
+		output:
+			tuple sample_name, path(out_bedpe) into intersect_bedpe
+
+		script:
+			log.info "Intersect calls against mm10_exon_list"
+			out_bedpe = in_bedpe.getBaseName() + ".intersect.bedpe"
+			"""
+			bedtools intersect \
+				-a ${in_bedpe} \
+				-b ${mm10_exon_list} \
+				-loj > ${out_bedpe}
+			"""
+	}
+	process annot_merge_vcf {
+		tag "$sample_name"
+		label 'python3'
+		publishDir "${params.outdir}", pattern: "*.ExonAnnot.vcf", mode: 'move'
+		publishDir "${params.outdir}/logs", pattern: "*.error.log", mode: 'move'
+
+		when:
+		params.annotateMergedSVifExon == true
+
+		input:
+			tuple sample_name, path(in_bedpe) from intersect_bedpe
+			tuple sample_name, path(merged_vcf) from vcf_mrg_annot
+
+		output:
+			tuple sample_name, path(exon_vcf) into exon_annot_vcf
+			path("*.error.log") optional true into errlog_ch
+
+		script:
+			log.info "Apply 'InExon' to original VCF file. Based on matching annotations from VCF and annotated bedpe."
+			exon_vcf = sample_name + '.ExonAnnot.vcf'
+			"""
+			python3 ${workflow.projectDir}/bin/annot_vcf_with_exon.py \
+				${in_bedpe} \
+				${merged_vcf} \
+				> ${exon_vcf} \
+				2>${exon_vcf}.error.log
+			"""
+	}
+*/
 } // END OF if param.seqmode == 'illumina'
+
+
+/*
+//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Closing Info ~ ~ ~ ~ ~ ~
+workflow.onComplete {
+    wfEnd = [:]
+    wfEnd['Completed at'] = workflow.complete
+    wfEnd['Duration']     = workflow.duration
+    wfEnd['Exit status']  = workflow.exitStatus
+    wfEnd['Success']      = workflow.success
+    if(!workflow.success){
+        wfEnd['!!Execution failed'] = ''
+        wfEnd['.    Error']   = workflow.errorMessage
+        wfEnd['.    Report']  = workflow.errorReport
+    }
+    Summary.show(wfEnd)
+}
+
+
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
