@@ -51,7 +51,7 @@ workflow RNASEQ {
     // Step 4b: Picard Alignment Metrics
     PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
 
-    // Step 5: Summary Stats
+    /* Step 5: Summary Stats
     SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
                   QUALITY_STATISTICS.out.quality_stats,
                   PICARD_ALN_METRICS_B.out.picard_metrics)
@@ -62,6 +62,6 @@ workflow RNASEQ {
     // Step 6b: GATK Coverage Stats
     GATK_STATS_B(GATK_STATS_A.out.gatk_3,
                  GATK_STATS_A.out.gatk_6)
-
+   */
   }
 }

@@ -54,7 +54,7 @@ process PICARD_ALN_METRICS_B {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.pubdir}/picard", pattern: "*.txt", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(reordered_sorted_bam)
