@@ -13,7 +13,6 @@ process READ_GROUPS {
 
   input:
   tuple val(sampleID), file(read)
-  file(read_group_pyfile)
 
   output:
   tuple val(sampleID), file("*.txt"), emit: read_groups
@@ -22,6 +21,6 @@ process READ_GROUPS {
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
 
   """
-  python ${read_group_pyfile} -p -o ${sampleID}_read_group.txt ${read[0]}
+  python ${params.read_group_pyfile} -p -o ${sampleID}_read_group.txt ${read[0]}
   """
   }
