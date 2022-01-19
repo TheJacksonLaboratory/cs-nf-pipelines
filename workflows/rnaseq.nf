@@ -57,9 +57,9 @@ workflow RNASEQ {
     GATK_STATS_A(PICARD_ALN_METRICS_A.out.reordered_sorted_bam,
                  PICARD_ALN_METRICS_A.out.reordered_sorted_bai)
 
-    /* Step 6b: GATK Coverage Stats
+    // Step 6b: GATK Coverage Stats
     GATK_STATS_B(GATK_STATS_A.out.gatk_3,
                  GATK_STATS_A.out.gatk_6)
-   */
+   
   }
 }

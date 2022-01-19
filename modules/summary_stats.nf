@@ -21,7 +21,7 @@ process SUMMARY_STATS {
     params.gen_org == "human"
 
     script:
-    log.info "-----Human Summary Metrics running on ${sampleID}-----"
+    log.info "----- Human Summary Metrics running on ${sampleID} -----"
 
     if (params.read_type == "PE")
 
