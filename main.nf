@@ -916,14 +916,13 @@ if (params.seqmode == 'illumina') {
 	process breakdancer_calling_sv {
     tag "$sample_name"
     label 'breakdancer'
-    publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancer-SV", mode: 'move'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_brkdncr
 		val abs_outdir from abs_outdir
 
     output:
-		path(breakdancer_sv_out) into ch_breakdancer_sv
+		file breakdancer_sv_out into ch_breakdancer_sv
 
     script:
 		breakdancer_config   = sample_name + "_config"
@@ -939,14 +938,14 @@ if (params.seqmode == 'illumina') {
     tag "$sample_name"
     label 'python'
     publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'move'
+	publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancer-SV", mode: 'move'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_brkdncr
 		val abs_outdir from abs_outdir
-		path(breakdancer_sv_out) from ch_breakdancer_sv
+		file breakdancer_sv_out from ch_breakdancer_sv
 
     output:
-		path(breakdancer_sv_out)
 		path(breakdancer_sort_vcf)
 		path("vcf_path") into vcf_breakdancer
 
