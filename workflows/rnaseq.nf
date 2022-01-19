@@ -8,9 +8,7 @@ include {BAMTOOLS_RNASEQ_MOUSE} from '../modules/bamtools'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
-
-// include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
-
+include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
 
 // prepare reads channel *
 if (params.read_type == 'PE'){
@@ -25,7 +23,7 @@ rsem_ref_files = file("${params.rsem_ref_files}/*")
 
 // main workflow
 workflow RNASEQ {
-
+  
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
 
@@ -55,10 +53,11 @@ workflow RNASEQ {
                   QUALITY_STATISTICS.out.quality_stats,
                   PICARD_ALN_METRICS_B.out.picard_metrics)
 
-    /* Step 6a: GATK Coverage Stats
-    GATK_STATS_A(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
+    // Step 6a: GATK Coverage Stats
+    GATK_STATS_A(PICARD_ALN_METRICS_A.out.reordered_sorted_bam,
+                 PICARD_ALN_METRICS_A.out.reordered_sorted_bai)
 
-    // Step 6b: GATK Coverage Stats
+    /* Step 6b: GATK Coverage Stats
     GATK_STATS_B(GATK_STATS_A.out.gatk_3,
                  GATK_STATS_A.out.gatk_6)
    */

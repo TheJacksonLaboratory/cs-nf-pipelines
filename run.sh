@@ -4,7 +4,7 @@
 #SBATCH --mail-user=barry.guglielmo@jax.org
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 00:20:00
+#SBATCH -t 10:00:00
 #SBATCH --mem=16G
 #SBATCH --ntasks=16
 

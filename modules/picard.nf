@@ -19,7 +19,7 @@ process PICARD_ALN_METRICS_A {
 
   output:
   tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
-  tuple val(sampleID), file("*group_reorder.bai")
+  tuple val(sampleID), file("*group_reorder.bai"), emit: reordered_sorted_bai
 
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
