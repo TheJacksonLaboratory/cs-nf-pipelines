@@ -37,7 +37,7 @@ process SUMMARY_STATS {
       """
       perl ${params.summary_mets_SE} \
       ${quality_stats} \
-      ${rsem_stat} \
+      ${rsem_stats} \
       ${picard_metrics}  > ${sampleID}_summary_stats.txt
 
       """

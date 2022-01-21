@@ -16,14 +16,14 @@ process QUALITY_STATISTICS {
 
   output:
   tuple val(sampleID), file("*.fastq.gz_stat"), emit: quality_stats
-  tuple val(sampleID), file("${sampleID}_R{1,2}*filtered_trimmed"), emit: trimmed_fastq
+  tuple val(sampleID), file("*filtered_trimmed"), emit: trimmed_fastq
 
   script:
   log.info "----- Quality Stats Running on: ${sampleID} -----"
 
   if (params.read_type == "SE"){
     mode_HQ="-S -M"
-    inputfq="${reads}"
+    inputfq="${reads[0]}"
   }
   if (params.read_type == "PE"){
     mode_HQ="-M"
