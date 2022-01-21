@@ -12,7 +12,7 @@ process READ_GROUPS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'read_groups' }", pattern: "*read_group.txt", mode:'copy'
 
   input:
-  tuple val(sampleID), file(read)
+  tuple val(sampleID), file(fq_reads)
 
   output:
   tuple val(sampleID), file("*.txt"), emit: read_groups
@@ -21,6 +21,6 @@ process READ_GROUPS {
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
 
   """
-  python ${params.read_group_pyfile} -p -o ${sampleID}_read_group.txt ${read[0]}
+  python ${params.read_group_pyfile} -p -o ${sampleID}_read_group.txt ${fq_reads[0]}
   """
   }

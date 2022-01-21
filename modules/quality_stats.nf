@@ -12,7 +12,7 @@ process QUALITY_STATISTICS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'quality_stats' }", pattern: "*fastq.gz_stat", mode:'copy'
 
   input:
-  tuple val(sampleID), file(reads)
+  tuple val(sampleID), file(fq_reads)
 
   output:
   tuple val(sampleID), file("*.fastq.gz_stat"), emit: quality_stats
@@ -23,11 +23,11 @@ process QUALITY_STATISTICS {
 
   if (params.read_type == "SE"){
     mode_HQ="-S -M"
-    inputfq="${reads[0]}"
+    inputfq="${fq_reads[0]}"
   }
   if (params.read_type == "PE"){
     mode_HQ="-M"
-    inputfq="${reads[0]} ${reads[1]}"
+    inputfq="${fq_reads[0]} ${fq_reads[1]}"
   }
 
   """

@@ -1,268 +1,61 @@
 #!/usr/bin/env nextflow
+nextflow.enable.dsl=2
 
-import Helpers
+// import modules
+include {QUALITY_STATISTICS} from '../modules/quality_stats'
+include {BWA_MEM} from '../modules/bwa'
+
+// import groovy files
 import Logos
+import Helpers
 
+// print logo and set datestamp
 logo = new Logo()
 println logo.show()
-
-
-//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Parameter Defaults ~ ~ ~ ~ ~ ~
-def setParamDefaults() {
-    params.help = false
-
-    // Configurable variable parameters specific to individual runs:
-    params.fastqInputs          = null // absolute path to input fastq(s)
-    params.outdir               = null // directory where output will be stored
-    params.tmpdir               = null // directory where files will be stored while pipeline is running
-    params.ref_fa               = null // absolute path to reference genome .fa file
-    params.target_gatk          = null // absolute path to gatk target bed file
-    params.target_picard        = null // absolute path to picard target bed file
-    params.dbSNP                = null // absolute path to dbSNP file
-    params.snpEff_config        = null // absolute path to snpEff config file
-}
-setParamDefaults()
-
-def helpMessage() {
-    log.info"""
-    =========================================
-      ${workflow.manifest.name} v${workflow.manifest.version}
-    =========================================
-    ${workflow.manifest.description}
-
-    Usage:
-      The typical command for running the pipeline is as follows:
-        nextflow -c path/to/params.config run path/to/pipeline.nf -profile slurm, singularity
-            (The params.config file needs to have the following mandatory parameters
-             OR they need to specified on the command line.)
-
-    Mandatory:
-        --fastqInputs             absolute path to input fastq(s).
-        --outdir                  directory where output will be stored.
-        --tmpdir                  directory where temporary files will be held.
-        --ref_fa                  absolute path to reference genome .fa file.
-        --target_gatk             absolute path to gatk target bed file.
-        --target_picard           absolute path to picard target bed file.
-        --dbSNP                   absolute path to dbSNP file.
-        --snpEff_config           absolute path to snpEff config file.
-
-    Optional:
-        -name                   Name for the pipeline run. If not specified Nextflow will
-                                automatically generate a random mnemonic.
-
-    """.stripIndent()
-}
-
-// Show help message
-if (params.help){
-    helpMessage()
-    exit 0
-}
-
-
-//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Param File and Format Checking ~ ~ ~ ~ ~ ~
-////// Required parameters \\\\\\
-if ( ! params.fastqInputs ) {
-    exit 1, "Parameter ERROR: fastqInputs ($params.fastqInputs) must be the absolute path to fastq file(s) with _R1 and _R2 fastq filenames."
-}
-if ( ! params.outdir ) {
-    exit 1, "Parameter ERROR: Output directory parameter must be specified."
-}
-if ( ! file(params.outdir).exists() ) {
-    exit 1, "Parameter ERROR: Missing output directory ($params.outdir) is not found: check if path is correct."
-}
-if ( ! params.tmpdir ) {
-    exit 1, "Parameter ERROR: Temporary directory parameter must be specified."
-}
-if ( ! file(params.tmpdir).exists() ) {
-    exit 1, "Parameter ERROR: Missing temporary directory ($params.tmpdir) is not found: check if path is correct."
-}
-if ( ! params.ref_fa ) {
-    exit 1, "Parameter ERROR: absolute path to reference genome .fa file must be specified."
-}
-if ( ! params.target_gatk ) {
-    exit 1, "Parameter ERROR: absolute path to gatk target bed file must be specified."
-}
-if ( ! params.target_picard ) {
-    exit 1, "Parameter ERROR: absolute path to picard target bed file must be specified."
-}
-if ( ! params.dbSNP ) {
-    exit 1, "Parameter ERROR: absolute path to dbSNP file must be specified."
-}
-if ( ! params.snpEff_config ) {
-    exit 1, "Parameter ERROR: absolute path to snpEff config file must be specified."
-}
-
-//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Summary Info ~ ~ ~ ~ ~ ~
-// Header info
-println "Pipeline         = ${workflow.manifest.name}"
-println "Description      = ${workflow.manifest.description}"
-if(workflow.revision) {
-    println "Pipeline Release = ${workflow.revision}"
-}
-println "Run Name         = ${workflow.runName}"
-println "User             = ${workflow.userName}"
-println "Config Profile   = ${workflow.profile}"
-println "Config Files     = ${workflow.configFiles}"
-println "Command Line     = ${workflow.commandLine}"
-println "Nextflow Info    = v${nextflow.version}, build: ${nextflow.build}, on ${nextflow.timestamp}"
-println "Launch dir       = ${workflow.launchDir}"
-println "Working dir      = ${workflow.workDir}"
-println "Workflow dir     = ${workflow.projectDir}"
-
-// Pipeline Params:
-println "Parameters......"                           
-println ".  Output dir                              = ${params.outdir}"
-println ".  Temporary dir                           = ${params.tmpdir}"
-println ".  FASTQ inputs                            = ${params.fastqInputs}"
-println ".  Reference genome                        = ${params.ref_fa}"
-println ".  GATK target bed file                    = ${params.target_gatk}"
-println ".  Picard target bed file                  = ${params.target_picard}"
-println ".  dbSNP file                              = ${params.dbSNP}"
-println ".  snpEff config file                      = ${params.snpEff_config}"
-println "Run Start Time                             = ${workflow.start}"
-
-
-//~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Opening Variables and Channels ~ ~ ~ ~ ~
 def timestamp = new Date().format("yyMMdd-HHmmss")
-def tmpdir    = params.tmpdir
+
+// prepare reads channel
+if (params.read_type == 'PE'){
+  read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}_*${params.extension}",checkExists:true )
+}
+else if (params.read_type == 'SE'){
+  read_ch = Channel.fromFilePairs("${params.fq_path}/*${params.extension}",checkExists:true, size:1 )
+}
+
+// main workflow
+workflow WES{
+  // Step 1: Qual_Stat
+  QUALITY_STATISTICS(read_ch)
+  // Step 2: Get Read Group Information
+  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
+  // Step 3: BWA-MEM Alignment
+  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  // Step 4: Variant Preprocessing - Part 1
+  PICARD_SORTSAM(BWA_MEM.out.bwa_mem)
+  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam)
+  // Step 5: Variant Pre-Processing - Part 2
+
+}
 
 
-def fqPairRE = ~/_R1.*\..*f[ast]*q.*$/
-
-fqin = params.fastqInputs.tokenize(",")
-fqR1 = file(fqin[0])
 
 
-// Need to specify absolute path to fastq file(s) because relative paths cause symlink breakage
-fqR1p = fqR1.toAbsolutePath().toString()
-fqR2p = file(fqin[1]).toAbsolutePath().toString()
 
-def sampleID = ( fqR1.name - fqPairRE )
-
-
-//~~~~~~~~~~ Initial Channel of SampleID and Fastq Data ~~~~
-Channel.of( sampleID, fqR1p, fqR2p )
-       .toList()
-       .set { sample_fastqs_ch }
-
-
-//~~~~~~~~~~~~~~~~ Primary publishDir == sample_tmpdir ~~~~~
-def sample_tmpdir = "${params.tmpdir}/${timestamp}_${sampleID}"
 
 // Step 1: Qual_Stat
-process qual_stat {
-  tag "sampleID"
-  label 'long_mem'
-  label 'python'
-
-  publishDir "${sample_tmpdir}_tmp", pattern: "*fastq.gz_stat", mode: 'copy'
-
-  input:
-  tuple sampleID, read1, read2 from sample_fastqs_ch
-
-  output:
-  tuple sampleID, file("${sampleID}_R{1,2}*filtered_trimmed") into trimmed_fastq
-  file "*.fastq.gz_stat"
-  tuple sampleID, file("*.fastq.gz_stat") into fq_stats, dummy_fq_stats
-
-  script:
-  log.info "-----Qual_Stat running on ${sampleID}-----"
-
-  if (params.reads == "SE"){
-    mode_HQ="-S -M"
-    inputfq="${read1}"
-  }
-  if (params.reads == "PE"){
-    mode_HQ="-M"
-    inputfq="${read1} ${read2}"
-  }
-  """
-
-  python ${params.filter_trim} $mode_HQ ${params.min_pct_hq_reads}  $inputfq
-
-  """
-}
-
-// Step 2: Get Read Group Information and BWA-MEM Alignment
-process read_grp_bwa_mem {
-  tag "sampleID"
-  label 'long_high_mem'
-  label 'bwa'
-
-  input:
-  tuple sampleID, file(trimmed) from trimmed_fastq
-
-  output:
-  tuple sampleID, file("*.sam") into bwa_mem_out, dummy_bwa_mem_out
-
-  script:
-  log.info "-----bwa-mem alignment running on ${sampleID}-----"
-
-  if (params.reads == "SE"){
-    inputfq="${trimmed[0]}"
-    }
-  if (params.reads == "PE"){
-    inputfq="${trimmed[0]} ${trimmed[1]}"
-    }
-
-  """
-
-  python ${params.read_grp_det} ${trimmed[0]} -o ${sampleID}_read_group.txt
-
-  rg=\$(cat ${sampleID}_read_group.txt)
-
-  /bwa-0.7.9a/bwa mem -M ${params.mismatch_penalty} -t ${task.cpus} -R \${rg} ${params.ref_fa} $inputfq > ${sampleID}.sam
-
-  """
-}
-
-// Step 3: Variant Preprocessing 1
-process variant_preproc_1 {
-  tag "sampleID"
-  label 'long_high_mem'
-  label 'picard_2_8_1'
-
-  publishDir "${sample_tmpdir}_tmp", pattern: "*dup_metrics.dat", mode: 'copy'
-
-  input:
-  tuple sampleID, file(sam) from bwa_mem_out
-
-  output:
-  tuple sampleID, file("*_dedup.bam") into bam_dedup
-  tuple sampleID, file("*_dedup.bai") into bai_dedup
-  tuple sampleID, file("*metrics.dat") into picard_metrics, dummy_picard_metrics
-  file "*dup_metrics.dat"
-
-  script:
-  log.info "-----Variant pre-processing part 1 running on ${sampleID}-----"
-
-  """
-
-  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /picard.jar SortSam \
-  SO=coordinate \
-  INPUT=${sam} \
-  OUTPUT=${sampleID}_aln.bam  \
-  VALIDATION_STRINGENCY=SILENT \
-  CREATE_INDEX=true
-
-  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /picard.jar MarkDuplicates \
-  I=${sampleID}_aln.bam \
-  O=${sampleID}_dedup.bam \
-  M=${sampleID}_dup_metrics.dat \
-  REMOVE_DUPLICATES=true \
-  CREATE_INDEX=true \
-  VALIDATION_STRINGENCY=SILENT
-
-  """
-}
-
-// Step 4: Variant Pre-Processing 2
+// Step 2a: Get Read Group Information
+// Step 2 (3): BWA-MEM Alignment
+// Step 4: Variant Preprocessing 1
+// Step 5: Variant Pre-Processing 2
 process variant_preproc_2 {
   tag "sampleID"
-  label 'long_high_mem'
-  label 'gatk4'
 
+  cpus = 12
+  memory = 35.GB
+  time = '72:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*realigned_BQSR*", mode: 'copy'
 
@@ -299,7 +92,7 @@ process variant_preproc_2 {
 
     samtools index ${sampleID}_realigned_BQSR.bam
 
-    rm -rf *_dedup.bam *_dedup.bai recal_data.table 
+    rm -rf *_dedup.bam *_dedup.bai recal_data.table
 
     """
     }
@@ -321,8 +114,13 @@ process variant_preproc_2 {
 // Step 5: Variant Preprocessing 3
 process variant_preproc_3 {
   tag "sampleID"
-  label 'short_med_mem'
-  label 'picard_1_95'
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'picard-1.95.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
 
@@ -353,8 +151,13 @@ process variant_preproc_3 {
 // Step 6a: Variant Calling
 process variant_calling {
   tag "sampleID"
-  label 'variant_calling_mem'
-  label 'gatk4'
+
+  cpus = 8
+  memory = 15.GB
+  time = '23:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
 
@@ -382,13 +185,16 @@ process variant_calling {
   """
 }
 
-
-
 // Step 6b: Variant Calling: Gvcf
 process variant_calling_gvcf {
   tag "sampleID"
-  label 'variant_calling_mem'
-  label 'gatk4'
+
+  cpus = 8
+  memory = 15.GB
+  time = '23:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
 
@@ -420,8 +226,13 @@ process variant_calling_gvcf {
 // Step 7: Variant Filtration
 process variant_filtration {
   tag "sampleID"
-  label 'short_med_mem'
-  label 'gatk4'
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
 
   input:
@@ -515,13 +326,16 @@ process variant_filtration {
 
 }
 
-
-
 // Step 8: Post Variant Calling Processing, part 1
 process post_var_proc1 {
   tag "sampleID"
-  label 'med_high_mem'
-  label 'gatk4'
+
+  cpus = 8
+  memory = 10.GB
+  time = '08:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*full*anno*", mode: 'copy'
 
@@ -590,8 +404,13 @@ process post_var_proc1 {
 // Step 9: Post Variant Calling Processing, part 2
 process post_var_proc2 {
   tag "sampleID"
-  label 'short_med_mem'
-  label 'gatk3'
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 
   publishDir "${sample_tmpdir}_tmp", pattern: "*snp*", mode: 'copy'
 
@@ -650,8 +469,12 @@ process post_var_proc2 {
 if (params.gen_org == "human") {
   process agg_stats_hsa {
     tag "sampleID"
-    label 'vshort_mem'
-    label 'python'
+
+    cpus = 1
+    time = '00:30:00'
+    clusterOptions = '-q batch'
+
+    container 'python_2.7.3.sif'
 
     publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
 
@@ -678,8 +501,12 @@ else if (params.gen_org == "mouse") {
 
   process agg_stats_mmu {
     tag "sampleID"
-    label 'vshort_mem'
-    label 'python'
+
+    cpus = 1
+    time = '00:30:00'
+    clusterOptions = '-q batch'
+
+    container 'python_2.7.3.sif'
 
     publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
 
@@ -705,7 +532,10 @@ else if (params.gen_org == "mouse") {
 // Step 11: Transfer files to output directory
 process transfer_files {
   tag "sampleID"
-  label 'vshort_mem'
+
+  cpus = 1
+  time = '00:30:00'
+  clusterOptions = '-q batch'
 
   input:
   tuple sampleID, file(fq_stat) from dummy_fq_stats
@@ -737,19 +567,4 @@ process transfer_files {
 
 
   """
-}
-
-// ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Closing Summary ~ ~ ~ ~ ~
-workflow.onComplete {
-  wfEnd = [:]
-  wfEnd['Completed at'] = ${workflow.complete}
-  wfEnd['Duration']     = ${workflow.duration}
-  wfEnd['Exit status']  = ${workflow.exitStatus}
-  wfEnd['Success']      = ${workflow.success}
-    if(!workflow.success){
-      wfEnd['!!Execution failed'] = ''
-      wfEnd['.    Error']   = ${workflow.errorMessage}
-      wfEnd['.    Report']  = ${workflow.errorReport}
-    }
-  Summary.show(wfEnd)
 }
