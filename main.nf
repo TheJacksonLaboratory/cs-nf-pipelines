@@ -1130,6 +1130,7 @@ if (params.seqmode == 'illumina') {
 
 		input:
 			path(vcf_paths) from sample_vcfs_paths
+			val sample_name from params.names
 
 		output:
 			tuple sample_name, path(outMerged) into ( vcf_merged, vcf_mrg_annot )
@@ -1158,7 +1159,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Annotate if in Exon  ~~~~~
-	/*
+	
 	process survivor_vcf_to_bed {
 		tag "$sample_name"
 		label 'survivor'
@@ -1188,7 +1189,7 @@ if (params.seqmode == 'illumina') {
 	}
 	process annot_bedpe_to_multi {
 		tag "$sample_name"
-		label 'python3'
+		label 'pysam'
 		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
 
 		when:
@@ -1204,7 +1205,7 @@ if (params.seqmode == 'illumina') {
 			log.info "Convert TRA calls from single line to multi-line to facilitate bedtools intersect"
 			out_bedpe = in_bedpe.getBaseName() + ".annot.bedpe"
 			"""
-			python3 ${workflow.projectDir}/bin/bedpe_annot_para.py \
+			python ${workflow.projectDir}/bin/bedpe_annot_para.py \
 				${in_bedpe} ${out_bedpe}
 			"""
 	}
@@ -1218,7 +1219,6 @@ if (params.seqmode == 'illumina') {
 
 		input:
 			tuple sample_name, path(in_bedpe) from annot_bedpe
-			path(mm10_exon_list) from mm10_exon_list
 
 		output:
 			tuple sample_name, path(out_bedpe) into intersect_bedpe
@@ -1229,13 +1229,13 @@ if (params.seqmode == 'illumina') {
 			"""
 			bedtools intersect \
 				-a ${in_bedpe} \
-				-b ${mm10_exon_list} \
+				-b /ref_data/mm10_exons \
 				-loj > ${out_bedpe}
 			"""
 	}
 	process annot_merge_vcf {
 		tag "$sample_name"
-		label 'python3'
+		label 'pysam'
 		publishDir "${params.outdir}", pattern: "*.ExonAnnot.vcf", mode: 'move'
 		publishDir "${params.outdir}/logs", pattern: "*.error.log", mode: 'move'
 
@@ -1254,18 +1254,18 @@ if (params.seqmode == 'illumina') {
 			log.info "Apply 'InExon' to original VCF file. Based on matching annotations from VCF and annotated bedpe."
 			exon_vcf = sample_name + '.ExonAnnot.vcf'
 			"""
-			python3 ${workflow.projectDir}/bin/annot_vcf_with_exon.py \
+			python ${workflow.projectDir}/bin/annot_vcf_with_exon.py \
 				${in_bedpe} \
 				${merged_vcf} \
 				> ${exon_vcf} \
 				2>${exon_vcf}.error.log
 			"""
 	}
-*/
+
 } // END OF if param.seqmode == 'illumina'
 
 
-/*
+
 //~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Closing Info ~ ~ ~ ~ ~ ~
 workflow.onComplete {
     wfEnd = [:]
@@ -1283,4 +1283,3 @@ workflow.onComplete {
 
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
