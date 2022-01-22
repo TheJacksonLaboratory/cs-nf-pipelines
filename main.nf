@@ -554,6 +554,7 @@ if (params.seqmode == 'illumina') {
  
 	process map{
 	  label 'bwa'
+	  label 'cpus_8'
 	  stageInMode 'copy'
 	  input:
 		file fq1 from ch_fastq1
@@ -768,6 +769,7 @@ if (params.seqmode == 'illumina') {
 	process lumpy_bwa_sort {
 		tag "$sample_name"
 		label 'picard'
+		label 'cpus_8'
 
 		input:
 		tuple sample_name, path(bam_bwa_lumpy) from bam_bwa_lumpy_ch
@@ -786,6 +788,7 @@ if (params.seqmode == 'illumina') {
 	process lumpy_discordant_sort {
 		tag "$sample_name"
 		label 'picard'
+		label 'cpus_8'
 
 		input:
 		tuple sample_name, path(dis_unsorted_bam) from dis_unsorted_bam_ch
@@ -804,6 +807,7 @@ if (params.seqmode == 'illumina') {
 	process lumpy_extract_splits {
 		tag "$sample_name"
 		label 'lumpy'
+		label 'cpus_8'
 
 		input:
 		tuple sample_name, path(bam_bwa_lumpy) from bam_bwa_lumpy_splits_ch
@@ -824,6 +828,7 @@ if (params.seqmode == 'illumina') {
 	process lumpy_split_bam_sort {
 		tag "$sample_name"
 		label 'picard'
+		label 'cpus_8'
 		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_splitters.sorted.ba*", mode: 'copy'
 
 		input:
@@ -843,6 +848,7 @@ if (params.seqmode == 'illumina') {
 	process lumpy_call_sv {
 		tag "$sample_name"
 		label 'lumpy'
+		label 'cpus_8'
 		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
 
 		//errorStrategy { task.exitStatus=141 ? 'ignore' : 'terminate' } // validExitStatus 141 for pairend_distro
@@ -921,6 +927,7 @@ if (params.seqmode == 'illumina') {
 	process breakdancer_calling_sv {
     tag "$sample_name"
     label 'breakdancer'
+	label 'cpus_8'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_brkdncr
@@ -942,6 +949,7 @@ if (params.seqmode == 'illumina') {
 	process breakdancer_sv_to_vcf {
     tag "$sample_name"
     label 'python'
+	label 'cpus_8'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_brkdncr
@@ -994,6 +1002,8 @@ if (params.seqmode == 'illumina') {
 	process manta_calling_sv {
 		tag "$sample_name"
 		label 'manta'
+		label 'cpus_8'
+		
 		publishDir "${params.outdir}/temps", pattern: "mantaSVOut", enabled: params.keep_intermediate
 		cpus params.threads
 
@@ -1097,7 +1107,7 @@ if (params.seqmode == 'illumina') {
 			"""
 	}
 
-		process reheader_delly {
+	process reheader_delly {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
