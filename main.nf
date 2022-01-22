@@ -918,8 +918,6 @@ if (params.seqmode == 'illumina') {
 	process breakdancer_sv_to_vcf {
     tag "$sample_name"
     label 'python'
-    publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'move'
-	publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancer-SV", mode: 'move'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_brkdncr
@@ -927,8 +925,7 @@ if (params.seqmode == 'illumina') {
 		file breakdancer_sv_out from ch_breakdancer_sv
 
     output:
-		path(breakdancer_sort_vcf)
-		path("vcf_path") into vcf_breakdancer
+		file breakdancer_sort_vcf into reheader_breakdancer
 
     script:
 		breakdancer_2_vcf    = sample_name + "_BreakDancer2VCF.vcf"
@@ -939,8 +936,33 @@ if (params.seqmode == 'illumina') {
 
 		breakdancer2vcfHeader.py -i ${breakdancer_sv_out} -o ${breakdancer_2_vcf}
 		vcfSort.sh ${breakdancer_2_vcf} ${breakdancer_sort_vcf}
-		echo ${abs_outdir}/BreakDancerSVOut/${breakdancer_sort_vcf} > vcf_path # for later merging
 		"""
+	}
+
+	process reheader_breakdancer {
+		tag "$sample_name"
+		label 'bcftools'
+		label 'tiny_job'
+		publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'move'
+
+		input:
+			val abs_outdir from abs_outdir
+			val sample_name from params.names
+			file "BreakDancerSortVCF.vcf" from reheader_breakdancer
+		
+		output:
+			path(breakdancer_sort_vcf)
+			path("vcf_path") into vcf_breakdancer
+		
+		script:
+			log.info "Reheading Breakdancer SV VCF"
+			"""
+			printf "${sample_name}_breakdancer\n" > rehead_breakdancer.txt
+			bcftools reheader --samples rehead_breakdancer.txt \
+				-o ${sample_name}_BreakDancerSortVCF.vcf \
+				BreakDancerSortVCF.vcf
+			echo ${abs_outdir}/BreakDancerSVOut/${sample_name}_BreakDancerSortVCF.vcf > vcf_path # for later merging
+			"""
 	}
 	
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Manta SV ~~~~~
@@ -958,7 +980,7 @@ if (params.seqmode == 'illumina') {
 			val abs_outdir from abs_outdir
 
 		output:
-			path("*candidateSV.vcf*") into reheader_manta
+			file "candidateSV.vcf" into reheader_manta
 
 		script:
 			log.info "Calling Manta SV"
@@ -977,7 +999,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/mantaSVout", pattern: "candidate.rehead.vcf", mode: 'move', \
+		publishDir "${params.outdir}/mantaSVout", pattern: "candidateSV.rehead.vcf", mode: 'move', \
 			saveAs: { vcf -> "${sample_name}_manta_${vcf}" }
 
 		input:
@@ -986,7 +1008,7 @@ if (params.seqmode == 'illumina') {
 			file "candidateSV.vcf" from reheader_manta
 		
 		output:
-			path("candidate.rehead.vcf")
+			path("candidateSV.rehead.vcf")
 			path("vcf_path") into vcf_manta
 		
 		script:
