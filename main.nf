@@ -843,54 +843,78 @@ if (params.seqmode == 'illumina') {
 	process lumpy_call_sv {
 		tag "$sample_name"
 		label 'lumpy'
-		publishDir "${params.outdir}/lumpySVOut", pattern: "*_lumpySort.vcf", mode: 'move'
 		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
 
 		//errorStrategy { task.exitStatus=141 ? 'ignore' : 'terminate' } // validExitStatus 141 for pairend_distro
 
 		input:
-		tuple sample_name, path(bam_bwa_lumpy_sort) from bam_bwa_lumpy_sort_ch
-		tuple sample_name, path(split_sorted_bam) from split_sorted_bam_ch
-		tuple sample_name, path(dis_sorted_bam) from dis_sorted_bam_ch
-		val abs_outdir from abs_outdir
+			tuple sample_name, path(bam_bwa_lumpy_sort) from bam_bwa_lumpy_sort_ch
+			tuple sample_name, path(split_sorted_bam) from split_sorted_bam_ch
+			tuple sample_name, path(dis_sorted_bam) from dis_sorted_bam_ch
+			val abs_outdir from abs_outdir
 
 		output:
 	//    path(dis_sorted_bam, includeInputs=true) 
 	// NOTE: The above statement was causing issues in the run. Not entirely sure that we need the sorted bam as output. 
 	//       It has been turned off for now. 
-
-		path(lumpy_sort_vcf)
-		path("vcf_path") into vcf_lumpy
+			file lumpy_sort_vcf into reheader_lumpy
+			
+			
 
 		shell:
-		log.info "Call SV by Lumpy, sort vcf"
-		pairend_distro = "pairend_distro.py"
-		histo          = sample_name + "_alignBWA_lumpySort.lib1.histo"
-		lumpy_vcf      = sample_name + "_lumpyOut.vcf"
-		lumpy_sort_vcf = sample_name + "_lumpySort.vcf"
-		exclude_regions = "/ref_data/mm10.gaps.centro_telo.scafold.exclude.bed"
-		'''
-		RG_ID=$(samtools view -H !{bam_bwa_lumpy_sort[1]} | grep '^@RG' | sed "s/.*ID:\\([^\\t]*\\).*/\\1/g")
-		#orig: metrics=$(samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>&1
-		samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 > pre_metrics 2>/dev/null
-		metrics=$(cat pre_metrics | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>/dev/null \
-			&& [ $? = 141 ] && echo 'metrics to pairend_distro had exitcode: '$?;
-		mean=$(echo "${metrics}" | cut -d " " -f 1)
-		mean=$(echo "${mean}"    | cut -d ":" -f 2)
-		std_dev=$(echo "${metrics}" | cut -d " " -f 2)
-		std_dev=$(echo "${std_dev}" | cut -d ":" -f 2)
-		rm pre_metrics;
+			log.info "Call SV by Lumpy, sort vcf"
+			pairend_distro = "pairend_distro.py"
+			histo          = sample_name + "_alignBWA_lumpySort.lib1.histo"
+			lumpy_vcf      = sample_name + "_lumpyOut.vcf"
+			lumpy_sort_vcf = sample_name + "_lumpySort.vcf"
+			exclude_regions = "/ref_data/mm10.gaps.centro_telo.scafold.exclude.bed"
+			'''
+			RG_ID=$(samtools view -H !{bam_bwa_lumpy_sort[1]} | grep '^@RG' | sed "s/.*ID:\\([^\\t]*\\).*/\\1/g")
+			#orig: metrics=$(samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>&1
+			samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 > pre_metrics 2>/dev/null
+			metrics=$(cat pre_metrics | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>/dev/null \
+				&& [ $? = 141 ] && echo 'metrics to pairend_distro had exitcode: '$?;
+			mean=$(echo "${metrics}" | cut -d " " -f 1)
+			mean=$(echo "${mean}"    | cut -d ":" -f 2)
+			std_dev=$(echo "${metrics}" | cut -d " " -f 2)
+			std_dev=$(echo "${std_dev}" | cut -d ":" -f 2)
+			rm pre_metrics;
 
-		lumpy \
-			-mw 4 \
-			-x !{exclude_regions} \
-			-pe id:"${RG_ID}",bam_file:!{dis_sorted_bam[1]},histo_file:!{histo},mean:"${mean}",stdev:"${std_dev}",read_length:150,min_non_overlap:150,discordant_z:5,back_distance:10,weight:1,min_mapping_threshold:20 \
-			-sr id:"${RG_ID}",bam_file:!{split_sorted_bam[1]},back_distance:10,weight:1,min_mapping_threshold:20 \
-			> !{lumpy_vcf}
+			lumpy \
+				-mw 4 \
+				-x !{exclude_regions} \
+				-pe id:"${RG_ID}",bam_file:!{dis_sorted_bam[1]},histo_file:!{histo},mean:"${mean}",stdev:"${std_dev}",read_length:150,min_non_overlap:150,discordant_z:5,back_distance:10,weight:1,min_mapping_threshold:20 \
+				-sr id:"${RG_ID}",bam_file:!{split_sorted_bam[1]},back_distance:10,weight:1,min_mapping_threshold:20 \
+				> !{lumpy_vcf}
 
-		vcfSort.sh !{lumpy_vcf} !{lumpy_sort_vcf}
-		echo !{abs_outdir}/lumpySVOut/!{lumpy_sort_vcf} > vcf_path # for later merging
-		'''
+			vcfSort.sh !{lumpy_vcf} !{lumpy_sort_vcf}
+			'''
+	}
+
+	process reheader_lumpy {
+		tag "$sample_name"
+		label 'bcftools'
+		label 'tiny_job'
+		publishDir "${params.outdir}/lumpySVOut", pattern: "*_lumpySort.vcf", mode: 'move'
+
+		input:
+			val abs_outdir from abs_outdir
+			val sample_name from params.names
+			file "lumpySort.vcf" from reheader_lumpy
+		
+		output:
+			path(lumpy_sort_vcf)
+			path("vcf_path") into vcf_lumpy
+		
+		script:
+			log.info "Reheading lumpy SV VCF"
+			"""
+			printf "${sample_name}_lumpy\n" > rehead_lumpy.txt
+			bcftools reheader --samples rehead_lumpy.txt \
+				-o ${sample_name}_lumpySort.vcf \
+				lumpySort.vcf
+			echo ${abs_outdir}/lumpySVOut/${sample_name}_lumpySort.vcf > vcf_path # for later merging
+			"""
 	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ BreakDancer SV ~~~~~
