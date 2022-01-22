@@ -951,7 +951,7 @@ if (params.seqmode == 'illumina') {
 			file "BreakDancerSortVCF.vcf" from reheader_breakdancer
 		
 		output:
-			path(breakdancer_sort_vcf)
+			path("${sample_name}_BreakDancerSortVCF.vcf")
 			path("vcf_path") into vcf_breakdancer
 		
 		script:
@@ -1053,16 +1053,14 @@ if (params.seqmode == 'illumina') {
 	process delly_bcf2vcf_sort {
 		tag "$sample_name"
 		label 'bcftools'
-		label 'cpus_8'
-		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'move'
+		label 'cpus_8'		
 
 		input:
 			tuple sample_name, path(delly_bcf) from delly_bcf_out
 			val abs_outdir from abs_outdir
 
 		output:
-			path(delly_sort_vcf)
-			path("vcf_path") into vcf_delly
+			file "${delly_sort_vcf}" into reheader_delly
 
 		script:
 			delly_vcf      = sample_name + "_DellyVCF.vcf"
@@ -1072,7 +1070,32 @@ if (params.seqmode == 'illumina') {
 			"""
 			bcftools view ${delly_bcf} > ${delly_vcf}
 			vcfSort.sh ${delly_vcf} ${delly_sort_vcf}
-			echo ${abs_outdir}/DellySVOut/${delly_sort_vcf} > vcf_path # for later merging
+			"""
+	}
+
+		process reheader_delly {
+		tag "$sample_name"
+		label 'bcftools'
+		label 'tiny_job'
+		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'move'
+
+		input:
+			val abs_outdir from abs_outdir
+			val sample_name from params.names
+			file "dellySort.vcf" from reheader_delly
+		
+		output:
+			path("${sample_name}_dellySort.vcf")
+			path("vcf_path") into vcf_delly
+		
+		script:
+			log.info "Reheading Delly SV VCF"
+			"""
+			printf "${sample_name}_delly\n" > rehead_delly.txt
+			bcftools reheader --samples rehead_delly.txt \
+				-o ${sample_name}_dellySort.vcf \
+				dellySort.vcf
+			echo ${abs_outdir}/DellySVOut/${sample_name}_dellySort.vcf > vcf_path # for later merging
 			"""
 	}
 
