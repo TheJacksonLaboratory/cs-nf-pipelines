@@ -723,30 +723,11 @@ if (params.seqmode == 'illumina') {
 	}
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Lumpy SV ~~~~~
-	/* 
-		TODO:
-			- encapsulate "black regions" tsv in container
-			- check input/output flow to ensure it plays
-	*/ 
-	
-	/* OLD VERSION
-	process lumpy{
-		publishDir params.outdir, mode:'copy'
-		label 'cpus_8'
-		label 'lumpy'
-		input:
-			file bamf from ch_bam
 
-		output:
-			file "lumpy_output.vcf" into lumpy_out
-		script:
-		"""
-		lumpyexpress -B $bamf -P -m 2 -o lumpy_output.vcf -v
-		"""
-	*/
 	process lumpy_mapping {
 		tag "$sample_name"
 		label 'lumpy'
+		label 'cpus_8'
 		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
 		cpus params.threads
 
@@ -963,32 +944,7 @@ if (params.seqmode == 'illumina') {
 	}
 	
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Manta SV ~~~~~
-	/*process manta_calling_sv {
-		label 'manta'
-		label 'cpus_8'
-		
-		publishDir params.outdir, mode: 'copy'
 
-		input:
-		file bamf from ch_bam
-		file bamfb from ch_bam_bai
-		file fasta from ch_fasta
-		file fastafai from fasta_fai_ch		
-		
-		output:
-		path("*candidateSV.vcf*")
-
-		script:
-		log.info "Calling Manta SV"
-		"""
-		configManta.py \
-			--runDir mantaSVOut \
-			--bam ${bamf} \
-			--referenceFasta ${fasta}
-		./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
-		mv mantaSVOut/results/variants/candidateSV.vcf.gz ./manta_candidateSV.vcf.gz
-		"""
-	}*/
 	process manta_calling_sv {
 		tag "$sample_name"
 		label 'manta'
@@ -1023,46 +979,10 @@ if (params.seqmode == 'illumina') {
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Delly SV ~~~~~
 
-	// Run delly
-	/*
-	params.delly_exc = params.delly_genome ? "${params.delly_base}${params.delly_genome}.excl.tsv" : null
-	dex = params.delly_exc ? Channel.value(file(params.delly_exc)) : "null"
-	//type_list = Channel.from('DEL', 'DUP', 'INV', 'BND', 'INS')
-	process delly{
-	  label 'cpus_8'
-	  label 'delly'
-	  input:
-	 //   val type from type_list
-		file fasta from ch_fasta
-		file bamf from ch_bam
-		file bami from ch_bam_bai
-		file excl from dex
-	  output:
-		file "delly.bcf" into delly_bcf
-	  script:
-	  exc = params.delly_exc ? "-x ${excl}" : ""
-	  """
-	  delly call -g $fasta -o delly.bcf $bamf 
-	  """
-	}
-
-	process bcf2vcf{
-	  publishDir params.outdir, mode:'copy'
-	  label 'bcftools'
-	  label 'cpus_8'
-	  input:
-		file bcf from delly_bcf
-	  output:
-		file "${bcf.baseName}.vcf" into delly_vcf
-	  script:
-	  """
-	  bcftools view delly.bcf > delly.vcf
-	  """
-	} */
-
 	process delly_calling_sv {
     tag "$sample_name"
     label 'delly'
+	label 'cpus_8'
 
     input:
 		tuple sample_name, bam_input, bam_index from in_delly
@@ -1088,6 +1008,7 @@ if (params.seqmode == 'illumina') {
 	process delly_bcf2vcf_sort {
 		tag "$sample_name"
 		label 'bcftools'
+		label 'cpus_8'
 		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'move'
 
 		input:
@@ -1123,7 +1044,6 @@ if (params.seqmode == 'illumina') {
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
 	process survivor_merge_sv_vcf {
 		tag "$sample_name"
-		label 'survivor'
 		label 'survivor'
 		publishDir "${params.outdir}", pattern: "*_mergedCall.BDLM.vcf", mode: "copy"
 		publishDir "${params.outdir}/temps", pattern: "*.vcfs.txt", enabled: params.keep_intermediate
