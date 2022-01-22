@@ -909,7 +909,7 @@ if (params.seqmode == 'illumina') {
 			file "lumpySort.vcf" from reheader_lumpy
 		
 		output:
-			path(lumpy_sort_vcf)
+			path("${sample_name}_lumpySort.vcf")
 			path("vcf_path") into vcf_lumpy
 		
 		script:
