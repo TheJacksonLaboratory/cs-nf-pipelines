@@ -948,8 +948,6 @@ if (params.seqmode == 'illumina') {
 	process manta_calling_sv {
 		tag "$sample_name"
 		label 'manta'
-		publishDir "${params.outdir}/mantaSVout", pattern: "*candidateSV.vcf*", mode: 'move', \
-			saveAs: { vcf -> "${sample_name}_manta_${vcf}" }
 		publishDir "${params.outdir}/temps", pattern: "mantaSVOut", enabled: params.keep_intermediate
 		cpus params.threads
 
@@ -960,8 +958,7 @@ if (params.seqmode == 'illumina') {
 			val abs_outdir from abs_outdir
 
 		output:
-			path("*candidateSV.vcf*")
-			path("vcf_path") into vcf_manta
+			path("*candidateSV.vcf*") into reheader_manta
 
 		script:
 			log.info "Calling Manta SV"
@@ -973,6 +970,32 @@ if (params.seqmode == 'illumina') {
 			./mantaSVOut/runWorkflow.py -m local -j ${params.threads}
 			mv mantaSVOut/results/variants/candidateSV.vcf.gz ./
 			gunzip candidateSV.vcf.gz
+			"""
+	}
+
+	process reheader_manta {
+		tag "$sample_name"
+		label 'bcftools'
+		label 'tiny_job'
+		publishDir "${params.outdir}/mantaSVout", pattern: "candidate.rehead.vcf", mode: 'move', \
+			saveAs: { vcf -> "${sample_name}_manta_${vcf}" }
+
+		input:
+			val abs_outdir from abs_outdir
+			val sample_name from params.names
+			file "candidateSV.vcf" from reheader_manta
+		
+		output:
+			path("candidate.rehead.vcf")
+			path("vcf_path") into vcf_manta
+		
+		script:
+			log.info "Reheading Manta SV VCF"
+			"""
+			printf "${sample_name}_manta\n" > rehead_manta.txt
+			bcftools reheader --samples rehead_manta.txt \
+				-o candidateSV.rehead.vcf \
+				candidateSV.vcf
 			echo ${abs_outdir}/mantaSVout/${sample_name}_manta_candidateSV.vcf > vcf_path # for later merging
 			"""
 	}
@@ -1038,7 +1061,7 @@ if (params.seqmode == 'illumina') {
 	vcf_lumpy,
 	vcf_manta
 	)
-	.collectFile(name: "sample.vcfs.txt", sort: true)
+	.collectFile(name: "sample.vcfs.txt", sort: false)
 	.set { sample_vcfs_paths }
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
