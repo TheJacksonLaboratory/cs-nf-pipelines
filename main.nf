@@ -1049,13 +1049,19 @@ if (params.seqmode == 'illumina') {
 			log.info "Reheading Manta SV VCF"
 			"""
 			printf "${sample_name}_manta\n" > rehead_manta.txt
-			bcftools reheader --samples rehead_manta.txt \
-				-o candidateSV.rehead.vcf \
-				candidateSV.vcf
-			echo ${abs_outdir}/mantaSVout/${sample_name}_manta_candidateSV.vcf > vcf_path # for later merging
+			{bcftools reheader --samples rehead_manta.txt \
+				-o ${sample_name}_candidateSV.vcf \
+				candidateSV.vcf} || {mv candidateSV.vcf ${sample_name}_candidateSV.vcf}
+			echo ${abs_outdir}/mantaSVout/${sample_name}_candidateSV.vcf > vcf_path # for later merging
 			"""
 	}
-
+/*
+			printf "${sample_name}_breakdancer\n" > rehead_breakdancer.txt
+			bcftools reheader --samples rehead_breakdancer.txt \
+				-o ${sample_name}_BreakDancerSortVCF.vcf \
+				BreakDancerSortVCF.vcf
+			echo ${abs_outdir}/BreakDancerSVOut/${sample_name}_BreakDancerSortVCF.vcf
+*/
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Delly SV ~~~~~
 
 	process delly_calling_sv {
