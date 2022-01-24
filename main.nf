@@ -366,7 +366,7 @@ if (params.seqmode == 'pacbio') {
 		SURVIVOR merge vcf_list ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${name_string}.merged.vcf
 		"""
 	}
-
+	/*
 	process annotate_sv{
 		label 'mid_job'
 		input:
@@ -507,7 +507,7 @@ if (params.seqmode == 'pacbio') {
         -o ${name_string}.merged.annotated.vcf
     """
 	}
-
+	*/
 
 	// NEED TO CHANGE THIS TO HAVE CCS INCLUDED 
 	
@@ -574,7 +574,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process map2{
-	  publishDir params.outdir, mode:'copy'
+	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'cpus_8'
 	  label 'samtools'
 	  input:
@@ -594,7 +594,7 @@ if (params.seqmode == 'illumina') {
 	// end of optional mapping steps. ch_bam_und (either from mapping or from input) is passed to post processing and calling
 
 	process dedup{
-	  publishDir params.outdir, mode:'copy'
+	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'gatk'
 	  label 'cpus_8'
 	  input:
@@ -692,7 +692,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process bam_insertsize{
-	  publishDir params.outdir, mode:'copy'
+	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'samtools'
 	  input:
 		tuple sample_name, bam_input, bam_index from ch_sample_name_bam_bai
@@ -705,7 +705,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process fastaindex{
-	  publishDir params.outdir, mode:'copy'
+	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'samtools'
 	  input:
 		file fasta from ch_fasta
@@ -732,7 +732,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'lumpy'
 		label 'cpus_8'
-		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
+		publishDir "${params.outdir}/alignments/mapped_lumpy", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
 		cpus params.threads
 
 		input:
@@ -832,7 +832,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'picard'
 		label 'cpus_8'
-		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_splitters.sorted.ba*", mode: 'copy'
+		publishDir "${params.outdir}/alignments/mapped_lumpy", pattern: "*_splitters.sorted.ba*", mode: 'copy'
 
 		input:
 		tuple sample_name, path(split_unsorted_bam) from split_unsorted_bam_ch
@@ -852,7 +852,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'lumpy'
 		label 'cpus_8'
-		publishDir "${params.outdir}/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
+		publishDir "${params.outdir}/alignments/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
 
 		//errorStrategy { task.exitStatus=141 ? 'ignore' : 'terminate' } // validExitStatus 141 for pairend_distro
 
@@ -1144,153 +1144,191 @@ if (params.seqmode == 'illumina') {
 	.set { sample_vcfs_paths }
 
 	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
-	process survivor_merge_sv_vcf {
-		tag "$sample_name"
-		label 'survivor'
-		publishDir "${params.outdir}", pattern: "*_mergedCall.BDLM.vcf", mode: "copy"
-		publishDir "${params.outdir}/temps", pattern: "*.vcfs.txt", enabled: params.keep_intermediate
 
+	process survivor_sr{
+		label 'long_himem'
+		label 'survivor'
 		input:
 			path(vcf_paths) from sample_vcfs_paths
 			val sample_name from params.names
-
+			val surv_dist from params.surv_dist
+			val surv_supp from params.surv_supp
+			val surv_type from params.surv_type
+			val surv_strand from params.surv_strand
+			val surv_min from params.surv_min
 		output:
-			tuple sample_name, path(outMerged) into ( vcf_merged, vcf_mrg_annot )
-
+			tuple sample_name, path("${sample_name}_mergedCall.BDLM.vcf") into ( vcf_merged, vcf_mrg_annot )
 		script:
-			log.info "Merging SV Call VCFs with SURVIVOR"
-
-			maxBreak   = params.mergeMaxBreakDist
-			minSupp    = params.mergeMinSupportCaller
-			takeType   = params.mergeTakeTypeAccount
-			takeStrand = params.mergeTakeStrandAccount
-			estDist    = params.mergeEstDistSizeSV
-			minSizeSV  = params.mergeMinSizeSV
-			outMerged  = sample_name + "_mergedCall.BDLM.vcf"
-			"""
-			SURVIVOR merge  \
-				$vcf_paths  \
-				$maxBreak   \
-				$minSupp    \
-				$takeType   \
-				$takeStrand \
-				$estDist    \
-				$minSizeSV  \
-				$outMerged;
-			"""
+		"""
+		SURVIVOR merge ${vcf_paths} ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${sample_name}_mergedCall.BDLM.vcf
+		"""
 	}
 
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Annotate if in Exon  ~~~~~
-	
-	process survivor_vcf_to_bed {
-		tag "$sample_name"
-		label 'survivor'
-		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
 
-		when:
-		params.annotateMergedSVifExon == true
-
-		input:
-			tuple sample_name, path(in_vcf) from vcf_merged
-
-		output:
-			tuple sample_name, path(out_bedpe) into vcf_bedpe
-
-		script:
-			log.info "Preparing for annotation by converting VCF to BED with SURVIVOR"
-			minSizeBed = params.vcftoBedMinSize
-			maxSizeBed = params.vcftoBedMaxSize
-			out_bedpe  = in_vcf + ".bedpe"
-			"""
-			SURVIVOR vcftobed \
-				$in_vcf \
-				$minSizeBed \
-				$maxSizeBed \
-				$out_bedpe;
-			"""
-	}
-	process annot_bedpe_to_multi {
-		tag "$sample_name"
-		label 'pysam'
-		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
-
-		when:
-		params.annotateMergedSVifExon == true
-
-		input:
-			tuple sample_name, path(in_bedpe) from vcf_bedpe
-
-		output:
-			tuple sample_name, path(out_bedpe) into annot_bedpe
-
-		script:
-			log.info "Convert TRA calls from single line to multi-line to facilitate bedtools intersect"
-			out_bedpe = in_bedpe.getBaseName() + ".annot.bedpe"
-			"""
-			python ${workflow.projectDir}/bin/bedpe_annot_para.py \
-				${in_bedpe} ${out_bedpe}
-			"""
-	}
-	process bedtools_intersect {
-		tag "$sample_name"
-		label 'bedtools'
-		publishDir "${params.outdir}/temps", pattern: "*.bedpe", enabled: params.keep_intermediate
-
-		when:
-		params.annotateMergedSVifExon == true
-
-		input:
-			tuple sample_name, path(in_bedpe) from annot_bedpe
-
-		output:
-			tuple sample_name, path(out_bedpe) into intersect_bedpe
-
-		script:
-			log.info "Intersect calls against mm10_exon_list"
-			out_bedpe = in_bedpe.getBaseName() + ".intersect.bedpe"
-			"""
-			bedtools intersect \
-				-a ${in_bedpe} \
-				-b /ref_data/mm10_exons \
-				-loj > ${out_bedpe}
-			"""
-	}
-	
-	
-	process annot_merge_vcf {
-		tag "$sample_name"
-		label 'pysam'
-		publishDir "${params.outdir}", pattern: "*.ExonAnnot.vcf", mode: 'move'
-		publishDir "${params.outdir}/logs", pattern: "*.error.log", mode: 'move'
-
-		when:
-		params.annotateMergedSVifExon == true
-
-		input:
-			tuple sample_name, path(in_bedpe) from intersect_bedpe
-			tuple sample_name, path(merged_vcf) from vcf_mrg_annot
-
-		output:
-			tuple sample_name, path(exon_vcf) into exon_annot_vcf
-			path("*.error.log") optional true into errlog_ch
-
-		script:
-			log.info "Apply 'InExon' to original VCF file. Based on matching annotations from VCF and annotated bedpe."
-			exon_vcf = sample_name + '.ExonAnnot.vcf'
-			"""
-			python ${workflow.projectDir}/bin/annot_vcf_with_exon.py \
-				${in_bedpe} \
-				${merged_vcf} \
-				> ${exon_vcf} \
-				2>${exon_vcf}.error.log
-			"""
-	}
 
 } // END OF if param.seqmode == 'illumina'
 
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Annotate if in Exon  ~~~~~
+
+vcf_merged.into{vcf_merged_1; vcf_merged_2; vcf_merged_3}
+
+process annotate_sv{
+	label 'mid_job'
+	input:
+		tuple sample_name, path(in_vcf) from vcf_merged_1
+		val seqmode from params.seqmode
+	output:
+		file "${sample_name}.merged.overlap.annotated.txt" into ch_annot
+	script:
+	"""
+	/usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sample_name} ${in_vcf} ${seqmode}
+	"""
+}
+
+
+process summarize_sv{
+	label 'mid_job'
+	label 'pyvcf'
+	input:
+		tuple sample_name, path(in_vcf) from vcf_merged_2
+	output:
+		file "${sample_name}.survivor_summary.csv" into ch_summary
+	script:
+	"""
+	/usr/bin/env python ${projectDir}/bin/sv_to_table.py -v ${in_vcf} -o ${sample_name}.survivor_summary.csv
+	"""
+}
+
+ch_summary.into{ch_summary_1; ch_summary_2}
+
+process prep_beds{
+	label 'short_himem'
+	label 'tidyverse'
+	input:
+		file annot from ch_annot
+		file summary from ch_summary_1
+		val name_string from params.names
+	output:
+		file "${name_string}.ins.bed" into ch_ins
+		file "${name_string}.inv.bed" into ch_inv
+		file "${name_string}.del.bed" into ch_del
+		file "${name_string}.dup.bed" into ch_dup
+		file "${name_string}.tra.bed" into ch_tra
+	script:
+	"""
+	/usr/bin/env Rscript ${projectDir}/bin/surv_annot_process.R ${annot} ${summary} ${name_string}
+	"""
+}
+
+ch_ins.into{ch_ins_1; ch_ins_2}
+ch_inv.into{ch_inv_1; ch_inv_2}
+ch_del.into{ch_del_1; ch_del_2}
+ch_dup.into{ch_dup_1; ch_dup_2}
+ch_tra.into{ch_tra_1; ch_tra_2}
+
+process intersect_beds{
+	label 'short_himem'
+	label 'bedtools'
+	input:
+		val name_string from params.names
+		file "ins.bed" from ch_ins_1
+		file "inv.bed" from ch_inv_1
+		file "del.bed" from ch_del_1
+		file "dup.bed" from ch_dup_1
+		file "tra.bed" from ch_tra_1
+	output:
+		file "${name_string}.ins.s.bed" into ch_ins_s
+		file "${name_string}.ins.e.bed" into ch_ins_e
+		file "${name_string}.del.s.bed" into ch_del_s
+		file "${name_string}.del.s.bed" into ch_del_e
+		file "${name_string}.inv.e.bed" into ch_inv_e
+		file "${name_string}.tra.e.bed" into ch_tra_e
+		file "${name_string}.dup.e.bed" into ch_dup_e
+		file "${name_string}.ins.genes.bed" into ch_ins_genes
+		file "${name_string}.del.genes.bed" into ch_del_genes
+		file "${name_string}.inv.genes.bed" into ch_inv_genes
+		file "${name_string}.dup.genes.bed" into ch_dup_genes
+		file "${name_string}.tra.genes.bed" into ch_tra_genes
+		file "${name_string}.ins.exons.bed" into ch_ins_exons
+		file "${name_string}.del.exons.bed" into ch_del_exons
+		file "${name_string}.inv.exons.bed" into ch_inv_exons
+		file "${name_string}.dup.exons.bed" into ch_dup_exons
+		file "${name_string}.tra.exons.bed" into ch_tra_exons
+	script:
+	"""
+	/usr/bin/env bash ${projectDir}/bin/intersect_beds.sh ${name_string}
+	"""
+}
+
+ch_ins_exons.into{ch_ins_exons_1; ch_ins_exons_2}
+ch_del_exons.into{ch_del_exons_1; ch_del_exons_2}
+ch_inv_exons.into{ch_inv_exons_1; ch_inv_exons_2}
+ch_dup_exons.into{ch_dup_exons_1; ch_dup_exons_2}
+ch_tra_exons.into{ch_tra_exons_1; ch_tra_exons_2}
+
+process summarize_intersections{
+	publishDir params.outdir, mode:'copy'
+	label 'short_himem'
+	label 'tidyverse'
+	input:
+		val name_string from params.names
+		file "summary.csv" from ch_summary_2
+		file "ins.bed" from ch_ins_2
+		file "dup.bed" from ch_dup_2
+		file "tra.bed" from ch_tra_2
+		file "inv.bed" from ch_inv_2
+		file "del.bed" from ch_del_2
+		file "ins.s.bed" from ch_ins_s
+		file "ins.e.bed" from ch_ins_e
+		file "del.s.bed" from ch_del_s
+		file "del.e.bed" from ch_del_e
+		file "dup.e.bed" from ch_dup_e
+		file "inv.e.bed" from ch_inv_e
+		file "tra.e.bed" from ch_tra_e
+		file "ins.genes.bed" from ch_ins_genes
+		file "del.genes.bed" from ch_del_genes
+		file "dup.genes.bed" from ch_dup_genes
+		file "tra.genes.bed" from ch_tra_genes
+		file "inv.genes.bed" from ch_inv_genes
+		file "ins.exons.bed" from ch_ins_exons_1
+		file "del.exons.bed" from ch_del_exons_1
+		file "dup.exons.bed" from ch_dup_exons_1
+		file "tra.exons.bed" from ch_tra_exons_1
+		file "inv.exons.bed" from ch_inv_exons_1
+	output:
+		file "${name_string}.survivor_results.csv"
+	script:
+	"""
+	/usr/bin/env Rscript ${projectDir}/bin/post_filt.R
+	mv survivor_results.csv ${name_string}.survivor_results.csv
+	"""
+}
+	
+process annotate_exons{
+publishDir params.outdir, mode:'copy'
+label 'midjob'
+label 'pysam'
+input:
+	tuple sample_name, path(in_vcf) from vcf_merged_3
+	file "ins.exons.bed" from ch_ins_exons_2
+	file "del.exons.bed" from ch_del_exons_2
+	file "dup.exons.bed" from ch_dup_exons_2
+	file "tra.exons.bed" from ch_tra_exons_2
+	file "inv.exons.bed" from ch_inv_exons_2
+output:
+	file "${sample_name}.mergedCalls.InExon.BDLM.vcf"
+script:
+"""
+/usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${in_vcf} \
+	-i ins.exons.bed -d del.exons.bed \
+	-u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
+	-o ${sample_name}.mergedCalls.InExon.BDLM.vcf
+"""
+}
 
 
 //~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ ~ Closing Info ~ ~ ~ ~ ~ ~
+/*
 workflow.onComplete {
     wfEnd = [:]
     wfEnd['Completed at'] = workflow.complete
@@ -1304,6 +1342,6 @@ workflow.onComplete {
     }
     Summary.show(wfEnd)
 }
-
+*/
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
