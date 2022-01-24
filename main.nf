@@ -87,7 +87,7 @@ if (params.seqmode == 'pacbio') {
 		file "${name_string}.ngmlr.aligned.bam.bai" into ch_bam_index
 	  script:
 	  """
-	  samtools sort --threads ${task.cpus} -m 2G ${sam} > ${name_string}.ngmlr.aligned.bam
+	  samtools sort --threads ${task.cpus} -m 30${sam} > ${name_string}.ngmlr.aligned.bam
 	  samtools index ${name_string}.ngmlr.aligned.bam
 	  """
 	}
@@ -544,11 +544,12 @@ if (params.seqmode == 'illumina') {
 	  label 'python2'
 	  input:
 		file fq1 from ch_fastq1
+		val sample_name from params.names		
 	  output:
-		file "${fq1.baseName}.rg" into readgroup
+		file "${sample_name}.rg" into readgroup
 	  script:
 	  """
-	  /usr/bin/env python ${projectDir}/bin/read_group_from_fastq.py -o ${fq1.baseName}.rg $fq1
+	  /usr/bin/env python ${projectDir}/bin/read_group_from_fastq.py -o ${sample_name}.rg $fq1
 	  """
 	}
  
@@ -562,12 +563,13 @@ if (params.seqmode == 'illumina') {
 		file faidx from ch_bwa
 		file fasta from ch_fasta
 		file rgr from readgroup
+		val sample_name from params.names
 	  output:
-		file "${fq1.baseName}.sam" into ch_sam_map
+		file "${sample_name}.sam" into ch_sam_map
 	  when: !(params.bam) && params.fastq1
 	  script:
 	  """
-	  bwa mem -K 100000000 -R \$(cat $rgr) -t ${task.cpus} -M ${fasta} $fq1 $fq2 > ${fq1.baseName}.sam
+	  bwa mem -K 100000000 -R \$(cat $rgr) -t ${task.cpus} -M ${fasta} $fq1 $fq2 > ${sample_name}.sam
 	  """
 	}
 
@@ -577,11 +579,12 @@ if (params.seqmode == 'illumina') {
 	  label 'samtools'
 	  input:
 		file sam from ch_sam_map
+		val sample_name from params.names
 	  output:
-		file "${sam.baseName}.bam" into ch_bam_map
+		file "${sample_name}.bam" into ch_bam_map
 	  script:
 	  """
-	  samtools sort --threads ${task.cpus} -m 2G $sam > ${sam.baseName}.bam
+	  samtools sort --threads ${task.cpus} -m 30G $sam > ${sample_name}.bam
 	  """
 	}
 	ch_bam_und = ch_bam_map 
@@ -1033,8 +1036,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/mantaSVout", pattern: "candidateSV.rehead.vcf", mode: 'move', \
-			saveAs: { vcf -> "${sample_name}_manta_${vcf}" }
+		publishDir "${params.outdir}/mantaSVout", pattern: "${sample_name}_candidateSV.vcf", mode: 'move'
 
 		input:
 			val abs_outdir from abs_outdir
@@ -1042,26 +1044,18 @@ if (params.seqmode == 'illumina') {
 			file "candidateSV.vcf" from reheader_manta
 		
 		output:
-			path("candidateSV.rehead.vcf")
+			path("${sample_name}_candidateSV.vcf")
 			path("vcf_path") into vcf_manta
 		
 		script:
 			log.info "Reheading Manta SV VCF"
 			"""
 			printf "${sample_name}_manta\n" > rehead_manta.txt
-			{bcftools reheader --samples rehead_manta.txt \
-				-o ${sample_name}_candidateSV.vcf \
-				candidateSV.vcf} || {mv candidateSV.vcf ${sample_name}_candidateSV.vcf}
+			mv candidateSV.vcf ${sample_name}_candidateSV.vcf
 			echo ${abs_outdir}/mantaSVout/${sample_name}_candidateSV.vcf > vcf_path # for later merging
 			"""
 	}
-/*
-			printf "${sample_name}_breakdancer\n" > rehead_breakdancer.txt
-			bcftools reheader --samples rehead_breakdancer.txt \
-				-o ${sample_name}_BreakDancerSortVCF.vcf \
-				BreakDancerSortVCF.vcf
-			echo ${abs_outdir}/BreakDancerSVOut/${sample_name}_BreakDancerSortVCF.vcf
-*/
+
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ Delly SV ~~~~~
 
 	process delly_calling_sv {
@@ -1261,6 +1255,8 @@ if (params.seqmode == 'illumina') {
 				-loj > ${out_bedpe}
 			"""
 	}
+	
+	
 	process annot_merge_vcf {
 		tag "$sample_name"
 		label 'pysam'
