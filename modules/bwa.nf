@@ -6,7 +6,7 @@ process BWA_MEM {
   time '02:00:00'
   clusterOptions '-q batch'
 
-  container 'bwa-0.7.9a_python_2.7.3.sif'
+  container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy'
 
@@ -21,10 +21,10 @@ process BWA_MEM {
   script:
   log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
 
-  if (params.reads == "SE"){
+  if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"
     }
-  if (params.reads == "PE"){
+  if (params.read_type == "PE"){
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
     }
 

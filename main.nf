@@ -6,16 +6,23 @@ nextflow.enable.dsl=2
 if (params.workflow == "toy_example"){
   include {TOY_EXAMPLE} from './workflows/toy_example'
 }
-else if (params.workflow == "rnaseq"){
+if (params.workflow == "rnaseq"){
   include {RNASEQ} from './workflows/rnaseq'
+}
+if (params.workflow == "wes"){
+  include {WES} from './workflows/wes'
 }
 
 // conditional to kick off appropriate workflow
 workflow{
-if (params.workflow == "toy_example"){
-  TOY_EXAMPLE()
-  }
-else if (params.workflow == "rnaseq"){
-  RNASEQ()
-  }
+  if (params.workflow == "toy_example"){
+    TOY_EXAMPLE()
+    }
+  if (params.workflow == "rnaseq"){
+    RNASEQ()
+    }
+  if (params.workflow == "wes"){
+    println("made it here")
+    WES()
+    }
 }

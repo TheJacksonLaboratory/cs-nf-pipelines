@@ -1,7 +1,7 @@
 //Picard Tools
 // Will need to depricate pamA and pamB for new approach
 
-process PICARD_SORTSAM{
+process PICARD_SORTSAM {
   tag "sampleID"
 
   // Slurm Options
@@ -14,13 +14,14 @@ process PICARD_SORTSAM{
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_sortsam.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bwa_mem)
+  tuple val(sampleID), file(bwa_mem_sam)
 
   output:
-  tuple val(sampleID), file(*_aln.ba*), emit: picard_sortsam
+  tuple val(sampleID), file("*_sortsam.bam"), emit: picard_sortsam_bam
+  tuple val(sampleID), file("*_sortsam.bai"), emit: picard_sortsam_bai
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
@@ -28,14 +29,14 @@ process PICARD_SORTSAM{
   """
   picard SortSam \
   SO=coordinate \
-  INPUT=${sam} \
-  OUTPUT=${sampleID}_aln_sortsam.bam  \
+  INPUT=${bwa_mem_sam} \
+  OUTPUT=${sampleID}_sortsam.bam  \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
   """
 }
 
-process PICARD_MARKDUPLICATES{
+process PICARD_MARKDUPLICATES {
   tag "sampleID"
 
   // Slurm Options
@@ -48,21 +49,22 @@ process PICARD_MARKDUPLICATES{
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
+//  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), file(sorted_sam)
+  tuple val(sampleID), file(bam)
+//  tuple val(sampleID), file(bai)
 
-  output:
-  tuple val(sampleID), file("*_dedup.ba*"), emit: bam_dedup
-  tuple val(sampleID), file("*metrics.dat"), emit: picard_metrics
+//  output:
+//  tuple val(sampleID), file("*_dedup.ba*"), emit: bam_dedup
+//  tuple val(sampleID), file("*metrics.dat"), emit: picard_metrics
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
 
   """
   picard MarkDuplicates \
-  I=${sorted_sam ? *.bam} \
+  I=${bam} \
   O=${sampleID}_dedup.bam \
   M=${sampleID}_dup_metrics.dat \
   REMOVE_DUPLICATES=true \
@@ -71,6 +73,7 @@ process PICARD_MARKDUPLICATES{
   """
 }
 
+/*
 process PICARD_CALCULATEHSMETRICS {
   tag "sampleID"
 
@@ -104,6 +107,7 @@ process PICARD_CALCULATEHSMETRICS {
   VALIDATION_STRINGENCY=SILENT
   """
 }
+*/
 
 // part A
 process PICARD_ALN_METRICS_A {

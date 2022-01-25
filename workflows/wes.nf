@@ -5,6 +5,7 @@ nextflow.enable.dsl=2
 include {BWA_MEM} from '../modules/bwa'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {READ_GROUPS} from '../modules/read_groups'
+include {PICARD_SORTSAM;PICARD_MARKDUPLICATES} from '../modules/picard'
 
 
 // prepare reads channel
@@ -16,20 +17,18 @@ else if (params.read_type == 'SE'){
 }
 
 // main workflow
-workflow WES{
-  // Step 1: Qual_Stat *
-  QUALITY_STATISTICS(read_ch) *
-  // Step 2: Get Read Group Information *
+workflow WES {
+  // Step 1: Qual_Stat
+  QUALITY_STATISTICS(read_ch) 
+  // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
-
   // Step 3: BWA-MEM Alignment
   BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
-
-
-  /* Step 4: Variant Preprocessing - Part 1
+  // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.bwa_mem)
-  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam)
-  // Step 5: Variant Pre-Processing - Part 2
+  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam_bam)
+ 
+  /* Step 5: Variant Pre-Processing - Part 2
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.bam_dedup)
     GATK_APPLYBQSR(GATK_BASERECALIBRATOR.out.recal_data_table)
