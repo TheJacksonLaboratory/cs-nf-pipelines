@@ -71,6 +71,40 @@ process PICARD_MARKDUPLICATES{
   """
 }
 
+process PICARD_CALCULATEHSMETRICS {
+  tag "sampleID"
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'picard-1.95.sif'
+
+  publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
+
+  input:
+  tuple sampleID, file(bam_realigned) from realigned_bam1
+  tuple sampleID, file(bai_realigned) from realigned_bai1
+
+  output:
+  tuple sampleID, file("*Metrics.txt") into covmet, dummy_covmet
+  file("*CoverageMetrics*")
+
+  script:
+  log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
+
+  """
+  picard CalculateHsMetrics \
+  TARGET_INTERVALS=${params.target_picard} \
+  BAIT_INTERVALS=${params.bait_picard} \
+  REFERENCE_SEQUENCE=${params.ref_fa} \
+  INPUT=${bam_realigned} \
+  OUTPUT=${sampleID}_CoverageMetrics.txt \
+  VALIDATION_STRINGENCY=SILENT
+  """
+}
+
 // part A
 process PICARD_ALN_METRICS_A {
 
