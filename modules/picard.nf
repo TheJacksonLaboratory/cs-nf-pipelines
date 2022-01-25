@@ -17,7 +17,7 @@ process PICARD_SORTSAM {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_sortsam.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bwa_mem_sam)
+  tuple val(sampleID), file(sam)
 
   output:
   tuple val(sampleID), file("*_sortsam.bam"), emit: picard_sortsam_bam
@@ -29,7 +29,7 @@ process PICARD_SORTSAM {
   """
   picard SortSam \
   SO=coordinate \
-  INPUT=${bwa_mem_sam} \
+  INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
@@ -49,15 +49,16 @@ process PICARD_MARKDUPLICATES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-//  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.dat", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
-//  tuple val(sampleID), file(bai)
 
-//  output:
-//  tuple val(sampleID), file("*_dedup.ba*"), emit: bam_dedup
-//  tuple val(sampleID), file("*metrics.dat"), emit: picard_metrics
+  output:
+  tuple val(sampleID), file("*_dedup.bam"), emit: dedup_bam
+  tuple val(sampleID), file("*_dedup.bai"), emit: dedup_bai
+  tuple val(sampleID), file("*.dat"), emit: dedup_metrics
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
