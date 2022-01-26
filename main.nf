@@ -107,9 +107,11 @@ if (params.seqmode == 'pacbio') {
 			file bam from ch_bam_map
 		output:
 			file "*.vcf" into sniffles_vcf
+			path(vcf_path) into vcf_sniffles_path
 		script:
 			  """
 			  sniffles -m ${bam} -v sniffles_calls.vcf
+			  echo ${params.outdir}/sniffles_calls.vcf > vcf_path # for later merging
 			  """
 	}
 	
@@ -308,8 +310,10 @@ if (params.seqmode == 'pacbio') {
 				file fasta from ch_fasta
 			output:
 				file "*.vcf" into pbsv_vcf_ccs
+				path(vcf_path) into vcf_pbsv_path
 			"""
 			pbsv call --ccs ${fasta} ${svsig} pbsv_calls.vcf
+			echo ${params.outdir}/pbsv_calls.vcf > vcf_path # for later merging
 			"""
 		}
 	}	
@@ -326,8 +330,10 @@ if (params.seqmode == 'pacbio') {
 				file fasta from ch_fasta
 			output:
 				file "*.vcf" into pbsv_vcf_clr
+				path(vcf_path) into vcf_pbsv_path
 			"""
 			pbsv call ${fasta} ${svsig} pbsv_calls.vcf
+			echo ${params.outdir}/pbsv_calls.vcf > vcf_path # for later merging
 			"""
 		}
 	}	
@@ -346,7 +352,16 @@ if (params.seqmode == 'pacbio') {
     """
 	}
 
-	process survivor{
+
+	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Collect all VCF file Paths  ~~~~~
+	// NOTE: merged extension contains 'BDLM' => Breakdancer + Delly + Lumpy + Manta
+	vcf_pbsv_path.concat(
+	vcf_sniffles_path
+	)
+	.collectFile(name: "sample.vcfs.txt", sort: false)
+	.set { sample_vcfs_paths }
+
+	/*process survivor{
 		label 'long_himem'
 		label 'survivor'
 		input:
@@ -365,7 +380,7 @@ if (params.seqmode == 'pacbio') {
 		"""
 		SURVIVOR merge vcf_list ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${name_string}.merged.vcf
 		"""
-	}
+	} */
 	/*
 	process annotate_sv{
 		label 'mid_job'
@@ -1142,31 +1157,32 @@ if (params.seqmode == 'illumina') {
 	)
 	.collectFile(name: "sample.vcfs.txt", sort: false)
 	.set { sample_vcfs_paths }
-
-	//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
-
-	process survivor_sr{
-		label 'long_himem'
-		label 'survivor'
-		input:
-			path(vcf_paths) from sample_vcfs_paths
-			val sample_name from params.names
-			val surv_dist from params.surv_dist
-			val surv_supp from params.surv_supp
-			val surv_type from params.surv_type
-			val surv_strand from params.surv_strand
-			val surv_min from params.surv_min
-		output:
-			tuple sample_name, path("${sample_name}_mergedCall.BDLM.vcf") into ( vcf_merged, vcf_mrg_annot )
-		script:
-		"""
-		SURVIVOR merge ${vcf_paths} ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${sample_name}_mergedCall.BDLM.vcf
-		"""
-	}
-
-
-
 } // END OF if param.seqmode == 'illumina'
+	
+//~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
+
+process survivor{
+	label 'long_himem'
+	label 'survivor'
+	input:
+		path(vcf_paths) from sample_vcfs_paths
+		val sample_name from params.names
+		val surv_dist from params.surv_dist
+		val surv_supp from params.surv_supp
+		val surv_type from params.surv_type
+		val surv_strand from params.surv_strand
+		val surv_min from params.surv_min
+	output:
+		tuple sample_name, path("${sample_name}_mergedCall.BDLM.vcf") into ( vcf_merged, vcf_mrg_annot )
+	script:
+	"""
+	SURVIVOR merge ${vcf_paths} ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${sample_name}_mergedCall.BDLM.vcf
+	"""
+}
+
+
+
+
 
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Annotate if in Exon  ~~~~~
 
@@ -1174,6 +1190,7 @@ vcf_merged.into{vcf_merged_1; vcf_merged_2; vcf_merged_3}
 
 process annotate_sv{
 	label 'mid_job'
+	publishDir params.outdir, mode:'copy'
 	input:
 		tuple sample_name, path(in_vcf) from vcf_merged_1
 		val seqmode from params.seqmode
