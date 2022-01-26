@@ -1,4 +1,4 @@
-process SAMTOOLS_FAIDX {
+process SAMTOOLS_INDEX {
 
   tag "sampleID"
 
@@ -9,20 +9,19 @@ process SAMTOOLS_FAIDX {
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern:"*fai", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern:"*.ba*", mode:'copy'
 
   input:
-  file(ref_fa)
+  tuple val("sampleID"), file(bam)
 
   output:
-  file("*"), emit: ref_fai
+  tuple val("sampleID"), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Creating Reference Index -----"
+  log.info "----- Samtools Index Running on: ${sampleID} -----"
 
     """
-    samtools faidx ${ref_fa}
+    samtools index ${bam}
     """
 }
 
-process samtools index ${sampleID}_realigned_BQSR.bam

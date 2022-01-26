@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 include {BWA_MEM} from '../modules/bwa'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {READ_GROUPS} from '../modules/read_groups'
-include {PICARD_SORTSAM;PICARD_MARKDUPLICATES} from '../modules/picard'
+include {PICARD_SORTSAM;PICARD_MARKDUPLICATES;PICARD_COLLECTHSMETRICS} from '../modules/picard'
+include {SAMTOOLS_INDEX} from '../modules/samtools'
 
 
 // prepare reads channel
@@ -23,23 +24,26 @@ workflow WES {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
   // Step 3: BWA-MEM Alignment
-  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  bwa_files = file("/projects/compsci/refdata/Mouse/mm10/Index_Files/BWA/*")
+  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups, bwa_files)
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.bwa_mem)
-  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam_bam)
- 
-  /* Step 5: Variant Pre-Processing - Part 2
+  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam_bam) 
+  // Step 5: Variant Pre-Processing - Part 2
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.bam_dedup)
     GATK_APPLYBQSR(GATK_BASERECALIBRATOR.out.recal_data_table)
     SAMTOOLS_INDEX(GATK_APPLYBQSR.out.bam)
   }
   else if (params.gen_org=='mouse'){
-    SAMTOOLS_INDEX(PICARD_MARKDUPLICATES.out.bam_dedup)
+    SAMTOOLS_INDEX(PICARD_MARKDUPLICATES.out.dedup_bam) // dont think this is necessary
   }
   // Step 6: Variant Pre-Processing - Part 3
-  PICARD_CALCULATEHSMETRICS(SAMTOOLS_INDEX.out.samtools_index)
-  // Step 7: Variant Calling
+  PICARD_COLLECTHSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam,
+                          PICARD_MARKDUPLICATES.out.dedup_bai)
+
+
+  /* Step 7: Variant Calling
   GATK_HAPLOTYPECALLER(SAMTOOLS_INDEX.out.samtools_index, 'normal')
   GATK_HAPLOTYPECALLER(SAMTOOLS_INDEX.out.samtools_index, 'gvcf')
   // Step 8-11 Human

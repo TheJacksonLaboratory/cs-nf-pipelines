@@ -13,7 +13,7 @@ process BWA_MEM {
   input:
   tuple val(sampleID), file(fq_reads)
   tuple val(sampleID), file(read_groups)
-
+  file(bwa_files)
 
   output:
   tuple val(sampleID), file("*.sam"), emit: bwa_mem
@@ -30,6 +30,7 @@ process BWA_MEM {
 
   """
   rg=\$(cat ${read_groups})
-  bwa mem -M -B ${params.mismatch_penalty} -t ${task.cpus} -R \${rg} ${params.ref_fa} $inputfq > ${sampleID}.sam
+  bwa mem -M \
+  ${params.ref_fa} $inputfq > ${sampleID}.sam
   """
   }

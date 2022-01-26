@@ -49,7 +49,7 @@ process PICARD_MARKDUPLICATES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_aln.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.dat", mode:'copy'
 
   input:
@@ -74,8 +74,8 @@ process PICARD_MARKDUPLICATES {
   """
 }
 
-/*
-process PICARD_CALCULATEHSMETRICS {
+
+process PICARD_COLLECTHSMETRICS {
   tag "sampleID"
 
   cpus = 1
@@ -83,32 +83,31 @@ process PICARD_CALCULATEHSMETRICS {
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  container 'picard-1.95.sif'
+  container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.*", mode:'copy'
 
   input:
-  tuple sampleID, file(bam_realigned) from realigned_bam1
-  tuple sampleID, file(bai_realigned) from realigned_bai1
+  tuple val(sampleID), file(bam) 
+  tuple val(sampleID), file(bai) 
 
   output:
-  tuple sampleID, file("*Metrics.txt") into covmet, dummy_covmet
-  file("*CoverageMetrics*")
+  tuple val(sampleID), file("*Metrics.txt"), emit: hsmetrics
 
   script:
-  log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
+  log.info "----- Picard CollectHsMetrics Running on: ${sampleID} -----"
 
   """
-  picard CalculateHsMetrics \
-  TARGET_INTERVALS=${params.target_picard} \
-  BAIT_INTERVALS=${params.bait_picard} \
-  REFERENCE_SEQUENCE=${params.ref_fa} \
-  INPUT=${bam_realigned} \
+  picard CollectHsMetrics \
+  INPUT=${bam} \
   OUTPUT=${sampleID}_CoverageMetrics.txt \
+  BAIT_INTERVALS=${params.bait_picard} \
+  TARGET_INTERVALS=${params.target_picard} \
+  REFERENCE_SEQUENCE=${params.ref_fa} \
   VALIDATION_STRINGENCY=SILENT
   """
 }
-*/
+
 
 // part A
 process PICARD_ALN_METRICS_A {
