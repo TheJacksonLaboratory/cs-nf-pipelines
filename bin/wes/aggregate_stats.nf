@@ -1,4 +1,4 @@
-process AGGREGATE_STATS { // NEED TO FIX THIS UP TO TAKE N NUMBER OF FILES OR A LIST OF FILES
+process AGGREGATE_STATS_MOUSE { 
   tag "sampleID"
 
   cpus = 1
@@ -7,23 +7,25 @@ process AGGREGATE_STATS { // NEED TO FIX THIS UP TO TAKE N NUMBER OF FILES OR A 
 
   container 'python_2.7.3.sif'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
 
   input:
-  tuple sampleID, file(filter_stats), file(AlignMet) from fq_stats.join(covmet)
+  tuple val(sampleID), file(filter_stats)
+  tuple val(sampleID), file(algn_met)
 
   output:
-  tuple sampleID, file("*summary_stats.txt")
-  tuple sampleID, file("*stats.txt") into dummy_stats_file
+  tuple val(sampleID), file("*summary_stats.txt"), emit: txt
 
   script:
-  log.info "-----Generating summary stats file for ${sampleID}-----"
+  log.info "----- Generating Summary Stats for: ${sampleID} -----"
 
   """
-  python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${AlignMet}
+  python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${algn_met}
   """
 }
-process AGGREGATE_STATS_HUMAN { // THIS IS DEPRECATED
+
+/*
+process AGGREGATE_STATS_HUMAN { D
   tag "sampleID"
 
   cpus = 1
@@ -48,3 +50,4 @@ process AGGREGATE_STATS_HUMAN { // THIS IS DEPRECATED
   python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${PicardMet} ${CoverageMet}
   """
 }
+*/

@@ -7,8 +7,10 @@ include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {READ_GROUPS} from '../modules/read_groups'
 include {PICARD_SORTSAM;PICARD_MARKDUPLICATES;PICARD_COLLECTHSMETRICS} from '../modules/picard'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
-include {GATK_HAPLOTYPECALLER;GATK_INDEXFEATUREFILE;GATK_VARIANTFILTRATION} from '../modules/gatk'
+include {GATK_HAPLOTYPECALLER;GATK_INDEXFEATUREFILE;GATK_VARIANTFILTRATION;GATK_GENOMEANALYSISTK} from '../modules/gatk'
 include {SNPEFF} from '../modules/snpeff'
+include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpsift'
+include {AGGREGATE_STATS_MOUSE} from '../bin/wes/aggregate_stats.nf'
 
 // prepare reads channel
 if (params.read_type == 'PE'){
@@ -87,15 +89,15 @@ workflow WES {
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
                              GATK_INDEXFEATUREFILE.out.vcf_index,
                              'INDEL')
-    // Step 9: Post Variant Calling Processing - Part 1 (just renaming--skip for now)
-      // CAT_SNP_INDEL()
-    // Step 10: Post Variant Calling Processing - Part 2
+    // Step 9: Post Variant Calling Processing - Part 1 (just renaming--skip for now) // CAT_SNP_INDEL()
+
+    // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
-   
-/*   GENOMEANALYSISTK()
-      EXTRACTFIELDS()
+      GATK_GENOMEANALYSISTK(GATK_VARIANTFILTRATION.out.vcf,
+                            SNPEFF.out.vcf)
+      SNPSIFT_EXTRACTFIELDS(GATK_GENOMEANALYSISTK.out.vcf)
     // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
-      AGGREGATE_STATS()
-*/
+      AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
+                      PICARD_COLLECTHSMETRICS.out.hsmetrics)
   }
 }

@@ -1,3 +1,37 @@
+process GATK_GENOMEANALYSISTK {
+  tag "sampleID"
+
+  cpus 1
+  memory 15.GB
+  time '24:00:00'
+  clusterOptions '-q batch' 
+
+  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+// need to update, but genomeanalysistk does not exist in gatkv4  
+// container 'broadinstitute/gatk:4.2.4.1'
+  
+  input:
+  tuple val(sampleID), file(sample_vcf)
+  tuple val(sampleID), file(snpeff_vcf)
+  
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+  
+  script:
+  if (params.gen_org =='mouse')
+    """
+    java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/GenomeAnalysisTK.jar \
+    -R ${params.ref_fa} \
+    -T VariantAnnotator \
+    -A SnpEff \
+    --variant ${sample_vcf} \
+    --snpEffFile ${snpeff_vcf} \
+    -L ${sample_vcf} \
+    -o ${sampleID}_genomeanalysistk.vcf
+    """
+
+}
+
 // part A
 process GATK_STATS_A {
 
