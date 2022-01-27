@@ -13,4 +13,4 @@ cd $SLURM_SUBMIT_DIR
 # LOAD SINGULARITY
 ml singularity
 # RUN TEST PIPELINE
-~/nextflow main.nf --workflow wes
+~/nextflow main.nf --workflow wes -resume

@@ -13,8 +13,7 @@ process BWA_MEM {
   input:
   tuple val(sampleID), file(fq_reads)
   tuple val(sampleID), file(read_groups)
-  file(bwa_files)
-
+  
   output:
   tuple val(sampleID), file("*.sam"), emit: bwa_mem
 
@@ -29,8 +28,14 @@ process BWA_MEM {
     }
 
   """
-  rg=\$(cat ${read_groups})
-  bwa mem -M \
+  rg=\$(cat $read_groups)
+  rg=\$(echo \$rg | sed -r 's/[=]+/:/g')
+  rg=\$(echo \$rg | sed -r 's/[RG]+//g')
+  rg=\$(echo \$rg | sed -r 's/[ ]+/\t/g')
+
+  echo '\'\$rg\''
+  
+  bwa mem -M -R "@RG\t\${rg}" \
   ${params.ref_fa} $inputfq > ${sampleID}.sam
   """
   }

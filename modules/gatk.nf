@@ -88,6 +88,7 @@ process GATK_STATS_B {
 
   """
 }
+/*
 process GATK_BASERECALIBRATOR {
   tag "sampleID"
 
@@ -149,6 +150,8 @@ process GATK_APPLYBQSR {
    -O ${sampleID}_realigned_BQSR.bam
   """
 }
+*/
+
 process GATK_HAPLOTYPECALLER {
   tag "sampleID"
 
@@ -157,38 +160,39 @@ process GATK_HAPLOTYPECALLER {
   time = '23:00:00'
   clusterOptions = '-q batch'
 
-  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
+  container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*.*", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
 
   input:
-  tuple sampleID, file(bam_realigned) from realigned_bam2
-  tuple sampleID, file(bai_realigned) from realigned_bai2
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(bai)
   val(gvcf)
 
   output:
-  tuple sampleID, file("*variants_raw.vcf") into raw_variants, dummy_raw_variants
+  tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "-----Variant calling running on ${sampleID}-----"
+  log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
 
   if (gvcf=='gvcf'){
     delta='-ERC GVCF'
   }
+  else{
+    delta=''
+  }
+
+//  --dbsnp ${params.dbSNP}
+
   """
-
-  gatk --java-options "-Xmx12g" HaplotypeCaller  \
+  gatk HaplotypeCaller  \
   -R ${params.ref_fa} \
-  -I ${bam_realigned} \
-  --dbsnp ${params.dbSNP} \
+  -I ${bam} \
   -O ${sampleID}_variants_raw.vcf \
-  ${delta} \
-  -L ${params.target_gatk} \
-  -stand-call-conf ${params.call_val} \
-  ${params.ploidy_val}
-
+  -ERC GVCF \
   """
 }
+/*
 process GATK_SELECTVARIANTS{
   tag "sampleID"
 
@@ -252,3 +256,4 @@ process GATK_VARIANTFILTRATION{
   --filter-expression "FS > ${fs}" --filter-name "StrandBias"
   """
 }
+*/
