@@ -25,9 +25,8 @@ workflow WES {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
   // Step 3: BWA-MEM Alignment
-  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
-  
-  /* Step 4: Variant Preprocessing - Part 1
+  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )  
+  // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.bwa_mem)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam_bam) 
   // Step 5: Variant Pre-Processing - Part 2
@@ -47,7 +46,7 @@ workflow WES {
                        PICARD_MARKDUPLICATES.out.dedup_bai,
                        'normal')
   
-  // GATK_HAPLOTYPECALLER(SAMTOOLS_INDEX.out.samtools_index, 'gvcf')
+  /* GATK_HAPLOTYPECALLER(SAMTOOLS_INDEX.out.samtools_index, 'gvcf')
   // Step 8-11 Human
   if (params.gen_org=='human'){
     // Step 8: Variant Filtration
