@@ -7,8 +7,8 @@ include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {READ_GROUPS} from '../modules/read_groups'
 include {PICARD_SORTSAM;PICARD_MARKDUPLICATES;PICARD_COLLECTHSMETRICS} from '../modules/picard'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
-include {GATK_HAPLOTYPECALLER} from '../modules/gatk'
-
+include {GATK_HAPLOTYPECALLER;GATK_INDEXFEATUREFILE;GATK_VARIANTFILTRATION} from '../modules/gatk'
+include {SNPEFF} from '../modules/snpeff'
 
 // prepare reads channel
 if (params.read_type == 'PE'){
@@ -45,9 +45,11 @@ workflow WES {
   GATK_HAPLOTYPECALLER(PICARD_MARKDUPLICATES.out.dedup_bam,
                        PICARD_MARKDUPLICATES.out.dedup_bai,
                        'normal')
-  
-  /* GATK_HAPLOTYPECALLER(SAMTOOLS_INDEX.out.samtools_index, 'gvcf')
-  // Step 8-11 Human
+//need to tweek haplotypecaller -- why run both ways just for output change?
+//  GATK_HAPLOTYPECALLER(PICARD_MARKDUPLICATES.out.dedup_bam,
+  //                     PICARD_MARKDUPLICATES.out.dedup_bai,
+    //                   'gvcf')  
+  /* Step 8-11 Human
   if (params.gen_org=='human'){
     // Step 8: Variant Filtration
       // SNP
@@ -76,20 +78,24 @@ workflow WES {
     // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
       AGGREGATE_STATS()
   }
+*/
 
   // Step 8-11 Mouse
   if (params.gen_org=='mouse'){
     // Step 8: Variant Filtration
-      GATK_INDEXFEATUREFILE()
-      GATK_VARIANTFILTRATION()
-    // Step 9: Post Variant Calling Processing - Part 1
-      CAT_SNP_INDEL()
+      GATK_INDEXFEATUREFILE(GATK_HAPLOTYPECALLER.out.vcf)
+      GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
+                             GATK_INDEXFEATUREFILE.out.vcf_index,
+                             'INDEL')
+    // Step 9: Post Variant Calling Processing - Part 1 (just renaming--skip for now)
+      // CAT_SNP_INDEL()
     // Step 10: Post Variant Calling Processing - Part 2
-      SNPEFF()                  // snpEff
-      GENOMEANALYSISTK()
+      SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
+   
+/*   GENOMEANALYSISTK()
       EXTRACTFIELDS()
     // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
       AGGREGATE_STATS()
+*/
   }
-  */
 }

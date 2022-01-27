@@ -224,30 +224,71 @@ process GATK_SELECTVARIANTS{
   -select-type ${indel_snp} \
   -O ${sampleID}_${indel_snp}.vcf
   """
-}
-process GATK_INDEXFEATUREFILE{
-  //output?
+}*/
+
+process GATK_INDEXFEATUREFILE {
+  tag "sampleID"
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.idx", mode:'copy'
+
   input:
   tuple val(sampleID), file(vcf)
+ 
+  output:
+  tuple val(sampleID), file("*.idx"), emit: vcf_index
+ 
+  script:
+  
   """
   gatk IndexFeatureFile \
   -I ${vcf}
   """
 }
-process GATK_VARIANTFILTRATION{
+
+
+process GATK_VARIANTFILTRATION {
+  tag "sampleID"
+
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  
   input:
+  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(idx)
   val(indel_snp)
-  if (indel_nsp == 'INDEL'){
-    fs='60.0'
+  
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+
+  script:
+  if (indel_snp == 'INDEL'){
+    fs='200.0'
   }
-  else{
-    fs ='200.0'
+  if (indel_snp =='SNP'){
+    fs ='60.0'
   }
+  if (params.gen_org == 'mouse'){
+    // mouse will be indel but fs needs to be same as snp (not sure why)
+    fs = '60.0'
+  }
+
   """
   gatk VariantFiltration \
   -R ${params.ref_fa} \
-  -V ${sampleID}_only_snps.vcf \
-  -O ${sampleID}_only_snps_filtered.vcf \
+  -V ${vcf} \
+  -O ${sampleID}_${indel_snp}.vcf \
   --cluster-window-size 10 \
   --filter-expression "DP < 25" --filter-name "LowCoverage" \
   --filter-expression "QUAL < 30.0" --filter-name "VeryLowQual" \
@@ -256,4 +297,3 @@ process GATK_VARIANTFILTRATION{
   --filter-expression "FS > ${fs}" --filter-name "StrandBias"
   """
 }
-*/
