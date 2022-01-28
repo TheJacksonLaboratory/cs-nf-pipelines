@@ -122,7 +122,7 @@ process GATK_STATS_B {
 
   """
 }
-/*
+
 process GATK_BASERECALIBRATOR {
   tag "sampleID"
 
@@ -131,29 +131,30 @@ process GATK_BASERECALIBRATOR {
   time = '72:00:00'
   clusterOptions = '-q batch'
 
-  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
+  container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*realigned_BQSR*", mode: 'copy'
-
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.table", mode:'copy'
+  
   input:
-  tuple sampleID, file(dedup_bam)
+  tuple val(sampleID), file(bam)
 
   output:
-  tuple sampleID, file("*.table") emit: recal_data_table
+  tuple val(sampleID), file("*.table"), emit: table
 
   script:
   log.info "----- GATK BaseRecalibrator Running on: ${sampleID} -----"
 
   """
   gatk BaseRecalibrator \
-  -I ${dedup_bam} \
+  -I ${bam} \
   -R ${params.ref_fa} \
   --known-sites ${params.dbSNP} \
   --known-sites ${params.gold_std_indels} \
   --known-sites ${params.phase1_1000G} \
-  -O recal_data.table \
+  -O ${sampleID}_recal_data.table \
   """
 }
+
 process GATK_APPLYBQSR {
   tag "sampleID"
 
@@ -162,29 +163,30 @@ process GATK_APPLYBQSR {
   time = '72:00:00'
   clusterOptions = '-q batch'
 
-  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
+  container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${sample_tmpdir}_tmp", pattern: "*realigned_BQSR*", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.ba*", mode:'copy'
 
   input:
-  tuple sampleID, file(dedup_bam)
-
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(table)
+  
   output:
-  tuple sampleID, file("*realigned_BQSR.bam")
-  tuple sampleID, file("*realigned_BQSR*bai")
+  tuple val(sampleID), file("*.bam"), emit: bam
+  tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
   log.info "----- GATK ApplyBQSR Running on: ${sampleID} -----"
 
   """
-  gatk --java-options "-Xmx24g" ApplyBQSR \
+  gatk ApplyBQSR \
    -R ${params.ref_fa} \
-   -I ${dedup_bam} \
-   --bqsr-recal-file recal_data.table \
+   -I ${bam} \
+   --bqsr-recal-file ${table} \
    -O ${sampleID}_realigned_BQSR.bam
   """
 }
-*/
+
 
 process GATK_HAPLOTYPECALLER {
   tag "sampleID"
@@ -226,8 +228,8 @@ process GATK_HAPLOTYPECALLER {
   -ERC GVCF \
   """
 }
-/*
-process GATK_SELECTVARIANTS{
+
+process GATK_SELECTVARIANTS {
   tag "sampleID"
 
   cpus = 1
@@ -235,30 +237,26 @@ process GATK_SELECTVARIANTS{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
-
-
-  input:
-  tuple sampleID, file(merged_raw_var) from raw_variants
-
-  output:
-  tuple sampleID, file("*only_snps_filtered.vcf"), file("*only_indels_filtered.vcf") into filt_var, dummy_filt_var
+  container 'broadinstitute/gatk:4.2.4.1'
 
   input:
-  tuple val(sampleID), file(merged_raw_var)
+  tuple val(sampleID), file(vcf)
   val(indel_snp)
 
-   output:
-   tuple val(sampleID), file(*.vcf)
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+  
+  script:
+  log.info "----- GATK Selectvariants Running on: ${sampleID} -----"
 
   """
   gatk SelectVariants \
   -R ${params.ref_fa} \
-  -V ${merged_raw_var} \
+  -V ${vcf} \
   -select-type ${indel_snp} \
   -O ${sampleID}_${indel_snp}.vcf
   """
-}*/
+}
 
 process GATK_INDEXFEATUREFILE {
   tag "sampleID"
