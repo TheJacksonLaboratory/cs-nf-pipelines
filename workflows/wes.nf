@@ -3,19 +3,33 @@ nextflow.enable.dsl=2
 
 // import modules
 include {BWA_MEM} from '../modules/bwa'
+include {CAT_HUMAN;
+         CAT_HUMAN as CAT_HUMAN_0} from '../bin/wes/cat'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {READ_GROUPS} from '../modules/read_groups'
-include {PICARD_SORTSAM;PICARD_MARKDUPLICATES;PICARD_COLLECTHSMETRICS} from '../modules/picard'
+include {PICARD_SORTSAM;
+         PICARD_MARKDUPLICATES;
+         PICARD_COLLECTHSMETRICS} from '../modules/picard'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
-include {SNPEFF;SNPEFF_HUMAN;SNPEFF_HUMAN as SNPEFF_HUMAN_0} from '../modules/snpeff'
-include {SNPSIFT_EXTRACTFIELDS;SNPSIFT_DBNSFP;SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_0} from '../modules/snpsift'
-include {AGGREGATE_STATS_MOUSE} from '../bin/wes/aggregate_stats'
-include {COSMIC_ANNOTATION;COSMIC_ANNOTATION as COSMIC_ANNOTATION_0} from '../modules/cosmic'
+include {SNPEFF;
+         SNPEFF_HUMAN;
+         SNPEFF_HUMAN as SNPEFF_HUMAN_0} from '../modules/snpeff'
+include {SNPSIFT_EXTRACTFIELDS;
+         SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_0;
+         SNPSIFT_DBNSFP;
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_0} from '../modules/snpsift'
+include {AGGREGATE_STATS_MOUSE;AGGREGATE_STATS_HUMAN} from '../bin/wes/aggregate_stats'
+include {COSMIC_ANNOTATION;
+         COSMIC_ANNOTATION as COSMIC_ANNOTATION_0} from '../modules/cosmic'
 // many from gatk
 include {GATK_HAPLOTYPECALLER;
-         GATK_INDEXFEATUREFILE;GATK_INDEXFEATUREFILE as GATK_INDEXFEATUREFILE_0;
-         GATK_VARIANTFILTRATION;GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_0;
-         GATK_GENOMEANALYSISTK;
+         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF;
+         GATK_INDEXFEATUREFILE;
+         GATK_INDEXFEATUREFILE as GATK_INDEXFEATUREFILE_0;
+         GATK_VARIANTFILTRATION;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_0;
+         GATK_GENOMEANALYSISTK_VA;
+         GATK_GENOMEANALYSISTK_CV;
          GATK_SELECTVARIANTS;GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_0;
          GATK_BASERECALIBRATOR;
          GATK_APPLYBQSR} from '../modules/gatk'
@@ -55,40 +69,46 @@ workflow WES {
       GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam,
                            GATK_APPLYBQSR.out.bai,
                           'normal')
-    
+      GATK_HAPLOTYPECALLER_GVCF(GATK_APPLYBQSR.out.bam,
+                                GATK_APPLYBQSR.out.bai,
+                                'gvcf')
     // Step 8: Variant Filtration
       // SNP
-        GATK_SELECTVARIANTS(GATK_HAPLOTYPECALLER.out.vcf, 'SNP')
+        GATK_SELECTVARIANTS(GATK_HAPLOTYPECALLER_GVCF.out.vcf, 'SNP')
         GATK_INDEXFEATUREFILE(GATK_SELECTVARIANTS.out.vcf)
-        GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
+        GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER_GVCF.out.vcf,
                                GATK_INDEXFEATUREFILE.out.vcf_index,
                               'SNP')
-      // INDEL
-      	GATK_SELECTVARIANTS_0(GATK_HAPLOTYPECALLER.out.vcf, 'INDEL')
+      // INDEL (Process	Alias Required for Reuse of Processes)
+      	GATK_SELECTVARIANTS_0(GATK_HAPLOTYPECALLER_GVCF.out.vcf, 'INDEL')
         GATK_INDEXFEATUREFILE_0(GATK_SELECTVARIANTS_0.out.vcf)
-        GATK_VARIANTFILTRATION_0(GATK_HAPLOTYPECALLER.out.vcf,
+        GATK_VARIANTFILTRATION_0(GATK_HAPLOTYPECALLER_GVCF.out.vcf,
                                GATK_INDEXFEATUREFILE_0.out.vcf_index,
                               'INDEL')
 
     // Step 9: Post Variant Calling Processing - Part 1 (MAY NEED TO SET SOME VARIABLES TO HOLD PROCESS.OUT)
       // SNP
-	COSMIC_ANNOTATION(GATK_VARIANTFILTRATION.out.vcf)
+        COSMIC_ANNOTATION(GATK_VARIANTFILTRATION.out.vcf)
         SNPEFF_HUMAN(COSMIC_ANNOTATION.out.vcf, 'SNP')
         SNPSIFT_DBNSFP(SNPEFF_HUMAN.out.vcf, 'SNP')
-      /*  CAT_HUMAN(FILES, 'SNP')
-        EXTRACTFIELDS()
-      // INDEL
-	COSMIC_ANNOTATION()	  // params.cosmic_annot
-        SNPEFF()
-        SNPSIFT_DBNSFP()
-        CAT_HUMAN(FILES, 'INDEL')
-        SNPSIFT_EXTRACTFIELDS()
+        CAT_HUMAN(SNPSIFT_DBNSFP.out.vcf, 'SNP')
+        SNPSIFT_EXTRACTFIELDS(CAT_HUMAN.out.vcf)
+ 
+      // INDEL (Process Alias Required for Reuse of Processes)
+	COSMIC_ANNOTATION_0(GATK_VARIANTFILTRATION_0.out.vcf)
+        SNPEFF_HUMAN_0(COSMIC_ANNOTATION_0.out.vcf, 'INDEL')
+        SNPSIFT_DBNSFP_0(SNPEFF_HUMAN_0.out.vcf, 'INDEL')
+        CAT_HUMAN_0(SNPSIFT_DBNSFP_0.out.vcf, 'INDEL')
+        SNPSIFT_EXTRACTFIELDS_0(CAT_HUMAN_0.out.vcf)
+
     // Step 10: Post Variant Calling Processing - Part 2
-      GENOMEANALYSISTK()        //GenomeAnalysisTK
+      GATK_GENOMEANALYSISTK_CV(CAT_HUMAN.out.vcf,
+                               CAT_HUMAN_0.out.vcf)
     // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
-      AGGREGATE_STATS_HUMAN()
-    */  
-  }
+      AGGREGATE_STATS_HUMAN(QUALITY_STATISTICS.out.quality_stats,
+                            PICARD_COLLECTHSMETRICS.out.hsmetrics,
+                            PICARD_MARKDUPLICATES.out.dedup_metrics)  
+  }           
 
   else if (params.gen_org=='mouse'){
     // SAMTOOLS_INDEX(PICARD_MARKDUPLICATES.out.dedup_bam) // dont think this is necessary
@@ -108,9 +128,9 @@ workflow WES {
     // CAT_SNP_INDEL()
     // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
-      GATK_GENOMEANALYSISTK(GATK_VARIANTFILTRATION.out.vcf,
-                            SNPEFF.out.vcf)
-      SNPSIFT_EXTRACTFIELDS(GATK_GENOMEANALYSISTK.out.vcf)
+      GATK_GENOMEANALYSISTK_VA(GATK_VARIANTFILTRATION.out.vcf,
+                               SNPEFF.out.vcf)
+      SNPSIFT_EXTRACTFIELDS(GATK_GENOMEANALYSISTK_VA.out.vcf)
     // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
       AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
                             PICARD_COLLECTHSMETRICS.out.hsmetrics)

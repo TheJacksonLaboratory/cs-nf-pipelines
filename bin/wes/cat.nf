@@ -4,7 +4,8 @@ process CAT_SNP_INDEL{
   cat !{indels_filt} > !{sampleID}_full_anno_indel.vcf
   """
 }
-process CAT_INDEL_HUMAN{
+
+process CAT_HUMAN{
   tag "sampleID"
 
   cpus 1
@@ -16,13 +17,14 @@ process CAT_INDEL_HUMAN{
 
   input:
   tuple val(sampleID), file(vcf)
-  
+  val(indel_snp)
+
   output:
-  tuple	val(sampleID), file(vcf), emit: vcf
+  tuple	val(sampleID), file("*.vcf"), emit: vcf
 
   script:
   // the pl in here needs to be discovered. this will happen when making the container cook book
   """
-  cat ${vcf} | /snpEff_v4_3/snpEff/scripts/vcfEffOnePerLine.pl > ${sampleID}indel_oneperline.vcf
+  cat ${vcf} | /snpEff_v4_3/snpEff/scripts/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${indel_snp}.vcf
   """
 }

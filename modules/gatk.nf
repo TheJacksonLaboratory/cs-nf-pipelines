@@ -1,4 +1,4 @@
-process GATK_GENOMEANALYSISTK {
+process GATK_GENOMEANALYSISTK_VA {
   tag "sampleID"
 
   cpus 1
@@ -31,7 +31,37 @@ process GATK_GENOMEANALYSISTK {
     """
 
 }
+process GATK_GENOMEANALYSISTK_CV {
+  tag "sampleID"
 
+  cpus 1
+  memory 15.GB
+  time '24:00:00'
+  clusterOptions '-q batch'
+
+  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+// need to update, but genomeanalysistk does not exist in gatkv4
+// container 'broadinstitute/gatk:4.2.4.1'
+
+  input:
+  tuple val(sampleID), file(snp_vcf)
+  tuple val(sampleID), file(indel_vcf)
+
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+
+  script:
+
+  """
+  java -Djava.io.tmpdir=$TMPDIR -Xmx2g -jar /usr/GenomeAnalysisTK.jar \
+  -T CombineGVCFs \
+  -R ${params.ref_fa} \
+  --variant:SNP ${snp_vcf} \
+  --variant:INDEL ${indel_vcf} \
+  -o ${sampleID}_genomeanalysistk_combined.vcf
+  """
+
+}
 // part A
 process GATK_STATS_A {
 
@@ -212,10 +242,10 @@ process GATK_HAPLOTYPECALLER {
   log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
 
   if (gvcf=='gvcf'){
-    delta='-ERC GVCF'
+    delta="-ERC GVCF"
   }
   else{
-    delta=''
+    delta="--dbsnp ${params.dbSNP} "
   }
 
 //  --dbsnp ${params.dbSNP}
@@ -225,7 +255,10 @@ process GATK_HAPLOTYPECALLER {
   -R ${params.ref_fa} \
   -I ${bam} \
   -O ${sampleID}_variants_raw.vcf \
-  -ERC GVCF \
+  -L ${params.target_gatk} \
+  -stand-call-conf ${params.call_val} \
+  ${params.ploidy_val} \
+  ${delta} \
   """
 }
 
