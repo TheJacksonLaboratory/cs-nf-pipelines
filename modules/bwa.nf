@@ -1,9 +1,9 @@
 process BWA_MEM {
   tag "sampleID"
 
-  cpus 1
-  memory 5.GB
-  time '02:00:00'
+  cpus 4
+  memory 16.GB
+  time '10:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'

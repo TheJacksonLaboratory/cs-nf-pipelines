@@ -1,4 +1,4 @@
-process GATK_GENOMEANALYSISTK_VA {
+process GATK_VARIANTANNOTATOR {
   tag "sampleID"
 
   cpus 1
@@ -6,9 +6,9 @@ process GATK_GENOMEANALYSISTK_VA {
   time '24:00:00'
   clusterOptions '-q batch' 
 
-  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+//  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 // need to update, but genomeanalysistk does not exist in gatkv4  
-// container 'broadinstitute/gatk:4.2.4.1'
+  container 'broadinstitute/gatk:4.2.4.1'
   
   input:
   tuple val(sampleID), file(sample_vcf)
@@ -18,20 +18,18 @@ process GATK_GENOMEANALYSISTK_VA {
   tuple val(sampleID), file("*.vcf"), emit: vcf
   
   script:
-  if (params.gen_org =='mouse')
-    """
-    java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/GenomeAnalysisTK.jar \
-    -R ${params.ref_fa} \
-    -T VariantAnnotator \
-    -A SnpEff \
-    --variant ${sample_vcf} \
-    --snpEffFile ${snpeff_vcf} \
-    -L ${sample_vcf} \
-    -o ${sampleID}_genomeanalysistk.vcf
-    """
-
+  """
+  gatk VariantAnnotator \
+  -R ${params.ref_fa} \
+  -A SnpEff \
+  --variant ${sample_vcf} \
+  --snpEffFile ${snpeff_vcf} \
+  -L ${sample_vcf} \
+  -o ${sampleID}_genomeanalysistk.vcf
+  """
 }
-process GATK_GENOMEANALYSISTK_CV {
+
+process GATK_MERGEVCF {
   tag "sampleID"
 
   cpus 1
@@ -39,9 +37,9 @@ process GATK_GENOMEANALYSISTK_CV {
   time '24:00:00'
   clusterOptions '-q batch'
 
-  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+//  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 // need to update, but genomeanalysistk does not exist in gatkv4
-// container 'broadinstitute/gatk:4.2.4.1'
+  container 'broadinstitute/gatk:4.2.4.1'
 
   input:
   tuple val(sampleID), file(snp_vcf)
@@ -53,12 +51,11 @@ process GATK_GENOMEANALYSISTK_CV {
   script:
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx2g -jar /usr/GenomeAnalysisTK.jar \
-  -T CombineGVCFs \
+  gatk MergeVcfs \
   -R ${params.ref_fa} \
-  --variant:SNP ${snp_vcf} \
-  --variant:INDEL ${indel_vcf} \
-  -o ${sampleID}_genomeanalysistk_combined.vcf
+  -I ${snp_vcf} \
+  -I ${indel_vcf} \
+  -O ${sampleID}_genomeanalysistk_combined.vcf
   """
 
 }
@@ -237,7 +234,8 @@ process GATK_HAPLOTYPECALLER {
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
-
+  tuple val(sampleID), file("*.idx"), emit: idx
+  
   script:
   log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
 
@@ -271,13 +269,16 @@ process GATK_SELECTVARIANTS {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
-
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  
   input:
   tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(idx)
   val(indel_snp)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.idx"), emit: idx  
   
   script:
   log.info "----- GATK Selectvariants Running on: ${sampleID} -----"
@@ -287,7 +288,7 @@ process GATK_SELECTVARIANTS {
   -R ${params.ref_fa} \
   -V ${vcf} \
   -select-type ${indel_snp} \
-  -O ${sampleID}_${indel_snp}.vcf
+  -O ${sampleID}_selectvariants_${indel_snp}.vcf
   """
 }
 
@@ -307,7 +308,7 @@ process GATK_INDEXFEATUREFILE {
   tuple val(sampleID), file(vcf)
  
   output:
-  tuple val(sampleID), file("*.idx"), emit: vcf_index
+  tuple val(sampleID), file("*.idx"), emit: idx
  
   script:
   
@@ -327,7 +328,7 @@ process GATK_VARIANTFILTRATION {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
   
   input:
   tuple val(sampleID), file(vcf)
@@ -335,7 +336,7 @@ process GATK_VARIANTFILTRATION {
   val(indel_snp)
   
   output:
-  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.*"), emit: vcf
 
   script:
   if (indel_snp == 'INDEL'){
@@ -353,12 +354,11 @@ process GATK_VARIANTFILTRATION {
   gatk VariantFiltration \
   -R ${params.ref_fa} \
   -V ${vcf} \
-  -O ${sampleID}_${indel_snp}.vcf \
+  -O ${sampleID}_variantfiltration_${indel_snp}.vcf \
   --cluster-window-size 10 \
-  --filter-expression "DP < 25" --filter-name "LowCoverage" \
-  --filter-expression "QUAL < 30.0" --filter-name "VeryLowQual" \
-  --filter-expression "QUAL > 30.0 && QUAL < 50.0" --filter-name "LowQual" \
-  --filter-expression "QD < 1.5" --filter-name "LowQD" \
-  --filter-expression "FS > ${fs}" --filter-name "StrandBias"
+  --filter-name "LowCoverage" --filter-expression "DP < 25" \
+  --filter-name "VeryLowQual" --filter-expression "QUAL < 30.0" \
+  --filter-name "LowQD" --filter-expression "QD < 1.5" \
+  --filter-name "StrandBias" --filter-expression "FS > ${fs}"
   """
 }
