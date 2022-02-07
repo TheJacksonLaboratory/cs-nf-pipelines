@@ -105,7 +105,7 @@ workflow WES {
         SNPSIFT_EXTRACTFIELDS_SNP(CAT_HUMAN_SNP.out.vcf)
 
       // INDEL
-	      COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+        COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
         SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
         SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
         CAT_HUMAN_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
@@ -133,13 +133,9 @@ workflow WES {
                           'varient')
 
     // Step 8: Variant Filtration
-      GATK_INDEXFEATUREFILE(GATK_SELECTVARIANTS.out.vcf)
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
-                             GATK_INDEXFEATUREFILE.out.idx,
+                             GATK_HAPLOTYPECALLER.out.idx,
                             'INDEL')
-
-    // Step 9: Post Variant Calling Processing - Part 1 (just renaming--skip for now)
-    // CAT_SNP_INDEL()
 
     // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)

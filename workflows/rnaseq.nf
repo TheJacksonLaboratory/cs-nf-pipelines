@@ -66,13 +66,13 @@ workflow RNASEQ {
 
     // Step 7: GATK Coverage Stats
       // CTP
-        GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, ${params.ctp_genes})
-        GATK_FORMATTER_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt,${params.ctp_genes})
+        GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.ctp_genes)
+        GATK_FORMATTER_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt, params.ctp_genes)
         GATK_COVCALC_CTP(GATK_FORMATTER_CTP.out.txt, "CTP")
 
       // PROBES
-        GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, ${params.probes})
-        GATK_FORMATTER_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, ${params.probes})
+        GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.probes)
+        GATK_FORMATTER_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
         GATK_COVCALC_PROBES(GATK_FORMATTER_CTP.out.txt, "PROBES")
 
   }

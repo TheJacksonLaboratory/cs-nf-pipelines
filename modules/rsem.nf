@@ -24,8 +24,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
   tuple val(sampleID), file("*genes.results"), emit: rsem_genes
   tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
-  tuple val(sampleID), file("*.bam"), emit: bam
-
+  tuple val(sampleID), file("*.genome.bam"), emit: bam
+  tuple val(sampleID), file("*.transcript.bam"), emit: transcript_bam
 
   script:
   log.info "----- Genome Alignment Running on: ${sampleID} -----"

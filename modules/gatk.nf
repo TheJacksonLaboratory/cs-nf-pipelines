@@ -6,8 +6,9 @@ process GATK_VARIANTANNOTATOR {
   time '24:00:00'
   clusterOptions '-q batch'
 
-  container 'broadinstitute/gatk:4.2.4.1'
-
+ // container 'broadinstitute/gatk:4.2.4.1'
+  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+  
   input:
   tuple val(sampleID), file(sample_vcf)
   tuple val(sampleID), file(snpeff_vcf)
@@ -18,7 +19,8 @@ process GATK_VARIANTANNOTATOR {
   script:
   log.info "----- GATK VariantAnnotator Running on: ${sampleID} -----"
   """
-  gatk VariantAnnotator \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/GenomeAnalysisTK.jar \
+  -T VariantAnnotator \
   -R ${params.ref_fa} \
   -A SnpEff \
   --variant ${sample_vcf} \
@@ -56,7 +58,6 @@ process GATK_MERGEVCF {
   """
 
 }
-// part A
 process GATK_DEPTHOFCOVERAGE {
 
   tag "sampleID"
@@ -85,7 +86,7 @@ process GATK_DEPTHOFCOVERAGE {
   -R ${params.ref_fa} \
   --output-format TABLE \
   -O ${sampleID}_gatk_temp.txt \
-  -I ${reord_sorted_bam} \
+  -I ${bam} \
   -L  ${L} \
   --omit-per-sample-statistics \
   --omit-interval-statistics \
@@ -280,7 +281,8 @@ process GATK_VARIANTFILTRATION {
   val(indel_snp)
 
   output:
-  tuple val(sampleID), file("*.*"), emit: vcf
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.idx"), emit: idx
 
   script:
   log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
