@@ -18,8 +18,9 @@ process SNPEFF{
   tuple val(sampleID),file("*.vcf"), emit:vcf
   tuple val(sampleID),file("*.html")
 
-  // may change -v to a paramiter 
+  // may change -v to a paramiter
   script:
+  log.info "----- snpEff Running on: ${sampleID} -----"
   """
   java -Xmx8g -jar /snpEff/snpEff.jar GRCm38.75 \
   -c ${params.snpEff_config} \
@@ -49,7 +50,7 @@ process SNPEFF_HUMAN{
   tuple val(sampleID),file("*.vcf"), emit:vcf
 
   script:
-
+  log.info "----- snpEff Running on: ${sampleID} -----"
   """
   java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /snpEff_v4_3/snpEff/snpEff.jar \
   -v -lof ${params.gen_ver} \

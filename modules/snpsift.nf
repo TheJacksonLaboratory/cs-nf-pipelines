@@ -13,8 +13,9 @@ process SNPSIFT_DBNSFP{
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
-  
+
   script:
+  log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
   """
   java -jar /snpEff_v4_3/snpEff/SnpSift.jar \
   dbnsfp -v -db ${params.dbNSFP} -noDownload -a \
@@ -30,7 +31,7 @@ process SNPSIFT_EXTRACTFIELDS {
   memory = 6.GB
   time = '06:00:00'
   clusterOptions = '-q batch'
-  
+
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 //container 'quay.io/biocontainers/snpsift:4.2--hdfd78af_5'
 
@@ -38,9 +39,10 @@ process SNPSIFT_EXTRACTFIELDS {
   tuple val(sampleID), file(vcf)
 
   output:
-  tuple val(sampleID), file("*.txt"), emit: txt  
+  tuple val(sampleID), file("*.txt"), emit: txt
 
   script:
+  log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
   """
   java -jar /snpEff/SnpSift.jar \
   extractFields ${vcf} \

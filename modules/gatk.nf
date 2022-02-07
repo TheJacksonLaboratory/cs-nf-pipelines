@@ -4,20 +4,19 @@ process GATK_VARIANTANNOTATOR {
   cpus 1
   memory 15.GB
   time '24:00:00'
-  clusterOptions '-q batch' 
+  clusterOptions '-q batch'
 
-//  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
-// need to update, but genomeanalysistk does not exist in gatkv4  
   container 'broadinstitute/gatk:4.2.4.1'
-  
+
   input:
   tuple val(sampleID), file(sample_vcf)
   tuple val(sampleID), file(snpeff_vcf)
-  
+
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
-  
+
   script:
+  log.info "----- GATK VariantAnnotator Running on: ${sampleID} -----"
   """
   gatk VariantAnnotator \
   -R ${params.ref_fa} \
@@ -37,8 +36,6 @@ process GATK_MERGEVCF {
   time '24:00:00'
   clusterOptions '-q batch'
 
-//  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
-// need to update, but genomeanalysistk does not exist in gatkv4
   container 'broadinstitute/gatk:4.2.4.1'
 
   input:
@@ -49,7 +46,7 @@ process GATK_MERGEVCF {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-
+  log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
   """
   gatk MergeVcfs \
   -R ${params.ref_fa} \
@@ -60,7 +57,7 @@ process GATK_MERGEVCF {
 
 }
 // part A
-process GATK_STATS_A {
+process GATK_DEPTHOFCOVERAGE {
 
   tag "sampleID"
 
@@ -73,80 +70,26 @@ process GATK_STATS_A {
   file(params.ref_fai)
 
   input:
-  tuple val(sampleID), file(reord_sorted_bam)
-  tuple val(sampleID), file(reord_sorted_bai)
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(bai)
+  val(L)
 
   output:
-  tuple val(sampleID), file("*gatk_temp3*"), emit: gatk_3
-  tuple val(sampleID), file("*gatk_temp6*"), emit: gatk_6
-
-  when:
-  params.gen_org == "human"
+  tuple val(sampleID), file("*_gatk_temp.txt"), emit: txt
 
   script:
-  log.info "----- Human GATK Coverage Stats, Part 1 Running on: ${sampleID} -----"
+  log.info "----- GATK Depth of Coverage Running on: ${sampleID} -----"
+
   """
   gatk DepthOfCoverage \
   -R ${params.ref_fa} \
   --output-format TABLE \
-  -O ${sampleID}_gatk_temp1.txt \
+  -O ${sampleID}_gatk_temp.txt \
   -I ${reord_sorted_bam} \
-  -L  ${params.probes} \
+  -L  ${L} \
   --omit-per-sample-statistics \
   --omit-interval-statistics \
   --omit-locus-table \
-
-  gatk DepthOfCoverage \
-  -R ${params.ref_fa} \
-  --output-format TABLE \
-  -O ${sampleID}_gatk_temp4.txt \
-  -I ${reord_sorted_bam} \
-  -L ${params.ctp_genes} \
-  --omit-per-sample-statistics \
-  --omit-interval-statistics \
-  --omit-locus-table \
-
-  chmod +x ${params.gatk_form}
-
-  ${params.gatk_form} ${sampleID}_gatk_temp1.txt ${sampleID}_gatk_temp2.txt ${sampleID}_gatk_temp3.txt ${params.probes}
-
-  ${params.gatk_form} ${sampleID}_gatk_temp4.txt ${sampleID}_gatk_temp5.txt ${sampleID}_gatk_temp6.txt ${params.ctp_genes}
-  """
-}
-// part B
-process GATK_STATS_B {
-
-  tag "sampleID"
-
-  cpus 1
-  memory 15.GB
-  time '24:00:00'
-  clusterOptions '-q batch'
-
-  container 'python_2.7.sif'
-
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
-
-  input:
-  tuple val(sampleID), file(gatk_3)
-  tuple val(sampleID), file(gatk_6)
-
-  output:
-  file "*CCP_interval_avg_median_coverage.bed"
-  file "*exome_interval_avg_median_coverage.bed"
-  tuple val(sampleID), file("*CP_interval_avg_median_coverage.bed")
-
-  when:
-  params.gen_org == "human"
-
-  script:
-  log.info "----- Human GATK Coverage Stats, Part 2 Running on: ${sampleID} -----"
-
-  """
-  python ${params.cov_calc} ${gatk_3} ${sampleID}_exome_interval_avg_median_coverage.bed
-
-  python ${params.cov_calc} ${gatk_6} ${sampleID}_CCP_interval_avg_median_coverage.bed
-
   """
 }
 
@@ -161,7 +104,7 @@ process GATK_BASERECALIBRATOR {
   container 'broadinstitute/gatk:4.2.4.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.table", mode:'copy'
-  
+
   input:
   tuple val(sampleID), file(bam)
 
@@ -197,7 +140,7 @@ process GATK_APPLYBQSR {
   input:
   tuple val(sampleID), file(bam)
   tuple val(sampleID), file(table)
-  
+
   output:
   tuple val(sampleID), file("*.bam"), emit: bam
   tuple val(sampleID), file("*.bai"), emit: bai
@@ -235,7 +178,7 @@ process GATK_HAPLOTYPECALLER {
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
   tuple val(sampleID), file("*.idx"), emit: idx
-  
+
   script:
   log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
 
@@ -269,8 +212,9 @@ process GATK_SELECTVARIANTS {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
+
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
-  
+
   input:
   tuple val(sampleID), file(vcf)
   tuple val(sampleID), file(idx)
@@ -278,8 +222,8 @@ process GATK_SELECTVARIANTS {
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
-  tuple val(sampleID), file("*.idx"), emit: idx  
-  
+  tuple val(sampleID), file("*.idx"), emit: idx
+
   script:
   log.info "----- GATK Selectvariants Running on: ${sampleID} -----"
 
@@ -306,12 +250,12 @@ process GATK_INDEXFEATUREFILE {
 
   input:
   tuple val(sampleID), file(vcf)
- 
+
   output:
   tuple val(sampleID), file("*.idx"), emit: idx
- 
+
   script:
-  
+  log.info "----- GATK IndexFeatureFile Running on: ${sampleID} -----"
   """
   gatk IndexFeatureFile \
   -I ${vcf}
@@ -329,16 +273,17 @@ process GATK_VARIANTFILTRATION {
 
   container 'broadinstitute/gatk:4.2.4.1'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
-  
+
   input:
   tuple val(sampleID), file(vcf)
   tuple val(sampleID), file(idx)
   val(indel_snp)
-  
+
   output:
   tuple val(sampleID), file("*.*"), emit: vcf
 
   script:
+  log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
   if (indel_snp == 'INDEL'){
     fs='200.0'
   }

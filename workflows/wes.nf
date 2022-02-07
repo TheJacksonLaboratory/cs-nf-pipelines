@@ -56,8 +56,8 @@ workflow WES {
   // Step 3: BWA-MEM Alignment
   BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
   // Step 4: Variant Preprocessing - Part 1
-  PICARD_SORTSAM(BWA_MEM.out.bwa_mem)
-  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.picard_sortsam_bam)
+  PICARD_SORTSAM(BWA_MEM.out.sam)
+  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // If Human: Step 5-11
   if (params.gen_org=='human'){

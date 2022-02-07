@@ -10,11 +10,12 @@ process COSMIC_ANNOTATION {
 
   input:
   tuple val(sampleID), file(vcf)
-  
+
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
+  log.info "----- Cosmic Annotation Running on: ${sampleID} -----"
   """
   ${params.cosmic_annot} \
   -i1 ${params.cosmic} \

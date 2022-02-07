@@ -1,5 +1,4 @@
 //Picard Tools
-// Will need to depricate pamA and pamB for new approach
 
 process PICARD_SORTSAM {
   tag "sampleID"
@@ -20,8 +19,8 @@ process PICARD_SORTSAM {
   tuple val(sampleID), file(sam)
 
   output:
-  tuple val(sampleID), file("*_sortsam.bam"), emit: picard_sortsam_bam
-  tuple val(sampleID), file("*_sortsam.bai"), emit: picard_sortsam_bai
+  tuple val(sampleID), file("*_sortsam.bam"), emit: bam
+  tuple val(sampleID), file("*_sortsam.bai"), emit: bai
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
@@ -88,8 +87,8 @@ process PICARD_COLLECTHSMETRICS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.*", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam) 
-  tuple val(sampleID), file(bai) 
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(bai)
 
   output:
   tuple val(sampleID), file("*Metrics.txt"), emit: hsmetrics
@@ -108,9 +107,7 @@ process PICARD_COLLECTHSMETRICS {
   """
 }
 
-
-// part A
-process PICARD_ALN_METRICS_A {
+process PICARD_ADDORREPLACEREADGROUPS {
 
   tag "sampleID"
 
@@ -125,35 +122,61 @@ process PICARD_ALN_METRICS_A {
 
   input:
   tuple val(sampleID), file(read_groups)
-  tuple val(sampleID), file(genome_sorted_bam)
+  tuple val(sampleID), file(bam)
 
 
   output:
-  tuple val(sampleID), file("*group_reorder.bam"), emit: reordered_sorted_bam
-  tuple val(sampleID), file("*group_reorder.bai"), emit: reordered_sorted_bai
+  tuple val(sampleID), file("*.bam"), emit: bam
+  tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
+  log.info "----- Picard Add or Replace Read Groups Running on: ${sampleID} -----"
 
   """
   picard AddOrReplaceReadGroups \
-  INPUT=${genome_sorted_bam} \
+  INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
   \$(cat $read_groups) \
   CREATE_INDEX=true
-
-  picard ReorderSam \
-  INPUT=${sampleID}_genome_bam_with_read_groups.bam \
-  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
-  SEQUENCE_DICTIONARY=${params.picard_dict} \
-  CREATE_INDEX=true
   """
 
   }
+  process PICARD_REORDERSAM {
 
-// part B
-process PICARD_ALN_METRICS_B {
+    tag "sampleID"
+
+    cpus 1
+    memory 8.GB
+    time '12:00:00'
+    clusterOptions '-q batch'
+
+    container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
+
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
+
+    input:
+    tuple val(sampleID), file(bam)
+
+
+    output:
+    tuple val(sampleID), file("*.bam"), emit: bam
+    tuple val(sampleID), file("*.bai"), emit: bai
+
+    script:
+    log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
+
+    """
+    picard ReorderSam \
+    INPUT=${bam} \
+    OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
+    SEQUENCE_DICTIONARY=${params.picard_dict} \
+    CREATE_INDEX=true
+    """
+
+    }
+
+process PICARD_COLLECTRNASEQMETRICS {
 
   // human only for mouse see bamtools
   tag "sampleID"
@@ -166,12 +189,14 @@ process PICARD_ALN_METRICS_B {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.pdf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(reordered_sorted_bam)
+  tuple val(sampleID), file(bam)
 
   output:
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
+  tuple val(sampleID), file("*.pdf")
 
   script:
   log.info "----- Alignment Metrics B Human Running on: ${sampleID} -----"
@@ -179,15 +204,8 @@ process PICARD_ALN_METRICS_B {
   if (params.read_prep == "stranded")
 
     """
-    picard SortSam \
-    SO=coordinate \
-    INPUT=${reordered_sorted_bam} \
-    OUTPUT=${sampleID}_reorder_sort.bam \
-    VALIDATION_STRINGENCY=SILENT \
-    CREATE_INDEX=true
-
     picard CollectRnaSeqMetrics \
-    I=${reordered_sorted_bam} \
+    I=${bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
@@ -198,13 +216,6 @@ process PICARD_ALN_METRICS_B {
   else if (params.read_prep != "stranded")
 
     """
-    picard SortSam \
-    SO=coordinate \
-    INPUT=${reordered_sorted_bam} \
-    OUTPUT=${sampleID}_reorder_sort.bam \
-    VALIDATION_STRINGENCY=SILENT \
-    CREATE_INDEX=true
-
     picard CollectRnaSeqMetrics \
     I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \

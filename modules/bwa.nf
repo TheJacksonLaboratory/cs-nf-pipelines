@@ -13,9 +13,9 @@ process BWA_MEM {
   input:
   tuple val(sampleID), file(fq_reads)
   tuple val(sampleID), file(read_groups)
-  
+
   output:
-  tuple val(sampleID), file("*.sam"), emit: bwa_mem
+  tuple val(sampleID), file("*.sam"), emit: sam
 
   script:
   log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
@@ -34,7 +34,7 @@ process BWA_MEM {
   rg=\$(echo \$rg | sed -r 's/[ ]+/\t/g')
 
   echo '\'\$rg\''
-  
+
   bwa mem -M -R "@RG\t\${rg}" \
   ${params.ref_fa} $inputfq > ${sampleID}.sam
   """

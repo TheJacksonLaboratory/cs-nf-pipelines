@@ -4,11 +4,19 @@ nextflow.enable.dsl=2
 // import modules
 include {READ_GROUPS} from '../modules/read_groups'
 include {SUMMARY_STATS} from '../modules/summary_stats'
-include {BAMTOOLS_RNASEQ_MOUSE} from '../modules/bamtools'
+include {BAMTOOLS_STATS} from '../modules/bamtools'
 include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {PICARD_ALN_METRICS_A;PICARD_ALN_METRICS_B} from '../modules/picard'
-include {GATK_STATS_A;GATK_STATS_B} from '../modules/gatk'
+include {PICARD_ADDORREPLACEREADGROUPS;
+         PICARD_REORDERSAM;
+         PICARD_COLLECTRNASEQMETRICS;
+         PICARD_SORTSAM} from '../modules/picard'
+include {GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_CTP;
+         GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_PROBES} from '../modules/gatk'
+include {GATK_FORMATTER as GATK_FORMATTER_CTP;
+         GATK_FORMATTER as GATK_FORMATTER_PROBES;
+         GATK_COVCALC as GATK_COVCALC_CTP;
+         GATK_COVCALC as GATK_COVCALC_PROBES} from '../bin/rnaseq/gatk_formatter'
 
 // prepare reads channel *
 if (params.read_type == 'PE'){
@@ -33,33 +41,39 @@ workflow RNASEQ {
   //Step 3: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
 
-  // Step 4a: Picard Alignment Metrics
-  PICARD_ALN_METRICS_A(READ_GROUPS.out.read_groups,
-                       RSEM_ALIGNMENT_EXPRESSION.out.genome_sorted_bam)
+  // Step 4: Picard Alignment Metrics
+  PICARD_ADDORREPLACEREADGROUPS(READ_GROUPS.out.read_groups,
+                                RSEM_ALIGNMENT_EXPRESSION.out.bam)
+  PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam)
 
+  // If gen_org mouse
   if ("${params.gen_org}" == 'mouse'){
-    // Step 4b: Bamtools
-    BAMTOOLS_RNASEQ_MOUSE(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
+    // Step 5: Bamtools
+    BAMTOOLS_STATS(PICARD_REORDERSAM.out.bam)
   }
 
-  //HUMAN NEEDS TO BE FLUSHED OUT
+  // If gen_org human
   if ("${params.gen_org}" == 'human'){
 
-    // Step 4b: Picard Alignment Metrics
-    PICARD_ALN_METRICS_B(PICARD_ALN_METRICS_A.out.reordered_sorted_bam)
+    // Step 5: Picard Alignment Metrics
+    PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
+    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
 
-    // Step 5: Summary Stats
+    // Step 6: Summary Stats
     SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
                   QUALITY_STATISTICS.out.quality_stats,
-                  PICARD_ALN_METRICS_B.out.picard_metrics)
+                  PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
-    // Step 6a: GATK Coverage Stats
-    GATK_STATS_A(PICARD_ALN_METRICS_A.out.reordered_sorted_bam,
-                 PICARD_ALN_METRICS_A.out.reordered_sorted_bai)
+    // Step 7: GATK Coverage Stats
+      // CTP
+        GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, ${params.ctp_genes})
+        GATK_FORMATTER_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt,${params.ctp_genes})
+        GATK_COVCALC_CTP(GATK_FORMATTER_CTP.out.txt, "CTP")
 
-    // Step 6b: GATK Coverage Stats
-    GATK_STATS_B(GATK_STATS_A.out.gatk_3,
-                 GATK_STATS_A.out.gatk_6)
+      // PROBES
+        GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, ${params.probes})
+        GATK_FORMATTER_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, ${params.probes})
+        GATK_COVCALC_PROBES(GATK_FORMATTER_CTP.out.txt, "PROBES")
 
   }
 }

@@ -24,7 +24,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
   tuple val(sampleID), file("*genes.results"), emit: rsem_genes
   tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
-  tuple val(sampleID), file("*genome.bam"), emit: genome_sorted_bam
+  tuple val(sampleID), file("*.bam"), emit: bam
 
 
   script:
@@ -75,6 +75,7 @@ process RSEM_REF_PULL {
   params.ref_pull=='true'
 
   script:
+  log.info "----- RSEM Pull Genome Running on: ${sampleID} -----"
   """
   wget ftp://ftp.ensembl.org/pub/release-82/fasta/mus_musculus/dna/Mus_musculus.GRCm38.dna.toplevel.fa.gz
   wget ftp://ftp.ensembl.org/pub/release-82/gtf/mus_musculus/Mus_musculus.GRCm38.82.chr.gtf.gz
@@ -94,6 +95,7 @@ process RSEM_REF_BUILD {
   file("*")
 
   script:
+  log.info "----- RSEM Build Reference Running on: ${sampleID} -----"
         """
         rsem-prepare-reference \
         --gtf ${gtf} \
@@ -113,9 +115,11 @@ process RSEM_EXPRESSION {
   file(ref_files)
 
   output:
+
   file "*"
 
   script:
+  log.info "----- RSEM Expression Running -----"
   """
   rsem-calculate-expression -p 8 --paired-end \
   --bowtie2 \
@@ -139,6 +143,7 @@ process RSEM_SIMULATE_READS{
   file "*"
 
   script:
+  log.info "----- RSEM Simulate Reads Running -----"
   """
   reference_name ${estimated_model_file} ${estimated_isoform_results} 0.2 50000000 simulated_reads
   """

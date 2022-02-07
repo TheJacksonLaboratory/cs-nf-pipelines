@@ -1,4 +1,4 @@
-process BAMTOOLS_RNASEQ_MOUSE {
+process BAMTOOLS_STATS {
 
   tag "sampleID"
 
@@ -18,6 +18,7 @@ process BAMTOOLS_RNASEQ_MOUSE {
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
+  log.info "----- Bamtools Stats Running on: ${sampleID} -----"
   if (params.read_type == "PE")
 
     """

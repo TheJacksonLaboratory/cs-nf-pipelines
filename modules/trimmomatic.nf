@@ -9,6 +9,7 @@ process TRIM {
   tuple val(sampleId), file('*R1_paired.fastq.gz'), file('*R2_paired.fastq.gz')
 
   script:
+  log.info "----- Trimmomatic Running on: ${sampleID} -----"
   """
   trimmomatic \
   PE \
