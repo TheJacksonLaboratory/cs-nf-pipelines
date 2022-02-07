@@ -12,8 +12,8 @@ process TRIM {
   """
   trimmomatic \
   PE \
-  ${params.fq_path}/${reads[0]} \
-  ${params.fq_path}/${reads[1]} \
+  ${params.sample_folder}/${reads[0]} \
+  ${params.sample_folder}/${reads[1]} \
   ${sampleId}_R1_paired.fastq.gz \
   ${sampleId}_R1_unpaired.fastq.gz \
   ${sampleId}_R2_paired.fastq.gz \

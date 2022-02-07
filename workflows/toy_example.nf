@@ -8,7 +8,7 @@ include {TRIM} from '../modules/trimmomatic'
 include {RSEM_REF_PULL;RSEM_REF_BUILD;RSEM_EXPRESSION} from '../modules/rsem'
 
 // 3.) reads channel and reference files
-read_ch = Channel.fromFilePairs("${params.fq_path}/*_R{1,2}_*${params.extension}",checkExists:true )
+read_ch = Channel.fromFilePairs("${params.sample_folder}/*_R{1,2}_*${params.extension}",checkExists:true )
 ref_files = file("${params.ref_files}/*")
 
 // 4.) The main workflow

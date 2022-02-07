@@ -16,5 +16,5 @@ ml singularity
 # RUN TEST PIPELINE
 ~/nextflow ../main.nf \
 --workflow rnaseq \
---fq_path *PATH_TO_YOUR_SEQUENCES* \
+--sample_folder *PATH_TO_YOUR_SEQUENCES* \
 --gen_org mouse
