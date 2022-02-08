@@ -2,6 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {help} from '../bin/help/rnaseq'
+include {param_log} from '../bin/log/rnaseq'
 include {READ_GROUPS} from '../modules/read_groups'
 include {SUMMARY_STATS} from '../modules/summary_stats'
 include {BAMTOOLS_STATS} from '../modules/bamtools'
@@ -17,6 +19,14 @@ include {GATK_FORMATTER as GATK_FORMATTER_CTP;
          GATK_FORMATTER as GATK_FORMATTER_PROBES;
          GATK_COVCALC as GATK_COVCALC_CTP;
          GATK_COVCALC as GATK_COVCALC_PROBES} from '../bin/rnaseq/gatk_formatter'
+// help if needed
+if (params.help){
+    help()
+    exit 0
+}
+
+// log paramiter info
+param_log()
 
 // prepare reads channel *
 if (params.read_type == 'PE'){

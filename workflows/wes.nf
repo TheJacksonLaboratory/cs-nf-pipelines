@@ -2,6 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {help} from '../bin/help/wes.nf'
+include {param_log} from '../bin/log/wes.nf'
 include {BWA_MEM} from '../modules/bwa'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
 include {READ_GROUPS} from '../modules/read_groups'
@@ -38,6 +40,15 @@ include {GATK_HAPLOTYPECALLER;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
          GATK_BASERECALIBRATOR;
          GATK_APPLYBQSR} from '../modules/gatk'
+
+// help if needed
+if (params.help){
+    help()
+    exit 0
+}
+
+// log params
+param_log()
 
 // prepare reads channel
 if (params.read_type == 'PE'){
