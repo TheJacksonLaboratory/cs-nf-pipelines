@@ -12,7 +12,9 @@ if (params.workflow == "rnaseq"){
 if (params.workflow == "wes"){
   include {WES} from './workflows/wes'
 }
-
+if (params.workflow == "wgs"){
+  include {WGS} from './workflows/wgs'
+}
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "toy_example"){
@@ -22,7 +24,9 @@ workflow{
     RNASEQ()
     }
   if (params.workflow == "wes"){
-    println("made it here")
     WES()
+    }
+  if (params.workflow == "wgs"){
+    WGS()
     }
 }

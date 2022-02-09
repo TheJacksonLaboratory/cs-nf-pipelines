@@ -1,3 +1,70 @@
+process GATK_REALIGNERTARGETCREATOR {
+  tag "sampleID"
+
+  cpus = 12
+  memory = 35.GB
+  time = '72:00:00'
+  clusterOptions = '-q batch'
+
+  // update container, cannot find this command in gatk 4
+  // container 'broadinstitute/gatk:4.2.4.1'
+
+  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+
+  input:
+  tuple val(sampleID), file(bam)
+
+  output:
+  tuple val(sampleID), file("*.intervals"), emit: intervals
+
+  script:
+  log.info "----- GATK RealignerTargetCreator Running on: ${sampleID} -----"
+
+  """
+  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
+  -I ${bam} \
+  -R ${params.ref_fa} \
+  -T RealignerTargetCreator \
+  -o ${sampleID}.aligner.intervals \
+  -nt 12 \
+  --disable_auto_index_creation_and_locking_when_reading_rods
+  """
+
+}
+
+process GATK_INDELREALIGNER{
+tag "sampleID"
+
+cpus = 12
+memory = 35.GB
+time = '72:00:00'
+clusterOptions = '-q batch'
+
+// update container, cannot find this command in gatk 4
+// container 'broadinstitute/gatk:4.2.4.1'
+
+container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+
+input:
+tuple val(sampleID), file(intervals)
+
+output:
+tuple val(sampleID), file("*.bam"), emit: bam
+
+script:
+log.info "----- GATK IndelRealigner Running on: ${sampleID} -----"
+
+"""
+java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
+-I ${bam} \
+-R ${params.ref_fa} \
+-T IndelRealigner \
+-targetIntervals ${intervals} \
+-o ${sampleID}_realigned_BQSR.bam \
+--disable_auto_index_creation_and_locking_when_reading_rods
+"""
+}
+
 process GATK_VARIANTANNOTATOR {
   tag "sampleID"
 
@@ -8,7 +75,7 @@ process GATK_VARIANTANNOTATOR {
 
  // container 'broadinstitute/gatk:4.2.4.1'
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
-  
+
   input:
   tuple val(sampleID), file(sample_vcf)
   tuple val(sampleID), file(snpeff_vcf)

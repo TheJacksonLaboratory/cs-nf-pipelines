@@ -1,4 +1,34 @@
 //Picard Tools
+process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
+  tag "sampleID"
+
+  cpus = 1
+  memory = 5.GB
+  time = '06:00:00'
+  clusterOptions = '-q batch'
+
+  container 'picard-1.95_python_2_7_3.sif'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.txt", mode:'copy'
+
+  input:
+  tuple val(sampleID), file(bam)
+
+  output:
+  tuple sampleID, file("*.txt"), emit: txt
+
+  script:
+  log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
+
+    """
+    java -Djava.io.tmpdir=$TMPDIR -jar -Xmx4g /picard-tools-1.95/CollectAlignmentSummaryMetrics.jar \
+    INPUT=${bam} \
+    OUTPUT=${sampleID}_AlignmentMetrics.txt \
+    REFERENCE_SEQUENCE=${params.ref_fa} \
+    METRIC_ACCUMULATION_LEVEL=ALL_READS \
+    VALIDATION_STRINGENCY=LENIENT
+    """
+}
 
 process PICARD_SORTSAM {
   tag "sampleID"
