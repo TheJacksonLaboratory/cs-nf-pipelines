@@ -30,7 +30,7 @@ param_log()
 
 // prepare reads channel *
 if (params.read_type == 'PE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/*_R{1,2}_*${params.extension}",checkExists:true )
+  read_ch = Channel.fromFilePairs("${params.sample_folder}/*_R{1,2}*${params.extension}",checkExists:true )
 }
 else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )

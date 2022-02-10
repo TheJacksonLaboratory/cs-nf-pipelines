@@ -3,7 +3,7 @@ process BWA_MEM {
 
   cpus 4
   memory 16.GB
-  time '10:00:00'
+  time '30:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'
