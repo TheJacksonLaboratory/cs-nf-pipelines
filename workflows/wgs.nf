@@ -5,8 +5,24 @@ nextflow.enable.dsl=2
 include {help} from '../bin/help/wes.nf'
 include {param_log} from '../bin/log/wes.nf'
 include {BWA_MEM} from '../modules/bwa'
+include {CAT_ANNOTATE as CAT_ANNOTATE_SNP;
+         CAT_ANNOTATE as CAT_ANNOTATE_INDEL} from '../bin/wgs/cat'
+include {SNPEFF} from '../modules/snpeff'
+include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpsift'
+include {AGGREGATE_STATS_MOUSE} from '../bin/wes/aggregate_stats'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
+include {PICARD_SORTSAM;
+         PICARD_MARKDUPLICATES;
+         PICARD_COLLECTALIGNMENTSUMARYMETRICS} from '../modules/picard'
+include {GATK_REALIGNERTARGETCREATOR;
+         GATK_INDELREALIGNER;
+         GATK_VARIANTANNOTATOR;
+         GATK_HAPLOTYPECALLER_WGS;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk'
 
 // help if needed
 if (params.help){
@@ -44,45 +60,34 @@ workflow WGS {
     BaseRecalibrator
     PrintReads
     CollectAlignmentSummaryMetrics (picard)
-
-
-    HaplotypeCaller NOTE ib for the chromosomes (1-23 human dif for mouse?)
   }
-  */
+  */  
 
-  else if (params.gen_org=='mouse'){
+  if (params.gen_org=='mouse'){
   // Step 5:
-    GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.bam) //may need bai
-    GATK_INDELREALIGNER(GATK_REALIGNERTARGETCREATOR.out.intervals)
+    GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+    GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
+                        GATK_REALIGNERTARGETCREATOR.out.intervals)
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
-
-    // Next Week
-    // HaplotypeCaller NOTE ib for the chromosomes (1-23 human dif for mouse?)
   }
 
-  // Mouse and Human Same Here
-
-  //Next Week with HaplotypeCaller (will want a index output added as well)
-  GATK_MERGEVCF Note: change this to take in a list (will need to update wes)
-
+  // Mouse and Human Same Here (Why no bed file like in WES for -L? Because everything is merged I am simplifying this)
+    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam, 
+                             GATK_INDELREALIGNER.out.bai)
   // SNP
-    GATK_SELECTVARIANTS_SNP(GATK_MERGEVCF.out.vcf,
-                          GATK_MERGEVCF.out.idx,
-                         'SNP')
-    BCF_SORT_SNP(GATK_SELECTVARIANTS_SNP.out.vcf) // DOES THIS GIVE A INDEX? IS THIS NECESSARY?
-    GATK_INDEXFEATUREFILE_SNP(BCF_SORT_SNP.out.vcf) // NECESSARY?
-    GATK_VARIANTFILTRATION_SNP(BCF_SORT_SNP.out.vcf,
-                               GATK_INDEXFEATUREFILE_SNP.out.idx,
+    GATK_SELECTVARIANTS_SNP(GATK_HAPLOTYPECALLER_WGS.out.vcf,
+                            GATK_HAPLOTYPECALLER_WGS.out.idx,
+                           'SNP')
+    GATK_VARIANTFILTRATION_SNP(GATK_SELECTVARIANTS_SNP.out.vcf,
+                               GATK_SELECTVARIANTS_SNP.out.idx,
                               'SNP')
   // INDEL
-  GATK_SELECTVARIANTS_INDEL(GATK_MERGEVCF.out.vcf,
-                        GATK_MERGEVCF.out.idx,
-                       'INDEL')
-  BCF_SORT_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf) // DOES THIS GIVE A INDEX? IS THIS NECESSARY?
-  GATK_INDEXFEATUREFILE_INDEL(BCF_SORT_INDEL.out.vcf) // NECESSARY?
-  GATK_VARIANTFILTRATION_INDEL(BCF_SORT_INDEL.out.vcf,
-                             GATK_INDEXFEATUREFILE_INDEL.out.idx,
-                            'INDEL')
+  GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER_WGS.out.vcf,
+                            GATK_HAPLOTYPECALLER_WGS.out.idx,
+                           'INDEL')
+  GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
+                               GATK_SELECTVARIANTS_INDEL.out.idx,
+                              'INDEL')
 
   /* Finishing Steps Dif Mouse and Human
   if (params.gen_org=='human'){
@@ -91,12 +96,12 @@ workflow WGS {
     AGGREGATE_STATS_HUMAN
   }
   */
+  
   if (params.gen_org=='mouse'){
-    // NEXT WEEK
-    "Step 9: Post Variant Calling Processing, Part 2 lots to break down here"
-
-    SNPEFF(.out.vcf)
-    GATK_VARIANTANNOTATOR(SAMPLE.out.vcf,
+    CAT_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
+    CAT_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+    SNPEFF(CAT_ANNOTATE_SNP.out.vcf)
+    GATK_VARIANTANNOTATOR(CAT_ANNOTATE_SNP.out.vcf,
                           SNPEFF.out.vcf)
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
     AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,

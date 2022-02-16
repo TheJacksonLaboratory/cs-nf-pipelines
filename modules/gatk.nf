@@ -46,10 +46,12 @@ clusterOptions = '-q batch'
 container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 
 input:
+tuple val(sampleID), file(bam)
 tuple val(sampleID), file(intervals)
 
 output:
 tuple val(sampleID), file("*.bam"), emit: bam
+tuple val(sampleID), file("*.bai"), emit: bai
 
 script:
 log.info "----- GATK IndelRealigner Running on: ${sampleID} -----"
@@ -268,6 +270,37 @@ process GATK_HAPLOTYPECALLER {
   -stand-call-conf ${params.call_val} \
   ${params.ploidy_val} \
   ${delta} \
+  """
+}
+
+process GATK_HAPLOTYPECALLER_WGS {
+  tag "sampleID"
+
+  cpus = 8
+  memory = 15.GB
+  time = '23:00:00'
+  clusterOptions = '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+
+  input:
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(bai)
+
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.idx"), emit: idx
+
+  script:
+
+  log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
+
+  """
+  gatk HaplotypeCaller  \
+  -R ${params.ref_fa} \
+  -I ${bam} \
+  -O ${sampleID}_HaplotypeCaller.vcf \
+  -stand-call-conf ${params.call_val}
   """
 }
 
