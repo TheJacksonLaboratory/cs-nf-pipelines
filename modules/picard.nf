@@ -15,7 +15,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   tuple val(sampleID), file(bam)
 
   output:
-  tuple sampleID, file("*.txt"), emit: txt
+  tuple val(sampleID), file("*.txt"), emit: txt
 
   script:
   log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
