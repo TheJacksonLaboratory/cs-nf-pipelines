@@ -17,7 +17,8 @@ if len(sys.argv) < 4:
     
 out = open(sys.argv[1],"w")
 inp_qc = open(sys.argv[2],"r")
-inp_hs = open(sys.argv[3],"r")
+inp_dup = open(sys.argv[3],"r")
+inp_hs = open(sys.argv[4],"r")
 
 qc_out = [None, None]
 read_data = False
@@ -48,11 +49,40 @@ for line in inp_qc:
                 qc_out[1] = "NA"
 print >>out, "Total number of reads\t%s\nTotal number of HQ filtered reads\t%s" %(qc_out[0],qc_out[1])
 
-data_lines = []
-for line in inp_hs:
+data_lines_dup = []
+for line in inp_dup:
     line = line.strip()
     if line and not(line.startswith("#")):
-        data_lines.append(line)
+        data_lines_dup.append(line)
+
+col_names = data_lines_dup[0].split("\t")
+col_values = data_lines_dup[1].split("\t")
+for i,n in enumerate(col_names):
+        if n in ["PERCENT_DUPLICATION"]:
+            print >>out, "%s\t%s" %(n,col_values[i])
+
+data_lines = []
+# for line in inp_hs:
+#    print(line)
+#    line = line.strip()
+#    print(line)
+#    if line and not(line.startswith("#")):
+#        data_lines.append(line)
+
+with open(sys.argv[4], "r") as inp_hs:
+    for line in inp_hs:
+        #print(line.strip())
+        if line.startswith("## METRICS CLASS"):
+            #print(line)
+            data_lines.append(next(inp_hs, '').strip())
+            data_lines.append(next(inp_hs, '').strip())
+            #line.strip())
+            #data_lines.append()
+            #
+
+print(data_lines)
+
+#print(len(data_lines))
 
 if len(data_lines) != 2:
     print >>sys.stderr, "CoverageMetrics.txt is invalid"
