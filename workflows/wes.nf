@@ -141,7 +141,7 @@ workflow WES {
     // Step 8: Variant Filtration
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
                              GATK_HAPLOTYPECALLER.out.idx,
-                            'INDEL')
+                            'MOUSE')
 
     // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
@@ -151,9 +151,9 @@ workflow WES {
 
   }
 
-    // Step 11: Aggregate Stats
-      AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-                            PICARD_COLLECTHSMETRICS.out.hsmetrics,
-                            PICARD_MARKDUPLICATES.out.dedup_metrics)
-                            
+  // Step 11: Aggregate Stats
+  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
+						PICARD_COLLECTHSMETRICS.out.hsmetrics,
+						PICARD_MARKDUPLICATES.out.dedup_metrics)
+						
 }

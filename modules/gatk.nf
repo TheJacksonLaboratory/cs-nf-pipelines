@@ -95,7 +95,7 @@ process GATK_VARIANTANNOTATOR {
   --variant ${sample_vcf} \
   --snpEffFile ${snpeff_vcf} \
   -L ${sample_vcf} \
-  -o ${sampleID}_genomeanalysistk.vcf
+  -o ${sampleID}_GATKannotated.vcf
   """
 }
 
@@ -123,7 +123,7 @@ process GATK_MERGEVCF {
   -R ${params.ref_fa} \
   -I ${snp_vcf} \
   -I ${indel_vcf} \
-  -O ${sampleID}_genomeanalysistk_combined.vcf
+  -O ${sampleID}_GATKcombined.vcf
   """
 
 }
@@ -390,20 +390,23 @@ process GATK_VARIANTFILTRATION {
   log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
   if (indel_snp == 'INDEL'){
     fs='200.0'
+    output_suffix = 'INDEL_filtered.vcf'
   }
   if (indel_snp =='SNP'){
     fs ='60.0'
+    output_suffix = 'SNP_filtered.vcf'
   }
-  if (params.gen_org == 'mouse'){
+  if (indel_snp == 'MOUSE'){
     // mouse will be indel but fs needs to be same as snp (not sure why)
     fs = '60.0'
+    output_suffix = 'snp_indel_filtered.vcf'
   }
 
   """
   gatk VariantFiltration \
   -R ${params.ref_fa} \
   -V ${vcf} \
-  -O ${sampleID}_variantfiltration_${indel_snp}.vcf \
+  -O ${sampleID}_variantfiltration_${output_suffix} \
   --cluster-window-size 10 \
   --filter-name "LowCoverage" --filter-expression "DP < 25" \
   --filter-name "VeryLowQual" --filter-expression "QUAL < 30.0" \
