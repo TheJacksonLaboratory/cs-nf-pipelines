@@ -126,8 +126,7 @@ workflow WES {
                     CAT_HUMAN_INDEL.out.vcf)
 
 
-
-  else if (params.gen_org=='mouse'){
+  } else if (params.gen_org=='mouse'){
 
     // Step 6: Variant Pre-Processing - Part 3
       PICARD_COLLECTHSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam,
@@ -152,8 +151,8 @@ workflow WES {
   }
 
   // Step 11: Aggregate Stats
+	  
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
 						PICARD_COLLECTHSMETRICS.out.hsmetrics,
-						PICARD_MARKDUPLICATES.out.dedup_metrics)
-						
+						PICARD_MARKDUPLICATES.out.dedup_metrics)				
 }
