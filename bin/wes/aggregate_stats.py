@@ -62,28 +62,12 @@ for i,n in enumerate(col_names):
             print >>out, "%s\t%s" %(n,col_values[i])
 
 data_lines = []
-# for line in inp_hs:
-#    print(line)
-#    line = line.strip()
-#    print(line)
-#    if line and not(line.startswith("#")):
-#        data_lines.append(line)
-
 with open(sys.argv[4], "r") as inp_hs:
     for line in inp_hs:
-        #print(line.strip())
         if line.startswith("## METRICS CLASS"):
-            #print(line)
             data_lines.append(next(inp_hs, '').strip())
             data_lines.append(next(inp_hs, '').strip())
-            #line.strip())
-            #data_lines.append()
-            #
-
-print(data_lines)
-
-#print(len(data_lines))
-
+ 
 if len(data_lines) != 2:
     print >>sys.stderr, "CoverageMetrics.txt is invalid"
 else:

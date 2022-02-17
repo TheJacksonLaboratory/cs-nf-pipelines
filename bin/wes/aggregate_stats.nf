@@ -1,4 +1,4 @@
-process AGGREGATE_STATS_HUMAN {
+process AGGREGATE_STATS {
   tag "sampleID"
 
   cpus = 1
