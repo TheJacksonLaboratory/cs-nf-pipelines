@@ -62,7 +62,7 @@ java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
 -R ${params.ref_fa} \
 -T IndelRealigner \
 -targetIntervals ${intervals} \
--o ${sampleID}_realigned_BQSR.bam \
+-o ${sampleID}_realigned.bam \
 --disable_auto_index_creation_and_locking_when_reading_rods
 """
 }
@@ -254,9 +254,11 @@ process GATK_HAPLOTYPECALLER {
 
   if (gvcf=='gvcf'){
     delta="-ERC GVCF"
+    output_suffix='.gvcf'
   }
   else{
     delta="--dbsnp ${params.dbSNP} "
+    output_suffix='.vcf'
   }
 
 //  --dbsnp ${params.dbSNP}
@@ -265,7 +267,7 @@ process GATK_HAPLOTYPECALLER {
   gatk HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
-  -O ${sampleID}_variants_raw.vcf \
+  -O ${sampleID}_variants_raw.${output_suffix} \
   -L ${params.target_gatk} \
   -stand-call-conf ${params.call_val} \
   ${params.ploidy_val} \
