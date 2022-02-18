@@ -8,8 +8,7 @@ include {BWA_MEM} from '../modules/bwa'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {AGGREGATE_STATS_MOUSE;
-         AGGREGATE_STATS_HUMAN} from '../bin/wes/aggregate_stats'
+include {AGGREGATE_STATS} from '../bin/wes/aggregate_stats'
 include {CAT_HUMAN;
          CAT_HUMAN as CAT_HUMAN_SNP;
          CAT_HUMAN as CAT_HUMAN_INDEL} from '../bin/wes/cat'
@@ -70,7 +69,7 @@ workflow WES {
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
-  // If Human: Step 5-11
+  // If Human: Step 5-10
   if (params.gen_org=='human'){
 
     // Step 5: Variant Pre-Processing - Part 2
@@ -126,13 +125,8 @@ workflow WES {
       GATK_MERGEVCF(CAT_HUMAN_SNP.out.vcf,
                     CAT_HUMAN_INDEL.out.vcf)
 
-    // Step 11: Aggregate Stats
-      AGGREGATE_STATS_HUMAN(QUALITY_STATISTICS.out.quality_stats,
-                            PICARD_COLLECTHSMETRICS.out.hsmetrics,
-                            PICARD_MARKDUPLICATES.out.dedup_metrics)
-  }
 
-  else if (params.gen_org=='mouse'){
+  } else if (params.gen_org=='mouse'){
 
     // Step 6: Variant Pre-Processing - Part 3
       PICARD_COLLECTHSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam,
@@ -146,7 +140,7 @@ workflow WES {
     // Step 8: Variant Filtration
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
                              GATK_HAPLOTYPECALLER.out.idx,
-                            'INDEL')
+                            'MOUSE')
 
     // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
@@ -154,9 +148,11 @@ workflow WES {
                             SNPEFF.out.vcf)
       SNPSIFT_EXTRACTFIELDS(GATK_VARIANTFILTRATION.out.vcf)
 
-    // Step 11: Aggregate Stats (UNIQUE TO BIN/WES)
-      AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
-                            PICARD_COLLECTHSMETRICS.out.hsmetrics)
   }
 
+  // Step 11: Aggregate Stats
+	  
+  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
+						PICARD_COLLECTHSMETRICS.out.hsmetrics,
+						PICARD_MARKDUPLICATES.out.dedup_metrics)				
 }

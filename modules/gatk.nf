@@ -90,7 +90,7 @@ java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
 -R ${params.ref_fa} \
 -T IndelRealigner \
 -targetIntervals ${intervals} \
--o ${sampleID}_realigned_BQSR.bam \
+-o ${sampleID}_realigned.bam \
 --disable_auto_index_creation_and_locking_when_reading_rods
 """
 }
@@ -123,7 +123,7 @@ process GATK_VARIANTANNOTATOR {
   --variant ${sample_vcf} \
   --snpEffFile ${snpeff_vcf} \
   -L ${sample_vcf} \
-  -o ${sampleID}_genomeanalysistk.vcf
+  -o ${sampleID}_GATKannotated.vcf
   """
 }
 
@@ -151,7 +151,7 @@ process GATK_MERGEVCF {
   -R ${params.ref_fa} \
   -I ${snp_vcf} \
   -I ${indel_vcf} \
-  -O ${sampleID}_genomeanalysistk_combined.vcf
+  -O ${sampleID}_GATKcombined.vcf
   """
 
 }
@@ -282,9 +282,11 @@ process GATK_HAPLOTYPECALLER {
 
   if (gvcf=='gvcf'){
     delta="-ERC GVCF"
+    output_suffix='gvcf'
   }
   else{
     delta="--dbsnp ${params.dbSNP} "
+    output_suffix='vcf'
   }
 
 //  --dbsnp ${params.dbSNP}
@@ -293,7 +295,7 @@ process GATK_HAPLOTYPECALLER {
   gatk HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
-  -O ${sampleID}_variants_raw.vcf \
+  -O ${sampleID}_variants_raw.${output_suffix} \
   -L ${params.target_gatk} \
   -stand-call-conf ${params.call_val} \
   ${params.ploidy_val} \
@@ -416,20 +418,23 @@ process GATK_VARIANTFILTRATION {
   log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
   if (indel_snp == 'INDEL'){
     fs='200.0'
+    output_suffix = 'INDEL_filtered.vcf'
   }
   if (indel_snp =='SNP'){
     fs ='60.0'
+    output_suffix = 'SNP_filtered.vcf'
   }
-  if (params.gen_org == 'mouse'){
+  if (indel_snp == 'MOUSE'){
     // mouse will be indel but fs needs to be same as snp (not sure why)
     fs = '60.0'
+    output_suffix = 'snp_indel_filtered.vcf'
   }
 
   """
   gatk VariantFiltration \
   -R ${params.ref_fa} \
   -V ${vcf} \
-  -O ${sampleID}_variantfiltration_${indel_snp}.vcf \
+  -O ${sampleID}_variantfiltration_${output_suffix} \
   --cluster-window-size 10 \
   --filter-name "LowCoverage" --filter-expression "DP < 25" \
   --filter-name "VeryLowQual" --filter-expression "QUAL < 30.0" \
