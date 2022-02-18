@@ -28,6 +28,7 @@ include {PICARD_SORTSAM;
          PICARD_COLLECTALIGNMENTSUMARYMETRICS} from '../modules/picard'
 include {GATK_REALIGNERTARGETCREATOR;
          GATK_BASERECALIBRATOR;
+         GATK_APPLYBQSR;
          GATK_PRINTREADS;
          GATK_INDELREALIGNER;
          GATK_MERGEVCF;
@@ -74,15 +75,12 @@ workflow WGS {
   if (params.gen_org=='human'){
 
   //    Need help sorting out baserecalibrator and printreads
-//    GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
-//    ran into issue here -BQSR parameter no longer valid, cannot use old printreads gatk3 and baserecal gatk4 together either
-//    GATK_PRINTREADS(GATK_INDELREALIGNER.out.bam,
-//                    GATK_BASERECALIBRATOR.out.table)
-  //    for now skipping printreads and using indelrealigner output instead
-
-    PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
-    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam,
-                             GATK_INDELREALIGNER.out.bai)
+    GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
+    GATK_APPLYBQSR(GATK_INDELREALIGNER.out.bam,
+                    GATK_BASERECALIBRATOR.out.table)
+    PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    GATK_HAPLOTYPECALLER_WGS(GATK_APPLYBQSR.out.bam,
+                             GATK_APPLYBQSR.out.bai)
   }
   
   // If Mouse
