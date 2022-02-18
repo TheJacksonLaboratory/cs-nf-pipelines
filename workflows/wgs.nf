@@ -16,6 +16,8 @@ include {PICARD_SORTSAM;
          PICARD_MARKDUPLICATES;
          PICARD_COLLECTALIGNMENTSUMARYMETRICS} from '../modules/picard'
 include {GATK_REALIGNERTARGETCREATOR;
+         GATK_BASERECALIBRATOR;
+         GATK_PRINTREADS;
          GATK_INDELREALIGNER;
          GATK_VARIANTANNOTATOR;
          GATK_HAPLOTYPECALLER_WGS;
@@ -52,28 +54,30 @@ workflow WGS {
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
-
-  /* If Human: Step 5-X
+  // Step 5
+  GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+  GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
+                        GATK_REALIGNERTARGETCREATOR.out.intervals)
+  // If Human
   if (params.gen_org=='human'){
-    GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.bam) //may need bai
-    GATK_INDELREALIGNER(GATK_REALIGNERTARGETCREATOR.out.intervals)
-    BaseRecalibrator
-    PrintReads
-    CollectAlignmentSummaryMetrics (picard)
+    
+//    GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
+// ran into major issue here
+//    GATK_PRINTREADS(GATK_INDELREALIGNER.out.bam,
+//                    GATK_BASERECALIBRATOR.out.table)
+  //for now skipping printreads and using indelrealigner output instead
+    PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
+    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam,
+                             GATK_INDELREALIGNER.out.bai)
   }
-  */  
+
 
   if (params.gen_org=='mouse'){
-  // Step 5:
-    GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-    GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                        GATK_REALIGNERTARGETCREATOR.out.intervals)
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
+    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam,
+                             GATK_INDELREALIGNER.out.bai)
   }
 
-  // Mouse and Human Same Here (Why no bed file like in WES for -L? Because everything is merged I am simplifying this)
-    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam, 
-                             GATK_INDELREALIGNER.out.bai)
   // SNP
     GATK_SELECTVARIANTS_SNP(GATK_HAPLOTYPECALLER_WGS.out.vcf,
                             GATK_HAPLOTYPECALLER_WGS.out.idx,
@@ -82,20 +86,19 @@ workflow WGS {
                                GATK_SELECTVARIANTS_SNP.out.idx,
                               'SNP')
   // INDEL
-  GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER_WGS.out.vcf,
-                            GATK_HAPLOTYPECALLER_WGS.out.idx,
-                           'INDEL')
-  GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
-                               GATK_SELECTVARIANTS_INDEL.out.idx,
-                              'INDEL')
+    GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER_WGS.out.vcf,
+                              GATK_HAPLOTYPECALLER_WGS.out.idx,
+                             'INDEL')
+    GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
+                                 GATK_SELECTVARIANTS_INDEL.out.idx,
+                                'INDEL')
 
-  /* Finishing Steps Dif Mouse and Human
+/*   Finishing Steps Dif Mouse and Human
   if (params.gen_org=='human'){
     "Step 9: Post Variant Calling Processing, Part 2 lots to break down here"
     CombineVariants
     AGGREGATE_STATS_HUMAN
   }
-  */
   
   if (params.gen_org=='mouse'){
     CAT_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
@@ -107,4 +110,5 @@ workflow WGS {
     AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
                           PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt)
   }
+*/
 }

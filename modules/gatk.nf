@@ -1,3 +1,31 @@
+process GATK_PRINTREADS{
+  tag "sampleID"
+
+  cpus = 12
+  memory = 35.GB
+  time = '72:00:00'
+  clusterOptions = '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+
+  input:
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(table)
+
+  output:
+  tuple val(sampleID), file("*.bam"), emit: bam
+  
+  script:
+  log.info "----- GATK PrintReads Running on: ${sampleID} -----"
+// ran into an issue with using the old -BQSR argument and using our table from baserecal
+  """
+  gatk PrintReads \
+  -R ${params.ref_fa} \
+  -I ${bam} \
+  -O ${sampleID}_realigned_BQSR.bam \
+  """
+}
+
 process GATK_REALIGNERTARGETCREATOR {
   tag "sampleID"
 
