@@ -20,7 +20,7 @@ include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpsift'
 include {AGGREGATE_STATS_MOUSE;
-         AGGREGATE_STATS_HUMAN} from '../bin/wes/aggregate_stats'
+         AGGREGATE_STATS_HUMAN} from '../bin/shared/aggregate_stats'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_SORTSAM;
