@@ -254,11 +254,11 @@ process GATK_HAPLOTYPECALLER {
 
   if (gvcf=='gvcf'){
     delta="-ERC GVCF"
-    output_suffix='.gvcf'
+    output_suffix='gvcf'
   }
   else{
     delta="--dbsnp ${params.dbSNP} "
-    output_suffix='.vcf'
+    output_suffix='vcf'
   }
 
 //  --dbsnp ${params.dbSNP}
