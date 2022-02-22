@@ -1,3 +1,30 @@
+process GATK_MERGEVCF_LIST {
+  tag "sampleID"
+
+  cpus 1
+  memory 15.GB
+  time '24:00:00'
+  clusterOptions '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+
+  input:
+  tuple val(sampleID), file(list)
+
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.idx"), emit: idx
+  
+  script:
+  log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
+  """
+  gatk MergeVcfs \
+  -R ${params.ref_fa} \
+  -I ${list} \
+  -O ${sampleID}_GATKcombined.vcf
+  """
+
+}
 process GATK_PRINTREADS{
   tag "sampleID"
 
@@ -312,10 +339,9 @@ process GATK_HAPLOTYPECALLER_WGS {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
-
+  
   input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(bai)
+  tuple val(sampleID), file(bam), file(bai), val(chrome)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
@@ -323,13 +349,14 @@ process GATK_HAPLOTYPECALLER_WGS {
 
   script:
 
-  log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
+  log.info "----- GATK Haplotype Caller Running on Chromosome ${chrome} for sample: ${sampleID} -----"
 
   """
   gatk HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
-  -O ${sampleID}_HaplotypeCaller.vcf \
+  -O ${sampleID}_HaplotypeCaller_${chrome}.vcf \
+  -L ${chrome} \
   -stand-call-conf ${params.call_val}
   """
 }

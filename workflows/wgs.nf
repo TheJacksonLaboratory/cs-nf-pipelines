@@ -32,13 +32,14 @@ include {GATK_REALIGNERTARGETCREATOR;
          GATK_PRINTREADS;
          GATK_INDELREALIGNER;
          GATK_MERGEVCF;
+         GATK_MERGEVCF_LIST;
          GATK_VARIANTANNOTATOR;
          GATK_HAPLOTYPECALLER_WGS;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk'
-
+include {MAKE_VCF_LIST} from '../bin/wgs/make_vcf_list'
 // help if needed
 if (params.help){
     help()
@@ -73,26 +74,44 @@ workflow WGS {
                         GATK_REALIGNERTARGETCREATOR.out.intervals)
   // If Human
   if (params.gen_org=='human'){
-
-  //    Need help sorting out baserecalibrator and printreads
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
     GATK_APPLYBQSR(GATK_INDELREALIGNER.out.bam,
                     GATK_BASERECALIBRATOR.out.table)
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_APPLYBQSR.out.bam)
-    GATK_HAPLOTYPECALLER_WGS(GATK_APPLYBQSR.out.bam,
-                             GATK_APPLYBQSR.out.bai)
+
+    // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
+    data = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+    chromes = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
+                         'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chr20',
+                         'chr21','chr22','chrM','chrX','chrY')
+    chrome_channel = data.combine(chromes)
+
+    // Use the Channel in HaplotypeCaller
+    GATK_HAPLOTYPECALLER_WGS(chrome_channel)
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
+    GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
   }
   
   // If Mouse
   if (params.gen_org=='mouse'){
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
-    GATK_HAPLOTYPECALLER_WGS(GATK_INDELREALIGNER.out.bam,
-                             GATK_INDELREALIGNER.out.bai)
-  }
+    
+    // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
+    data = GATK_INDELREALIGNER.out.bam.join(GATK_INDELREALIGNER.out.bai)
+    chromes = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
+                         'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19',
+                         'chrM','chrX','chrY')
+    chrome_channel = data.combine(chromes)
+     
+    // Use the Channel in HaplotypeCaller
+    GATK_HAPLOTYPECALLER_WGS(chrome_channel)
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
+    GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+    }
 
   // SNP
-    GATK_SELECTVARIANTS_SNP(GATK_HAPLOTYPECALLER_WGS.out.vcf,
-                            GATK_HAPLOTYPECALLER_WGS.out.idx,
+    GATK_SELECTVARIANTS_SNP(GATK_MERGEVCF_LIST.out.vcf,
+                            GATK_MERGEVCF_LIST.out.idx,
                            'SNP')
     GATK_VARIANTFILTRATION_SNP(GATK_SELECTVARIANTS_SNP.out.vcf,
                                GATK_SELECTVARIANTS_SNP.out.idx,
@@ -146,4 +165,5 @@ workflow WGS {
     AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
                           PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt)
   }
+
 }
