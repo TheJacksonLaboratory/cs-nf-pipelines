@@ -51,7 +51,7 @@ param_log()
 
 // prepare reads channel
 if (params.read_type == 'PE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/*_R{1,2}*${params.extension}",checkExists:true )
+  read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
 }
 else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
@@ -151,8 +151,8 @@ workflow WES {
   }
 
   // Step 11: Aggregate Stats
-	  
+
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
 						PICARD_COLLECTHSMETRICS.out.hsmetrics,
-						PICARD_MARKDUPLICATES.out.dedup_metrics)				
+						PICARD_MARKDUPLICATES.out.dedup_metrics)
 }

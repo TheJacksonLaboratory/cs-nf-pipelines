@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mail-user=first.last@jax.org
-#SBATCH --job-name=rnaseq_mouse
+#SBATCH --job-name=wgs_mouse
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
 #SBATCH -q batch
@@ -15,7 +15,7 @@ ml singularity
 
 # RUN TEST PIPELINE
 ~/nextflow ../main.nf \
---workflow rnaseq \
+--workflow wgs \
 --sample_folder *PATH_TO_YOUR_SEQUENCES* \
 --gen_org mouse \
---comment "This script will run rnaseq on mouse samples using default mm10"
+--comment "This script will run whole genome sequencing on mouse samples using default mm10"
