@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/wes.nf'
-include {param_log} from '../bin/log/wes.nf'
+include {help} from '../bin/help/wgs.nf'
+include {param_log} from '../bin/log/wgs.nf'
 include {BWA_MEM} from '../modules/bwa'
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
@@ -117,8 +117,8 @@ workflow WGS {
                                GATK_SELECTVARIANTS_SNP.out.idx,
                               'SNP')
   // INDEL
-    GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER_WGS.out.vcf,
-                              GATK_HAPLOTYPECALLER_WGS.out.idx,
+    GATK_SELECTVARIANTS_INDEL(GATK_MERGEVCF_LIST.out.vcf,
+                              GATK_MERGEVCF_LIST.out.idx,
                              'INDEL')
     GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
                                  GATK_SELECTVARIANTS_INDEL.out.idx,

@@ -33,6 +33,7 @@ process GATK_PRINTREADS{
   time = '72:00:00'
   clusterOptions = '-q batch'
 
+  // Command Depricated in GATK 4
   container 'broadinstitute/gatk:4.2.4.1'
 
   input:
@@ -61,10 +62,8 @@ process GATK_REALIGNERTARGETCREATOR {
   time = '72:00:00'
   clusterOptions = '-q batch'
 
-  // update container, cannot find this command in gatk 4
-  // container 'broadinstitute/gatk:4.2.4.1'
+  container 'broadinstitute/gatk3:3.6-0'
 
-  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 
   input:
   tuple val(sampleID), file(bam)
@@ -95,10 +94,8 @@ memory = 35.GB
 time = '72:00:00'
 clusterOptions = '-q batch'
 
-// update container, cannot find this command in gatk 4
-// container 'broadinstitute/gatk:4.2.4.1'
-
-container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+// Command Depricated in GATK 4
+container 'broadinstitute/gatk3:3.6-0'
 
 input:
 tuple val(sampleID), file(bam)

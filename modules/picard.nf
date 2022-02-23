@@ -7,7 +7,8 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  container 'picard-1.95_python_2_7_3.sif'
+  // container 'picard-1.95_python_2_7_3.sif'
+  container 'broadinstitute/gatk:4.2.4.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.txt", mode:'copy'
 
@@ -21,7 +22,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
 
     """
-    java -Djava.io.tmpdir=$TMPDIR -jar -Xmx4g /picard-tools-1.95/CollectAlignmentSummaryMetrics.jar \
+    gatk CollectAlignmentSummaryMetrics \
     INPUT=${bam} \
     OUTPUT=${sampleID}_AlignmentMetrics.txt \
     REFERENCE_SEQUENCE=${params.ref_fa} \

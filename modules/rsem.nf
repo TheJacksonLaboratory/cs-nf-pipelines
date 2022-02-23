@@ -8,7 +8,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   time '24:00:00'
   clusterOptions '-q batch'
 
-  container 'rsem_bowtie2_samtools_picard.v2.sif'
+  container 'dceoy/rsem'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*stats", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
