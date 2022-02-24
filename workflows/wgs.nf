@@ -19,8 +19,8 @@ include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_INDEL;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpsift'
-include {AGGREGATE_STATS_MOUSE;
-         AGGREGATE_STATS_HUMAN} from '../bin/shared/aggregate_stats'
+include {AGGREGATE_STATS;
+         AGGREGATE_STATS} from '../bin/wgs/aggregate_stats_wgs'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_SORTSAM;
@@ -149,10 +149,6 @@ workflow WGS {
   // Merge SNP and INDEL and Aggregate Stats
     GATK_MERGEVCF(CAT_ONEPERLINE_SNP.out.vcf,
                   CAT_ONEPERLINE_INDEL.out.vcf)
-    AGGREGATE_STATS_HUMAN(QUALITY_STATISTICS.out.quality_stats,
-                          PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt,
-                          PICARD_MARKDUPLICATES.out.dedup_metrics)
-
   }
 
   // If Mouse
@@ -161,8 +157,11 @@ workflow WGS {
     GATK_VARIANTANNOTATOR(CAT_ANNOTATE_SNP.out.vcf,
                           SNPEFF.out.vcf)
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
-    AGGREGATE_STATS_MOUSE(QUALITY_STATISTICS.out.quality_stats,
-                          PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt)
+
   }
 
+  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
+                  PICARD_MARKDUPLICATES.out.dedup_metrics
+                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt
+                  )
 }

@@ -8,7 +8,7 @@ include {BWA_MEM} from '../modules/bwa'
 include {SAMTOOLS_INDEX} from '../modules/samtools'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {AGGREGATE_STATS} from '../bin/wes/aggregate_stats'
+include {AGGREGATE_STATS} from '../bin/wes/aggregate_stats_wes'
 include {CAT_HUMAN;
          CAT_HUMAN as CAT_HUMAN_SNP;
          CAT_HUMAN as CAT_HUMAN_INDEL} from '../bin/wes/cat'
