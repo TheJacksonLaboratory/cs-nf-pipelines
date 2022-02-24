@@ -7,6 +7,7 @@ process SNPEFF{
   // try with old container
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 // this is most recent but does not accept the old .bin files (v4 did not work either)
+// probably need to update snpEff downloadable files to update to newer version (v5.1)
 //  container 'quay.io/biocontainers/snpeff:5.0--hdfd78af_1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy'
@@ -17,6 +18,7 @@ process SNPEFF{
   output:
   tuple val(sampleID),file("*.vcf"), emit:vcf
   tuple val(sampleID),file("*.html")
+  // tuple val(sampleID),file("*")
 
   // may change -v to a paramiter
   script:

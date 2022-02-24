@@ -14,7 +14,7 @@ process GATK_MERGEVCF_LIST {
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
   tuple val(sampleID), file("*.idx"), emit: idx
-  
+
   script:
   log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
   """
@@ -42,7 +42,7 @@ process GATK_PRINTREADS{
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam
-  
+
   script:
   log.info "----- GATK PrintReads Running on: ${sampleID} -----"
 // ran into an issue with using the old -BQSR argument and using our table from baserecal
@@ -161,6 +161,8 @@ process GATK_MERGEVCF {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+
   input:
   tuple val(sampleID), file(snp_vcf)
   tuple val(sampleID), file(indel_vcf)
@@ -225,6 +227,7 @@ process GATK_BASERECALIBRATOR {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
+  // store in /stats
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.table", mode:'copy'
 
   input:
@@ -257,6 +260,7 @@ process GATK_APPLYBQSR {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
+  // store in /bam
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.ba*", mode:'copy'
 
   input:
@@ -336,7 +340,7 @@ process GATK_HAPLOTYPECALLER_WGS {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
-  
+
   input:
   tuple val(sampleID), file(bam), file(bai), val(chrome)
 
@@ -387,7 +391,7 @@ process GATK_SELECTVARIANTS {
   -R ${params.ref_fa} \
   -V ${vcf} \
   -select-type ${indel_snp} \
-  -O ${sampleID}_selectvariants_${indel_snp}.vcf
+  -O ${sampleID}_selectedvariants_${indel_snp}.vcf
   """
 }
 
@@ -448,11 +452,13 @@ process GATK_VARIANTFILTRATION {
     fs ='60.0'
     output_suffix = 'SNP_filtered.vcf'
   }
-  if (indel_snp == 'MOUSE'){
-    // mouse will be indel but fs needs to be same as snp (not sure why)
+  if (indel_snp == 'BOTH'){
     fs = '60.0'
     output_suffix = 'snp_indel_filtered.vcf'
   }
+
+// perhaps escape the \&&
+//    --filter-expression "QUAL > 30.0 && QUAL < 50.0" --filter-name "LowQual" \
 
   """
   gatk VariantFiltration \

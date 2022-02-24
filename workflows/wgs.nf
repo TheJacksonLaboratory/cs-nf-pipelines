@@ -91,21 +91,22 @@ workflow WGS {
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
   }
-  
+
   // If Mouse
   if (params.gen_org=='mouse'){
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
-    
+
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_INDELREALIGNER.out.bam.join(GATK_INDELREALIGNER.out.bai)
     chromes = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
                          'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19',
                          'chrM','chrX','chrY')
     chrome_channel = data.combine(chromes)
-     
+
     // Use the Channel in HaplotypeCaller
     GATK_HAPLOTYPECALLER_WGS(chrome_channel)
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
+    // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     }
 
@@ -124,16 +125,15 @@ workflow WGS {
                                  GATK_SELECTVARIANTS_INDEL.out.idx,
                                 'INDEL')
 
-  // Cat Output to vcf-annotate* 
-  // Note: Mouse=[CHROM,FROM,TO,ID] Human=[CHROM,POS,ID,REF,ALT]
+  // Cat Output to vcf-annotate*
     CAT_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
     CAT_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
 
 // Final Post-Processing Steps Slightly Different for Mouse and Human
-  
+
   // If Human
   if (params.gen_org=='human'){
-   
+
     // SNP
       COSMIC_ANNOTATION_SNP(CAT_ANNOTATE_SNP.out.vcf)
       SNPEFF_HUMAN_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP')
@@ -141,11 +141,11 @@ workflow WGS {
       CAT_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
       SNPSIFT_EXTRACTFIELDS_SNP(CAT_ONEPERLINE_SNP.out.vcf)
     // INDEL
-      COSMIC_ANNOTATION_INDEL(CAT_ANNOTATE_SNP.out.vcf)
-      SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_SNP.out.vcf, 'INDEL')
-      SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_SNP.out.vcf, 'INDEL')
-      CAT_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_SNP.out.vcf, 'INDEL')
-      SNPSIFT_EXTRACTFIELDS_INDEL(CAT_ONEPERLINE_SNP.out.vcf)
+      COSMIC_ANNOTATION_INDEL(CAT_ANNOTATE_INDEL.out.vcf)
+      SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
+      SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
+      CAT_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
+      SNPSIFT_EXTRACTFIELDS_INDEL(CAT_ONEPERLINE_INDEL.out.vcf)
 
   // Merge SNP and INDEL and Aggregate Stats
     GATK_MERGEVCF(CAT_ONEPERLINE_SNP.out.vcf,
@@ -155,7 +155,7 @@ workflow WGS {
                           PICARD_MARKDUPLICATES.out.dedup_metrics)
 
   }
-  
+
   // If Mouse
   if (params.gen_org=='mouse'){
     SNPEFF(CAT_ANNOTATE_SNP.out.vcf)

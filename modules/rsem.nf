@@ -10,9 +10,12 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   container 'dceoy/rsem'
 
+  // put into /stats
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*stats", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*.ba*", mode:'copy'
+  // subfolder of /bam
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*genome.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*transcript.bam", mode:'copy'
 
   input:
   tuple val(sampleID), file(reads)

@@ -4,9 +4,10 @@ process SUMMARY_STATS {
     cpus = 1
     time = '00:15:00'
     clusterOptions = '-q batch'
-    
+
     container 'R_perl.sif'
 
+    // store in /stats
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
 
     input:
@@ -17,11 +18,8 @@ process SUMMARY_STATS {
     output:
     tuple val(sampleID), file("*.txt")
 
-    when:
-    params.gen_org == "human"
-
     script:
-    log.info "----- Human Summary Metrics running on ${sampleID} -----"
+    log.info "----- Summary Metrics running on ${sampleID} -----"
 
     if (params.read_type == "PE")
 
@@ -39,7 +37,6 @@ process SUMMARY_STATS {
       ${quality_stats} \
       ${rsem_stats} \
       ${picard_metrics}  > ${sampleID}_summary_stats.txt
-
       """
 
     }

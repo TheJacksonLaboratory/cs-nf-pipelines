@@ -44,7 +44,8 @@ process PICARD_SORTSAM {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_sortsam.ba*", mode:'copy'
+  // store in /bam
+  // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_sortsam.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(sam)
@@ -79,8 +80,11 @@ process PICARD_MARKDUPLICATES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
+  // save if mouse optional if human
+  // store in /bam
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.dat", mode:'copy'
+  // store in /stats
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -88,7 +92,7 @@ process PICARD_MARKDUPLICATES {
   output:
   tuple val(sampleID), file("*_dedup.bam"), emit: dedup_bam
   tuple val(sampleID), file("*_dedup.bai"), emit: dedup_bai
-  tuple val(sampleID), file("*.dat"), emit: dedup_metrics
+  tuple val(sampleID), file("*.txt"), emit: dedup_metrics
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
@@ -97,7 +101,7 @@ process PICARD_MARKDUPLICATES {
   picard MarkDuplicates \
   I=${bam} \
   O=${sampleID}_dedup.bam \
-  M=${sampleID}_dup_metrics.dat \
+  M=${sampleID}_dup_metrics.txt \
   REMOVE_DUPLICATES=true \
   CREATE_INDEX=true \
   VALIDATION_STRINGENCY=SILENT
@@ -115,6 +119,7 @@ process PICARD_COLLECTHSMETRICS {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
+  // store in /stats
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.*", mode:'copy'
 
   input:
@@ -148,8 +153,8 @@ process PICARD_ADDORREPLACEREADGROUPS {
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
-
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
+  // store in /bam
+  // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(read_groups)
@@ -183,8 +188,8 @@ process PICARD_ADDORREPLACEREADGROUPS {
     clusterOptions '-q batch'
 
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
-
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
+    // store in /bam
+    // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
 
     input:
     tuple val(sampleID), file(bam)

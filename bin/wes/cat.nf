@@ -1,18 +1,11 @@
-process CAT_SNP_INDEL{
-  """
-  cat !{snps_filt} > !{sampleID}_full_anno_snp.vcf
-  cat !{indels_filt} > !{sampleID}_full_anno_indel.vcf
-  """
-}
-
 process CAT_HUMAN{
   tag "sampleID"
 
   cpus 1
   memory 2.GB
   time '00:10:00'
-  clusterOptions '-q batch' 
-  
+  clusterOptions '-q batch'
+
   container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   input:

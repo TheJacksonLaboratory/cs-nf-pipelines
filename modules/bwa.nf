@@ -6,9 +6,10 @@ process BWA_MEM {
   time '30:00:00'
   clusterOptions '-q batch'
 
-  container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'
-
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy'
+  // try to update to 0.7.17
+  //container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'
+  container 'quay.io/biocontainers/bwa:0.7.17--h5bf99c6_8'	
+  // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy'
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -28,12 +29,11 @@ process BWA_MEM {
     }
 
   """
+  // new version bwa needs specific readgroup formatting
   rg=\$(cat $read_groups)
   rg=\$(echo \$rg | sed -r 's/[=]+/:/g')
   rg=\$(echo \$rg | sed -r 's/[RG]+//g')
   rg=\$(echo \$rg | sed -r 's/[ ]+/\t/g')
-
-  echo '\'\$rg\''
 
   bwa mem -M -R "@RG\t\${rg}" \
   ${params.ref_fa} $inputfq > ${sampleID}.sam

@@ -1,5 +1,5 @@
 process GATK_FORMATTER {
-
+// change to FORMAT_GATK
   tag "sampleID"
 
   cpus 1
@@ -7,6 +7,7 @@ process GATK_FORMATTER {
   time '24:00:00'
   clusterOptions '-q batch'
 
+  // change to bedtools container (make sure cat statment in container)
   container 'broadinstitute/gatk:4.2.4.1'
   file(params.ref_fai)
 
@@ -27,7 +28,7 @@ process GATK_FORMATTER {
 
 // takes ouput from GATK_FORMATTER
 process GATK_COVCALC {
-
+// change to COVCALC_GATK
   tag "sampleID"
 
   cpus 1
@@ -37,6 +38,7 @@ process GATK_COVCALC {
 
   container 'python_2.7.sif'
 
+  // store in /stats
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.bed", mode:'copy'
 
   input:

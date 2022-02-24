@@ -84,7 +84,7 @@ workflow WES {
     // Step 7: Variant Calling
       GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam,
                            GATK_APPLYBQSR.out.bai,
-                          'varient')
+                          'variant')
       GATK_HAPLOTYPECALLER_GVCF(GATK_APPLYBQSR.out.bam,
                                 GATK_APPLYBQSR.out.bai,
                                'gvcf')
@@ -140,9 +140,9 @@ workflow WES {
     // Step 8: Variant Filtration
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
                              GATK_HAPLOTYPECALLER.out.idx,
-                            'MOUSE')
+                            'BOTH')
 
-    // Step 10: Post Variant Calling Processing - Part 2 (this all needs updating -- the containers and versions are wicked old)
+    // Step 10: Post Variant Calling Processing
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
       GATK_VARIANTANNOTATOR(GATK_VARIANTFILTRATION.out.vcf,
                             SNPEFF.out.vcf)
@@ -151,8 +151,7 @@ workflow WES {
   }
 
   // Step 11: Aggregate Stats
-
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-						PICARD_COLLECTHSMETRICS.out.hsmetrics,
-						PICARD_MARKDUPLICATES.out.dedup_metrics)
+						      PICARD_COLLECTHSMETRICS.out.hsmetrics,
+						      PICARD_MARKDUPLICATES.out.dedup_metrics)
 }

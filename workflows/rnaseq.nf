@@ -56,24 +56,24 @@ workflow RNASEQ {
                                 RSEM_ALIGNMENT_EXPRESSION.out.bam)
   PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam)
 
-  // If gen_org mouse
+  // Step 5: Picard Alignment Metrics
+  PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
+  // need to sort out ref_flat and ribo_intervals (may break mouse now)
+  PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
+
+  // Step 6: Summary Stats
+  SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
+                QUALITY_STATISTICS.out.quality_stats,
+                PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+
+  /* do we need this?
   if ("${params.gen_org}" == 'mouse'){
-    // Step 5: Bamtools
-    BAMTOOLS_STATS(PICARD_REORDERSAM.out.bam)
+     BAMTOOLS_STATS(PICARD_REORDERSAM.out.bam)
   }
+  */
 
   // If gen_org human
   if ("${params.gen_org}" == 'human'){
-
-    // Step 5: Picard Alignment Metrics
-    PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
-    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
-
-    // Step 6: Summary Stats
-    SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
-                  QUALITY_STATISTICS.out.quality_stats,
-                  PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
-
     // Step 7: GATK Coverage Stats
       // CTP
         GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.ctp_genes)

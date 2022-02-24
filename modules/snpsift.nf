@@ -5,6 +5,7 @@ process SNPSIFT_DBNSFP{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
+  // revisit snpsift versioning (v5.1) comes as package with snpEff
   container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   input:
@@ -16,6 +17,7 @@ process SNPSIFT_DBNSFP{
 
   script:
   log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
+  // new dbNSFP is going to be much larger. new db may break things
   """
   java -jar /snpEff_v4_3/snpEff/SnpSift.jar \
   dbnsfp -v -db ${params.dbNSFP} -noDownload -a \
@@ -33,7 +35,8 @@ process SNPSIFT_EXTRACTFIELDS {
   clusterOptions = '-q batch'
 
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
-//container 'quay.io/biocontainers/snpsift:4.2--hdfd78af_5'
+  //container 'quay.io/biocontainers/snpsift:4.2--hdfd78af_5'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf)
@@ -43,6 +46,7 @@ process SNPSIFT_EXTRACTFIELDS {
 
   script:
   log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
+  // add suffix for snp indel both for output name 
   """
   java -jar /snpEff/SnpSift.jar \
   extractFields ${vcf} \

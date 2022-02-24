@@ -8,7 +8,8 @@ process QUALITY_STATISTICS {
   clusterOptions '-q batch'
 
   container 'python_2.7.sif'
-
+  
+  // put as sampleID+"/stats" folder
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'quality_stats' }", pattern: "*fastq.gz_stat", mode:'copy'
 
   input:
