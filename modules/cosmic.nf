@@ -6,8 +6,6 @@ process COSMIC_ANNOTATION {
   time = '08:00:00'
   clusterOptions = '-q batch'
 
-  // see if works with Sumner container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
-
   input:
   tuple val(sampleID), file(vcf)
 

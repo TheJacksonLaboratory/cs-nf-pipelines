@@ -7,8 +7,7 @@ process SUMMARY_STATS {
 
     container 'R_perl.sif'
 
-    // store in /stats
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
 
     input:
     tuple val(sampleID), file(rsem_stats)
@@ -38,5 +37,4 @@ process SUMMARY_STATS {
       ${rsem_stats} \
       ${picard_metrics}  > ${sampleID}_summary_stats.txt
       """
-
-    }
+}

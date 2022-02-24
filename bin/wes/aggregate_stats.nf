@@ -7,7 +7,7 @@ process AGGREGATE_STATS {
 
   container 'python_2.7.3.sif'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(filter_stats)

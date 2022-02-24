@@ -25,35 +25,6 @@ process GATK_MERGEVCF_LIST {
   """
 
 }
-process GATK_PRINTREADS{
-  tag "sampleID"
-
-  cpus = 12
-  memory = 35.GB
-  time = '72:00:00'
-  clusterOptions = '-q batch'
-
-  // Command Depricated in GATK 4
-  container 'broadinstitute/gatk:4.2.4.1'
-
-  input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(table)
-
-  output:
-  tuple val(sampleID), file("*.bam"), emit: bam
-
-  script:
-  log.info "----- GATK PrintReads Running on: ${sampleID} -----"
-// ran into an issue with using the old -BQSR argument and using our table from baserecal
-  """
-  gatk PrintReads \
-  -R ${params.ref_fa} \
-  -I ${bam} \
-  -O ${sampleID}_realigned_BQSR.bam \
-  """
-}
-
 process GATK_REALIGNERTARGETCREATOR {
   tag "sampleID"
 
@@ -63,7 +34,6 @@ process GATK_REALIGNERTARGETCREATOR {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk3:3.6-0'
-
 
   input:
   tuple val(sampleID), file(bam)
@@ -85,40 +55,38 @@ process GATK_REALIGNERTARGETCREATOR {
   """
 
 }
-
 process GATK_INDELREALIGNER{
-tag "sampleID"
+  tag "sampleID"
 
-cpus = 12
-memory = 35.GB
-time = '72:00:00'
-clusterOptions = '-q batch'
+  cpus = 12
+  memory = 35.GB
+  time = '72:00:00'
+  clusterOptions = '-q batch'
 
-// Command Depricated in GATK 4
-container 'broadinstitute/gatk3:3.6-0'
+  // Command Depricated in GATK 4
+  container 'broadinstitute/gatk3:3.6-0'
 
-input:
-tuple val(sampleID), file(bam)
-tuple val(sampleID), file(intervals)
+  input:
+  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(intervals)
 
-output:
-tuple val(sampleID), file("*.bam"), emit: bam
-tuple val(sampleID), file("*.bai"), emit: bai
+  output:
+  tuple val(sampleID), file("*.bam"), emit: bam
+  tuple val(sampleID), file("*.bai"), emit: bai
 
-script:
-log.info "----- GATK IndelRealigner Running on: ${sampleID} -----"
+  script:
+  log.info "----- GATK IndelRealigner Running on: ${sampleID} -----"
 
-"""
-java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
--I ${bam} \
--R ${params.ref_fa} \
--T IndelRealigner \
--targetIntervals ${intervals} \
--o ${sampleID}_realigned.bam \
---disable_auto_index_creation_and_locking_when_reading_rods
-"""
+  """
+  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
+  -I ${bam} \
+  -R ${params.ref_fa} \
+  -T IndelRealigner \
+  -targetIntervals ${intervals} \
+  -o ${sampleID}_realigned.bam \
+  --disable_auto_index_creation_and_locking_when_reading_rods
+  """
 }
-
 process GATK_VARIANTANNOTATOR {
   tag "sampleID"
 
@@ -150,7 +118,6 @@ process GATK_VARIANTANNOTATOR {
   -o ${sampleID}_GATKannotated.vcf
   """
 }
-
 process GATK_MERGEVCF {
   tag "sampleID"
 
@@ -179,7 +146,6 @@ process GATK_MERGEVCF {
   -I ${indel_vcf} \
   -O ${sampleID}_GATKcombined.vcf
   """
-
 }
 process GATK_DEPTHOFCOVERAGE {
 
@@ -216,7 +182,6 @@ process GATK_DEPTHOFCOVERAGE {
   --omit-locus-table \
   """
 }
-
 process GATK_BASERECALIBRATOR {
   tag "sampleID"
 
@@ -227,8 +192,7 @@ process GATK_BASERECALIBRATOR {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  // store in /stats
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.table", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'gatk' }", pattern: "*.table", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -249,7 +213,6 @@ process GATK_BASERECALIBRATOR {
   -O ${sampleID}_recal_data.table \
   """
 }
-
 process GATK_APPLYBQSR {
   tag "sampleID"
 
@@ -260,8 +223,7 @@ process GATK_APPLYBQSR {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  // store in /bam
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(bam)
@@ -282,8 +244,6 @@ process GATK_APPLYBQSR {
    -O ${sampleID}_realigned_BQSR.bam
   """
 }
-
-
 process GATK_HAPLOTYPECALLER {
   tag "sampleID"
 
@@ -294,7 +254,7 @@ process GATK_HAPLOTYPECALLER {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -317,7 +277,6 @@ process GATK_HAPLOTYPECALLER {
     output_suffix='vcf'
   }
 
-//  --dbsnp ${params.dbSNP}
 
   """
   gatk HaplotypeCaller  \
@@ -330,7 +289,6 @@ process GATK_HAPLOTYPECALLER {
   ${delta} \
   """
 }
-
 process GATK_HAPLOTYPECALLER_WGS {
   tag "sampleID"
 
@@ -342,7 +300,7 @@ process GATK_HAPLOTYPECALLER_WGS {
   container 'broadinstitute/gatk:4.2.4.1'
 
   input:
-  tuple val(sampleID), file(bam), file(bai), val(chrome)
+  tuple val(sampleID), file(bam), file(bai), val(chrom)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
@@ -350,18 +308,17 @@ process GATK_HAPLOTYPECALLER_WGS {
 
   script:
 
-  log.info "----- GATK Haplotype Caller Running on Chromosome ${chrome} for sample: ${sampleID} -----"
+  log.info "----- GATK Haplotype Caller Running on Chromosome ${chrom} for sample: ${sampleID} -----"
 
   """
   gatk HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
   -O ${sampleID}_HaplotypeCaller_${chrome}.vcf \
-  -L ${chrome} \
+  -L ${chrom} \
   -stand-call-conf ${params.call_val}
   """
 }
-
 process GATK_SELECTVARIANTS {
   tag "sampleID"
 
@@ -394,7 +351,6 @@ process GATK_SELECTVARIANTS {
   -O ${sampleID}_selectedvariants_${indel_snp}.vcf
   """
 }
-
 process GATK_INDEXFEATUREFILE {
   tag "sampleID"
 
@@ -405,7 +361,7 @@ process GATK_INDEXFEATUREFILE {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.idx", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.idx", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf)
@@ -420,8 +376,6 @@ process GATK_INDEXFEATUREFILE {
   -I ${vcf}
   """
 }
-
-
 process GATK_VARIANTFILTRATION {
   tag "sampleID"
 
@@ -431,7 +385,7 @@ process GATK_VARIANTFILTRATION {
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf)

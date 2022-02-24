@@ -1,4 +1,3 @@
-
 process SNPSIFT_DBNSFP{
   cpus = 1
   memory = 6.GB
@@ -7,6 +6,8 @@ process SNPSIFT_DBNSFP{
 
   // revisit snpsift versioning (v5.1) comes as package with snpEff
   container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf)
@@ -54,5 +55,4 @@ process SNPSIFT_EXTRACTFIELDS {
   SNPEFF_GENE_NAME SNPEFF_AMINO_ACID_CHANGE \
   SNPEFF_EFFECT SNPEFF_TRANSCRIPT_ID > ${sampleID}_snpsift.txt
   """
-
 }

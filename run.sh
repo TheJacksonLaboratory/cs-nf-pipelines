@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --mail-user=first.last@jax.org
+#SBATCH --mail-user=barry.guglielmo@jax.org
 #SBATCH --job-name=min_nextflow
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
@@ -13,5 +13,4 @@ cd $SLURM_SUBMIT_DIR
 # LOAD SINGULARITY
 ml singularity
 # RUN TEST PIPELINE
-~/nextflow main.nf --workflow rnaseq -resume
-
+~/nextflow main.nf --workflow wgs -resume

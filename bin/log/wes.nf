@@ -16,6 +16,7 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 -w                              ${workDir}
+--keep_intermediate    ${params.keep_intermediate}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
@@ -63,6 +64,7 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 -w                              ${workDir}
+--keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}

@@ -10,7 +10,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   // container 'picard-1.95_python_2_7_3.sif'
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -30,7 +30,6 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
     VALIDATION_STRINGENCY=LENIENT
     """
 }
-
 process PICARD_SORTSAM {
   tag "sampleID"
 
@@ -44,8 +43,7 @@ process PICARD_SORTSAM {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  // store in /bam
-  // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_sortsam.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*_sortsam.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(sam)
@@ -66,7 +64,6 @@ process PICARD_SORTSAM {
   CREATE_INDEX=true
   """
 }
-
 process PICARD_MARKDUPLICATES {
   tag "sampleID"
 
@@ -81,10 +78,8 @@ process PICARD_MARKDUPLICATES {
 
   // Publish Directory
   // save if mouse optional if human
-  // store in /bam
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
-  // store in /stats
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -107,8 +102,6 @@ process PICARD_MARKDUPLICATES {
   VALIDATION_STRINGENCY=SILENT
   """
 }
-
-
 process PICARD_COLLECTHSMETRICS {
   tag "sampleID"
 
@@ -119,8 +112,7 @@ process PICARD_COLLECTHSMETRICS {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  // store in /stats
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -142,7 +134,6 @@ process PICARD_COLLECTHSMETRICS {
   VALIDATION_STRINGENCY=SILENT
   """
 }
-
 process PICARD_ADDORREPLACEREADGROUPS {
 
   tag "sampleID"
@@ -153,8 +144,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
-  // store in /bam
-  // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(read_groups)
@@ -178,43 +168,8 @@ process PICARD_ADDORREPLACEREADGROUPS {
   """
 
   }
-  process PICARD_REORDERSAM {
+process PICARD_REORDERSAM {
 
-    tag "sampleID"
-
-    cpus 1
-    memory 8.GB
-    time '12:00:00'
-    clusterOptions '-q batch'
-
-    container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
-    // store in /bam
-    // optional publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
-
-    input:
-    tuple val(sampleID), file(bam)
-
-
-    output:
-    tuple val(sampleID), file("*.bam"), emit: bam
-    tuple val(sampleID), file("*.bai"), emit: bai
-
-    script:
-    log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
-
-    """
-    picard ReorderSam \
-    INPUT=${bam} \
-    OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
-    SEQUENCE_DICTIONARY=${params.picard_dict} \
-    CREATE_INDEX=true
-    """
-
-    }
-
-process PICARD_COLLECTRNASEQMETRICS {
-
-  // human only for mouse see bamtools
   tag "sampleID"
 
   cpus 1
@@ -224,8 +179,39 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.ba*", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.pdf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
+
+  input:
+  tuple val(sampleID), file(bam)
+
+  output:
+  tuple val(sampleID), file("*.bam"), emit: bam
+  tuple val(sampleID), file("*.bai"), emit: bai
+
+  script:
+  log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
+
+  """
+  picard ReorderSam \
+  INPUT=${bam} \
+  OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
+  SEQUENCE_DICTIONARY=${params.picard_dict} \
+  CREATE_INDEX=true
+  """
+}
+process PICARD_COLLECTRNASEQMETRICS {
+
+  tag "sampleID"
+
+  cpus 1
+  memory 8.GB
+  time '12:00:00'
+  clusterOptions '-q batch'
+
+  container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.pdf", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -259,5 +245,4 @@ process PICARD_COLLECTRNASEQMETRICS {
     STRAND=NONE \
     CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
     """
-
-  }
+}

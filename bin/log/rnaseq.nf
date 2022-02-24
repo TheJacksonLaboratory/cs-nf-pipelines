@@ -7,7 +7,7 @@ ______________________________________________________
 
 --comment: ${params.comment}
 
-Rsults Published to: ${params.pubdir}
+Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
 --gen_org              ${params.gen_org}
@@ -18,6 +18,7 @@ ______________________________________________________
 --organize_by          ${params.organize_by}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}
+--keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
 --ref_fa               ${params.ref_fa}
 --ref_fai              ${params.ref_fai}
@@ -63,6 +64,7 @@ ______________________________________________________
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
 -w                              ${workDir}
+--keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
 --ref_fa                        ${params.ref_fa}
 --filter_trim                   ${params.filter_trim}

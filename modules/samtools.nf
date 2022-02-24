@@ -9,7 +9,7 @@ process SAMTOOLS_INDEX {
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern:"*.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern:"*.ba*", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val("sampleID"), file(bam)
