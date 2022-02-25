@@ -19,8 +19,7 @@ include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_INDEL;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpsift'
-include {AGGREGATE_STATS;
-         AGGREGATE_STATS} from '../bin/wgs/aggregate_stats_wgs'
+include {AGGREGATE_STATS} from '../bin/wgs/aggregate_stats_wgs'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_SORTSAM;
@@ -161,7 +160,7 @@ workflow WGS {
   }
 
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-                  PICARD_MARKDUPLICATES.out.dedup_metrics
+                  PICARD_MARKDUPLICATES.out.dedup_metrics,
                   PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt
                   )
 }
