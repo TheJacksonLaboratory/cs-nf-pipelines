@@ -19,6 +19,7 @@ include {FORMAT_GATK as FORMAT_GATK_CTP;
          FORMAT_GATK as FORMAT_GATK_PROBES;
          COVCALC_GATK as COVCALC_GATK_CTP;
          COVCALC_GATK as COVCALC_GATK_PROBES} from '../bin/rnaseq/gatk_formatter'
+
 // help if needed
 if (params.help){
     help()
@@ -37,10 +38,7 @@ else if (params.read_type == 'SE'){
 }
 
 // if channel is empty give error message and exit
-if (read_ch.count()==0){
-  log.info "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"
-  exit 0
-}
+read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 // downstream resources (only load once so do it here)
 rsem_ref_files = file("${params.rsem_ref_files}/*")

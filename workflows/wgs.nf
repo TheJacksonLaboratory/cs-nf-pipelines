@@ -55,11 +55,8 @@ else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
 }
 
-// if channel is empty give error message
-if (read_ch.count()==0){
-  log.info "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"
-  exit 0
-}
+// if channel is empty give error message and exit
+read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 // main workflow
 workflow WGS {
