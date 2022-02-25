@@ -1,5 +1,4 @@
-process GATK_FORMATTER {
-// change to FORMAT_GATK
+process FORMAT_GATK {
   tag "sampleID"
 
   cpus 1
@@ -25,10 +24,7 @@ process GATK_FORMATTER {
   ${params.gatk_form} ${txt} ${sampleID}_gatk_temp2.txt ${sampleID}_gatk_formatter.txt ${L}
   """
 }
-
-// takes ouput from GATK_FORMATTER
-process GATK_COVCALC {
-// change to COVCALC_GATK
+process COVCALC_GATK {
   tag "sampleID"
 
   cpus 1

@@ -9,8 +9,8 @@ include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
 include {SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
          SNPEFF_HUMAN as SNPEFF_HUMAN_INDEL} from '../modules/snpeff'
-include {CAT_ANNOTATE as CAT_ANNOTATE_SNP;
-         CAT_ANNOTATE as CAT_ANNOTATE_INDEL;
+include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
+         VCF_ANNOTATE as VCF_ANNOTATE_INDEL;
          CAT_ONEPERLINE as CAT_ONEPERLINE_SNP;
          CAT_ONEPERLINE as CAT_ONEPERLINE_INDEL} from '../bin/wgs/cat'
 include {SNPEFF} from '../modules/snpeff'
@@ -53,6 +53,12 @@ if (params.read_type == 'PE'){
 }
 else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+}
+
+// if channel is empty give error message
+if (read_ch.count()==0){
+  log.info "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"
+  exit 0
 }
 
 // main workflow
@@ -124,8 +130,8 @@ workflow WGS {
                                 'INDEL')
 
   // Cat Output to vcf-annotate*
-    CAT_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-    CAT_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+    VCF_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
+    VCF_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
 
 // Final Post-Processing Steps Slightly Different for Mouse and Human
 
@@ -133,13 +139,13 @@ workflow WGS {
   if (params.gen_org=='human'){
 
     // SNP
-      COSMIC_ANNOTATION_SNP(CAT_ANNOTATE_SNP.out.vcf)
+      COSMIC_ANNOTATION_SNP(VCF_ANNOTATE_SNP.out.vcf)
       SNPEFF_HUMAN_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP')
       SNPSIFT_DBNSFP_SNP(SNPEFF_HUMAN_SNP.out.vcf, 'SNP')
       CAT_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
       SNPSIFT_EXTRACTFIELDS_SNP(CAT_ONEPERLINE_SNP.out.vcf)
     // INDEL
-      COSMIC_ANNOTATION_INDEL(CAT_ANNOTATE_INDEL.out.vcf)
+      COSMIC_ANNOTATION_INDEL(VCF_ANNOTATE_INDEL.out.vcf)
       SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
       SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
       CAT_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
@@ -152,8 +158,8 @@ workflow WGS {
 
   // If Mouse
   if (params.gen_org=='mouse'){
-    SNPEFF(CAT_ANNOTATE_SNP.out.vcf)
-    GATK_VARIANTANNOTATOR(CAT_ANNOTATE_SNP.out.vcf,
+    SNPEFF(VCF_ANNOTATE_SNP.out.vcf)
+    GATK_VARIANTANNOTATOR(VCF_ANNOTATE_SNP.out.vcf,
                           SNPEFF.out.vcf)
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 

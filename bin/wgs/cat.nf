@@ -1,5 +1,4 @@
-process CAT_ANNOTATE {
-  // change to VCF_ANNOTATE
+process VCF_ANNOTATE {
   cpus = 1
   memory = 10.GB
   time = '23:00:00'

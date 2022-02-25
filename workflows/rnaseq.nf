@@ -15,10 +15,10 @@ include {PICARD_ADDORREPLACEREADGROUPS;
          PICARD_SORTSAM} from '../modules/picard'
 include {GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_CTP;
          GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_PROBES} from '../modules/gatk'
-include {GATK_FORMATTER as GATK_FORMATTER_CTP;
-         GATK_FORMATTER as GATK_FORMATTER_PROBES;
-         GATK_COVCALC as GATK_COVCALC_CTP;
-         GATK_COVCALC as GATK_COVCALC_PROBES} from '../bin/rnaseq/gatk_formatter'
+include {FORMAT_GATK as FORMAT_GATK_CTP;
+         FORMAT_GATK as FORMAT_GATK_PROBES;
+         COVCALC_GATK as COVCALC_GATK_CTP;
+         COVCALC_GATK as COVCALC_GATK_PROBES} from '../bin/rnaseq/gatk_formatter'
 // help if needed
 if (params.help){
     help()
@@ -34,6 +34,12 @@ if (params.read_type == 'PE'){
 }
 else if (params.read_type == 'SE'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+}
+
+// if channel is empty give error message and exit
+if (read_ch.count()==0){
+  log.info "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"
+  exit 0
 }
 
 // downstream resources (only load once so do it here)
@@ -77,13 +83,13 @@ workflow RNASEQ {
     // Step 7: GATK Coverage Stats
       // CTP
         GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.ctp_genes)
-        GATK_FORMATTER_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt, params.ctp_genes)
-        GATK_COVCALC_CTP(GATK_FORMATTER_CTP.out.txt, "CTP")
+        FORMAT_GATK_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt, params.ctp_genes)
+        COVCALC_GATK_CTP(FORMAT_GATK_CTP.out.txt, "CTP")
 
       // PROBES
         GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.probes)
-        GATK_FORMATTER_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
-        GATK_COVCALC_PROBES(GATK_FORMATTER_CTP.out.txt, "PROBES")
+        FORMAT_GATK_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
+        COVCALC_GATK_PROBES(FORMAT_GATK_CTP.out.txt, "PROBES")
 
   }
 }
