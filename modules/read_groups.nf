@@ -1,10 +1,9 @@
 process READ_GROUPS {
-  // ** why is only one read used here?
   tag "sampleID"
 
   cpus 1
   memory 5.GB
-  time '02:00:00'
+  time '01:00:00'
   clusterOptions '-q batch'
 
   container 'python_2.7.sif'

@@ -1,12 +1,13 @@
 process RSEM_ALIGNMENT_EXPRESSION {
-
   tag "sampleID"
 
   cpus 12
-  memory 30.GB
+  memory 60.GB
   time '24:00:00'
   clusterOptions '-q batch'
+// retry +=60GB +=24H
 
+  // container runs only calculate expression
   container 'dceoy/rsem'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy'
@@ -47,7 +48,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
     stype=""
     trimmedfq="${reads[0]}"
   }
-
+// dynamic threads task.cpu
   """
   rsem-calculate-expression -p 12 \
   ${prob} \
@@ -63,7 +64,6 @@ process RSEM_ALIGNMENT_EXPRESSION {
   2> rsem_aln_${sampleID}.stats
   """
 }
-
 // Toy Example RSEM below
 process RSEM_REF_PULL {
   publishDir "${params.pubdir}/rsem/ref"

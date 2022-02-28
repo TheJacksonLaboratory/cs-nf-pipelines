@@ -12,7 +12,7 @@ include {SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
 include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
          VCF_ANNOTATE as VCF_ANNOTATE_INDEL;
          CAT_ONEPERLINE as CAT_ONEPERLINE_SNP;
-         CAT_ONEPERLINE as CAT_ONEPERLINE_INDEL} from '../bin/wgs/cat'
+         CAT_ONEPERLINE as CAT_ONEPERLINE_INDEL} from '../bin/wgs/vcf_annotate'
 include {SNPEFF} from '../modules/snpeff'
 include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_SNP;
@@ -38,6 +38,7 @@ include {GATK_REALIGNERTARGETCREATOR;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk'
 include {MAKE_VCF_LIST} from '../bin/wgs/make_vcf_list'
+
 // help if needed
 if (params.help){
     help()
@@ -72,7 +73,7 @@ workflow WGS {
   // Step 5
   GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
   GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                        GATK_REALIGNERTARGETCREATOR.out.intervals)
+                      GATK_REALIGNERTARGETCREATOR.out.intervals) // always saved mouse optional for human (like markdups)
   // If Human
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
@@ -88,7 +89,7 @@ workflow WGS {
     chrome_channel = data.combine(chromes)
 
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_WGS(chrome_channel)
+    GATK_HAPLOTYPECALLER_WGS(chrome_channel) // GATK_HAPLOTYPECALLER_INTERVAL
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
   }
@@ -162,8 +163,8 @@ workflow WGS {
 
   }
 
+  // may replace with multiqc
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
                   PICARD_MARKDUPLICATES.out.dedup_metrics,
-                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt
-                  )
+                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt)
 }

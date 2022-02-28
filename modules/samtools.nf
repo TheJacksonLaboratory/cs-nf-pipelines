@@ -1,10 +1,9 @@
 process SAMTOOLS_INDEX {
-
   tag "sampleID"
 
   cpus 1
   memory 8.GB
-  time '12:00:00'
+  time '06:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
@@ -24,4 +23,3 @@ process SAMTOOLS_INDEX {
     samtools index ${bam}
     """
 }
-

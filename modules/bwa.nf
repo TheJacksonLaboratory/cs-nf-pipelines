@@ -1,10 +1,12 @@
 process BWA_MEM {
   tag "sampleID"
 
-  cpus 4
-  memory 16.GB
+  cpus 8
+  memory 60.GB
   time '30:00:00'
   clusterOptions '-q batch'
+// add retry once with strategy: +=60gb and +=30H
+// add cpu into the command
 
   // try to update to 0.7.17
   container 'quay.io/biocontainers/bwa:0.7.3a--h5bf99c6_6'

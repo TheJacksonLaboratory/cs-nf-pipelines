@@ -1,13 +1,11 @@
-//Picard Tools
 process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   tag "sampleID"
 
   cpus = 1
   memory = 5.GB
-  time = '06:00:00'
+  time = '03:00:00'
   clusterOptions = '-q batch'
 
-  // container 'picard-1.95_python_2_7_3.sif'
   container 'broadinstitute/gatk:4.2.4.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
@@ -19,7 +17,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   tuple val(sampleID), file("*.txt"), emit: txt
 
   script:
-  log.info "-----Variant pre-processing part 3 running on ${sampleID}-----"
+  log.info "----- Collect Alignment Sumary Metrics Running on: ${sampleID} -----"
 
     """
     gatk CollectAlignmentSummaryMetrics \
@@ -36,7 +34,7 @@ process PICARD_SORTSAM {
   // Slurm Options
   cpus 1
   memory 8.GB
-  time '12:00:00'
+  time '06:00:00'
   clusterOptions '-q batch'
 
   // Container
@@ -69,7 +67,7 @@ process PICARD_MARKDUPLICATES {
 
   // Slurm Options
   cpus 1
-  memory 8.GB
+  memory 16.GB
   time '12:00:00'
   clusterOptions '-q batch'
 
@@ -77,7 +75,7 @@ process PICARD_MARKDUPLICATES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // Publish Directory
-  // save if mouse optional if human
+  // save if mouse and wes save if anything else optional
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
@@ -107,7 +105,7 @@ process PICARD_COLLECTHSMETRICS {
 
   cpus = 1
   memory = 6.GB
-  time = '06:00:00'
+  time = '03:00:00'
   clusterOptions = '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
@@ -140,7 +138,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
 
   cpus 1
   memory 8.GB
-  time '12:00:00'
+  time '06:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
@@ -166,15 +164,14 @@ process PICARD_ADDORREPLACEREADGROUPS {
   \$(cat $read_groups) \
   CREATE_INDEX=true
   """
-
-  }
+}
 process PICARD_REORDERSAM {
 
   tag "sampleID"
 
   cpus 1
   memory 8.GB
-  time '12:00:00'
+  time '06:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
@@ -205,7 +202,7 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   cpus 1
   memory 8.GB
-  time '12:00:00'
+  time '03:00:00'
   clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'

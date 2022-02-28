@@ -1,12 +1,15 @@
 process GATK_MERGEVCF_LIST {
   tag "sampleID"
+  // base the task.memory - value (1GB)
 
   cpus 1
-  memory 15.GB
-  time '24:00:00'
+  memory 10.GB
+  time '05:00:00'
   clusterOptions '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
+
+  // keep output
 
   input:
   tuple val(sampleID), file(list)
@@ -18,22 +21,24 @@ process GATK_MERGEVCF_LIST {
   script:
   log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
   """
-  gatk MergeVcfs \
+  gatk --java-options "-Xmx9G" MergeVcfs \
   -R ${params.ref_fa} \
   -I ${list} \
-  -O ${sampleID}_GATKcombined.vcf
+  -O ${sampleID}_GATKcombined_raw.vcf
   """
-
 }
 process GATK_REALIGNERTARGETCREATOR {
+  // depricated in gatk4, not reccomended. Leaving for historic precedence.
   tag "sampleID"
 
   cpus = 12
   memory = 35.GB
-  time = '72:00:00'
+  time = '12:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk3:3.6-0'
+
+  // keep as optional
 
   input:
   tuple val(sampleID), file(bam)
@@ -45,7 +50,7 @@ process GATK_REALIGNERTARGETCREATOR {
   log.info "----- GATK RealignerTargetCreator Running on: ${sampleID} -----"
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx30g -jar /usr/GenomeAnalysisTK.jar \
   -I ${bam} \
   -R ${params.ref_fa} \
   -T RealignerTargetCreator \
@@ -53,18 +58,20 @@ process GATK_REALIGNERTARGETCREATOR {
   -nt 12 \
   --disable_auto_index_creation_and_locking_when_reading_rods
   """
-
 }
 process GATK_INDELREALIGNER{
+  // depricated in gatk4, not reccomended. Leaving for historic precedence.
   tag "sampleID"
 
-  cpus = 12
+  cpus = 1
   memory = 35.GB
-  time = '72:00:00'
+  time = '05:00:00'
   clusterOptions = '-q batch'
 
   // Command Depricated in GATK 4
   container 'broadinstitute/gatk3:3.6-0'
+
+  // optional output
 
   input:
   tuple val(sampleID), file(bam)
@@ -92,11 +99,14 @@ process GATK_VARIANTANNOTATOR {
 
   cpus 1
   memory 15.GB
-  time '24:00:00'
+  time '05:00:00'
   clusterOptions '-q batch'
 
- // container 'broadinstitute/gatk:4.2.4.1'
+  // Legacy Reasons Leave as GATK3 (public)
+  // Flag --snpEffFile was removed in GATK4
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+
+  // save output
 
   input:
   tuple val(sampleID), file(sample_vcf)
@@ -123,7 +133,7 @@ process GATK_MERGEVCF {
 
   cpus 1
   memory 15.GB
-  time '24:00:00'
+  time '05:00:00'
   clusterOptions '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -153,7 +163,7 @@ process GATK_DEPTHOFCOVERAGE {
 
   cpus 1
   memory 15.GB
-  time '24:00:00'
+  time '05:00:00'
   clusterOptions '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -185,9 +195,9 @@ process GATK_DEPTHOFCOVERAGE {
 process GATK_BASERECALIBRATOR {
   tag "sampleID"
 
-  cpus = 12
+  cpus = 1
   memory = 35.GB
-  time = '72:00:00'
+  time = '12:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -216,14 +226,14 @@ process GATK_BASERECALIBRATOR {
 process GATK_APPLYBQSR {
   tag "sampleID"
 
-  cpus = 12
+  cpus = 1
   memory = 35.GB
-  time = '72:00:00'
+  time = '12:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -247,9 +257,9 @@ process GATK_APPLYBQSR {
 process GATK_HAPLOTYPECALLER {
   tag "sampleID"
 
-  cpus = 8
+  cpus = 1
   memory = 15.GB
-  time = '23:00:00'
+  time = '10:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -290,11 +300,12 @@ process GATK_HAPLOTYPECALLER {
   """
 }
 process GATK_HAPLOTYPECALLER_WGS {
+// GATK_HAPLOTYPECALLER_INTERVAL also put note about it
   tag "sampleID"
 
-  cpus = 8
+  cpus = 1
   memory = 15.GB
-  time = '23:00:00'
+  time = '05:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -324,7 +335,7 @@ process GATK_SELECTVARIANTS {
 
   cpus = 1
   memory = 6.GB
-  time = '06:00:00'
+  time = '03:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -356,7 +367,7 @@ process GATK_INDEXFEATUREFILE {
 
   cpus = 1
   memory = 6.GB
-  time = '06:00:00'
+  time = '03:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
@@ -381,7 +392,7 @@ process GATK_VARIANTFILTRATION {
 
   cpus = 1
   memory = 6.GB
-  time = '06:00:00'
+  time = '03:00:00'
   clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'

@@ -3,12 +3,12 @@ process QUALITY_STATISTICS {
   tag "sampleID"
 
   cpus 1
-  memory 15.GB
+  memory 30.GB
   time '24:00:00'
   clusterOptions '-q batch'
 
   container 'python_2.7.sif'
-  
+
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*fastq.gz_stat", mode:'copy'
 
   input:

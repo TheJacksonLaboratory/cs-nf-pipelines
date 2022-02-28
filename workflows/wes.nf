@@ -145,7 +145,7 @@ workflow WES {
                              GATK_HAPLOTYPECALLER.out.idx,
                             'BOTH')
 
-    // Step 10: Post Variant Calling Processing
+    // Step 9: Post Variant Calling Processing
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
       GATK_VARIANTANNOTATOR(GATK_VARIANTFILTRATION.out.vcf,
                             SNPEFF.out.vcf)

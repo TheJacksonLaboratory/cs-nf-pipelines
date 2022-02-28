@@ -26,8 +26,6 @@ process SNPSIFT_DBNSFP{
   ${vcf} > ${sampleID}_${indel_snp}.vcf
   """
 }
-
-
 process SNPSIFT_EXTRACTFIELDS {
 
   cpus = 1
@@ -47,7 +45,7 @@ process SNPSIFT_EXTRACTFIELDS {
 
   script:
   log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
-  // add suffix for snp indel both for output name 
+  // add suffix for snp indel both for output name
   """
   java -jar /snpEff/SnpSift.jar \
   extractFields ${vcf} \

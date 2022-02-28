@@ -1,10 +1,11 @@
 process COSMIC_ANNOTATION {
   tag "sampleID"
 
-  cpus = 8
-  memory = 10.GB
-  time = '08:00:00'
+  cpus = 1
+  memory = 1.GB
+  time = '01:00:00'
   clusterOptions = '-q batch'
+// retry strategy: +=5H and +5GB
 
   input:
   tuple val(sampleID), file(vcf)
