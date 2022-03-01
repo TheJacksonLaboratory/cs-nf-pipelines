@@ -1,5 +1,5 @@
 process GATK_MERGEVCF_LIST {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 10.GB
@@ -32,7 +32,7 @@ process GATK_MERGEVCF_LIST {
 }
 process GATK_REALIGNERTARGETCREATOR {
   // Depricated in GATK4, not recommended. Leaving for historic precedence.
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 12
   memory = 35.GB
@@ -66,7 +66,7 @@ process GATK_REALIGNERTARGETCREATOR {
 }
 process GATK_INDELREALIGNER{
   // Deprecated in GATK4, not recommended. Leaving for historic precedence.
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 35.GB
@@ -103,7 +103,7 @@ process GATK_INDELREALIGNER{
   """
 }
 process GATK_VARIANTANNOTATOR {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 15.GB
@@ -139,7 +139,7 @@ process GATK_VARIANTANNOTATOR {
   """
 }
 process GATK_MERGEVCF {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 15.GB
@@ -172,7 +172,7 @@ process GATK_MERGEVCF {
 }
 process GATK_DEPTHOFCOVERAGE {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 15.GB
@@ -208,7 +208,7 @@ process GATK_DEPTHOFCOVERAGE {
   """
 }
 process GATK_BASERECALIBRATOR {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 35.GB
@@ -241,7 +241,7 @@ process GATK_BASERECALIBRATOR {
   """
 }
 process GATK_APPLYBQSR {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 35.GB
@@ -274,7 +274,7 @@ process GATK_APPLYBQSR {
   """
 }
 process GATK_HAPLOTYPECALLER {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 15.GB
@@ -323,7 +323,7 @@ process GATK_HAPLOTYPECALLER {
 }
 process GATK_HAPLOTYPECALLER_INTERVAL {
 // Note about this module
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 15.GB
@@ -355,7 +355,7 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
   """
 }
 process GATK_SELECTVARIANTS {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB
@@ -389,7 +389,7 @@ process GATK_SELECTVARIANTS {
   """
 }
 process GATK_INDEXFEATUREFILE {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB
@@ -417,7 +417,7 @@ process GATK_INDEXFEATUREFILE {
   """
 }
 process GATK_VARIANTFILTRATION {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB

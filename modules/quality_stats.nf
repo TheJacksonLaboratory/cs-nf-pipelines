@@ -1,6 +1,6 @@
 process QUALITY_STATISTICS {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 30.GB

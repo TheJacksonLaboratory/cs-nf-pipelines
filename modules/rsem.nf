@@ -1,11 +1,12 @@
 process RSEM_ALIGNMENT_EXPRESSION {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 12
-  memory 60.GB
-  time '24:00:00'
+  memory {60.GB * task.attempts}
+  time {'24:00:00' * task.attempts}
   clusterOptions '-q batch'
-// retry +=60GB +=24H
+  errorStrategy 'retry'
+  maxRetries 1
 
   // container runs only calculate expression
   container 'dceoy/rsem'

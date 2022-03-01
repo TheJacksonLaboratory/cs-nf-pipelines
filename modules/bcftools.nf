@@ -1,5 +1,5 @@
 process BCF_SORT {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB

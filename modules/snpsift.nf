@@ -1,4 +1,6 @@
 process SNPSIFT_DBNSFP{
+  tag "$sampleID"
+
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
@@ -27,6 +29,7 @@ process SNPSIFT_DBNSFP{
   """
 }
 process SNPSIFT_EXTRACTFIELDS {
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB

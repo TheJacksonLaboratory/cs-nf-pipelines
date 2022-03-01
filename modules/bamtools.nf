@@ -1,6 +1,6 @@
 process BAMTOOLS_STATS {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 8.GB

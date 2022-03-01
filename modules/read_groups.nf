@@ -1,5 +1,5 @@
 process READ_GROUPS {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 5.GB

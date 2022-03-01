@@ -1,5 +1,5 @@
 process SUMMARY_STATS {
-    tag "sampleID"
+    tag "$sampleID"
 
     cpus = 1
     time = '00:15:00'

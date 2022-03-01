@@ -107,7 +107,7 @@ workflow WGS {
 
     // Use the Channel in HaplotypeCaller
     GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple())
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     }

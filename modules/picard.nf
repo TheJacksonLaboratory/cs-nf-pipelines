@@ -1,5 +1,5 @@
 process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 5.GB
@@ -32,7 +32,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   """
 }
 process PICARD_SORTSAM {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 8.GB
@@ -63,7 +63,7 @@ process PICARD_SORTSAM {
   """
 }
 process PICARD_MARKDUPLICATES {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 16.GB
@@ -98,7 +98,7 @@ process PICARD_MARKDUPLICATES {
   """
 }
 process PICARD_COLLECTHSMETRICS {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB
@@ -131,7 +131,7 @@ process PICARD_COLLECTHSMETRICS {
 }
 process PICARD_ADDORREPLACEREADGROUPS {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 8.GB
@@ -164,7 +164,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
 }
 process PICARD_REORDERSAM {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 8.GB
@@ -195,7 +195,7 @@ process PICARD_REORDERSAM {
 }
 process PICARD_COLLECTRNASEQMETRICS {
 
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 8.GB

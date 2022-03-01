@@ -1,11 +1,12 @@
 process BWA_MEM {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 8
-  memory 60.GB
-  time '30:00:00'
+  memory {60.GB * task.attempt}
+  time {'30:00:00'* task.attempt}
   clusterOptions '-q batch'
-// add retry once with strategy: +=60gb and +=30H
+  errorStrategy 'retry' 
+  maxRetries 1
 
   container 'quay.io/biocontainers/bwa:0.7.17--h5bf99c6_8'	// breaks when updated: issue with readgroup
 

@@ -1,4 +1,6 @@
 process SNPEFF{
+  tag "$sampleID"
+
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
@@ -32,6 +34,8 @@ process SNPEFF{
   """
 }
 process SNPEFF_HUMAN{
+  tag "$sampleID"
+
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
@@ -61,7 +65,7 @@ process SNPEFF_HUMAN{
   """
 }
 process SNPEFF_ONEPERLINE {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 2.GB
