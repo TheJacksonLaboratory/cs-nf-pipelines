@@ -33,7 +33,7 @@ process BWA_MEM {
   // new version bwa needs specific readgroup formatting
   """
   rg=\$(cat $read_groups)
-  bwa mem -M -R "@RG    \${rg}" \
+  bwa mem -M -R \${rg} \
   -t $task.cpus ${params.ref_fa} $inputfq > ${sampleID}.sam
   """
   }
