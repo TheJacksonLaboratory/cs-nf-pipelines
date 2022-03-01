@@ -9,9 +9,6 @@ include {SAMTOOLS_INDEX} from '../modules/samtools'
 include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {AGGREGATE_STATS} from '../bin/wes/aggregate_stats_wes'
-include {CAT_HUMAN;
-         CAT_HUMAN as CAT_HUMAN_SNP;
-         CAT_HUMAN as CAT_HUMAN_INDEL} from '../bin/wes/cat'
 include {COSMIC_ANNOTATION;
         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
         COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
@@ -19,6 +16,8 @@ include {PICARD_SORTSAM;
          PICARD_MARKDUPLICATES;
          PICARD_COLLECTHSMETRICS} from '../modules/picard'
 include {SNPEFF;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL;
          SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
          SNPEFF_HUMAN as SNPEFF_HUMAN_INDEL} from '../modules/snpeff'
 include {SNPSIFT_EXTRACTFIELDS;
@@ -114,19 +113,19 @@ workflow WES {
         COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
         SNPEFF_HUMAN_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP')
         SNPSIFT_DBNSFP_SNP(SNPEFF_HUMAN_SNP.out.vcf, 'SNP')
-        CAT_HUMAN_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
-        SNPSIFT_EXTRACTFIELDS_SNP(CAT_HUMAN_SNP.out.vcf)
+        SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
+        SNPSIFT_EXTRACTFIELDS_SNP(SNPEFF_ONEPERLINE_SNP.out.vcf)
 
       // INDEL
         COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
         SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
         SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
-        CAT_HUMAN_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
-        SNPSIFT_EXTRACTFIELDS_INDEL(CAT_HUMAN_INDEL.out.vcf)
+        SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
+        SNPSIFT_EXTRACTFIELDS_INDEL(SNPEFF_ONEPERLINE_INDEL.out.vcf)
 
     // Step 10: Post Variant Calling Processing - Part 2
-      GATK_MERGEVCF(CAT_HUMAN_SNP.out.vcf,
-                    CAT_HUMAN_INDEL.out.vcf)
+      GATK_MERGEVCF(SNPEFF_ONEPERLINE_SNP.out.vcf,
+                    SNPEFF_ONEPERLINE_INDEL.out.vcf)
 
 
   } else if (params.gen_org=='mouse'){
