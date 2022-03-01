@@ -1,4 +1,6 @@
 process VCF_ANNOTATE {
+  tag "$sampleID"
+
   cpus = 1
   memory = 10.GB
   time = '23:00:00'

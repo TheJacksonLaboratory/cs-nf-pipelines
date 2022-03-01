@@ -52,9 +52,12 @@ process PICARD_SORTSAM {
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   picard SortSam \
+  -Xmx${my_mem}G \
   SO=coordinate \
   INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
@@ -86,9 +89,12 @@ process PICARD_MARKDUPLICATES {
 
   script:
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   picard MarkDuplicates \
+  -Xmx${my_mem}G \
   I=${bam} \
   O=${sampleID}_dedup.bam \
   M=${sampleID}_dup_metrics.txt \
@@ -118,9 +124,12 @@ process PICARD_COLLECTHSMETRICS {
 
   script:
   log.info "----- Picard CollectHsMetrics Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   picard CollectHsMetrics \
+  -Xmx${my_mem}G \
   INPUT=${bam} \
   OUTPUT=${sampleID}_CoverageMetrics.txt \
   BAIT_INTERVALS=${params.bait_picard} \
@@ -130,7 +139,6 @@ process PICARD_COLLECTHSMETRICS {
   """
 }
 process PICARD_ADDORREPLACEREADGROUPS {
-
   tag "$sampleID"
 
   cpus 1
@@ -152,9 +160,12 @@ process PICARD_ADDORREPLACEREADGROUPS {
 
   script:
   log.info "----- Picard Add or Replace Read Groups Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   picard AddOrReplaceReadGroups \
+  -Xmx${my_mem}G \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
@@ -163,7 +174,6 @@ process PICARD_ADDORREPLACEREADGROUPS {
   """
 }
 process PICARD_REORDERSAM {
-
   tag "$sampleID"
 
   cpus 1
@@ -184,9 +194,12 @@ process PICARD_REORDERSAM {
 
   script:
   log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   picard ReorderSam \
+  -Xmx${my_mem}G \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
   SEQUENCE_DICTIONARY=${params.picard_dict} \
@@ -194,7 +207,6 @@ process PICARD_REORDERSAM {
   """
 }
 process PICARD_COLLECTRNASEQMETRICS {
-
   tag "$sampleID"
 
   cpus 1
@@ -215,12 +227,15 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   script:
   log.info "----- Alignment Metrics B Human Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   if (params.read_prep == "stranded")
 
     """
     picard CollectRnaSeqMetrics \
     I=${bam} \
+    -Xmx${my_mem}G \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
@@ -232,6 +247,7 @@ process PICARD_COLLECTRNASEQMETRICS {
 
     """
     picard CollectRnaSeqMetrics \
+    -Xmx${my_mem}G \
     I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \

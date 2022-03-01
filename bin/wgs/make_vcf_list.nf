@@ -1,4 +1,5 @@
 process MAKE_VCF_LIST {
+  tag "$sampleID"
 
   input:
   tuple val(sampleID), val(chroms)

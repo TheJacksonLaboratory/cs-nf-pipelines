@@ -1,5 +1,5 @@
 process CAT_HUMAN{
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 2.GB

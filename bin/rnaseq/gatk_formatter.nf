@@ -1,5 +1,5 @@
 process FORMAT_GATK {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 15.GB
@@ -25,7 +25,7 @@ process FORMAT_GATK {
   """
 }
 process COVCALC_GATK {
-  tag "sampleID"
+  tag "$sampleID"
 
   cpus 1
   memory 15.GB
