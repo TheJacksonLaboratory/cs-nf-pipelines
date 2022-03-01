@@ -4,7 +4,7 @@ process SNPEFF{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  // try with old container
+  // SNPEFF and SNPSIFT need updating
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 // this is most recent but does not accept the old .bin files (v4 did not work either)
 // probably need to update snpEff downloadable files to update to newer version (v5.1)
@@ -37,7 +37,7 @@ process SNPEFF_HUMAN{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  // try with old container
+  // SNPEFF and SNPSIFT need updating
   container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 // this is most recent but does not accept the old .bin files (v4 did not work either)
 //  container 'quay.io/biocontainers/snpeff:5.0--hdfd78af_1'
@@ -61,7 +61,6 @@ process SNPEFF_HUMAN{
   """
 }
 process SNPEFF_ONEPERLINE {
-// change to SNPEFF_ONEPERLINE
   tag "sampleID"
 
   cpus 1

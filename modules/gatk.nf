@@ -1,6 +1,5 @@
 process GATK_MERGEVCF_LIST {
   tag "sampleID"
-  // base the task.memory - value (1GB)
 
   cpus 1
   memory 10.GB
@@ -9,7 +8,7 @@ process GATK_MERGEVCF_LIST {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  // keep output
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(list)
@@ -32,7 +31,7 @@ process GATK_MERGEVCF_LIST {
   """
 }
 process GATK_REALIGNERTARGETCREATOR {
-  // depricated in gatk4, not reccomended. Leaving for historic precedence.
+  // Depricated in GATK4, not recommended. Leaving for historic precedence.
   tag "sampleID"
 
   cpus = 12
@@ -42,7 +41,7 @@ process GATK_REALIGNERTARGETCREATOR {
 
   container 'broadinstitute/gatk3:3.6-0'
 
-  // keep as optional
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.intervals", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(bam)
@@ -66,7 +65,7 @@ process GATK_REALIGNERTARGETCREATOR {
   """
 }
 process GATK_INDELREALIGNER{
-  // depricated in gatk4, not reccomended. Leaving for historic precedence.
+  // Deprecated in GATK4, not recommended. Leaving for historic precedence.
   tag "sampleID"
 
   cpus = 1
@@ -77,7 +76,8 @@ process GATK_INDELREALIGNER{
   // Command Depricated in GATK 4
   container 'broadinstitute/gatk3:3.6-0'
 
-  // optional output
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
 
   input:
   tuple val(sampleID), file(bam)
@@ -114,7 +114,7 @@ process GATK_VARIANTANNOTATOR {
   // Flag --snpEffFile was removed in GATK4
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
 
-  // save output
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(sample_vcf)
@@ -452,9 +452,6 @@ process GATK_VARIANTFILTRATION {
     fs = '60.0'
     output_suffix = 'snp_indel_filtered.vcf'
   }
-
-// perhaps escape the \&&
-//    --filter-expression "QUAL > 30.0 && QUAL < 50.0" --filter-name "LowQual" \
 
   """
   gatk VariantFiltration \

@@ -48,7 +48,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
     stype=""
     trimmedfq="${reads[0]}"
   }
-// dynamic threads task.cpu
+
   """
   rsem-calculate-expression -p $task.cpus \
   ${prob} \

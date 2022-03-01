@@ -4,7 +4,7 @@ process SNPSIFT_DBNSFP{
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  // revisit snpsift versioning (v5.1) comes as package with snpEff
+  // SNPEFF and SNPSIFT need updating
   container 'gatk-4.1.6.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy'
@@ -33,8 +33,9 @@ process SNPSIFT_EXTRACTFIELDS {
   time = '06:00:00'
   clusterOptions = '-q batch'
 
+  // SNPEFF and SNPSIFT need updating
   container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
-  //container 'quay.io/biocontainers/snpsift:4.2--hdfd78af_5'
+
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
 
   input:

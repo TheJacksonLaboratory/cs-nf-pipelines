@@ -6,8 +6,6 @@ process BCF_SORT {
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-
-//  container 'gatk-4.1.9.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
   container 'biocontainers/bcftools'
 
   input:

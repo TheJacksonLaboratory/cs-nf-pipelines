@@ -34,16 +34,13 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
 process PICARD_SORTSAM {
   tag "sampleID"
 
-  // Slurm Options
   cpus 1
   memory 8.GB
   time '06:00:00'
   clusterOptions '-q batch'
 
-  // Container
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  // Publish Directory
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*_sortsam.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
@@ -68,16 +65,13 @@ process PICARD_SORTSAM {
 process PICARD_MARKDUPLICATES {
   tag "sampleID"
 
-  // Slurm Options
   cpus 1
   memory 16.GB
   time '12:00:00'
   clusterOptions '-q batch'
 
-  // Container
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  // Publish Directory
   // save if mouse and wes save if anything else optional
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'

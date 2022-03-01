@@ -70,10 +70,10 @@ workflow WGS {
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
-  // Step 5 Depricated and breaks if BWA updated
+  // Step 5 Depricated in GATK 4
   GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
   GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                      GATK_REALIGNERTARGETCREATOR.out.intervals) // always saved mouse optional for human (like markdups)
+                      GATK_REALIGNERTARGETCREATOR.out.intervals)
   // If Human
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
@@ -81,7 +81,7 @@ workflow WGS {
                     GATK_BASERECALIBRATOR.out.table)
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_APPLYBQSR.out.bam)
 
-    // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
+    // Create a chromosome channel. HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
     chroms = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
                          'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chr20',
