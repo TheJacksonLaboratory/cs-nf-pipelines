@@ -18,15 +18,18 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
 
   script:
   log.info "----- Collect Alignment Sumary Metrics Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
-    """
-    gatk CollectAlignmentSummaryMetrics \
-    INPUT=${bam} \
-    OUTPUT=${sampleID}_AlignmentMetrics.txt \
-    REFERENCE_SEQUENCE=${params.ref_fa} \
-    METRIC_ACCUMULATION_LEVEL=ALL_READS \
-    VALIDATION_STRINGENCY=LENIENT
-    """
+  """
+  gatk CollectAlignmentSummaryMetrics \
+  --java-options "-Xmx${my_mem}G" \
+  INPUT=${bam} \
+  OUTPUT=${sampleID}_AlignmentMetrics.txt \
+  REFERENCE_SEQUENCE=${params.ref_fa} \
+  METRIC_ACCUMULATION_LEVEL=ALL_READS \
+  VALIDATION_STRINGENCY=LENIENT
+  """
 }
 process PICARD_SORTSAM {
   tag "sampleID"

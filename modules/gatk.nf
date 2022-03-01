@@ -20,8 +20,12 @@ process GATK_MERGEVCF_LIST {
 
   script:
   log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
+  // memory needs to be set explicitly
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
+
   """
-  gatk --java-options "-Xmx9G" MergeVcfs \
+  gatk --java-options "-Xmx${my_mem}G" MergeVcfs \
   -R ${params.ref_fa} \
   -I ${list} \
   -O ${sampleID}_GATKcombined_raw.vcf
@@ -48,14 +52,16 @@ process GATK_REALIGNERTARGETCREATOR {
 
   script:
   log.info "----- GATK RealignerTargetCreator Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx30g -jar /usr/GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/GenomeAnalysisTK.jar \
   -I ${bam} \
   -R ${params.ref_fa} \
   -T RealignerTargetCreator \
   -o ${sampleID}.aligner.intervals \
-  -nt 12 \
+  -nt $task.cpus \
   --disable_auto_index_creation_and_locking_when_reading_rods
   """
 }
@@ -83,9 +89,11 @@ process GATK_INDELREALIGNER{
 
   script:
   log.info "----- GATK IndelRealigner Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx24g -jar /usr/GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/GenomeAnalysisTK.jar \
   -I ${bam} \
   -R ${params.ref_fa} \
   -T IndelRealigner \
@@ -117,8 +125,10 @@ process GATK_VARIANTANNOTATOR {
 
   script:
   log.info "----- GATK VariantAnnotator Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/GenomeAnalysisTK.jar \
   -T VariantAnnotator \
   -R ${params.ref_fa} \
   -A SnpEff \
@@ -149,8 +159,11 @@ process GATK_MERGEVCF {
 
   script:
   log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk MergeVcfs \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   -I ${snp_vcf} \
   -I ${indel_vcf} \
@@ -179,9 +192,11 @@ process GATK_DEPTHOFCOVERAGE {
 
   script:
   log.info "----- GATK Depth of Coverage Running on: ${sampleID} -----"
-
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk DepthOfCoverage \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   --output-format TABLE \
   -O ${sampleID}_gatk_temp.txt \
@@ -212,9 +227,11 @@ process GATK_BASERECALIBRATOR {
 
   script:
   log.info "----- GATK BaseRecalibrator Running on: ${sampleID} -----"
-
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk BaseRecalibrator \
+  --java-options "-Xmx${my_mem}G" \
   -I ${bam} \
   -R ${params.ref_fa} \
   --known-sites ${params.dbSNP} \
@@ -245,13 +262,15 @@ process GATK_APPLYBQSR {
 
   script:
   log.info "----- GATK ApplyBQSR Running on: ${sampleID} -----"
-
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk ApplyBQSR \
-   -R ${params.ref_fa} \
-   -I ${bam} \
-   --bqsr-recal-file ${table} \
-   -O ${sampleID}_realigned_BQSR.bam
+  --java-options "-Xmx${my_mem}G" \
+  -R ${params.ref_fa} \
+  -I ${bam} \
+  --bqsr-recal-file ${table} \
+  -O ${sampleID}_realigned_BQSR.bam
   """
 }
 process GATK_HAPLOTYPECALLER {
@@ -277,6 +296,8 @@ process GATK_HAPLOTYPECALLER {
 
   script:
   log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   if (gvcf=='gvcf'){
     delta="-ERC GVCF"
@@ -290,6 +311,7 @@ process GATK_HAPLOTYPECALLER {
 
   """
   gatk HaplotypeCaller  \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   -I ${bam} \
   -O ${sampleID}_variants_raw.${output_suffix} \
@@ -299,8 +321,8 @@ process GATK_HAPLOTYPECALLER {
   ${delta} \
   """
 }
-process GATK_HAPLOTYPECALLER_WGS {
-// GATK_HAPLOTYPECALLER_INTERVAL also put note about it
+process GATK_HAPLOTYPECALLER_INTERVAL {
+// Note about this module
   tag "sampleID"
 
   cpus = 1
@@ -320,12 +342,14 @@ process GATK_HAPLOTYPECALLER_WGS {
   script:
 
   log.info "----- GATK Haplotype Caller Running on Chromosome ${chrom} for sample: ${sampleID} -----"
-
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk HaplotypeCaller  \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   -I ${bam} \
-  -O ${sampleID}_HaplotypeCaller_${chrome}.vcf \
+  -O ${sampleID}_HaplotypeCaller_${chrom}.vcf \
   -L ${chrom} \
   -stand-call-conf ${params.call_val}
   """
@@ -353,9 +377,11 @@ process GATK_SELECTVARIANTS {
 
   script:
   log.info "----- GATK Selectvariants Running on: ${sampleID} -----"
-
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk SelectVariants \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   -V ${vcf} \
   -select-type ${indel_snp} \
@@ -382,8 +408,11 @@ process GATK_INDEXFEATUREFILE {
 
   script:
   log.info "----- GATK IndexFeatureFile Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   """
   gatk IndexFeatureFile \
+  --java-options "-Xmx${my_mem}G" \
   -I ${vcf}
   """
 }
@@ -409,6 +438,8 @@ process GATK_VARIANTFILTRATION {
 
   script:
   log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
   if (indel_snp == 'INDEL'){
     fs='200.0'
     output_suffix = 'INDEL_filtered.vcf'
@@ -427,12 +458,14 @@ process GATK_VARIANTFILTRATION {
 
   """
   gatk VariantFiltration \
+  --java-options "-Xmx${my_mem}G" \
   -R ${params.ref_fa} \
   -V ${vcf} \
   -O ${sampleID}_variantfiltration_${output_suffix} \
   --cluster-window-size 10 \
   --filter-name "LowCoverage" --filter-expression "DP < 25" \
   --filter-name "VeryLowQual" --filter-expression "QUAL < 30.0" \
+  --filter-expression "QUAL > 30.0 && QUAL < 50.0" --filter-name "LowQual" \
   --filter-name "LowQD" --filter-expression "QD < 1.5" \
   --filter-name "StrandBias" --filter-expression "FS > ${fs}"
   """

@@ -10,10 +10,10 @@ include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
 include {SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
          SNPEFF_HUMAN as SNPEFF_HUMAN_INDEL} from '../modules/snpeff'
 include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
-         VCF_ANNOTATE as VCF_ANNOTATE_INDEL;
-         CAT_ONEPERLINE as CAT_ONEPERLINE_SNP;
-         CAT_ONEPERLINE as CAT_ONEPERLINE_INDEL} from '../bin/wgs/vcf_annotate'
-include {SNPEFF} from '../modules/snpeff'
+         VCF_ANNOTATE as VCF_ANNOTATE_INDEL} from '../bin/wgs/vcf_annotate'
+include {SNPEFF;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff'
 include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_SNP;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_INDEL;
@@ -32,7 +32,7 @@ include {GATK_REALIGNERTARGETCREATOR;
          GATK_MERGEVCF;
          GATK_MERGEVCF_LIST;
          GATK_VARIANTANNOTATOR;
-         GATK_HAPLOTYPECALLER_WGS;
+         GATK_HAPLOTYPECALLER_INTERVAL;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
@@ -83,14 +83,14 @@ workflow WGS {
 
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-    chromes = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
+    chroms = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
                          'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19','chr20',
                          'chr21','chr22','chrM','chrX','chrY')
-    chrome_channel = data.combine(chromes)
+    chrom_channel = data.combine(chroms)
 
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_WGS(chrome_channel) // GATK_HAPLOTYPECALLER_INTERVAL
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
   }
 
@@ -100,14 +100,14 @@ workflow WGS {
 
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_INDELREALIGNER.out.bam.join(GATK_INDELREALIGNER.out.bai)
-    chromes = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
+    chroms = Channel.of('chr1', 'chr2','chr3','chr4','chr5','chr6','chr7','chr8','chr9','chr10',
                          'chr11','chr12','chr13','chr14','chr15','chr16','chr17','chr18','chr19',
                          'chrM','chrX','chrY')
-    chrome_channel = data.combine(chromes)
+    chrom_channel = data.combine(chroms)
 
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_WGS(chrome_channel)
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_WGS.out.vcf.groupTuple())
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     }
@@ -140,13 +140,13 @@ workflow WGS {
       COSMIC_ANNOTATION_SNP(VCF_ANNOTATE_SNP.out.vcf)
       SNPEFF_HUMAN_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP')
       SNPSIFT_DBNSFP_SNP(SNPEFF_HUMAN_SNP.out.vcf, 'SNP')
-      CAT_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
+      SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
       SNPSIFT_EXTRACTFIELDS_SNP(CAT_ONEPERLINE_SNP.out.vcf)
     // INDEL
       COSMIC_ANNOTATION_INDEL(VCF_ANNOTATE_INDEL.out.vcf)
       SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
       SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
-      CAT_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
+      SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
       SNPSIFT_EXTRACTFIELDS_INDEL(CAT_ONEPERLINE_INDEL.out.vcf)
 
   // Merge SNP and INDEL and Aggregate Stats

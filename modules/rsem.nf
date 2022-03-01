@@ -50,7 +50,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   }
 // dynamic threads task.cpu
   """
-  rsem-calculate-expression -p 12 \
+  rsem-calculate-expression -p $task.cpus \
   ${prob} \
   ${stype} \
   ${frag} \

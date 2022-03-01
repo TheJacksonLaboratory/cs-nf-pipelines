@@ -20,6 +20,6 @@ process READ_GROUPS {
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
 
   """
-  python ${params.read_group_pyfile} -p -o ${sampleID}_read_group.txt ${fq_reads[0]}
+  python ${params.read_group_pyfile} -o ${sampleID}_read_group.txt ${fq_reads[0]}
   """
   }
