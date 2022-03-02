@@ -20,6 +20,7 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
+--read_prep            ${params.read_prep}
 --ref_fa               ${params.ref_fa}
 --ref_fai              ${params.ref_fai}
 --ref_fa_indices       ${params.ref_fa_indices}
@@ -66,6 +67,7 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
+--read_prep    	                ${params.read_prep}
 --ref_fa                        ${params.ref_fa}
 --filter_trim                   ${params.filter_trim}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
