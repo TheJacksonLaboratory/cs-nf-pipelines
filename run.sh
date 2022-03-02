@@ -13,4 +13,4 @@ cd $SLURM_SUBMIT_DIR
 # LOAD SINGULARITY
 ml singularity
 # RUN TEST PIPELINE
-~/nextflow main.nf --workflow rnaseq --gen_org mouse --comment "fixing rnaseq mouse" --ribo_intervals=null
+~/nextflow main.nf --workflow rnaseq --gen_org mouse --comment "fixing rnaseq mouse"
