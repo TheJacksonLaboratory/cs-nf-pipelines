@@ -32,6 +32,6 @@ process BWA_MEM {
   """
   rg=\$(cat $read_groups)
   bwa mem -M -R \${rg} \
-  -t $task.cpus ${params.ref_fa} $inputfq > ${sampleID}.sam
+  -t $task.cpus ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
   """
   }
