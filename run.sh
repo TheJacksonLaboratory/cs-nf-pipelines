@@ -13,10 +13,4 @@ cd $SLURM_SUBMIT_DIR
 # LOAD SINGULARITY
 ml singularity
 # RUN TEST PIPELINE
-~/nextflow main.nf --workflow wgs --gen_org mouse --comment 'final run, tell mike ready'
-~/nextflow main.nf --workflow wgs --gen_org human --comment 'final run,	tell mike ready'
-~/nextflow main.nf --workflow rnaseq --gen_org mouse --comment 'final run, tell mike ready'
-~/nextflow main.nf --workflow rnaseq --gen_org human --comment 'final run, tell mike ready'
-~/nextflow main.nf --workflow wes --gen_org mouse --comment 'final run,	tell mike ready'
-~/nextflow main.nf --workflow wes --gen_org human --comment 'final run,	tell mike ready'
-
+~/nextflow main.nf --workflow wgs --gen_org mouse --comment "better work"

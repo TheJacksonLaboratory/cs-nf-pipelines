@@ -283,7 +283,7 @@ process GATK_HAPLOTYPECALLER {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -291,7 +291,7 @@ process GATK_HAPLOTYPECALLER {
   val(gvcf)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*.*vcf"), emit: vcf
   tuple val(sampleID), file("*.idx"), emit: idx
 
   script:

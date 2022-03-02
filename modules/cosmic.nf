@@ -1,9 +1,9 @@
 process COSMIC_ANNOTATION {
   tag "$sampleID"
 
-  cpus = 1
-  memory = {1.GB * task.attempt}
-  time = {'01:00:00' * task.attempt}
+  cpus 1
+  memory { 10.GB * task.attempt }
+  time {1.hour * task.attempt}
   clusterOptions = '-q batch'
   errorStrategy 'retry'
   maxRetries 1

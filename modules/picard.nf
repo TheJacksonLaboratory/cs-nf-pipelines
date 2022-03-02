@@ -165,7 +165,6 @@ process PICARD_ADDORREPLACEREADGROUPS {
 
   """
   picard AddOrReplaceReadGroups \
-  -Xmx${my_mem}G \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
@@ -226,16 +225,12 @@ process PICARD_COLLECTRNASEQMETRICS {
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
-  log.info "----- Alignment Metrics B Human Running on: ${sampleID} -----"
-  String my_mem = (task.memory-1.GB).toString()
-  my_mem =  my_mem[0..-4]
-
+  log.info "----- Collect RNA Sequence Metrics on: ${sampleID} -----"
   if (params.read_prep == "stranded")
 
     """
     picard CollectRnaSeqMetrics \
     I=${bam} \
-    -Xmx${my_mem}G \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \
     RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
@@ -247,7 +242,6 @@ process PICARD_COLLECTRNASEQMETRICS {
 
     """
     picard CollectRnaSeqMetrics \
-    -Xmx${my_mem}G \
     I=${reordered_sorted_bam} \
     O=${sampleID}_picard_aln_metrics.txt \
     REF_FLAT=${params.ref_flat} \

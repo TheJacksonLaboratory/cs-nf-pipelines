@@ -53,7 +53,7 @@ workflow RNASEQ {
   RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
 
   //Step 3: Get Read Group Information
-  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
+  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
 
   // Step 4: Picard Alignment Metrics
   PICARD_ADDORREPLACEREADGROUPS(READ_GROUPS.out.read_groups,

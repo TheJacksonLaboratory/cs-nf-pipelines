@@ -2,8 +2,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tag "$sampleID"
 
   cpus 12
-  memory {60.GB * task.attempts}
-  time {'24:00:00' * task.attempts}
+  memory { 60.GB * task.attempt }
+  time { 24.h * task.attempt }
   clusterOptions '-q batch'
   errorStrategy 'retry'
   maxRetries 1
@@ -49,7 +49,6 @@ process RSEM_ALIGNMENT_EXPRESSION {
     stype=""
     trimmedfq="${reads[0]}"
   }
-
   """
   rsem-calculate-expression -p $task.cpus \
   ${prob} \

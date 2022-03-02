@@ -12,14 +12,20 @@ process READ_GROUPS {
 
   input:
   tuple val(sampleID), file(fq_reads)
+  val(picard)
 
   output:
   tuple val(sampleID), file("*.txt"), emit: read_groups
 
   script:
   log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
-
+  if (picard=="picard"){
+    p='-p'
+  }
+  else{
+    p=''
+  }
   """
-  python ${params.read_group_pyfile} -o ${sampleID}_read_group.txt ${fq_reads[0]}
+  python ${params.read_group_pyfile} $p -o ${sampleID}_read_group.txt ${fq_reads[0]}
   """
   }

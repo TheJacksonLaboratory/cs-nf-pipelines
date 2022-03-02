@@ -64,7 +64,7 @@ workflow WES {
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
   // Step 2: Get Read Group Information
-  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq)
+  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
   // Step 3: BWA-MEM Alignment
   BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
   // Step 4: Variant Preprocessing - Part 1
