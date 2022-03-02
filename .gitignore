@@ -1,0 +1,11 @@
+*_RNASeq_Output/
+*test.*
+test/
+output/
+.nextflow*
+cache/
+work/
+.nextflow/
+*trace*
+*.out
+.DS_Store
