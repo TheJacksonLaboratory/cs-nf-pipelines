@@ -67,14 +67,15 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
   // Step 3: BWA-MEM Alignment
-  if (params.gen_org=='human'){ 
-  	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
-  }
   if (params.gen_org=='mouse'){
     BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+    PICARD_SORTSAM(BWA_MEM.out.sam)
+  }
+  if (params.gen_org=='human'){ 
+  	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  	PICARD_SORTSAM(BWA_MEM_HLA.out.bam)
   }
   // Step 4: Variant Preprocessing - Part 1
-  PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
   // Step 5 Depricated in GATK 4
   GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
