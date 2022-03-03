@@ -4,7 +4,8 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wgs.nf'
 include {param_log} from '../bin/log/wgs.nf'
-include {BWA_MEM} from '../modules/bwa'
+include {BWA_MEM;
+         BWA_MEM_HLA} from '../modules/bwa'
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
 include {SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
@@ -66,7 +67,12 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
   // Step 3: BWA-MEM Alignment
-  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  if (params.gen_org=='human'){ 
+  	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  }
+  if (params.gen_org=='mouse'){
+    BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  }
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
