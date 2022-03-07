@@ -31,13 +31,11 @@ ______________________________________________________
 --mismatch_penalty              ${params.mismatch_penalty}
 --call_val                      ${params.call_val}
 --ploidy_val                    ${params.ploidy_val}
---emit_val                      ${params.emit_val}
 --gold_std_indels               ${params.gold_std_indels}
 --phase1_1000G                  ${params.phase1_1000G}
 --dbNSFP                        ${params.dbNSFP}
 --cosmic                        ${params.cosmic}
 --cosmic_annot                  ${params.cosmic_annot}
---hgvs_data                     ${params.hgvs_data}
 --snpEff_config                 ${params.snpEff_config}
 
 

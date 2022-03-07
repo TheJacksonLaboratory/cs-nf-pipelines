@@ -16,7 +16,7 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 -w                              ${workDir}
---keep_intermediate    ${params.keep_intermediate}
+--keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
@@ -39,7 +39,6 @@ ______________________________________________________
 --phase1_1000G                  ${params.phase1_1000G}
 --dbNSFP                        ${params.dbNSFP}
 --cosmic                        ${params.cosmic}
---hgvs_data                     ${params.hgvs_data}
 --cosmic_annot                  ${params.cosmic_annot}
 --snpEff_config                 ${params.snpEff_config}
 
