@@ -23,6 +23,9 @@ process SNPEFF{
   //          -s ${sampleID}_snpeff.html \
   // tuple val(sampleID),file("*")
 
+  script:
+  log.info "----- snpEff Running on: ${sampleID} -----"
+  
   if (indel_snp == 'INDEL'){
     output_suffix = 'INDEL_snpeff.vcf'
   }
@@ -31,10 +34,8 @@ process SNPEFF{
   }
   if (indel_snp == 'BOTH'){
     output_suffix = 'snp_indel_snpeff.vcf'
-  }
+  }  
 
-  script:
-  log.info "----- snpEff Running on: ${sampleID} -----"
   """
   java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/local/share/snpeff-5.1-1/snpEff.jar \
   ${params.gen_ver} \
@@ -62,6 +63,7 @@ process SNPEFF_ONEPERLINE {
   output:
   tuple	val(sampleID), file("*.vcf"), emit: vcf
 
+  script:
   if (indel_snp == 'INDEL'){
     output_suffix = 'INDEL_snpeff.vcf'
   }
@@ -71,8 +73,6 @@ process SNPEFF_ONEPERLINE {
   if (indel_snp == 'BOTH'){
     output_suffix = 'snp_indel_snpeff.vcf'
   }
-
-  script:
   """
   cat ${vcf} | /usr/local/share/snpeff-5.1-1/scripts/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
   """
