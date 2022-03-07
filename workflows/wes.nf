@@ -18,8 +18,8 @@ include {PICARD_SORTSAM;
 include {SNPEFF;
          SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
          SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL;
-         SNPEFF_HUMAN as SNPEFF_HUMAN_SNP;
-         SNPEFF_HUMAN as SNPEFF_HUMAN_INDEL} from '../modules/snpeff'
+         SNPEFF as SNPEFF_SNP;
+         SNPEFF as SNPEFF_INDEL} from '../modules/snpeff'
 include {SNPSIFT_EXTRACTFIELDS;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_SNP;
          SNPSIFT_EXTRACTFIELDS as SNPSIFT_EXTRACTFIELDS_INDEL;
@@ -111,15 +111,15 @@ workflow WES {
     // Step 9: Post Variant Calling Processing - Part 1
       // SNP
         COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-        SNPEFF_HUMAN_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP')
-        SNPSIFT_DBNSFP_SNP(SNPEFF_HUMAN_SNP.out.vcf, 'SNP')
+        SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
+        SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
         SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
         SNPSIFT_EXTRACTFIELDS_SNP(SNPEFF_ONEPERLINE_SNP.out.vcf)
 
       // INDEL
         COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
-        SNPEFF_HUMAN_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL')
-        SNPSIFT_DBNSFP_INDEL(SNPEFF_HUMAN_INDEL.out.vcf, 'INDEL')
+        SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
+        SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
         SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
         SNPSIFT_EXTRACTFIELDS_INDEL(SNPEFF_ONEPERLINE_INDEL.out.vcf)
 
@@ -137,7 +137,7 @@ workflow WES {
     // Step 7: Variant Calling
       GATK_HAPLOTYPECALLER(PICARD_MARKDUPLICATES.out.dedup_bam,
                            PICARD_MARKDUPLICATES.out.dedup_bai,
-                          'varient')
+                          'variant')
 
     // Step 8: Variant Filtration
       GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
@@ -145,7 +145,7 @@ workflow WES {
                             'BOTH')
 
     // Step 9: Post Variant Calling Processing
-      SNPEFF(GATK_VARIANTFILTRATION.out.vcf)
+      SNPEFF(GATK_VARIANTFILTRATION.out.vcf, 'BOTH', 'gatk')
       GATK_VARIANTANNOTATOR(GATK_VARIANTFILTRATION.out.vcf,
                             SNPEFF.out.vcf)
       SNPSIFT_EXTRACTFIELDS(GATK_VARIANTFILTRATION.out.vcf)
