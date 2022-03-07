@@ -70,12 +70,6 @@ workflow RNASEQ {
                 QUALITY_STATISTICS.out.quality_stats,
                 PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
-  /* do we need this?
-  if ("${params.gen_org}" == 'mouse'){
-     BAMTOOLS_STATS(PICARD_REORDERSAM.out.bam)
-  }
-  */
-
   // If gen_org human
   if ("${params.gen_org}" == 'human'){
     // Step 7: GATK Coverage Stats
