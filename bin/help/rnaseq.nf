@@ -1,45 +1,55 @@
 def help(){
-  println """
+  println '''
+Parameter | Default | Description
 
-Parameter	Default			Description 
---workflow	‘rnaseq’		This is the main parameter that will set the pipeline in motion. 
---pubdir 	"../${workflow}"	The directory that the saved outputs will be stored. 
---organize_by 	‘sample’ 		How to organize the output folder structure. The options are by ‘sample’ or by ‘analysis’ 
+--pubdir | /<PATH> | The directory that the saved outputs will be stored.
+--organize_by | sample | How to organize the output folder structure. Options: sample or analysis
+--cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
+-w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
 
-cacheDir 	'/projects/omics_share/meta/containers'    This is where the Singularity containers reside 
--w		"/fastscratch/nextflow/${params.workflow}" The directory that all intermediary files and nextflow processes utilize. This needs to be a space with lots of memory. 
---cwd 		System.getProperty("user.dir")             Using Java’s native functions get the current working directory that the script is running. This is required to source the directories of files in the bin folder and other folders. 
+--sample_folder | /<PATH> | The path to the folder that contains all the samples to be run by the pipeline. The files in this path can also be symbolic links. 
+--extension | .fastq.gz | The expected extension for the input read files.
+--pattern | '*_R{1,2}*' | The expected R1 / R2 matching pattern. The default value will match reads with names like this READ_NAME_R1_MoreText.fastq.gz or READ_NAME_R1.fastq.gz
+--read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
 
---gen_org 	'mouse' (other option 'human')
---extension 	'.fastq.gz' 			 file extension
---read_type 	'PE' (other option 'mouse') 
---sample_folder "/projects/compsci/guglib/tmp_pipeline_defaults/wes_truncated_sequences/pe"  Location that your sequences are to be found
---ref_fa 	Mouse: '/projects/compsci/guglib/tmp_pipeline_defaults/mouse_genome/Mus_musculus.GRCm38.dna.toplevel.fa' 
-		Human: '/projects/compsci/refdata/Human/hg38/Index_Files/Bowtie2/Homo_sapiens.GRCh38.dna.toplevel_chr_mod_1_22_MT_X_Y.fa' 
-		Reference fasta to be used by various progams
+--gen_org | mouse | Options: mouse and human.
 
---ref_fa_indices 	'/projects/compsci/refdata/Mouse/mm10/Index_Files/BWA/mm10' 
---filter_trim 		"${params.cwd}/bin/shared/filter_trim.py" 
---min_pct_hq_reads 	0.0 
---read_group_pyfile 	“${params.cwd}/bin/shared/read_group_from_fastq.py" 
---stats_agg 		"${params.cwd}/bin/wes/aggregate_stats.py" 
---mismatch_penalty 	8 
---seed_length 		25 
---rsem_ref_prefix 	Mouse: 'mus_musculus' 
-			Human: 'Homo_sapiens.GRCh38.dna.toplevel_chr_mod_1_22_MT_X_Y' 
+--read_prep | 'stranded' | Options: 'stranded' or 'non_stranded'. This determines how RNA quantification is done, and statistics are calculated.
 
---rsem_ref_files 	Mouse: '/projects/compsci/guglib/tmp_pipeline_defaults/mouse_rsem_ref' 
-			Human: '/projects/compsci/refdata/Human/hg38/Index_Files/Bowtie2' 
+--min_pct_hq_reads| '0.0' | The minimum percent of high-quality reads passing when trimming the fastq files.
+--rsem_ref_files | /projects/omics_share/mouse/GRCm38/transcriptome/indices/ensembl/v102/bowtie2 | Pre-compiled index files. Refers to human indices when --gen_org human. JAX users should not change this, unless using STAR indices.
+--rsem_ref_prefix | 'Mus_musculus.GRCm38.dna.toplevel' | Prefix for index files. JAX users should not change this, unless using STAR indices. Refers to human indices when --gen_org human.
+--seed_length | 25 | 'Seed length used by the read aligner. Providing the correct value is important for RSEM. If RSEM runs Bowtie, it uses this value for Bowtie's seed length parameter.'
+--rsem_aligner | 'bowtie2' | Options: bowtie2 or star. The aligner algorithm used by RSEM. Note, if using STAR, point rsem_ref_files to STAR based indices.
 
---rsem_aligner 		'bowtie2' 
---picard_dict 		Mouse: '/projects/compsci/guglib/tmp_pipeline_defaults/mouse_picard_dict/Mus_musculus.GRCm38.dna.toplevel.dict' 
-			Human:'/projects/compsci/refdata/Human/hg38/Index_Files/Bowtie2/Homo_sapiens.GRCh38.dna.toplevel_chr_mod_1_22_MT_X_Y.dict' 
---summary_mets_PE 	"${params.cwd}/bin/rnaseq/summary_QC_metrics_without_xenome.pl" 
---summary_mets_SE 	"${params.cwd}/bin/rnaseq/summary_QC_metrics_without_xenome_SE.pl" 
---probes 		'/projects/compsci/refdata/Human/agilent/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed' 
---ctp_genes 		'/projects/compsci/refdata/Human/agilent/359genes_b38_noheader_withNames.bed 
---gatk_form 		"${params.cwd}/bin/rnaseq/gatk_formatter.sh" 
---cov_calc 		"${params.cwd}/bin/rnaseq/coveragecalculator.py" 
+--picard_dict | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.dict' 
+              | Human: '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.dict'
+              | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
 
-"""
+--ref_flat | Mouse: '/projects/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.chr_patch_hapl_scaff.refFlat.txt' 
+           | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.refFlat.txt'
+           | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
+
+--ribo_intervals | Mouse: '/projects/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.chr_patch_hapl_scaff.rRNA.interval_list' 
+                 | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.rRNA.interval_list'
+                 | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
+
+There are three additional parameters that are human specific. They are: 
+
+Parameter| Default| Description
+
+--ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa'| Reference fasta to be used in alignment calculation as well as any downstream analysis. JAX users should not change this parameter.
+--ref_fai | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa.fai' | Reference fasta index file.  JAX users should not change this parameter.
+--probes | '/projects/omics_share/human/GRCh38/supporting_files/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
+--ctp_genes | '/projects/omics_share/human/GRCh38/supporting_files/359genes_b38_noheader_withNames.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
+
+    
+There are additional parameters that point to required scripts for processing data and computing metrics, which should not be changed.
+
+--filter_trim = '${projectDir}/bin/shared/filter_trim.py'   
+--summary_mets_PE = '${projectDir}/bin/rnaseq/summary_QC_metrics_without_xenome.pl'   
+--summary_mets_SE = '${projectDir}/bin/rnaseq/summary_QC_metrics_without_xenome_SE.pl'   
+--params.gatk_form = '${projectDir}/bin/rnaseq/gatk_formatter.sh'   
+--params.cov_calc = '${projectDir}/bin/rnaseq/coveragecalculator.py'   
+'''
 }
