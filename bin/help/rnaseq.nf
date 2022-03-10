@@ -23,12 +23,12 @@ Parameter | Default | Description
 --rsem_aligner | 'bowtie2' | Options: bowtie2 or star. The aligner algorithm used by RSEM. Note, if using STAR, point rsem_ref_files to STAR based indices.
 
 --picard_dict | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.dict' 
-			  | Human: '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.dict'
-        | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
+              | Human: '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.dict'
+              | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
 
 --ref_flat | Mouse: '/projects/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.chr_patch_hapl_scaff.refFlat.txt' 
-		   | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.refFlat.txt'
-       | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
+           | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.refFlat.txt'
+           | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
 
 --ribo_intervals | Mouse: '/projects/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.chr_patch_hapl_scaff.rRNA.interval_list' 
                  | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.rRNA.interval_list'
@@ -38,9 +38,9 @@ There are three additional parameters that are human specific. They are:
 
 Parameter| Default| Description
 
---ref_fa| '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa'| Reference fasta to be used in alignment calculation as well as any downstream analysis. JAX users should not change this parameter.
+--ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa'| Reference fasta to be used in alignment calculation as well as any downstream analysis. JAX users should not change this parameter.
 --ref_fai | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa.fai' | Reference fasta index file.  JAX users should not change this parameter.
---probes| '/projects/omics_share/human/GRCh38/supporting_files/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
+--probes | '/projects/omics_share/human/GRCh38/supporting_files/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
 --ctp_genes | '/projects/omics_share/human/GRCh38/supporting_files/359genes_b38_noheader_withNames.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
 
     

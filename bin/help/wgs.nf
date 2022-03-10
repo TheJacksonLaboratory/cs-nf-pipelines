@@ -35,8 +35,9 @@ Parameter | Default | Description
         | Human: '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz'
         | The dbSNP database contains known single nucleotide polymorphisms, and is used in the annotation of known variants. Points to human dbSNP when --gen_org human.
 
---gen_ver | Mouse: 'GRCm38.99' | snpEff genome version. Sets to 'hg38' when --gen_org human
+--gen_ver | Mouse: 'GRCm38.99'
           | Human: 'hg38'
+          | snpEff genome version. Sets to 'hg38' when --gen_org human
 
 --snpEff_config | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/snpEff_5_1/snpEff.config' 
                 | Human: '/projects/omics_share/human/GRCh38/genome/indices/snpEff_5_1/snpEff.config'
