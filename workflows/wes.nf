@@ -114,18 +114,18 @@ workflow WES {
         SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
         SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
         SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
-        SNPSIFT_EXTRACTFIELDS_SNP(SNPEFF_ONEPERLINE_SNP.out.vcf)
 
       // INDEL
         COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
         SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
         SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
         SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
-        SNPSIFT_EXTRACTFIELDS_INDEL(SNPEFF_ONEPERLINE_INDEL.out.vcf)
 
     // Step 10: Post Variant Calling Processing - Part 2
       GATK_MERGEVCF(SNPEFF_ONEPERLINE_SNP.out.vcf,
                     SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      
+      SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
 
 
   } else if (params.gen_org=='mouse'){

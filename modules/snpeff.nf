@@ -26,6 +26,9 @@ process SNPEFF{
   script:
   log.info "----- snpEff Running on: ${sampleID} -----"
   
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
+
   if (indel_snp == 'INDEL'){
     output_suffix = 'INDEL_snpeff.vcf'
   }
@@ -37,7 +40,7 @@ process SNPEFF{
   }  
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx8g -jar /usr/local/share/snpeff-5.1-1/snpEff.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/local/share/snpeff-5.1-1/snpEff.jar \
   ${params.gen_ver} \
   -c ${params.snpEff_config} \
   -o ${output_format} \
