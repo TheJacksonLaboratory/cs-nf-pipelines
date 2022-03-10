@@ -7,7 +7,7 @@ process SNPEFF{
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
-  container 'quay.io/biocontainers/snpeff_5.1--hdfd78af_1.sif'
+  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy'
 
@@ -54,7 +54,7 @@ process SNPEFF_ONEPERLINE {
   time '00:10:00'
   clusterOptions '-q batch'
 
-  container 'quay.io/biocontainers/snpeff_5.1--hdfd78af_1.sif'
+  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
 
   input:
   tuple val(sampleID), file(vcf)
