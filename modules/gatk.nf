@@ -112,7 +112,7 @@ process GATK_VARIANTANNOTATOR {
 
   // Legacy Reasons Leave as GATK3 (public)
   // Flag --snpEffFile was removed in GATK4
-  container 'gatk-3.6_snpeff-3.6c_samtools-1.3.1_bcftools-1.11.sif'
+  container 'broadinstitute/gatk3:3.6-0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
@@ -162,8 +162,7 @@ process GATK_MERGEVCF {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk MergeVcfs \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" MergeVcfs \
   -R ${params.ref_fa} \
   -I ${snp_vcf} \
   -I ${indel_vcf} \
@@ -195,8 +194,7 @@ process GATK_DEPTHOFCOVERAGE {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk DepthOfCoverage \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" DepthOfCoverage \
   -R ${params.ref_fa} \
   --output-format TABLE \
   -O ${sampleID}_gatk_temp.txt \
@@ -230,8 +228,7 @@ process GATK_BASERECALIBRATOR {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk BaseRecalibrator \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" BaseRecalibrator \
   -I ${bam} \
   -R ${params.ref_fa} \
   --known-sites ${params.dbSNP} \
@@ -265,8 +262,7 @@ process GATK_APPLYBQSR {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk ApplyBQSR \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" ApplyBQSR \
   -R ${params.ref_fa} \
   -I ${bam} \
   --bqsr-recal-file ${table} \
@@ -310,8 +306,7 @@ process GATK_HAPLOTYPECALLER {
 
 
   """
-  gatk HaplotypeCaller  \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
   -O ${sampleID}_variants_raw.${output_suffix} \
@@ -345,8 +340,7 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk HaplotypeCaller  \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
   -O ${sampleID}_HaplotypeCaller_${chrom}.vcf \
@@ -380,8 +374,7 @@ process GATK_SELECTVARIANTS {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk SelectVariants \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" SelectVariants \
   -R ${params.ref_fa} \
   -V ${vcf} \
   -select-type ${indel_snp} \
@@ -411,8 +404,7 @@ process GATK_INDEXFEATUREFILE {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk IndexFeatureFile \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" IndexFeatureFile \
   -I ${vcf}
   """
 }
@@ -454,8 +446,7 @@ process GATK_VARIANTFILTRATION {
   }
 
   """
-  gatk VariantFiltration \
-  --java-options "-Xmx${my_mem}G" \
+  gatk --java-options "-Xmx${my_mem}G" VariantFiltration \
   -R ${params.ref_fa} \
   -V ${vcf} \
   -O ${sampleID}_variantfiltration_${output_suffix} \

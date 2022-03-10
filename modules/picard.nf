@@ -22,13 +22,12 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   my_mem =  my_mem[0..-4]
 
   """
-  gatk CollectAlignmentSummaryMetrics \
-  --java-options "-Xmx${my_mem}G" \
-  INPUT=${bam} \
-  OUTPUT=${sampleID}_AlignmentMetrics.txt \
-  REFERENCE_SEQUENCE=${params.ref_fa} \
-  METRIC_ACCUMULATION_LEVEL=ALL_READS \
-  VALIDATION_STRINGENCY=LENIENT
+  gatk --java-options "-Xmx${my_mem}G" CollectAlignmentSummaryMetrics \
+  --INPUT ${bam} \
+  --OUTPUT ${sampleID}_AlignmentMetrics.txt \
+  --REFERENCE_SEQUENCE ${params.ref_fa} \
+  --METRIC_ACCUMULATION_LEVEL ALL_READS \
+  --VALIDATION_STRINGENCY LENIENT
   """
 }
 process PICARD_SORTSAM {
@@ -56,8 +55,7 @@ process PICARD_SORTSAM {
   my_mem =  my_mem[0..-4]
 
   """
-  picard SortSam \
-  -Xmx${my_mem}G \
+  picard -Xmx${my_mem}G SortSam \
   SO=coordinate \
   INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
@@ -93,8 +91,7 @@ process PICARD_MARKDUPLICATES {
   my_mem =  my_mem[0..-4]
 
   """
-  picard MarkDuplicates \
-  -Xmx${my_mem}G \
+  picard -Xmx${my_mem}G MarkDuplicates \
   I=${bam} \
   O=${sampleID}_dedup.bam \
   M=${sampleID}_dup_metrics.txt \
@@ -128,8 +125,7 @@ process PICARD_COLLECTHSMETRICS {
   my_mem =  my_mem[0..-4]
 
   """
-  picard CollectHsMetrics \
-  -Xmx${my_mem}G \
+  picard -Xmx${my_mem}G CollectHsMetrics \
   INPUT=${bam} \
   OUTPUT=${sampleID}_CoverageMetrics.txt \
   BAIT_INTERVALS=${params.bait_picard} \
@@ -197,8 +193,7 @@ process PICARD_REORDERSAM {
   my_mem =  my_mem[0..-4]
 
   """
-  picard ReorderSam \
-  -Xmx${my_mem}G \
+  picard -Xmx${my_mem}G ReorderSam \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
   SEQUENCE_DICTIONARY=${params.picard_dict} \
