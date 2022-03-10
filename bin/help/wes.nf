@@ -14,35 +14,43 @@ Parameter | Default | Description
 
 --gen_org | mouse | Options: mouse and human.
 
---ref_fa | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' | The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
+--ref_fa | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' 
          | Human: '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta'
+         | The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
 
---ref_fa_indices | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bwa/Mus_musculus.GRCm38.dna.toplevel.fa' | Pre-compiled BWA index files, points to human reference when --gen_org human. JAX users should not change this parameter.
+--ref_fa_indices | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bwa/Mus_musculus.GRCm38.dna.toplevel.fa' 
                  | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta.64'
+                 | Pre-compiled BWA index files, points to human reference when --gen_org human. JAX users should not change this parameter.
 
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files.
 
---target_gatk | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.bed' | A bed file with WES target intervals as defined in the capture array used in the data, points to human bed file when --gen_org human. NOTE: This file MUST reflect the capture array used to generate your data.
+--target_gatk | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.bed' 
               | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.bed'
+              | A bed file with WES target intervals as defined in the capture array used in the data, points to human bed file when --gen_org human. NOTE: This file MUST reflect the capture array used to generate your data.
 
---target_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. NOTE: This file MUST reflect the capture array used to generate your data.
+--target_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' 
                 | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.picard.interval_list'
+                | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. NOTE: This file MUST reflect the capture array used to generate your data.
 
---bait_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. This file can be the same as the interval file,  NOTE: This file MUST reflect the capture array used to generate your data.
+--bait_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' 
               | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.picard.interval_list'
+              | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. This file can be the same as the interval file,  NOTE: This file MUST reflect the capture array used to generate your data.
 
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
 --ploidy_val | '-ploidy 2' | Sample ploidy
 
---dbSNP | Mouse: '/projects/omics_share/mouse/GRCm38/genome/annotation/snps_indels/GCA_000001635.6_current_ids.vcf.gz' | The dbSNP database contains known single nucleotide polymorphisms, and is used in the annotation of known variants. Points to human dbSNP when --gen_org human. JAX users should not change this parameter.
+--dbSNP | Mouse: '/projects/omics_share/mouse/GRCm38/genome/annotation/snps_indels/GCA_000001635.6_current_ids.vcf.gz' 
         | Human: '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz'
+        | The dbSNP database contains known single nucleotide polymorphisms, and is used in the annotation of known variants. Points to human dbSNP when --gen_org human. JAX users should not change this parameter.
 
---gen_ver | Mouse: 'GRCm38.99' | snpEff genome version. Sets to 'hg38' when --gen_org human JAX users should not change this parameter.
-		  | Human: 'hg38'
+--gen_ver | Mouse: 'GRCm38.99' 
+		      | Human: 'hg38'
+          | snpEff genome version. Sets to 'hg38' when --gen_org human JAX users should not change this parameter.
 
---snpEff_config | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/snpEff_5_1/snpEff.config' | The configuration file used while running snpEff, points to human snpEff file when --gen_org human. JAX users should not change this parameter.
+--snpEff_config | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/snpEff_5_1/snpEff.config' 
                 | Human: '/projects/omics_share/human/GRCh38/genome/indices/snpEff_5_1/snpEff.config'
+                | The configuration file used while running snpEff, points to human snpEff file when --gen_org human. JAX users should not change this parameter.
 
 
 --gold_std_indels | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz’ | Human Only - Used in GATK BaseRecalibrator. JAX users should not change this parameter.
