@@ -7,7 +7,7 @@ process SNPEFF{
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
-  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy'
 
@@ -40,7 +40,7 @@ process SNPEFF{
   }  
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/local/share/snpeff-5.1-1/snpEff.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
   ${params.gen_ver} \
   -c ${params.snpEff_config} \
   -o ${output_format} \

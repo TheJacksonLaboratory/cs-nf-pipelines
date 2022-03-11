@@ -7,7 +7,7 @@ process SNPSIFT_DBNSFP{
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
-  container 'quay.io/biocontainers/snpsift:4.3.1t--hdfd78af_3'
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy'
 
@@ -35,7 +35,7 @@ process SNPSIFT_DBNSFP{
   }  
 
   """
-  java -Xmx${my_mem}G -jar /usr/local/share/snpsift-4.3.1t-3/SnpSift.jar \
+  java -Xmx${my_mem}G -jar /opt/snpEff/SnpSift.jar \
   dbnsfp -v -db ${params.dbNSFP} -noDownload -a \
   -f SIFT_score,SIFT_pred,Polyphen2_HDIV_score,MutationAssessor_score,phyloP100way_vertebrate,1000Gp3_AF,1000Gp3_AFR_AF,1000Gp3_EUR_AF,1000Gp3_AMR_AF,1000Gp3_EAS_AF,ESP6500_AA_AF,ESP6500_EA_AF \
   ${vcf} > ${sampleID}_${output_suffix}
@@ -50,7 +50,7 @@ process SNPSIFT_EXTRACTFIELDS {
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
-  container 'quay.io/biocontainers/snpsift:4.3.1t--hdfd78af_3'
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
 
@@ -76,7 +76,7 @@ process SNPSIFT_EXTRACTFIELDS {
   }
 
   """
-  java -Xmx${my_mem}G -jar /usr/local/share/snpsift-4.3.1t-3/SnpSift.jar \
+  java -Xmx${my_mem}G -jar /opt/snpEff/SnpSift.jar \
   extractFields ${vcf} ${fields} \
    > ${sampleID}_snpsift_finalTable.txt
   """
