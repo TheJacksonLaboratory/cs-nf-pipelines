@@ -3,7 +3,7 @@ process SNPSIFT_DBNSFP{
 
   cpus = 1
   memory = 6.GB
-  time = '01:00:00'
+  time = '06:00:00'
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
