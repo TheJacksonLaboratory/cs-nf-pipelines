@@ -57,8 +57,6 @@ process SNPEFF_ONEPERLINE {
   time '00:10:00'
   clusterOptions '-q batch'
 
-  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
-
   input:
   tuple val(sampleID), file(vcf)
   val(indel_snp)
@@ -77,6 +75,6 @@ process SNPEFF_ONEPERLINE {
     output_suffix = 'snp_indel_snpeff.vcf'
   }
   """
-  cat ${vcf} | /usr/local/share/snpeff-5.1-1/scripts/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
+  cat ${vcf} | perl ${projectDir}/bin/shared/bin/shared/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
   """
 }
