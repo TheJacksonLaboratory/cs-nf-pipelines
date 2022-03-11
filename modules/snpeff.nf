@@ -75,6 +75,6 @@ process SNPEFF_ONEPERLINE {
     output_suffix = 'snp_indel_snpeff.vcf'
   }
   """
-  cat ${vcf} | perl ${projectDir}/bin/shared/bin/shared/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
+  cat ${vcf} | perl ${projectDir}/bin/shared/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
   """
 }
