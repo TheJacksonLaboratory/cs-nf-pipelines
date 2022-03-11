@@ -25,7 +25,8 @@ include {READ_GROUPS} from '../modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/quality_stats'
 include {PICARD_SORTSAM;
          PICARD_MARKDUPLICATES;
-         PICARD_COLLECTALIGNMENTSUMARYMETRICS} from '../modules/picard'
+         PICARD_COLLECTALIGNMENTSUMARYMETRICS;
+         PICARD_COLLECTWGSMETRICS} from '../modules/picard'
 include {GATK_REALIGNERTARGETCREATOR;
          GATK_BASERECALIBRATOR;
          GATK_APPLYBQSR;
@@ -87,6 +88,7 @@ workflow WGS {
     GATK_APPLYBQSR(GATK_INDELREALIGNER.out.bam,
                     GATK_BASERECALIBRATOR.out.table)
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
     // Create a chromosome channel. HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
@@ -112,6 +114,7 @@ workflow WGS {
   // If Mouse
   if (params.gen_org=='mouse'){
     PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
+    PICARD_COLLECTWGSMETRICS(GATK_INDELREALIGNER.out.bam)
 
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
     data = GATK_INDELREALIGNER.out.bam.join(GATK_INDELREALIGNER.out.bai)
@@ -189,5 +192,6 @@ workflow WGS {
   // may replace with multiqc
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
                   PICARD_MARKDUPLICATES.out.dedup_metrics,
-                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt)
+                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt,
+                  PICARD_COLLECTWGSMETRICS.out.txt)
 }
