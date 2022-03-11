@@ -19,7 +19,7 @@ if len(sys.argv) < 5:
 out = open(sys.argv[1],"w")
 inp_qc  = open(sys.argv[2],"r")
 inp_dup = open(sys.argv[3],"r")
-inp_hs  = open(sys.argv[4],"r")
+#inp_hs  = open(sys.argv[4],"r")
 
 qc_out = [None, None]
 read_data = False
@@ -50,6 +50,8 @@ for line in inp_qc:
                 qc_out[1] = "NA"
 print >>out, "Total number of reads\t%s\nTotal number of HQ filtered reads\t%s" %(qc_out[0],qc_out[1])
 
+####
+
 data_lines_dup = []
 for line in inp_dup:
     line = line.strip()
@@ -62,12 +64,16 @@ for i,n in enumerate(col_names):
         if n in ["PERCENT_DUPLICATION"]:
             print >>out, "%s\t%s" %(n,col_values[i])
 
-data_lines = []
-for line in inp_hs:
-    line = line.strip()
-    if line and not(line.startswith("#")):
-        data_lines.append(line)
+####
 
+data_lines = []
+with open(sys.argv[4], "r") as inp_hs:
+    for line in inp_hs:
+        if line.startswith("## METRICS CLASS"):
+            data_lines.append(next(inp_hs, '').strip())
+            data_lines.append(next(inp_hs, '').strip())
+            data_lines.append(next(inp_hs, '').strip())
+            data_lines.append(next(inp_hs, '').strip())
 
 if len(data_lines) != 4:
     print >>sys.stderr, "AlignmentMetrics.txt is invalid"
@@ -78,4 +84,25 @@ else:
         if n in  ["PF_READS_ALIGNED", "PCT_PF_READS_ALIGNED"]:
             print >>out, "%s\t%s" %(n,col_values[i])
 
+    #data_lines[3] is for paired data. Could be an issue here with SE data. This requires testing. 
+
+####
+
+data_lines = []
+with open(sys.argv[5], "r") as inp_cov:
+    for line in inp_cov:
+        if line.startswith("## METRICS CLASS"):
+            data_lines.append(next(inp_cov, '').strip())
+            data_lines.append(next(inp_cov, '').strip())
+
+
+#####
+if len(data_lines) != 2:
+    print >>sys.stderr, "WGS_Metrics.txt is invalid"
+else:
+    col_names = data_lines[0].split("\t")
+    col_values = data_lines[1].split("\t")    
+    for i,n in enumerate(col_names):
+        if n in  ["MEAN_COVERAGE", "SD_COVERAGE", "MEDIAN_COVERAGE"] or n.endswith("X"):
+            print >>out, "%s\t%s" %(n,col_values[i])
 
