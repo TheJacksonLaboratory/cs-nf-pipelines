@@ -13,6 +13,7 @@ process AGGREGATE_STATS {
   tuple val(sampleID), file(filter_stats)
   tuple val(sampleID), file(picard_met)
   tuple val(sampleID), file(algn_met)
+  tuple val(sampleID), file(cov_met)
 
   output:
   tuple val(sampleID), file("*summary_stats.txt"), emit: txt
@@ -21,6 +22,6 @@ process AGGREGATE_STATS {
   log.info "----- Generating Summary Stats for: ${sampleID} -----"
 
   """
-  python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${picard_met} ${algn_met}
+  python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${picard_met} ${algn_met} ${cov_met}
   """
 }
