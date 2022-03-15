@@ -76,8 +76,8 @@ process GATK_INDELREALIGNER{
   // Command Depricated in GATK 4
   container 'broadinstitute/gatk3:3.6-0'
 
-
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
+  // save if mouse and wgs or save if keep intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: params.gen_org=='mouse' && params.workflow=='wgs' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID), file(bam)

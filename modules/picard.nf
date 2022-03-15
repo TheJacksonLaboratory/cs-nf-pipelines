@@ -73,8 +73,8 @@ process PICARD_MARKDUPLICATES {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  // save if mouse and wes save if anything else optional
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
+  // save if mouse and wes or save if keep intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' && params.workflow=='wes' ? true : params.keep_intermediate }
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
