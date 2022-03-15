@@ -134,7 +134,7 @@ workflow WGS {
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
-    }
+  }
 
   // SNP
     GATK_SELECTVARIANTS_SNP(GATK_MERGEVCF_LIST.out.vcf,
@@ -151,11 +151,11 @@ workflow WGS {
                                  GATK_SELECTVARIANTS_INDEL.out.idx,
                                 'INDEL')
 
-  // Cat Output to vcf-annotate*
-    VCF_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-    VCF_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
-
-// Final Post-Processing Steps Slightly Different for Mouse and Human
+  // Cat Output to vcf-annotate* and add dbSNP annotations. 
+    VCF_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf, 'SNP')
+    VCF_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf, 'INDEL')
+  
+// Final Post-Processing Steps Differ for Human and Mouse
 
   // If Human
   if (params.gen_org=='human'){
@@ -180,8 +180,11 @@ workflow WGS {
 
   // If Mouse
   if (params.gen_org=='mouse'){
-    SNPEFF(VCF_ANNOTATE_SNP.out.vcf, 'BOTH', 'gatk')
-    GATK_VARIANTANNOTATOR(VCF_ANNOTATE_SNP.out.vcf,
+    // Merge SNP and INDEL
+    GATK_MERGEVCF(VCF_ANNOTATE_SNP.out.vcf,
+                  VCF_ANNOTATE_INDEL.out.vcf)
+    SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'gatk')
+    GATK_VARIANTANNOTATOR(GATK_MERGEVCF.out.vcf,
                           SNPEFF.out.vcf)
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 
