@@ -1,4 +1,4 @@
-image: atlassian/default-image:2
+image: ubuntu:16.04
 clone:
   depth: full
 pipelines:
@@ -6,7 +6,9 @@ pipelines:
     main:
       - step:
           script:
-            - eval `ssh-agent -s`
-            - ssh-add ~/.ssh/id_rsa
-            - ssh-add -l
+            - apt-get update -y
+            - apt-get install -y git
+            - git config --global user.name bitbucket-pipelines
+            - git config --global user.email commits-noreply@bitbucket.org
+            - git remote set-url origin ${BITBUCKET_GIT_SSH_ORIGIN}
             - git push --mirror git@github.com:TheJacksonLaboratory/cs-nf-pipelines.git
