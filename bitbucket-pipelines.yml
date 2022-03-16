@@ -1,8 +1,0 @@
-clone:
-  depth: full
-pipelines:
-  branches:
-    main:
-      - step:
-          script:
-            - git push --mirror git@github.com:TheJacksonLaboratory/cs-nf-pipelines.git
