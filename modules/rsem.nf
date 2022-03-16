@@ -8,8 +8,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   errorStrategy 'retry'
   maxRetries 1
 
-  // container runs only calculate expression
-  container 'dceoy/rsem'
+    container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
@@ -86,7 +85,7 @@ process RSEM_REF_PULL {
 
 process RSEM_REF_BUILD {
   publishDir "${params.pubdir}/rsem/ref"
-  container "dceoy/rsem"
+  container "quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0"
 
   input:
   tuple file(gtf), file(fa)
@@ -108,7 +107,7 @@ process RSEM_REF_BUILD {
 
 process RSEM_EXPRESSION {
   publishDir "${params.pubdir}/rsem/exp"
-  container "dceoy/rsem"
+  container "quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0"
 
   input:
   tuple val(sampleId), file(R1), file(R2)
@@ -134,7 +133,7 @@ process RSEM_EXPRESSION {
 
 process RSEM_SIMULATE_READS{
   publishDir "${params.pubdir}/rsem/sim"
-  container "dceoy/rsem"
+  container "quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0"
 
   input:
   tuple file(estimated_model_file), file(estimated_isoform_results)
