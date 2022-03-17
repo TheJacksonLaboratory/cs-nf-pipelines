@@ -28,10 +28,10 @@ process VCF_ANNOTATE {
   }
 
   if (indel_snp == 'INDEL'){
-    output_suffix = 'variants_filtered_dbsnp.vcf'
+    output_suffix = 'indel_filtered_dbsnp.vcf'
   }
   if (indel_snp =='SNP'){
-    output_suffix = 'variants_filtered_dbsnp.vcf'
+    output_suffix = 'snp_filtered_dbsnp.vcf'
   }
   if (indel_snp == 'BOTH'){
     output_suffix = 'snp_indel_filtered_dbsnp.vcf'
