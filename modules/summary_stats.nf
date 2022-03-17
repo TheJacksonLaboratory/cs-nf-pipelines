@@ -5,7 +5,7 @@ process SUMMARY_STATS {
     time = '00:15:00'
     clusterOptions = '-q batch'
 
-    container 'perl:5.30-slim-threaded.img'
+    container 'perl:5.30-slim-threaded'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
 
