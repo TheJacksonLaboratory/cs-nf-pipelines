@@ -5,7 +5,7 @@ process SUMMARY_STATS {
     time = '00:15:00'
     clusterOptions = '-q batch'
 
-    container 'perl:5.30-slim-threaded'
+    container 'quay.io/jaxcompsci/perl:0.1.0'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
 
