@@ -15,6 +15,9 @@ if (params.workflow == "wes"){
 if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
 }
+if (params.workflow == "mmrsvd"){
+  include {MMRSVD} from './workflows/mmrsvd'
+}
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "toy_example"){
@@ -28,5 +31,8 @@ workflow{
     }
   if (params.workflow == "wgs"){
     WGS()
+    }
+  if (params.workflow == "mmrsvd"){
+    MMRSVD()
     }
 }

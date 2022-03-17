@@ -22,3 +22,28 @@ process BCF_SORT {
   """
 
 }
+process BCFTOOLS_REHEADER{
+  tag "$sampleID"
+
+  cpus = 8
+  time= '72:00:00'
+  memory = '250.GB'
+  maxRetries = 1
+  clusterOptions = '-q batch'
+  errorStrategy = 'retry'
+
+  container 'biocontainers/bcftools'
+
+  input:
+  tuple val(sampleID), file(vcf)
+
+  output:
+  tuple val(sampleID), file(vcf), emit: vcf
+
+  script:
+  """
+  bcftools reheader --samples rehead_breakdancer.txt \
+  -o ${sample_name}_BreakDancerSortVCF.vcf \
+  ${vcf}
+  """
+}
