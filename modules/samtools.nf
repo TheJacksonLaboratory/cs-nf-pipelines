@@ -23,3 +23,10 @@ process SAMTOOLS_INDEX {
     samtools index ${bam}
     """
 }
+process SAMTOOLS_STATS {
+
+}
+process SAMTOOLS_VIEW_DISCORDANT {
+  # Extract the discordant pairedend alignments
+  samtools view -@ ${task.cpus} -b -F 1294 ${sampleID}_aligned_lumpy.bam > ${sampleID}_lumpy_discordant.bam
+}
