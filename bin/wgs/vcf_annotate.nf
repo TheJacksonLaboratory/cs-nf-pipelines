@@ -14,7 +14,7 @@ process VCF_ANNOTATE {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   // vcftools container needed
-  container 'gatk-4.1.9.0_samtools-1.3.1_snpEff_4.3_vcftools_bcftools.sif'
+  container 'quay.io/biocontainers/vcftools:0.1.16--pl5321hd03093a_7'
 
   script:
   log.info "----- CAT VCF-ANNOTATE Running on: ${sampleID} -----"
