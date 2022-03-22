@@ -20,9 +20,6 @@ include {BCFTOOLS_VIEW;BCFTOOLS_REHEADER} from '../modules/bcftools'
 include {MANTA_CALLSV} from '../modules/manta'
 include {DELLY_CALL} from '../modules/delly'
 
-
-
-// NOOS-33-mmrsvd-pipeline-to-dsl2
 // help if needed
 if (params.help){
     help()
@@ -78,6 +75,8 @@ workflow MMRSVD {
   	 PBSV_CALL(PBSV_DISCOVERY.out.svsig)
 
      // Add commented code here?
+
+     SURVIVOR_MERGE([List of VCFs Here])
   }
 
   // ILLUMINA
@@ -144,15 +143,61 @@ workflow MMRSVD {
                PICARD_MARKDUPLICATES.out.bai)
 
     // Necessary? BCFTOOLS_VIEW() | vcfSort.sh | reheader
+
+    SURVIVOR_MERGE([List of VCFs Here])
   }
 
-  // CONTINUE THE REST OF THE PIPELINE
-  SURVIVOR_MERGE()
+  // Continue pipeline samd for long or short reads
+  // Simple bash script to run surv_annot.sh
   ANNOTATE_SV(SURVIVOR_MERGE.out.vcf)
+
+  // sv_to_table.py
   SUMMARIZE_SV(SURVIVOR_MERGE.out.vcf)
-  PREP_BEDS() // RSCRIPT
-  INTERSECT_BEDS()
-  SUMMARIZE_INTERSECTIONS()
-  ANNOTATE_EXONS()
+
+  // RSCRIPT
+  PREP_BEDS(ANNOTATE_SV.out.txt,
+            SUMMARIZE_SV.out.csv)
+
+  // make the out names a little more descriptive?
+  INTERSECT_BEDS(PREP_BEDS.out.ins,
+                 PREP_BEDS.out.inv,
+                 PREP_BEDS.out.del,
+                 PREP_BEDS.out.dup,
+                 PREP_BEDS.out.tra)
+
+  // Is this expecting exact names to find? or just ALL .bed files?
+  // may be a less explicit way of doing this, but if this function is
+  // unique to this pipeline we wont worry about it
+  SUMMARIZE_INTERSECTIONS(SUMMARIZE_SV.out.csv,
+                          PREP_BEDS.out.ins,
+                          PREP_BEDS.out.inv,
+                          PREP_BEDS.out.del,
+                          PREP_BEDS.out.dup,
+                          PREP_BEDS.out.tra,
+                          INTERSECT_BEDS.out.ins_s,
+                          INTERSECT_BEDS.out.ins_e,
+                          INTERSECT_BEDS.out.del_s,
+                          INTERSECT_BEDS.out.del_e,
+                          INTERSECT_BEDS.out.inv_e,
+                          INTERSECT_BEDS.out.tra_e,
+                          INTERSECT_BEDS.out.dup_e,
+                          INTERSECT_BEDS.out.ins_genes,
+                          INTERSECT_BEDS.out.del_genes,
+                          INTERSECT_BEDS.out.inv_genes,
+                          INTERSECT_BEDS.out.dup_genes,
+                          INTERSECT_BEDS.out.tra_genes,
+                          INTERSECT_BEDS.out.ins_exons,
+                          INTERSECT_BEDS.out.del_exons,
+                          INTERSECT_BEDS.out.inv_exons,
+                          INTERSECT_BEDS.out.dup_exons,
+                          INTERSECT_BEDS.out.tra_exons)
+
+  // Python file
+  ANNOTATE_EXONS(INTERSECT_BEDS.out.ins_exons,
+                 INTERSECT_BEDS.out.del_exons,
+                 INTERSECT_BEDS.out.inv_exons,
+                 INTERSECT_BEDS.out.dup_exons,
+                 INTERSECT_BEDS.out.tra_exons)
 
 }
+// NOOS-33-mmrsvd-pipeline-to-dsl2
