@@ -20,14 +20,14 @@ process PBSV_DISCOVERY{
   log.info "----- PBSV Discover Running on: ${sampleID} -----"
 
   if (params.tandem==true){
-    command="/usr/bin/env bash ${projectDir}/bin/pbsv_tandem.sh ${bam} ${sampleID}.svsig.gz"
+    delta="--tandem-repeats ${params.defultname}"
   }
   else{
-    command="pbsv discover ${bam} ${sampleID}.svsig.gz"
+    delta=""
   }
 
   """
-  $command
+  pbsv discover $delta ${bam} ${sampleID}.svsig.gz
   """
 }
 

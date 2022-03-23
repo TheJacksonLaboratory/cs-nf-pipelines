@@ -41,6 +41,7 @@ process PBMM2_ALIGN {
   script:
   log.info "----- PBMM2 Align Running on: ${sampleID} -----"
 
+  // MOVE THIS OUT TO THE CONFIG
   if (params.pb_mode=="ccs"){
     delta='--preset CCS'
   }

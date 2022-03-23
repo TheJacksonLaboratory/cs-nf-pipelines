@@ -1,6 +1,7 @@
 // ccs and clr params handled in config
 
-process cutesv_css {
+process CURESV {
+    // SET THE PARAMS IN CONFIG
     tag "$sampleID"
 
     cpus = 8

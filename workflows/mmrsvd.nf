@@ -30,15 +30,29 @@ if (params.help){
 param_log()
 
 // prepare reads channel
-if (params.read_type == 'PE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
+if(params.seq_method=='illumina' && params.extension != '.bam'){
+  if (params.read_type == 'PE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
+  }
+  else if (params.read_type == 'SE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+  }
 }
-else if (params.read_type == 'SE'){
+
+if (params.seq_method=='pacbio' && params.extension != '.bam'){
   read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
 }
 
+if(params.extension == '.bam'){
+  read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+}
+
+
 // if channel is empty give error message and exit
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+
+// think about: failing if too many samples and no override (long queue 14 days (batch 3 days max))
+// need cleaning step for successful run
 
 // main workflow
 workflow MMRSVD {
@@ -49,32 +63,31 @@ workflow MMRSVD {
      // think about adding quality step
   	 QUALITY_STATISTICS(read_ch)
 
-     // why only fq1 used?
+     // No Paired End (Duh)
   	 NGMLR_MAP(QUALITY_STATISTICS.out.trimmed_fastq)
 
-     // swapped to picard sortsam rather than samtools sort. is that okay?
+     // Good
      PICARD_SORTSAM(NGMLR_MAP.out.sam)
 
-     // sniffles up to v2 (good to update?)
-     SNIFFLES(NGMLR_SORT.out.bam)
-     SVIM_ALIGNMENT(NGMLR_SORT.out.bam)
+     // Update to v2
+     SNIFFLES(PICARD_SORTSAM.out.bam)
+     SVIM_ALIGNMENT(PICARD_SORTSAM.out.bam)
 
-     // ccs and clr differ only in params (this will be handled in config for this step)
-  	 CUTESV_CSS(PICARD_SORTSAM.out.bam,
-  	 						PICARD_SORTSAM.out.bai)
+     // HANDLE IN CONFIG
+  	 CUTESV(PICARD_SORTSAM.out.bam,
+  	 				PICARD_SORTSAM.out.bai)
 
      // moved pbmm2 index (.mmi) to be a params instead of needing to generate here for each sample
-  	 PBMM2_ALIGN(QUALITY_STATISTICS.out.trimmed_fastq,
-  	 						 PBMM2_BUILD_INDEX.out.mmi)
+     // MOVE THE PARAMS TO CONFIG
+     PBMM2_ALIGN(QUALITY_STATISTICS.out.trimmed_fastq)
 
      // ccs and clr command differs and is handled in module
+     // CONFIG discovery defult = /ref_data/mm10_ucsc_simple_tandem_repeats_ucsc.bed
   	 PBSV_DISCOVERY(PBMM2_ALIGN.out.bam)
 
-     // ccs and clr differ only in "--ccs" needed for ccs
+     // ccs and clr differ only in "--ccs" needed for ccs (Good)
      // tandem vs no tandemm handled in module
   	 PBSV_CALL(PBSV_DISCOVERY.out.svsig)
-
-     // Add commented code here?
 
      SURVIVOR_MERGE([List of VCFs Here])
   }
@@ -98,32 +111,31 @@ workflow MMRSVD {
     }
 
     // mapped or raw continue with same steps from here
-  	// AVOID_RACE_COND() // NULL JUST ECHOS
   	SAMTOOLS_STATS(PICARD_MARKDUPLICATES.out.dedup_bam)
   	SAMBLASTER(PICARD_MARKDUPLICATES.out.dedup_bam
                PICARD_MARKDUPLICATES.out.dedup_bai)
-    SAMTOOLS_VIEW_DISCORDANT(PICARD_MARKDUPLICATES.out.dedup_bam
-                             PICARD_MARKDUPLICATES.out.dedup_bai)
+    SAMTOOLS_VIEW(PICARD_MARKDUPLICATES.out.dedup_bam
+                  PICARD_MARKDUPLICATES.out.dedup_bai)
 
     // may need to add naming option for these sort steps
     // is there a reason they would be out of order now? Is there threading going on above?
   	PICARD_SORTSAM_ALIGNED(SAMBLASTER.out.bam)
   	PICARD_SORTSAM_DISCORDANT(SAMTOOLS_VIEW_DISCORDANT.out.bam)
-
-    // What exactly is extractSplitReads_BwaMem
   	LUMPY_EXTRACT_SPLITS(LUMPY_MAP.out.aligned)
 
-    // Once again, is it necessary to sort again?
+    // Keep It (make sure name sorting [etc.], indexing reasons as well)
   	PICARD_SORTSAM_SPLITS(LUMPY_EXTRACT_SPLITS.out.bam)
 
-    // the only actual "lumpy" call
     // also includes vcfSort.sh being called. Should we move that call?
   	LUMPY_CALL_SV(PICARD_SORTSAM_ALIGNED.out.bam,
                   PICARD_SORTSAM_DISCORDANT.out.bam,
                   PICARD_SORTSAM_SPLITS.out.bam)
+    VCFSORT.SH()
 
     // are we expecting a single sample per vcf? does breakdancer require spcecial id?
-    BCFTOOLS_REHEADER(LUMPY_CALL_SV.out.vcf)
+    // COLLECT VCFS THEN REHEAD TO SAMPLEID + CALLER
+    // MANTA REHEADER WILL NOT WORK -- MANTA SPECIAL PROCESS
+    BCFTOOLS_REHEADER_LUMPY(LUMPY_CALL_SV.out.vcf, 'LUMPY')
 
     // requires bam2cfg.pl for formatting.
     // Break into own module.
@@ -133,9 +145,7 @@ workflow MMRSVD {
     // breakdancer2vcfHeader.py followed by vcfSort.sh
   	FORMAT_BREAKDANCER(BREAKDANCER_MAX.out.vcf)
 
-    // is this really neccessary? does the information get lost from above?
-    // if we assume one sample per file as default we can just rename at the end.
-  	BCFTOOLS_REHEADER(FORMAT_BREAKDANCER.out.vcf)
+  	BCFTOOLS_REHEADER_BREAKDANCER(FORMAT_BREAKDANCER.out.vcf)
 
     MANTA_CALLSV(PICARD_MARKDUPLICATES.out.bam,
                  PICARD_MARKDUPLICATES.out.bai)

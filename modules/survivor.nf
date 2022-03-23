@@ -22,7 +22,9 @@ process SURVIVOR{
 	tuple val(sampleID), file("*.vcf")
 
   script:
+  if('illumina'){.BDLM}
+  if('pacbio'){.PS}
 	"""
-	SURVIVOR merge ${vcf_paths} ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${sample_name}_mergedCall.BDLM.vcf
+	SURVIVOR merge ${vcf_paths} ${params.surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${sample_name}_mergedCall_$process.vcf
 	"""
 }

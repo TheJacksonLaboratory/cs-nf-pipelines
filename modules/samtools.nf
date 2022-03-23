@@ -26,7 +26,9 @@ process SAMTOOLS_INDEX {
 process SAMTOOLS_STATS {
 
 }
-process SAMTOOLS_VIEW_DISCORDANT {
+process SAMTOOLS_VIEW {
+  params.samtools_flag = "-F 1294"
+
   # Extract the discordant pairedend alignments
   samtools view -@ ${task.cpus} -b -F 1294 ${sampleID}_aligned_lumpy.bam > ${sampleID}_lumpy_discordant.bam
 }
