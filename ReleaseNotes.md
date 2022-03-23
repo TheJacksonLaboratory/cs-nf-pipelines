@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## Release 0.1.0 -- <INSERT DATE>
+## Release 0.1.0 -- 03.28.2022
 
 ### Pipelines Added:
 1. Whole Genome Sequencing - Mouse & Human
