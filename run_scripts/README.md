@@ -1,11 +1,46 @@
 # Run Scripts
 
-These are run scripts simply ```cd``` into this (run_scripts) directory then edit the script of interest.
-The only required changes for the script will be in *ALL_CAPS* with an asterisk * on both sides.
-Nown run the script using ```sbatch *SCRIPT_NAME.sh*```
 
-<hr>
+This directory contains example run scripts for each pipeline by species combination. 
 
-# Example
+Example: 
 
-<a href='#'> Click Here For a Short Video Tutorial</a>
+```
+#!/bin/bash
+#SBATCH --mail-user=first.last@jax.org
+#SBATCH --job-name=rnaseq_human
+#SBATCH --mail-type=END,FAIL
+#SBATCH -p compute
+#SBATCH -q batch
+#SBATCH -t 72:00:00
+#SBATCH --mem=1G
+#SBATCH --ntasks=1
+
+cd $SLURM_SUBMIT_DIR
+
+# LOAD SINGULARITY
+module load singularity
+
+# RUN PIPELINE
+~/nextflow ../main.nf \
+--workflow rnaseq \
+--sample_folder <PATH_TO_YOUR_SEQUENCES> \
+--gen_org human \
+--pubdir '/fastscratch/outputDir' \
+-w '/fastscratch/outputDir/work' \
+--comment "This script will run rnaseq on human samples using default hg38"
+```
+
+There are several things a user must change before running these scripts: 
+
+1. `--mail-user=first.last@jax.org` should be set to your email.
+
+2. `<PATH_TO_YOUR_SEQUENCES>` must be changed to point at the location of your data files. NOTE: The script assumes '_R{1,2}*.fastq.gz' is the default matching string for FASTQ files. 
+    See Wiki documentation for parameters to adjust if this is not the case. 
+
+3. `--pubdir '/fastscratch/outputDir'` and `-w '/fastscratch/outputDir/work'` should be changed to relevant directories. The `-w` work directory can be quite large. Use of `/fastscratch/` is recommended. 
+
+
+**NOTE:**  
+
+These scripts assume they are being run from within `cs-nf-pipelines/run_scripts`. If they are moved to other locations, specify the absolute path to `main.nf` (e.g., `/home/USERNAME/cs-nf-pipelines/main.nf`)
