@@ -13,4 +13,4 @@ cd $SLURM_SUBMIT_DIR
 module load singularity
 
 # RUN TEST PIPELINE
-~/nextflow main.nf --workflow rna --sample_folder 'test/rna' --pubdir '/fastscratch/outputDir' -w '/fastscratch/outputDir/work'
+~/nextflow main.nf --workflow rna --gen_org mouse --sample_folder 'test/rna/mouse' --pubdir '/fastscratch/outputDir' -w '/fastscratch/outputDir/work'
