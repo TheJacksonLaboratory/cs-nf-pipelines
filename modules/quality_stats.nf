@@ -7,7 +7,7 @@ process QUALITY_STATISTICS {
   time '24:00:00'
   clusterOptions '-q batch'
 
-  container 'python_2.7.sif'
+  container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*fastq.gz_stat", mode:'copy'
 

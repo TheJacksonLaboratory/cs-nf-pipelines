@@ -7,7 +7,7 @@ process SNPEFF{
   clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
-  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy'
 
@@ -40,7 +40,7 @@ process SNPEFF{
   }  
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/local/share/snpeff-5.1-1/snpEff.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
   ${params.gen_ver} \
   -c ${params.snpEff_config} \
   -o ${output_format} \
@@ -56,8 +56,6 @@ process SNPEFF_ONEPERLINE {
   memory 2.GB
   time '00:10:00'
   clusterOptions '-q batch'
-
-  container 'quay.io/biocontainers/snpeff:5.1--hdfd78af_1'
 
   input:
   tuple val(sampleID), file(vcf)
@@ -77,6 +75,6 @@ process SNPEFF_ONEPERLINE {
     output_suffix = 'snp_indel_snpeff.vcf'
   }
   """
-  cat ${vcf} | /usr/local/share/snpeff-5.1-1/scripts/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
+  cat ${vcf} | perl ${projectDir}/bin/shared/vcfEffOnePerLine.pl > ${sampleID}_oneperline_${output_suffix}
   """
 }

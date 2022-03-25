@@ -6,7 +6,7 @@ process READ_GROUPS {
   time '01:00:00'
   clusterOptions '-q batch'
 
-  container 'python_2.7.sif'
+  container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'read_groups' }", pattern: "*read_group.txt", mode:'copy', enabled: params.keep_intermediate
 

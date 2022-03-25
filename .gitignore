@@ -1,6 +1,4 @@
 *_RNASeq_Output/
-*test.*
-test/
 output/
 .nextflow*
 cache/

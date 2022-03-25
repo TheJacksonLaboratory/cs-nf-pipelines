@@ -4,18 +4,20 @@
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 24:00:00
-#SBATCH --mem=32G
-#SBATCH --ntasks=16
+#SBATCH -t 72:00:00
+#SBATCH --mem=1G
+#SBATCH --ntasks=1
 
 cd $SLURM_SUBMIT_DIR
 
 # LOAD SINGULARITY
-ml singularity
+module load singularity
 
-# RUN TEST PIPELINE
+# RUN PIPELINE
 ~/nextflow ../main.nf \
 --workflow rnaseq \
---sample_folder *PATH_TO_YOUR_SEQUENCES* \
+--sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
+--pubdir '/fastscratch/outputDir' \
+-w '/fastscratch/outputDir/work' \
 --comment "This script will run rnaseq on human samples using default hg38"

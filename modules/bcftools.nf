@@ -6,7 +6,7 @@ process BCF_SORT {
   time = '06:00:00'
   clusterOptions = '-q batch'
 
-  container 'biocontainers/bcftools'
+  container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
   input:
   tuple val(sampleID), file(vcf)

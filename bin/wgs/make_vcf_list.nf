@@ -20,7 +20,7 @@ process MAKE_VCF_LIST {
   // find matches and put in final list
   sorted=""
   for (int i = 0; i < order.size(); i++) {
-      sorted+=(string_list.find{ it.contains(order[i]+'.vcf')})+"\n"
+      sorted+=(string_list.find{ it.contains('_'+ order[i] + '.vcf')})+"\n"
     }
 
   """

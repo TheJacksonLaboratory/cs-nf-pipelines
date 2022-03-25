@@ -73,8 +73,8 @@ process PICARD_MARKDUPLICATES {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  // save if mouse and wes save if anything else optional
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: { params.gen_org=='mouse' ? true : params.keep_intermediate }
+  // save if mouse and wes or save if keep intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.gen_org=='mouse' && params.workflow=='wes' ? true : params.keep_intermediate
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
 
   input:
@@ -244,4 +244,37 @@ process PICARD_COLLECTRNASEQMETRICS {
     STRAND=NONE \
     CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
     """
+}
+
+process PICARD_COLLECTWGSMETRICS {
+  tag "$sampleID"
+
+  cpus = 1
+  memory = 5.GB
+  time = '03:00:00'
+  clusterOptions = '-q batch'
+
+  container 'broadinstitute/gatk:4.2.4.1'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
+
+  input:
+  tuple val(sampleID), file(bam)
+
+  output:
+  tuple val(sampleID), file("*.txt"), emit: txt
+
+  script:
+  log.info "----- Collect Alignment Sumary Metrics Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
+
+  """
+  gatk --java-options "-Xmx${my_mem}G" CollectWgsMetrics \
+  --INPUT ${bam} \
+  --OUTPUT ${sampleID}_CollectWgsMetrics.txt \
+  --REFERENCE_SEQUENCE ${params.ref_fa} \
+  --VALIDATION_STRINGENCY LENIENT
+  """
+
 }
