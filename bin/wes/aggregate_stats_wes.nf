@@ -5,7 +5,7 @@ process AGGREGATE_STATS {
   time = '00:30:00'
   clusterOptions = '-q batch'
 
-  container 'quay.io/jaxcompsci/python-bz2file:2.7.18'
+  container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
 
