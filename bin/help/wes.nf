@@ -25,15 +25,15 @@ Parameter | Default | Description
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files.
 
 --target_gatk | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.bed' 
-              | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.bed'
+              | Human: '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.bed'
               | A bed file with WES target intervals as defined in the capture array used in the data, points to human bed file when --gen_org human. NOTE: This file MUST reflect the capture array used to generate your data.
 
 --target_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' 
-                | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.picard.interval_list'
+                | Human: '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.picard.interval_list'
                 | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. NOTE: This file MUST reflect the capture array used to generate your data.
 
 --bait_picard | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/mm10Exome_v4_12-19.1.mm10.baits_and_targets.bare.picard.interval_list' 
-              | Human: '/projects/omics_share/human/GRCh38/supporting_files/hg38_liftover_agilent_SureSelect_V4_pChrM_probes.picard.interval_list'
+              | Human: '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.picard.interval_list'
               | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. This file can be the same as the interval file,  NOTE: This file MUST reflect the capture array used to generate your data.
 
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
