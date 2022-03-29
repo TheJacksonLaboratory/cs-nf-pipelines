@@ -30,6 +30,7 @@ process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   --VALIDATION_STRINGENCY LENIENT
   """
 }
+
 process PICARD_SORTSAM {
   tag "$sampleID"
 
@@ -44,6 +45,7 @@ process PICARD_SORTSAM {
 
   input:
   tuple val(sampleID), file(sam)
+  val(append)
 
   output:
   tuple val(sampleID), file("*_sortsam.bam"), emit: bam
@@ -53,12 +55,12 @@ process PICARD_SORTSAM {
   log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
-
+  
   """
   picard -Xmx${my_mem}G SortSam \
   SO=coordinate \
   INPUT=${sam} \
-  OUTPUT=${sampleID}_sortsam.bam  \
+  OUTPUT=${sampleID}${append}_sortsam.bam  \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
   """

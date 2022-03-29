@@ -15,17 +15,16 @@ process SAMBLASTER {
   tuple val(sampleID), file(bai)
 
   output:
-  tuple val(sampleID), file("*_lumpy_aligned_bwa.bam"), emit: aligned
-  tuple val(sampleID), file("*_lumpy_discordant.bam"), emit: discordant
+  tuple val(sampleID), file("*_samblaster.bam"), emit: bam
 
   script:
   log.info "----- Lumpy Mapping Running on: ${sampleID} -----"
 
   """
   # manual read group info
-  samtools view -h ${sampleID}_lumpy.bam \
+  samtools view -h ${bam} \
   | samblaster --acceptDupMarks --excludeDups --addMateTags \
   --ignoreUnmated --maxSplitCount 2 --minNonOverlap 20 \
-  | samtools view -@ ${task.cpus} -S -b - > ${sampleID}_lumpy_aligned_bwa.bam
+  | samtools view -@ ${task.cpus} -S -b - > ${sampleID}_samblaster.bam
   """
 }

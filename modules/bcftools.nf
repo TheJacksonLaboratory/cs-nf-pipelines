@@ -36,14 +36,17 @@ process BCFTOOLS_REHEADER{
 
   input:
   tuple val(sampleID), file(vcf)
+  val(append)
 
   output:
   tuple val(sampleID), file(vcf), emit: vcf
 
   script:
   """
-  bcftools reheader --samples rehead_breakdancer.txt \
-  -o ${sample_name}_BreakDancerSortVCF.vcf \
+  echo ${sampleID}_${append} > ${sampleID}_${append}.txt
+
+  bcftools reheader --samples ${sampleID}_${append}.txt \
+  -o ${sampleID}_${append}.vcf \
   ${vcf}
   """
 }
