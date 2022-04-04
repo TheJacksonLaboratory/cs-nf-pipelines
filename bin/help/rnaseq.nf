@@ -40,8 +40,8 @@ Parameter| Default| Description
 
 --ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa'| Reference fasta to be used in alignment calculation as well as any downstream analysis. JAX users should not change this parameter.
 --ref_fai | '/projects/omics_share/human/GRCh38/genome/sequence/ensembl/v104/Homo_sapiens.GRCh38.dna.toplevel.fa.fai' | Reference fasta index file.  JAX users should not change this parameter.
---probes | '/projects/omics_share/human/GRCh38/supporting_files/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
---ctp_genes | '/projects/omics_share/human/GRCh38/supporting_files/359genes_b38_noheader_withNames.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
+--probes | '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v4/hg38_agilent_SureSelect_V4_pChrM_probes_genename.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
+--ctp_genes | '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/359genes_b38_noheader_withNames.bed'| The coverage metric calculation step requires this file. JAX users should not change this parameter.
 
     
 There are additional parameters that point to required scripts for processing data and computing metrics, which should not be changed.
