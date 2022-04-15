@@ -61,7 +61,7 @@ workflow RNASEQ {
   PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam)
 
   // Step 5: Picard Alignment Metrics
-  PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
+  PICARD_SORTSAM(PICARD_REORDERSAM.out.bam, "")
   // need to sort out ref_flat and ribo_intervals (may break mouse now)
   PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
 

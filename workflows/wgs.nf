@@ -68,11 +68,11 @@ workflow WGS {
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
     BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
-    PICARD_SORTSAM(BWA_MEM.out.sam)
+    PICARD_SORTSAM(BWA_MEM.out.sam, "")
   }
   if (params.gen_org=='human'){ 
   	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
-  	PICARD_SORTSAM(BWA_MEM_HLA.out.bam)
+  	PICARD_SORTSAM(BWA_MEM_HLA.out.bam,"")
   }
   // Step 4: Variant Preprocessing - Part 1
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)

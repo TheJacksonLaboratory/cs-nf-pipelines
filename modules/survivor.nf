@@ -9,8 +9,8 @@ process SURVIVOR{
   errorStrategy = 'retry'
 
   container ''
-	input:
-  tuple val(sampleID), list(vcfs)
+  input:
+  val(vcf_paths)
 		// uses following params
     // params.names
 		// params.surv_dist

@@ -8,7 +8,7 @@ process SNIFFLES {
   clusterOptions = '-q batch'
   errorStrategy = 'retry'
 
-  container 'biocontainers/sniffles:v1.0.11ds-1-deb_cv1'
+  container 'quay.io/biocontainers/sniffles:2.0.5--pyhdfd78af_0'
 
   input:
   tuple val(sampleID), file(bam)

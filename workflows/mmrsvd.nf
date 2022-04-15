@@ -29,6 +29,7 @@ include {BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_LUMPY;
          BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_BREAKDANCER} from '../modules/bcftools'
 include {MANTA_CALLSV} from '../modules/manta'
 include {DELLY_CALL} from '../modules/delly'
+include {SURVIVOR_MERGE} from '../modules/survivor'
 
 // help if needed
 if (params.help){

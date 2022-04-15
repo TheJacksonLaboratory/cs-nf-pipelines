@@ -26,9 +26,9 @@ process CURESV {
     """
     cuteSV ${bam} ${params.fasta} ${sampleID}_cutesv_calls.vcf ./ \
     --threads ${task.cpus} \
-    --max_cluster_bias_INS 1000 \
-    --diff_ratio_merging_INS 0.9 \
-    --max_cluster_bias_DEL 1000 \
-    --diff_ratio_merging_DEL 0.5
+    --max_cluster_bias_INS ${params.max_cluster_bias_INS} \
+    --diff_ratio_merging_INS ${params.diff_ratio_merging_INS} \
+    --max_cluster_bias_DEL ${params.max_cluster_bias_DEL} \
+    --diff_ratio_merging_DEL ${params.diff_ratio_merging_DEL}
     """
 }
