@@ -1,3 +1,30 @@
+process PICARD_FIXVCFHEADER{
+  tag "$sampleID"
+
+  cpus = 1
+  memory = 5.GB
+  time = '03:00:00'
+  clusterOptions = '-q batch'
+
+  container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
+
+  input:
+  tuple val(sampleID), file(vcf)
+  val(rename)
+
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
+
+  script:
+  log.info "----- Fix VCF Header Running on: ${sampleID} -----"
+
+  """
+  picard FixVcfHeader \
+  I=${vcf} \
+  O=${sampleID}_${rename}.vcf \
+  HEADER=${rename}.vcf
+  """
+}
 process PICARD_COLLECTALIGNMENTSUMARYMETRICS{
   tag "$sampleID"
 

@@ -10,12 +10,14 @@ include {PICARD_SORTSAM;
          PICARD_SORTSAM as PICARD_SORTSAM_ALIGNED;
        	 PICARD_SORTSAM	as PICARD_SORTSAM_DISCORDANT;
        	 PICARD_SORTSAM	as PICARD_SORTSAM_SPLITS;
-         PICARD_MARKDUPLICATES} from '../modules/picard'
+         PICARD_MARKDUPLICATES;
+         PICARD_FIXVCFHEADER} from '../modules/picard'
 //include {SNIFFLES} from '../modules/sniffles'
 //include {SVIM_ALIGNMENT} from '../modules/svim'
 //include {CUTESV_CSS} from '../modules/cutesv'
 //include {PBMM2_ALIGN} from '../modules/cutesv'
 //include {PBSV_DISCOVERY; PBSV_CALL} from '../modules/pbsv'
+include {BREAKDANCER_MAX;FORMAT_BREAKDANCER} from '../modules/breakdancer'
 include {READ_GROUPS} from '../modules/read_groups'
 include {BWA_MEM} from '../modules/bwa'
 include {SAMTOOLS_STATS;
@@ -25,8 +27,8 @@ include {LUMPY_EXTRACT_SPLITS;
          LUMPY_CALL_SV} from '../modules/lumpy'
 include {BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_LUMPY;
          BCFTOOLS_REHEADER as BCFTOOLS_REHEADER_BREAKDANCER} from '../modules/bcftools'
-//include {MANTA_CALLSV} from '../modules/manta'
-//include {DELLY_CALL} from '../modules/delly'
+include {MANTA_CALLSV} from '../modules/manta'
+include {DELLY_CALL} from '../modules/delly'
 
 // help if needed
 if (params.help){
@@ -61,6 +63,7 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 
 // think about: failing if too many samples and no override (long queue 14 days (batch 3 days max))
 // need cleaning step for successful run
+fasta = file("${params.fasta}")
 
 // main workflow
 workflow MMRSVD {
@@ -134,26 +137,20 @@ workflow MMRSVD {
     // COLLECT VCFS THEN REHEAD TO SAMPLEID + CALLER
     // MANTA REHEADER WILL NOT WORK -- MANTA SPECIAL PROCESS
     BCFTOOLS_REHEADER_LUMPY(LUMPY_CALL_SV.out.vcf, 'LUMPY')
-/*
-    // requires bam2cfg.pl for formatting.
-    // Break into own module.
-    BAM2CFG(PICARD_MARKDUPLICATES.out.bam)
-  	BREAKDANCER_MAX(BAM2CFG.out.bam)
-
+    BREAKDANCER_MAX(PICARD_MARKDUPLICATES.out.dedup_bam, 
+                    PICARD_MARKDUPLICATES.out.dedup_bai)
     // breakdancer2vcfHeader.py followed by vcfSort.sh
-  	FORMAT_BREAKDANCER(BREAKDANCER_MAX.out.vcf)
+    FORMAT_BREAKDANCER(BREAKDANCER_MAX.out.vcf)
+    BCFTOOLS_REHEADER_BREAKDANCER(FORMAT_BREAKDANCER.out.vcf, "BREAKDANCER")
+    MANTA_CALLSV(PICARD_MARKDUPLICATES.out.dedup_bam,
+                 PICARD_MARKDUPLICATES.out.dedup_bai,
+                 fasta)
+    DELLY_CALL(PICARD_MARKDUPLICATES.out.dedup_bam,
+               PICARD_MARKDUPLICATES.out.dedup_bai)
 
-  	BCFTOOLS_REHEADER_BREAKDANCER(FORMAT_BREAKDANCER.out.vcf)
 
-    MANTA_CALLSV(PICARD_MARKDUPLICATES.out.bam,
-                 PICARD_MARKDUPLICATES.out.bai)
-    DELLY_CALL(PICARD_MARKDUPLICATES.out.bam,
-               PICARD_MARKDUPLICATES.out.bai)
-
-    // Necessary? BCFTOOLS_VIEW() | vcfSort.sh | reheader
-
-    SURVIVOR_MERGE([List of VCFs Here])
-*/  
+//    SURVIVOR_MERGE([List of VCFs Here])
+  
   }
 }
 

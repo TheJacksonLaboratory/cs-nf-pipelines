@@ -13,20 +13,20 @@ process MANTA_CALLSV {
   input:
   tuple val(sampleID), file(bam)
   tuple val(sampleID), file(bai)
+  file(fasta)
 
-  output:
-  tuple val(sampleID), file("*.vcf"), emit: vcf
+ // output:
+ // tuple val(sampleID), file("*.vcf*"), emit: vcf
 
   script:
   log.info "Calling Manta SV"
+
   """
   /usr/local/bin/configManta.py --runDir mantaSVOut \
-  --bam ${bam} --referenceFasta ${params.fasta}
+  --bam ${bam} --referenceFasta ${params.ref_fa}
 
   ./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
 
-  mv mantaSVOut/results/variants/candidateSV.vcf.gz ./
-
-  gunzip candidateSV.vcf.gz
+  gunzip mantaSVOut/results/variants/candidateSV.vcf.gz
   """
 }

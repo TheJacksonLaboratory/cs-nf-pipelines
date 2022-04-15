@@ -14,8 +14,8 @@ process DELLY_CALL {
   tuple val(sampleID), file(bam)
   tuple val(sampleID), file(bai)
 
-  output:
-  tuple val(sampleID), file()
+//  output:
+//  tuple val(sampleID), file()
 
   script:
   log.info "----- Delly Running on: ${sampleID} -----"
@@ -25,7 +25,7 @@ process DELLY_CALL {
   -q 40 \
   -x ${params.exclude_regions} \
   -s 500 \
-  -o ${delly_bcf} \
-  -g ${params.fasta} ${bam}
+  -o ${sampleID}_delly.bcf \
+  -g ${params.ref_fa} ${bam}
   """
 }

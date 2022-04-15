@@ -32,7 +32,7 @@ process BCFTOOLS_REHEADER{
   clusterOptions = '-q batch'
   errorStrategy = 'retry'
 
-  container 'biocontainers/bcftools'
+  container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
   input:
   tuple val(sampleID), file(vcf)
