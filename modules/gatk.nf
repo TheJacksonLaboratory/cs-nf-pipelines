@@ -70,7 +70,7 @@ process GATK_INDELREALIGNER{
 
   cpus = 1
   memory = 35.GB
-  time = '05:00:00'
+  time = '08:00:00'
   clusterOptions = '-q batch'
 
   // Command Depricated in GATK 4
