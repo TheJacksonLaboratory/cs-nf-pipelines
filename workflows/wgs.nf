@@ -17,7 +17,7 @@ include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
          SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff_snpsift/snpeff_oneperline'
 include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpeff_snpsift/snpsift_extractfields'
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
 include {AGGREGATE_STATS} from '../modules/utility_modules/aggregate_stats_wgs'
 include {READ_GROUPS} from '../modules/utility_modules/read_groups'
 include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'

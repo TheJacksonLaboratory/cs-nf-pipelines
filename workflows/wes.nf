@@ -22,7 +22,7 @@ include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
          SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff_snpsift/snpeff_oneperline'
 include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpeff_snpsift/snpsift_extractfields'
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
 include {GATK_HAPLOTYPECALLER;
          GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from '../modules/gatk/gatk_haplotypecaller'
 include {GATK_INDEXFEATUREFILE} from '../modules/gatk/gatk_indexfeaturefile'
