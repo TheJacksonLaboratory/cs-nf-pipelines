@@ -4,21 +4,21 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/rnaseq'
 include {param_log} from '../bin/log/rnaseq'
-include {READ_GROUPS} from '../modules/read_groups'
-include {SUMMARY_STATS} from '../modules/summary_stats'
-include {BAMTOOLS_STATS} from '../modules/bamtools'
-include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem'
-include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {PICARD_ADDORREPLACEREADGROUPS;
-         PICARD_REORDERSAM;
-         PICARD_COLLECTRNASEQMETRICS;
-         PICARD_SORTSAM} from '../modules/picard'
+include {READ_GROUPS} from '../modules/utility_modules/read_groups'
+include {RNA_SUMMARY_STATS} from '../modules/utility_modules/aggregate_stats_rna'
+include {BAMTOOLS_STATS} from '../modules/bamtools/bamtools_stats'
+include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem/rsem_alignment_expression'
+include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'
+include {PICARD_ADDORREPLACEREADGROUPS} from '../modules/picard/picard_addorreplacereadgroups'
+include {PICARD_REORDERSAM} from '../modules/picard/picard_reordersam'
+include {PICARD_COLLECTRNASEQMETRICS} from '../modules/picard/picard_collectrnaseqmetrics'
+include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
 include {GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_CTP;
-         GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_PROBES} from '../modules/gatk'
+         GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_PROBES} from '../modules/gatk/gatk_depthofcoverage'
 include {FORMAT_GATK as FORMAT_GATK_CTP;
-         FORMAT_GATK as FORMAT_GATK_PROBES;
-         COVCALC_GATK as COVCALC_GATK_CTP;
-         COVCALC_GATK as COVCALC_GATK_PROBES} from '../bin/rnaseq/gatk_formatter'
+         FORMAT_GATK as FORMAT_GATK_PROBES} from '../modules/utility_modules/rna_format_gatk'
+include {COVCALC_GATK as COVCALC_GATK_CTP;
+         COVCALC_GATK as COVCALC_GATK_PROBES} from '../modules/utility_modules/rna_covcalc_gatk'
 
 // help if needed
 if (params.help){
@@ -66,9 +66,9 @@ workflow RNASEQ {
   PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
 
   // Step 6: Summary Stats
-  SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
-                QUALITY_STATISTICS.out.quality_stats,
-                PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+  RNA_SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
+                    QUALITY_STATISTICS.out.quality_stats,
+                    PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
   // If gen_org human
   if ("${params.gen_org}" == 'human'){

@@ -4,38 +4,38 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wes.nf'
 include {param_log} from '../bin/log/wes.nf'
-include {BWA_MEM} from '../modules/bwa'
-include {SAMTOOLS_INDEX} from '../modules/samtools'
-include {READ_GROUPS} from '../modules/read_groups'
-include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {AGGREGATE_STATS} from '../bin/wes/aggregate_stats_wes'
+include {BWA_MEM} from '../modules/bwa/bwa_mem'
+include {SAMTOOLS_INDEX} from '../modules/samtools/samtools_index'
+include {READ_GROUPS} from '../modules/utility_modules/read_groups'
+include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'
+include {AGGREGATE_STATS} from '../modules/utility_modules/aggregate_stats_wes'
 include {COSMIC_ANNOTATION;
         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
-        COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
-include {PICARD_SORTSAM;
-         PICARD_MARKDUPLICATES;
-         PICARD_COLLECTHSMETRICS} from '../modules/picard'
+        COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic/cosmic_annotation'
+include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
+include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
+include {PICARD_COLLECTHSMETRICS} from '../modules/picard/picard_collecthsmetrics'
 include {SNPEFF;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL;
          SNPEFF as SNPEFF_SNP;
-         SNPEFF as SNPEFF_INDEL} from '../modules/snpeff'
-include {SNPSIFT_EXTRACTFIELDS;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpsift'
+         SNPEFF as SNPEFF_INDEL} from '../modules/snpeff_snpsift/snpeff_snpeff'
+include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff_snpsift/snpeff_oneperline'
+include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpeff_snpsift/snpsift_extractfields'
+include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
+include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
 include {GATK_HAPLOTYPECALLER;
-         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF;
-         GATK_INDEXFEATUREFILE;
-         GATK_VARIANTFILTRATION;
+         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from '../modules/gatk/gatk_haplotypecaller'
+include {GATK_INDEXFEATUREFILE} from '../modules/gatk/gatk_indexfeaturefile'
+include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL;
-         GATK_VARIANTANNOTATOR;
-         GATK_MERGEVCF;
-         GATK_SELECTVARIANTS;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk/gatk_variantfiltration'
+include {GATK_VARIANTANNOTATOR} from '../modules/gatk/gatk_variantannotator'
+include {GATK_MERGEVCF} from '../modules/gatk/gatk_mergevcf'
+include {GATK_SELECTVARIANTS;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
-         GATK_BASERECALIBRATOR;
-         GATK_APPLYBQSR} from '../modules/gatk'
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from '../modules/gatk/gatk_selectvariants'
+include {GATK_BASERECALIBRATOR} from '../modules/gatk/gatk_baserecalibrator'
+include {GATK_APPLYBQSR} from '../modules/gatk/gatk_applybqsr'
 
 // help if needed
 if (params.help){
