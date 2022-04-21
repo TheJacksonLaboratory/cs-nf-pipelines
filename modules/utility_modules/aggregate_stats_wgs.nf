@@ -22,6 +22,6 @@ process AGGREGATE_STATS {
   log.info "----- Generating Summary Stats for: ${sampleID} -----"
 
   """
-  python ${params.stats_agg} ${sampleID}_summary_stats.txt ${filter_stats} ${picard_met} ${algn_met} ${cov_met}
+  python ${projectDir}/bin/wes/aggregate_stats_wes.py ${sampleID}_summary_stats.txt ${filter_stats} ${picard_met} ${algn_met} ${cov_met}
   """
 }

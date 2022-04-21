@@ -1,5 +1,26 @@
 # RELEASE NOTES
 
+## Release 0.1.1 
+
+### Pipelines Added:
+
+NONE
+
+### Modules Added: 
+
+NONE
+
+### Pipeline Changes:
+
+1. Adjusted pipelines for refactored module files.
+
+### Module Changes:
+
+1. Adjusted WGS wall clock settings. 
+1. Refactored modules to individual files (e.g., gatk_haplotypecaller.nf). 
+2. Set pipeline script parameter to hard coded paths
+3. Cleaned all Nextflow files from the bin directory
+
 ## Release 0.1.0 -- 03.28.2022
 
 ### Pipelines Added:

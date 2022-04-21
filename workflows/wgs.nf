@@ -4,40 +4,40 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wgs.nf'
 include {param_log} from '../bin/log/wgs.nf'
-include {BWA_MEM;
-         BWA_MEM_HLA} from '../modules/bwa'
+include {BWA_MEM} from '../modules/bwa/bwa_mem'
+include {BWA_MEM_HLA} from '../modules/bwa/bwa_mem_hla'
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
-         COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic'
+         COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic/cosmic_annotation'
 include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
-         VCF_ANNOTATE as VCF_ANNOTATE_INDEL} from '../bin/wgs/vcf_annotate'
+         VCF_ANNOTATE as VCF_ANNOTATE_INDEL} from '../modules/vcftools/vcf_annotate'
 include {SNPEFF;
          SNPEFF as SNPEFF_SNP;
-         SNPEFF as SNPEFF_INDEL;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff'
-include {SNPSIFT_EXTRACTFIELDS;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpsift'
-include {AGGREGATE_STATS} from '../bin/wgs/aggregate_stats_wgs'
-include {READ_GROUPS} from '../modules/read_groups'
-include {QUALITY_STATISTICS} from '../modules/quality_stats'
-include {PICARD_SORTSAM;
-         PICARD_MARKDUPLICATES;
-         PICARD_COLLECTALIGNMENTSUMARYMETRICS;
-         PICARD_COLLECTWGSMETRICS} from '../modules/picard'
-include {GATK_REALIGNERTARGETCREATOR;
-         GATK_BASERECALIBRATOR;
-         GATK_APPLYBQSR;
-         GATK_INDELREALIGNER;
-         GATK_MERGEVCF;
-         GATK_MERGEVCF_LIST;
-         GATK_VARIANTANNOTATOR;
-         GATK_HAPLOTYPECALLER_INTERVAL;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk'
-include {MAKE_VCF_LIST} from '../bin/wgs/make_vcf_list'
+         SNPEFF as SNPEFF_INDEL} from '../modules/snpeff_snpsift/snpeff_snpeff'
+include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff_snpsift/snpeff_oneperline'
+include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpeff_snpsift/snpsift_extractfields'
+include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
+include {AGGREGATE_STATS} from '../modules/utility_modules/aggregate_stats_wgs'
+include {READ_GROUPS} from '../modules/utility_modules/read_groups'
+include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'
+include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
+include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
+include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from '../modules/picard/picard_collectalignmentsummarymetrics'
+include {PICARD_COLLECTWGSMETRICS} from '../modules/picard/picard_collectwgsmetrics'
+include {GATK_REALIGNERTARGETCREATOR} from '../modules/gatk/gatk_realignertargetcreator'
+include {GATK_BASERECALIBRATOR} from '../modules/gatk/gatk_baserecalibrator'
+include {GATK_APPLYBQSR} from '../modules/gatk/gatk_applybqsr'
+include {GATK_INDELREALIGNER} from '../modules/gatk/gatk_indelrealigner'
+include {GATK_MERGEVCF} from '../modules/gatk/gatk_mergevcf'
+include {GATK_MERGEVCF_LIST} from '../modules/gatk/gatk_mergevcf_list'
+include {GATK_VARIANTANNOTATOR} from '../modules/gatk/gatk_variantannotator'
+include {GATK_HAPLOTYPECALLER_INTERVAL} from '../modules/gatk/gatk_haplotypecaller_interval'
+include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from '../modules/gatk/gatk_selectvariants'
+include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk/gatk_variantfiltration'
+include {MAKE_VCF_LIST} from '../modules/utility_modules/make_vcf_list'
 
 // help if needed
 if (params.help){
@@ -85,7 +85,7 @@ workflow WGS {
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
     GATK_APPLYBQSR(GATK_INDELREALIGNER.out.bam,
                     GATK_BASERECALIBRATOR.out.table)
-    PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
     // Create a chromosome channel. HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
@@ -111,7 +111,7 @@ workflow WGS {
 
   // If Mouse
   if (params.gen_org=='mouse'){
-    PICARD_COLLECTALIGNMENTSUMARYMETRICS(GATK_INDELREALIGNER.out.bam)
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_INDELREALIGNER.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_INDELREALIGNER.out.bam)
 
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
@@ -193,6 +193,6 @@ workflow WGS {
   // may replace with multiqc
   AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
                   PICARD_MARKDUPLICATES.out.dedup_metrics,
-                  PICARD_COLLECTALIGNMENTSUMARYMETRICS.out.txt,
+                  PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt,
                   PICARD_COLLECTWGSMETRICS.out.txt)
 }
