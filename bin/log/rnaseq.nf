@@ -23,9 +23,7 @@ ______________________________________________________
 --read_prep            ${params.read_prep}
 --ref_fa               ${params.ref_fa}
 --ref_fai              ${params.ref_fai}
---ref_fa_indices       ${params.ref_fa_indices}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
---mismatch_penalty     ${params.mismatch_penalty}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
