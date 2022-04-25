@@ -4,7 +4,6 @@ process GATK_MERGEVCF {
   cpus 1
   memory 15.GB
   time '05:00:00'
-  clusterOptions '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
 

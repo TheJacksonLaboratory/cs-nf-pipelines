@@ -4,7 +4,6 @@ process PICARD_MARKDUPLICATES {
   cpus 1
   memory 16.GB
   time '12:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 

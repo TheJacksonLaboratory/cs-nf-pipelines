@@ -4,7 +4,6 @@ process GATK_VARIANTANNOTATOR {
   cpus 1
   memory 15.GB
   time '05:00:00'
-  clusterOptions '-q batch'
 
   // Legacy Reasons Leave as GATK3 (public)
   // Flag --snpEffFile was removed in GATK4

@@ -4,7 +4,6 @@ process PICARD_COLLECTRNASEQMETRICS {
   cpus 1
   memory 8.GB
   time '03:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 

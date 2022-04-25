@@ -4,7 +4,6 @@ process GATK_APPLYBQSR {
   cpus = 1
   memory = 35.GB
   time = '12:00:00'
-  clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
 

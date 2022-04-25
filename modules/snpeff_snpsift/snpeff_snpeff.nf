@@ -4,7 +4,6 @@ process SNPEFF{
   cpus = 1
   memory = 8.GB
   time = '06:00:00'
-  clusterOptions = '-q batch'
 
   // SNPEFF and SNPSIFT need updating
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'

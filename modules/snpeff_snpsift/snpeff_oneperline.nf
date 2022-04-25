@@ -4,7 +4,6 @@ process SNPEFF_ONEPERLINE {
   cpus 1
   memory 2.GB
   time '00:10:00'
-  clusterOptions '-q batch'
 
   input:
   tuple val(sampleID), file(vcf)

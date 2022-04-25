@@ -4,7 +4,6 @@ process SAMTOOLS_INDEX {
   cpus 1
   memory 8.GB
   time '06:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 

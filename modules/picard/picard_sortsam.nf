@@ -4,7 +4,6 @@ process PICARD_SORTSAM {
   cpus 1
   memory 8.GB
   time '06:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
