@@ -45,7 +45,7 @@ ______________________________________________________
 
 --comment: ${params.comment}
 
-Rsults Published to: ${params.pubdir}
+Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
