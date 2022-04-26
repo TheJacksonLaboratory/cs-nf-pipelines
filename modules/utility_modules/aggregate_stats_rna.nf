@@ -1,4 +1,4 @@
-process SUMMARY_STATS {
+process RNA_SUMMARY_STATS {
     tag "$sampleID"
 
     cpus = 1
@@ -23,7 +23,7 @@ process SUMMARY_STATS {
     if (params.read_type == "PE")
 
       """
-      perl ${params.summary_mets_PE} \
+      perl ${projectDir}/bin/rnaseq/summary_QC_metrics_without_xenome.pl \
       ${quality_stats} \
       ${rsem_stats} \
       ${picard_metrics} > ${sampleID}_summary_stats.txt
@@ -32,7 +32,7 @@ process SUMMARY_STATS {
     else if (params.read_type == "SE")
 
       """
-      perl ${params.summary_mets_SE} \
+      perl ${projectDir}/bin/rnaseq/summary_QC_metrics_without_xenome_SE.pl \
       ${quality_stats} \
       ${rsem_stats} \
       ${picard_metrics}  > ${sampleID}_summary_stats.txt

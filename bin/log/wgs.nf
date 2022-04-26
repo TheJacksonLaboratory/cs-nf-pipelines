@@ -22,12 +22,9 @@ ______________________________________________________
 --organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
---filter_trim                   ${params.filter_trim}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
---read_group_pyfile             ${params.read_group_pyfile}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
---stats_agg                     ${params.stats_agg}
 --mismatch_penalty              ${params.mismatch_penalty}
 --call_val                      ${params.call_val}
 --ploidy_val                    ${params.ploidy_val}
@@ -35,7 +32,6 @@ ______________________________________________________
 --phase1_1000G                  ${params.phase1_1000G}
 --dbNSFP                        ${params.dbNSFP}
 --cosmic                        ${params.cosmic}
---cosmic_annot                  ${params.cosmic_annot}
 --snpEff_config                 ${params.snpEff_config}
 
 
@@ -65,12 +61,9 @@ ______________________________________________________
 --organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
---filter_trim                   ${params.filter_trim}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
---read_group_pyfile             ${params.read_group_pyfile}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
---stats_agg                     ${params.stats_agg}
 --mismatch_penalty              ${params.mismatch_penalty}
 --call_val                      ${params.call_val}
 --ploidy_val                    ${params.ploidy_val}

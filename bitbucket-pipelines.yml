@@ -2,8 +2,8 @@ image: ubuntu:16.04
 clone:
   depth: full
 pipelines:
-  branches:
-    main:
+  tags:
+    '*':
       - step:
           script:
             - apt-get update -y

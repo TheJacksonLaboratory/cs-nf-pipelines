@@ -17,7 +17,7 @@ process COSMIC_ANNOTATION {
   script:
   log.info "----- Cosmic Annotation Running on: ${sampleID} -----"
   """
-  ${params.cosmic_annot} \
+  ${projectDir}/bin/shared/Cosmic_Annotation_hg38.pl \
   -i1 ${params.cosmic} \
   -i2 ${vcf} > ${sampleID}_cosmic_annotation.vcf
   """
