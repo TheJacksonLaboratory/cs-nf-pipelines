@@ -57,16 +57,12 @@ if (params.concat_lanes){
             .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
             .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
             .groupTuple()
-        CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_PE.out.concat_fastq
   }
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
                 .map { file, file1 -> tuple(getLibraryId(file), file1) }
                 .groupTuple()
                 .map{t-> [t[0], t[1].flatten()]}
-        CONCATENATE_READS_SE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
   }
 } else {
   if (params.read_type == 'PE'){
@@ -115,7 +111,7 @@ workflow WGS {
   GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
   GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
                       GATK_REALIGNERTARGETCREATOR.out.intervals)
-                      
+
   // If Human
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)

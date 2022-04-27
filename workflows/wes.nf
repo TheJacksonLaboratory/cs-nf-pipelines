@@ -55,16 +55,12 @@ if (params.concat_lanes){
             .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
             .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
             .groupTuple()
-        CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_PE.out.concat_fastq
   }
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
                 .map { file, file1 -> tuple(getLibraryId(file), file1) }
                 .groupTuple()
                 .map{t-> [t[0], t[1].flatten()]}
-        CONCATENATE_READS_SE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
   }
 } else {
   if (params.read_type == 'PE'){
@@ -99,7 +95,7 @@ workflow WES {
 
   // Step 3: BWA-MEM Alignment
   BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
-  
+
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
