@@ -39,7 +39,7 @@ if (params.concat_lanes){
             .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
             .groupTuple()
         CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
+        read_ch = CONCATENATE_READS_PE.out.concat_fastq
   }
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
