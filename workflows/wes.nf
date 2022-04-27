@@ -80,12 +80,26 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 
 // main workflow
 workflow WES {
+  // Step 0: Concatenate Fastq files if required. 
+  if (params.concat_lanes){
+    if (params.read_type == 'PE'){
+        CONCATENATE_READS_PE(read_ch)
+        read_ch = CONCATENATE_READS_PE.out.concat_fastq
+    } else if (params.read_type == 'SE'){
+        CONCATENATE_READS_SE(read_ch)
+        read_ch = CONCATENATE_READS_SE.out.concat_fastq
+    }
+  }
+
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
+
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+
   // Step 3: BWA-MEM Alignment
   BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
+  
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
