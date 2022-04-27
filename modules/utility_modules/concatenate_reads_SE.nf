@@ -1,4 +1,4 @@
-process CONCATENATE_READS_PE {
+process CONCATENATE_READS_SE {
 
   tag "$sampleID"
 
