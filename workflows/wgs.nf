@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wgs.nf'
 include {param_log} from '../bin/log/wgs.nf'
+include {getLibraryId} from '../bin/shared/getLibraryId.nf'
 include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
 include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'

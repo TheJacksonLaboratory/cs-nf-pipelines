@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/rnaseq'
 include {param_log} from '../bin/log/rnaseq'
+include {getLibraryId} from '../bin/shared/getLibraryId.nf'
 include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
 include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {READ_GROUPS} from '../modules/utility_modules/read_groups'
@@ -73,7 +74,7 @@ workflow RNASEQ {
         read_ch = CONCATENATE_READS_SE.out.concat_fastq
     }
   }
-  
+
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
 
