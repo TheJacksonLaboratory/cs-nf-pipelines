@@ -4,6 +4,8 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wgs.nf'
 include {param_log} from '../bin/log/wgs.nf'
+include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
+include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'
 include {BWA_MEM_HLA} from '../modules/bwa/bwa_mem_hla'
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
@@ -49,11 +51,30 @@ if (params.help){
 param_log()
 
 // prepare reads channel
-if (params.read_type == 'PE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
-}
-else if (params.read_type == 'SE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+if (params.concat_lanes){
+  if (params.read_type == 'PE'){
+    read_ch = Channel
+            .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
+            .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
+            .groupTuple()
+        CONCATENATE_READS_PE(read_ch)
+        read_ch = CONCATENATE_READS_SE.out.concat_fastq
+  }
+  else if (params.read_type == 'SE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
+                .map { file, file1 -> tuple(getLibraryId(file), file1) }
+                .groupTuple()
+                .map{t-> [t[0], t[1].flatten()]}
+        CONCATENATE_READS_SE(read_ch)
+        read_ch = CONCATENATE_READS_SE.out.concat_fastq
+  }
+} else {
+  if (params.read_type == 'PE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
+  }
+  else if (params.read_type == 'SE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+  }
 }
 
 // if channel is empty give error message and exit
