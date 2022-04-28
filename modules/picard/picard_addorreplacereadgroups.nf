@@ -4,7 +4,6 @@ process PICARD_ADDORREPLACEREADGROUPS {
   cpus 1
   memory 8.GB
   time '06:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate

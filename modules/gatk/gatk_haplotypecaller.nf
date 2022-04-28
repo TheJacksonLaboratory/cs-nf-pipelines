@@ -4,7 +4,6 @@ process GATK_HAPLOTYPECALLER {
   cpus = 1
   memory = 15.GB
   time = '10:00:00'
-  clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
 

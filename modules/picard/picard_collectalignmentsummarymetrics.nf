@@ -4,7 +4,6 @@ process PICARD_COLLECTALIGNMENTSUMMARYMETRICS{
   cpus = 1
   memory = 5.GB
   time = '03:00:00'
-  clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk:4.2.4.1'
 

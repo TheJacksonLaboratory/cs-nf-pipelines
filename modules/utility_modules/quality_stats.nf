@@ -5,7 +5,6 @@ process QUALITY_STATISTICS {
   cpus 1
   memory 30.GB
   time '24:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 

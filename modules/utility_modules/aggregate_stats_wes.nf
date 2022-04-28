@@ -3,7 +3,6 @@ process AGGREGATE_STATS {
 
   cpus = 1
   time = '00:30:00'
-  clusterOptions = '-q batch'
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 

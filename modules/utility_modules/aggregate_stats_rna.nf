@@ -3,7 +3,6 @@ process RNA_SUMMARY_STATS {
 
     cpus = 1
     time = '00:15:00'
-    clusterOptions = '-q batch'
 
     container 'quay.io/jaxcompsci/perl:0.1.0'
 

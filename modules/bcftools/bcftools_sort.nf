@@ -4,7 +4,6 @@ process BCF_SORT {
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
-  clusterOptions = '-q batch'
 
   container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 

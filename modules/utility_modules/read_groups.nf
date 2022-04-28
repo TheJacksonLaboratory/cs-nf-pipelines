@@ -4,7 +4,6 @@ process READ_GROUPS {
   cpus 1
   memory 5.GB
   time '01:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 

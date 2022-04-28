@@ -4,7 +4,6 @@ process RSEM_ALIGNMENT_EXPRESSION {
   cpus 12
   memory { 60.GB * task.attempt }
   time { 24.h * task.attempt }
-  clusterOptions '-q batch'
   errorStrategy 'retry'
   maxRetries 1
 

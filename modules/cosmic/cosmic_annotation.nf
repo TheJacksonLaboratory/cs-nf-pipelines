@@ -4,7 +4,6 @@ process COSMIC_ANNOTATION {
   cpus 1
   memory { 10.GB * task.attempt }
   time {1.hour * task.attempt}
-  clusterOptions = '-q batch'
   errorStrategy 'retry'
   maxRetries 1
 

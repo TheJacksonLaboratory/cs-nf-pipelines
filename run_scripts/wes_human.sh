@@ -16,6 +16,7 @@ module load singularity
 # RUN PIPELINE
 ~/nextflow ../main.nf \
 --workflow wes \
+-profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
 --pubdir '/fastscratch/outputDir' \

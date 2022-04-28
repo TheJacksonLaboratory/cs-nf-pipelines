@@ -16,6 +16,7 @@ ml singularity
 # RUN TEST PIPELINE
 ~/nextflow ../main.nf \
 --workflow wgs \
+-profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
 --pubdir '/fastscratch/outputDir' \
