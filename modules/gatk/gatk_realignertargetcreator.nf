@@ -5,7 +5,6 @@ process GATK_REALIGNERTARGETCREATOR {
   cpus = 12
   memory = 35.GB
   time = '12:00:00'
-  clusterOptions = '-q batch'
 
   container 'broadinstitute/gatk3:3.6-0'
 

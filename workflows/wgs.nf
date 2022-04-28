@@ -4,6 +4,9 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from '../bin/help/wgs.nf'
 include {param_log} from '../bin/log/wgs.nf'
+include {getLibraryId} from '../bin/shared/getLibraryId.nf'
+include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
+include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'
 include {BWA_MEM_HLA} from '../modules/bwa/bwa_mem_hla'
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
@@ -49,11 +52,26 @@ if (params.help){
 param_log()
 
 // prepare reads channel
-if (params.read_type == 'PE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
-}
-else if (params.read_type == 'SE'){
-  read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+if (params.concat_lanes){
+  if (params.read_type == 'PE'){
+    read_ch = Channel
+            .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
+            .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
+            .groupTuple()
+  }
+  else if (params.read_type == 'SE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
+                .map { file, file1 -> tuple(getLibraryId(file), file1) }
+                .groupTuple()
+                .map{t-> [t[0], t[1].flatten()]}
+  }
+} else {
+  if (params.read_type == 'PE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
+  }
+  else if (params.read_type == 'SE'){
+    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
+  }
 }
 
 // if channel is empty give error message and exit
@@ -61,10 +79,22 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 
 // main workflow
 workflow WGS {
+  // Step 0: Concatenate Fastq files if required. 
+  if (params.concat_lanes){
+    if (params.read_type == 'PE'){
+        CONCATENATE_READS_PE(read_ch)
+        read_ch = CONCATENATE_READS_PE.out.concat_fastq
+    } else if (params.read_type == 'SE'){
+        CONCATENATE_READS_SE(read_ch)
+        read_ch = CONCATENATE_READS_SE.out.concat_fastq
+    }
+  }
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
+
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
     BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
@@ -74,12 +104,15 @@ workflow WGS {
   	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
   	PICARD_SORTSAM(BWA_MEM_HLA.out.bam)
   }
+
   // Step 4: Variant Preprocessing - Part 1
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+
   // Step 5 Depricated in GATK 4
   GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
   GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
                       GATK_REALIGNERTARGETCREATOR.out.intervals)
+
   // If Human
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)

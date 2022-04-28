@@ -4,7 +4,6 @@ process BWA_MEM_HLA {
   cpus 8
   memory {60.GB * task.attempt}
   time {30.hour * task.attempt}
-  clusterOptions '-q batch'
   errorStrategy 'retry' 
   maxRetries 1
 

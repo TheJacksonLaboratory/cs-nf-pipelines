@@ -4,7 +4,6 @@ process FORMAT_GATK {
   cpus 1
   memory 15.GB
   time '24:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'
   file(params.ref_fai)

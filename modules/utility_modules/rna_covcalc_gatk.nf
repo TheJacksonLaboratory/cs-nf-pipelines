@@ -4,7 +4,6 @@ process COVCALC_GATK {
   cpus 1
   memory 15.GB
   time '24:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 

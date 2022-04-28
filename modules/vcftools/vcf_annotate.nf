@@ -4,7 +4,6 @@ process VCF_ANNOTATE {
   cpus = 1
   memory = 10.GB
   time = '23:00:00'
-  clusterOptions = 'q batch'
 
   input:
   tuple val(sampleID), file(snp_vcf)

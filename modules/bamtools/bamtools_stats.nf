@@ -5,7 +5,6 @@ process BAMTOOLS_STATS {
   cpus 1
   memory 8.GB
   time '12:00:00'
-  clusterOptions '-q batch'
 
   container 'quay.io/biocontainers/bamtools:2.5.1--h9a82719_9'
 

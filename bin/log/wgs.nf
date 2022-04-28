@@ -7,7 +7,7 @@ ______________________________________________________
 
 --comment: ${params.comment}
 
-Rsults Published to: ${params.pubdir}
+Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
@@ -16,6 +16,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -46,7 +47,7 @@ ______________________________________________________
 
 --comment: ${params.comment}
 
-Rsults Published to: ${params.pubdir}
+Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
@@ -55,6 +56,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
