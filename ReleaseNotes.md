@@ -8,18 +8,24 @@ NONE
 
 ### Modules Added: 
 
-NONE
+1. concatenate_reads_PE.nf
+2. concatenate_reads_SE.nf
+3. Modules refactored to individual files (e.g., gatk_haplotypecaller.nf). 
 
 ### Pipeline Changes:
 
-1. Adjusted pipelines for refactored module files.
+1. Added ability to concatenate Fastq files by sample, which are split across sequencing lanes into single R1/R2 or R1 files (depending on PE or SE). 
+2. Adjusted pipelines for refactored module files.
+3. Fixed CTP/PROBE typo in human RNA coverage calculation.
+4. Added HPC `--profile` options and settings for Sumner and Elion. 
 
 ### Module Changes:
 
 1. Adjusted WGS wall clock settings. 
 1. Refactored modules to individual files (e.g., gatk_haplotypecaller.nf). 
-2. Set pipeline script parameter to hard coded paths
-3. Cleaned all Nextflow files from the bin directory
+2. Set pipeline script parameter to hard coded paths.
+3. Cleaned all Nextflow files from the bin directory.
+4. Removed Sumner specific HPC settings from each module. 
 
 ## Release 0.1.0 -- 03.28.2022
 
