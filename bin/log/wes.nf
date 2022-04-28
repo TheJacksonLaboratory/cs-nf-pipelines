@@ -15,6 +15,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
@@ -58,6 +59,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}

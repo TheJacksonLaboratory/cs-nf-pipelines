@@ -16,6 +16,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -55,6 +56,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
+--concat_lanes                  ${params.concat_lanes}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}

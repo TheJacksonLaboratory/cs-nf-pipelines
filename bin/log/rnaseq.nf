@@ -15,6 +15,7 @@ ______________________________________________________
 --sample_folder        ${params.sample_folder}
 --extension            ${params.extension}
 --pattern              ${params.pattern}
+--concat_lanes         ${params.concat_lanes}
 --organize_by          ${params.organize_by}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}
@@ -53,6 +54,7 @@ ______________________________________________________
 --sample_folder                 ${params.sample_folder}
 --extension                     ${params.extension}
 --pattern                       ${params.pattern}
+--concat_lanes                  ${params.concat_lanes}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
 -w                              ${workDir}
