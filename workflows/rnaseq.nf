@@ -110,7 +110,7 @@ workflow RNASEQ {
       // PROBES
         GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.probes)
         FORMAT_GATK_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
-        COVCALC_GATK_PROBES(FORMAT_GATK_CTP.out.txt, "PROBES")
+        COVCALC_GATK_PROBES(FORMAT_GATK_PROBES.out.txt, "PROBES")
 
   }
 }
