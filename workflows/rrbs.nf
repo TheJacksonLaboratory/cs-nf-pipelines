@@ -8,7 +8,7 @@ include {getLibraryId} from '../bin/shared/getLibraryId.nf'
 include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
 include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {FASTQC} from '../modules/fastqc/fastqc'
-//include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
+include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 //include {BISMARK} from '../modules/bismark/bismark_alignment'
 //include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
 
@@ -66,7 +66,7 @@ workflow RRBS {
 
   FASTQC(read_ch)
 
-//  TRIM_GALORE(read_ch)
+  TRIM_GALORE(read_ch)
 
 //  BISMARK(TRIM_GALORE.out.trimmed_fastq)
 
