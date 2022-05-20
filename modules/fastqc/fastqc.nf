@@ -7,7 +7,7 @@ process FASTQC {
   time '06:00:00'
 
   container 'CONTAINER_TBD'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -19,7 +19,7 @@ process FASTQC {
   script:
   log.info "----- FASTQC Running on: ${sampleID} -----"
 
-    if ${params.non_directional} {
+    if (params.non_directional) {
         directionality = '--non_directional'
     } 
 

@@ -2,15 +2,15 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/rnaseq'
-include {param_log} from '../bin/log/rnaseq'
+include {help} from '../bin/help/rrbs'
+include {param_log} from '../bin/log/rrbs'
 include {getLibraryId} from '../bin/shared/getLibraryId.nf'
 include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
 include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
 include {FASTQC} from '../modules/fastqc/fastqc'
-include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
-include {BISMARK} from '../modules/bismark/bismark_alignment'
-include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
+//include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
+//include {BISMARK} from '../modules/bismark/bismark_alignment'
+//include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
 
 // help if needed
 if (params.help){
