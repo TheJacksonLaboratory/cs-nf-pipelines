@@ -6,7 +6,7 @@ process FASTQC {
   memory 8.GB
   time '06:00:00'
 
-  container 'CONTAINER_TBD'
+  container 'quay.io/biocontainers/fastqc:0.11.9--hdfd78af_1'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
 
   input:
