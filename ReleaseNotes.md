@@ -1,5 +1,23 @@
 # RELEASE NOTES
 
+## Release 0.2.0
+
+### Pipelines Added:
+
+1. Bisulfite sequencing RRBS - Mouse & Human
+
+### Modules Added: 
+
+NONE
+
+### Pipeline Changes:
+
+NONE
+
+### Module Changes:
+
+NONE
+
 ## Release 0.1.1 
 
 ### Pipelines Added:
