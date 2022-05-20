@@ -14,8 +14,9 @@ process TRIM_GALORE {
   tuple val(sampleID), file(fq_reads)
 
   output:
-  tuple val(sampleID), file("*.fastqc*"), emit: quality_stats // WHAT STATS DOES IT EMIT? 
-  tuple val(sampleID), file("*filtered_trimmed"), emit: trimmed_fastq
+  tuple val(sampleID), file("*_fastqc.{zip,html}"), emit: trimmed_fastqc // WHAT STATS DOES IT EMIT? 
+  tuple val(sampleID), file("*.fq.gz"), emit: trimmed_fastq
+  tuple val(sampleID), file("*trimming_report.txt"), emit: trim_stats
 
   script:
   log.info "----- Trim Galore Running on: ${sampleID} -----"
