@@ -11,6 +11,8 @@ pipelines:
             - git config --global user.name bitbucket-pipelines
             - git config --global user.email commits-noreply@bitbucket.org
             - git remote set-url origin ${BITBUCKET_GIT_SSH_ORIGIN}
+            - git clone git@bitbucket.org:jacksonlaboratory/ngs-ops-nf-pipelines.git ngs-ops-nf-pipelines
+            - cd ngs-ops-nf-pipelines
             - git push git@github.com:TheJacksonLaboratory/cs-nf-pipelines.git main:main
             - git clone --bare git@bitbucket.org:jacksonlaboratory/ngs-ops-nf-pipelines.git/wiki bit_wiki
             - cd bit_wiki

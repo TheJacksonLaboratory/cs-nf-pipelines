@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.1.2 
+
+Updated run scripts to load CS supported Nextflow module. 
+
 ## Release 0.1.1 
 
 ### Pipelines Added:
