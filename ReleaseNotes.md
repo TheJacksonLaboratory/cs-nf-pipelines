@@ -1,22 +1,8 @@
 # RELEASE NOTES
 
-## Release 0.2.0
+## Release 0.1.2 
 
-### Pipelines Added:
-
-1. Bisulfite sequencing RRBS - Mouse & Human
-
-### Modules Added: 
-
-NONE
-
-### Pipeline Changes:
-
-NONE
-
-### Module Changes:
-
-NONE
+Updated run scripts to load CS supported Nextflow module. 
 
 ## Release 0.1.1 
 
