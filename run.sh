@@ -3,7 +3,7 @@
 #SBATCH --job-name=CS_nextflow_example
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 00:01:00
+#SBATCH -t 01:00:00
 #SBATCH --mem=2G
 #SBATCH --ntasks=1
 
