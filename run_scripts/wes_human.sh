@@ -10,11 +10,12 @@
 
 cd $SLURM_SUBMIT_DIR
 
-# LOAD SINGULARITY
-module load singularity
+# LOAD NEXTFLOW
+module use --append /projects/omics_share/meta/modules
+module load nextflow
 
 # RUN PIPELINE
-~/nextflow ../main.nf \
+nextflow ../main.nf \
 --workflow wes \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
