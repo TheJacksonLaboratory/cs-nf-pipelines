@@ -19,10 +19,6 @@ process FASTQC {
   script:
   log.info "----- FASTQC Running on: ${sampleID} -----"
 
-    if (params.non_directional) {
-        directionality = '--non_directional'
-    } 
-
   """
     fastqc --quiet -t ${task.cpus} ${fq_reads}
   """

@@ -7,7 +7,7 @@ process BISMARK_ALIGNMENT {
   errorStrategy 'retry' 
   maxRetries 1
 
-  container 'CONTAINER_TBD'
+  container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy'
 
@@ -20,20 +20,13 @@ process BISMARK_ALIGNMENT {
   script:
   log.info "----- Bismark Alignment Running on: ${sampleID} -----"
 
-  if (params.read_type == "SE"){
-    inputfq="-1 ${fq_reads[0]}"
-    }
-  if (params.read_type == "PE"){
-    inputfq="-1 ${fq_reads[0]} -2 ${fq_reads[1]}"
-    }
+  inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : inputfq="-1 ${fq_reads[0]}"
+  directionality = params.non_directional ? '--non_directional': ''
 
-  if ${params.non_directional} {
-    directionality = '--non_directional'
-  } 
+  aligner = params.aligner == "bismark_hisat" ? "--hisat2" : "--bowtie2"
 
   """
-  bismark --bowtie2 -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --output_dir {in_4} --unmapped --ambiguous ${params.ref_fa_index} ${inputfq}
-  """ // NOTE: OUTPUT DIR IS CALLED....IS THIS A NEEDED THING? HOW IS OUTPUT NAMED? 
-}
+  bismark ${aligner} -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous ${params.ref_fa_index} ${inputfq}
+  """
 
 

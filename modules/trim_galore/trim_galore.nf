@@ -21,21 +21,9 @@ process TRIM_GALORE {
   script:
   log.info "----- Trim Galore Running on: ${sampleID} -----"
 
-  if (params.non_directional) {
-    directionality = '--non_directional'
-  } 
-
-  if (params.read_type == "SE"){
-    paired_end = ''
-  }
-
-  if (params.read_type == "PE"){
-    paired_end = '--paired'
-  }
-
-  if (params.workflow == "rrbs"){
-    rrbs_flag = '--rrbs'
-  }
+  rrbs_flag = params.workflow == "rrbs" ? '--rrbs' : ''
+  paired_end = params.read_type == 'PE' ?  '--paired' : ''
+  directionality = params.non_directional ? '--non_directional': ''
 
   """
     trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${fq_reads}
