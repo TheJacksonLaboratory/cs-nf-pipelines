@@ -1,4 +1,3 @@
-#!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
 // import modules
@@ -11,7 +10,7 @@ include {FASTQC} from '../modules/fastqc/fastqc'
 include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 include {BISMARK_ALIGNMENT} from '../modules/bismark/bismark_alignment'
 include {BISMARK_DEDUPLICATION} from '../modules/bismark/bismark_deduplication'
-include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
+include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methylation_extraction'
 
 // help if needed
 if (params.help){
@@ -48,9 +47,6 @@ if (params.concat_lanes){
 // if channel is empty give error message and exit
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
-// downstream resources (only load once so do it here)
-rsem_ref_files = file("${params.rsem_ref_files}/*")
-
 // main workflow
 workflow RRBS {
 
@@ -73,6 +69,6 @@ workflow RRBS {
 
   BISMARK_DEDUPLICATION(BISMARK_ALIGNMENT.out.bam)
 
-  BISMARK_METHYLATION_EXTRACTION(BISMARK_DEDUPLICATION.out.bam)
+  BISMARK_METHYLATION_EXTRACTION(BISMARK_DEDUPLICATION.out.dedup_bam)
 
 }

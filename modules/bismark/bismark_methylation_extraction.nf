@@ -9,8 +9,8 @@ process BISMARK_METHYLATION_EXTRACTION {
 
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_extract' }", pattern: "*txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bismark_results' : 'bismark_extract' }", pattern: "*.{png,gz}", mode:'copy'  
 
   input:
   tuple val(sampleID), file(bam)
