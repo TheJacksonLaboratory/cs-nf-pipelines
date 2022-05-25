@@ -1,5 +1,20 @@
 # RELEASE NOTES
 
+## Release 0.2.0
+
+### Pipelines Added:
+
+1. RRBS 
+
+### Modules Added: 
+
+LIST TBD
+
+### Pipeline Changes:
+
+### Module Changes:
+
+
 ## Release 0.1.2 
 
 Updated run scripts to load CS supported Nextflow module. 

@@ -15,7 +15,10 @@ process BISMARK_ALIGNMENT {
   tuple val(sampleID), file(fq_reads)
 
   output:
-  tuple val(sampleID), file("*.sam"), emit: sam
+  tuple val(sampleID), file("*.bam"), emit: bam
+  // UNMAPPED 
+  // AMBIGIOUS 
+
 
   script:
   log.info "----- Bismark Alignment Running on: ${sampleID} -----"
@@ -26,7 +29,7 @@ process BISMARK_ALIGNMENT {
   aligner = params.aligner == "bismark_hisat" ? "--hisat2" : "--bowtie2"
 
   """
-  bismark ${aligner} -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous ${params.ref_fa_index} ${inputfq}
+  bismark ${aligner} --bam -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
   """
 
 

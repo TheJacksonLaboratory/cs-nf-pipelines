@@ -68,7 +68,7 @@ workflow RRBS {
 
   TRIM_GALORE(read_ch)
 
-//  BISMARK(TRIM_GALORE.out.trimmed_fastq)
+  BISMARK(TRIM_GALORE.out.trimmed_fastq)
 
 //  BISMARK_METHYLATION_EXTRACTION(BISMARK.out.sam)
 

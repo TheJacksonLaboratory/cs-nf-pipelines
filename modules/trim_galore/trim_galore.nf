@@ -1,8 +1,8 @@
 process TRIM_GALORE {
   tag "$sampleID"
 
-  cpus 1
-  memory 8.GB
+  cpus 8
+  memory 16.GB
   time '06:00:00'
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
