@@ -31,5 +31,4 @@ process BISMARK_ALIGNMENT {
   """
   bismark ${aligner} --bam -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
   """
-
-
+}
