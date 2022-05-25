@@ -9,21 +9,24 @@ process BISMARK_ALIGNMENT {
 
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*unmapped*", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'alignment' : 'bismark_align' }", pattern: "*ambiguous*", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(fq_reads)
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam
-  // UNMAPPED 
-  // AMBIGIOUS 
-
+  tuple val(sampleID), file("*report.txt"), emit: report
+  tuple val(sampleID), file("*ambiguous*"), emit: ambiguous_reads
+  tuple val(sampleID), file("*unmapped*"), emit: unmapped_reads
 
   script:
   log.info "----- Bismark Alignment Running on: ${sampleID} -----"
 
-  inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : inputfq="-1 ${fq_reads[0]}"
+  inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : "-1 ${fq_reads[0]}"
   directionality = params.non_directional ? '--non_directional': ''
 
   aligner = params.aligner == "bismark_hisat" ? "--hisat2" : "--bowtie2"
