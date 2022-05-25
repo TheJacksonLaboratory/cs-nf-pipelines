@@ -1,4 +1,4 @@
-process BISMARK_ALIGNMENT {
+process BISMARK_METHYLATION_EXTRACTION {
   tag "$sampleID"
 
   cpus 8
@@ -7,70 +7,32 @@ process BISMARK_ALIGNMENT {
   errorStrategy 'retry' 
   maxRetries 1
 
-  container 'CONTAINER_TBD'
+  container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy' // WHAT IS OUTPUT NEEDS TO BE DETERMINED. 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*txt", mode:'copy'
 
   input:
-  tuple val(sampleID), file(sam)
+  tuple val(sampleID), file(bam)
 
   output:
-  tuple val(sampleID), file("*.sam"), emit: sam // WHAT IS OUTPUT NEEDS TO BE DETERMINED. 
+  tuple val(sampleID), file("*splitting_report.txt"), emit: extractor_reports
+  tuple val(sampleID), file("*.M-bias.txt"), emit: extractor_mbias
+  tuple val(sampleID), file("*.{png,gz}"), emit: extractor_png_gz
 
   script:
-  log.info "----- Bismark Alignment Running on: ${sampleID} -----"
-
-  if (params.read_type == "SE"){
-    paired_end = ''
-    }
-  if (params.read_type == "PE"){
-    paired_end = '--paired-end'
-    }
-
-  if ${params.non_directional} {
-    directionality = '--non_directional'
-  } 
-
-  """
-  bismark_methylation_extractor ${paired_end}  
+  log.info "----- Bismark Methylation Extractor Running on: ${sampleID} -----"
   
-  // PICK UP HERE TO SET THE PARAMS. MOVE PARAMS TO CONFIG ETC. 
-  --output  {in_2}  -multicore ${task.cpus}  {Comprehensive} {overlap} {ignore_forward} {ignore_reverse} {ignore_3prime_forward} {ignore_3prime_reverse}            {BedGraph}    --report  {in_1}
-  """ // NOTE: OUTPUT DIR IS CALLED....IS THIS A NEEDED THING? 
+  comprehensive = params.comprehensive ? '--comprehensive --merge_non_CpG' : ''
+  cytosine_report = params.cytosine_report ? "--cytosine_report --genome_folder ${params.ref_fa_index}" : ''
+  
+  if(params.read_type == 'SE') {
+      """
+      bismark_methylation_extractor  -multicore ${task.cpus} ${comprehensive} ${cytosine_report} --bedGraph --counts --gzip -s --report ${bam}
+      """
+  } else {
+      """
+      bismark_methylation_extractor -multicore ${task.cpus} ${comprehensive} ${cytosine_report} --ignore_r2 2 --ignore_3prime_r2 2 --bedGraph --counts --gzip -p --no_overlap --report ${bam}
+      """
+  }
 }
-
-
-
-
-
-
-
-
-    <!-- Files:
-        Ins:
-          1: bismark sam file
-          2: outdir
-        Outs:
-          1: Methylation output
-    -->
-    
- 
-    <option name="overlap"                   command_text=""                 value="--no_overlap" />
-    <option name="ignore_forward"            command_text="--ignore"         value="0" />
-    <option name="ignore_reverse"            command_text="--ignore_r2"      value="0" />
-    <option name="ignore_3prime_forward"     command_text="--ignore_3prime"  value="0" />
-    <option name="ignore_3prime_reverse"     command_text="--ignore_3prime_r2"   value="0" />
-    <option name="BedGraph"                  command_text=""              value="--bedgraph" />
-    <option name="Comprehensive"             command_text=""              value="--comprehensive" />
-
-
-    <command program="force_gd_graph.pl" />
-
-    <command program="">
-
-     
-
-    </command>
-
-
-</tool>

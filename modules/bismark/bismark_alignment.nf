@@ -10,7 +10,7 @@ process BISMARK_ALIGNMENT {
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*report.txt", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*unmapped*", mode:'copy', enabled: params.keep_intermediate
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*ambiguous*", mode:'copy', enabled: params.keep_intermediate
 

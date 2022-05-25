@@ -10,7 +10,8 @@ include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_read
 include {FASTQC} from '../modules/fastqc/fastqc'
 include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 include {BISMARK_ALIGNMENT} from '../modules/bismark/bismark_alignment'
-//include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
+include {BISMARK_DEDUPLICATION} from '../modules/bismark/bismark_deduplication'
+include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methlation_extraction'
 
 // help if needed
 if (params.help){
@@ -70,6 +71,8 @@ workflow RRBS {
 
   BISMARK_ALIGNMENT(TRIM_GALORE.out.trimmed_fastq)
 
-//  BISMARK_METHYLATION_EXTRACTION(BISMARK.out.sam)
+  BISMARK_DEDUPLICATION(BISMARK_ALIGNMENT.out.bam)
+
+  BISMARK_METHYLATION_EXTRACTION(BISMARK_DEDUPLICATION.out.bam)
 
 }
