@@ -2,8 +2,8 @@ process MULTIQC {
 
     container 'quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/multiqc' : 'multiqc' }", pattern: "*multiqc_report.html", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/multiqc' : 'multiqc' }", pattern: "*_data", mode:'copy'
+    publishDir "${params.pubdir}/multiqc", pattern: "*multiqc_report.html", mode:'copy'
+    publishDir "${params.pubdir}/multiqc", pattern: "*_data", mode:'copy'
 
     input:
     path multiqc_files
@@ -16,7 +16,7 @@ process MULTIQC {
     script:
 
     """
-    multiqc -f $args .
+    multiqc .
     """
 
 }
