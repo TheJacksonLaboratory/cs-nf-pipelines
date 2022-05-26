@@ -11,6 +11,7 @@ include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 include {BISMARK_ALIGNMENT} from '../modules/bismark/bismark_alignment'
 include {BISMARK_DEDUPLICATION} from '../modules/bismark/bismark_deduplication'
 include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methylation_extraction'
+include {MULTIQC} from '../modules/multiqc/multiqc'
 
 // help if needed
 if (params.help){
@@ -70,5 +71,17 @@ workflow RRBS {
   BISMARK_DEDUPLICATION(BISMARK_ALIGNMENT.out.bam)
 
   BISMARK_METHYLATION_EXTRACTION(BISMARK_DEDUPLICATION.out.dedup_bam)
+
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trimmed_fastqc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(BISMARK_ALIGNMENT.out.report.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(BISMARK_DEDUPLICATION.out.dedup_report.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(BISMARK_DEDUPLICATION.out.extractor_reports.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(BISMARK_DEDUPLICATION.out.extractor_reports.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 }
