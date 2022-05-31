@@ -1,5 +1,28 @@
 # RELEASE NOTES
 
+## Release 0.2.0
+
+### Pipelines Added:
+
+1. RRBS - Mouse & Human
+
+### Modules Added: 
+
+1. FastQC
+2. Trim-Galore
+3. Bismark Alignment
+4. Bismark Deduplicator
+5. Bismark Methylation Extractor 
+6. MultiQC
+
+### Pipeline Changes:
+
+NONE
+
+### Module Changes:
+
+1. Trimmomatic Trim stub module removed. 
+
 ## Release 0.1.2 
 
 Updated run scripts to load CS supported Nextflow module. 
