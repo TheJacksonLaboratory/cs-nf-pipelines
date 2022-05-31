@@ -32,6 +32,6 @@ process BISMARK_ALIGNMENT {
   aligner = params.aligner == "bismark_hisat" ? "--hisat2" : "--bowtie2"
 
   """
-  bismark ${aligner} --bam -p ${task.cpus} ${directionality} -L ${params.seedlength} -N ${params.seed_mismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
+  bismark ${aligner} --bam -p ${task.cpus} ${directionality} -L ${params.seedLength} -N ${params.seedMismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
   """
 }
