@@ -76,7 +76,7 @@ if (params.seqmode == 'pacbio') {
 	// SORT BAM
 		
 	process NGMLRsort{
-	  publishDir params.outdir, mode:'copy'
+	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'cpus_8'
 	  label 'samtools_1_9'
 	  input:
@@ -87,7 +87,7 @@ if (params.seqmode == 'pacbio') {
 		file "${name_string}.ngmlr.aligned.bam.bai" into ch_bam_index
 	  script:
 	  """
-	  samtools sort --threads ${task.cpus} -m 30${sam} > ${name_string}.ngmlr.aligned.bam
+	  samtools sort --threads ${task.cpus} -m 30G ${sam} > ${name_string}.ngmlr.aligned.bam
 	  samtools index ${name_string}.ngmlr.aligned.bam
 	  """
 	}
@@ -100,7 +100,7 @@ if (params.seqmode == 'pacbio') {
 	// CALL WITH SNIFFLES 
 	
 	process sniffles {
-		publishDir params.outdir, mode:'copy'
+		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 		label 'cpus_8'
 		label 'sniffles'
 		input:
@@ -111,7 +111,7 @@ if (params.seqmode == 'pacbio') {
 		script:
 			  """
 			  sniffles -m ${bam} -v sniffles_calls.vcf
-			  echo ${params.outdir}/sniffles_calls.vcf > vcf_path # for later merging
+			  echo ${params.outdir}/unmerged_calls/sniffles_calls.vcf > vcf_path # for later merging
 			  """
 	}
 	
@@ -119,7 +119,7 @@ if (params.seqmode == 'pacbio') {
 	// CALL WITH SVIM 
 	
 	process svim {
-		publishDir params.outdir, mode:'copy'
+		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 		label 'cpus_8'
 		label 'svim'
 		input:
@@ -141,7 +141,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (params.pbmode == 'ccs') {
 		process cutesv_css {
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'cutesv'
 			input:
@@ -164,7 +164,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (params.pbmode == 'clr') {
 		process cutesv_clr {
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'cutesv'
 			input:
@@ -213,7 +213,7 @@ if (params.seqmode == 'pacbio') {
 		process PBMM2fastqMap_css{
 			label 'cpus_8'
 			label 'pbmm2'
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/alignments", mode:'copy'
 			input:
 				val name_string from params.names
 				file mmi from pbmm2_built
@@ -237,7 +237,7 @@ if (params.seqmode == 'pacbio') {
 		process PBMM2fastqMap_clr{
 			label 'cpus_8'
 			label 'pbmm2'
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/alignments", mode:'copy'
 			input:
 				val name_string from params.names
 				file mmi from pbmm2_built
@@ -301,7 +301,7 @@ if (params.seqmode == 'pacbio') {
 
 	if (params.pbmode == 'ccs') {
 		process pbsv_call_ccs{
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'pbsv'
 			stageInMode 'copy'
@@ -313,7 +313,7 @@ if (params.seqmode == 'pacbio') {
 				path(vcf_path) into vcf_pbsv_path
 			"""
 			pbsv call --ccs ${fasta} ${svsig} pbsv_calls.vcf
-			echo ${params.outdir}/pbsv_calls.vcf > vcf_path # for later merging
+			echo "${params.outdir}/unmerged_calls/pbsv_calls.vcf" > vcf_path
 			"""
 		}
 	}	
@@ -321,7 +321,7 @@ if (params.seqmode == 'pacbio') {
 
 	if (params.pbmode == 'clr') {
 		process pbsv_call_clr{
-			publishDir params.outdir, mode:'copy'
+			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'pbsv'
 			stageInMode 'copy'
@@ -333,7 +333,7 @@ if (params.seqmode == 'pacbio') {
 				path(vcf_path) into vcf_pbsv_path
 			"""
 			pbsv call ${fasta} ${svsig} pbsv_calls.vcf
-			echo ${params.outdir}/pbsv_calls.vcf > vcf_path # for later merging
+			echo "${params.outdir}/unmerged_calls/pbsv_calls.vcf" > vcf_path
 			"""
 		}
 	}	
@@ -361,168 +361,6 @@ if (params.seqmode == 'pacbio') {
 	.collectFile(name: "sample.vcfs.txt", sort: false)
 	.set { sample_vcfs_paths }
 
-	/*process survivor{
-		label 'long_himem'
-		label 'survivor'
-		input:
-			file "vcf_list" from ch_vcf
-			file "pbsv_calls.vcf" from pbsv_vcf_ccs
-			file "sniffles_calls.vcf" from sniffles_vcf       
-			val name_string from params.names
-			val surv_dist from params.surv_dist
-			val surv_supp from params.surv_supp
-			val surv_type from params.surv_type
-			val surv_strand from params.surv_strand
-			val surv_min from params.surv_min
-		output:
-			file "${name_string}.merged.vcf" into ch_merged_vcf
-		script:
-		"""
-		SURVIVOR merge vcf_list ${surv_dist} ${surv_supp} ${surv_type} ${surv_strand} 0 ${surv_min} ${name_string}.merged.vcf
-		"""
-	} */
-	/*
-	process annotate_sv{
-		label 'mid_job'
-		input:
-			file merged_vcf from ch_merged_vcf
-			val name_string from params.names
-		output:
-			file "${name_string}.merged.overlap.annotated.txt" into ch_annot
-		script:
-		"""
-		/usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${name_string} ${merged_vcf}
-		"""
-	}
-
-	process summarize_sv{
-		label 'mid_job'
-		label 'pyvcf'
-		input:
-			file merged_vcf from ch_merged_vcf
-			val name_string from params.names
-		output:
-			file "${name_string}.survivor_summary.csv" into ch_summary
-		script:
-		"""
-		/usr/bin/env python ${projectDir}/bin/sv_to_table.py -v ${merged_vcf} -o ${name_string}.survivor_summary.csv
-		"""
-	}
-
-	process prep_beds{
-		label 'short_himem'
-		label 'tidyverse'
-		input:
-			file annot from ch_annot
-			file summary from ch_summary
-			val name_string from params.names
-		output:
-			file "${name_string}.ins.bed" into ch_ins
-			file "${name_string}.inv.bed" into ch_inv
-			file "${name_string}.del.bed" into ch_del
-			file "${name_string}.dup.bed" into ch_dup
-			file "${name_string}.tra.bed" into ch_tra
-		script:
-		"""
-		/usr/bin/env Rscript ${projectDir}/bin/surv_annot_process.R ${annot} ${summary} ${name_string}
-		"""
-	}
-
-	process intersect_beds{
-		label 'short_himem'
-		label 'bedtools'
-		input:
-			val name_string from params.names
-			file "ins.bed" from ch_ins
-			file "inv.bed" from ch_inv
-			file "del.bed" from ch_del
-			file "dup.bed" from ch_dup
-			file "tra.bed" from ch_tra
-		output:
-			file "${name_string}.ins.s.bed" into ch_ins_s
-			file "${name_string}.ins.e.bed" into ch_ins_e
-			file "${name_string}.del.s.bed" into ch_del_s
-			file "${name_string}.del.s.bed" into ch_del_e
-			file "${name_string}.inv.e.bed" into ch_inv_e
-			file "${name_string}.tra.e.bed" into ch_tra_e
-			file "${name_string}.dup.e.bed" into ch_dup_e
-			file "${name_string}.ins.genes.bed" into ch_ins_genes
-			file "${name_string}.del.genes.bed" into ch_del_genes
-			file "${name_string}.inv.genes.bed" into ch_inv_genes
-			file "${name_string}.dup.genes.bed" into ch_dup_genes
-			file "${name_string}.tra.genes.bed" into ch_tra_genes
-			file "${name_string}.ins.exons.bed" into ch_ins_exons
-			file "${name_string}.del.exons.bed" into ch_del_exons
-			file "${name_string}.inv.exons.bed" into ch_inv_exons
-			file "${name_string}.dup.exons.bed" into ch_dup_exons
-			file "${name_string}.tra.exons.bed" into ch_tra_exons
-		script:
-		"""
-		/usr/bin/env bash ${projectDir}/bin/intersect_beds.sh ${name_string}
-		"""
-	}
-
-	process summarize_intersections{
-		publishDir params.outdir, mode:'copy'
-		label 'short_himem'
-		label 'tidyverse'
-		input:
-			val name_string from params.names
-			file "summary.csv" from ch_summary
-			file "ins.bed" from ch_ins
-			file "dup.bed" from ch_dup
-			file "tra.bed" from ch_tra
-			file "inv.bed" from ch_inv
-			file "del.bed" from ch_del
-			file "ins.s.bed" from ch_ins_s
-			file "ins.e.bed" from ch_ins_e
-			file "del.s.bed" from ch_del_s
-			file "del.e.bed" from ch_del_e
-			file "dup.e.bed" from ch_dup_e
-			file "inv.e.bed" from ch_inv_e
-			file "tra.e.bed" from ch_tra_e
-			file "ins.genes.bed" from ch_ins_genes
-			file "del.genes.bed" from ch_del_genes
-			file "dup.genes.bed" from ch_dup_genes
-			file "tra.genes.bed" from ch_tra_genes
-			file "inv.genes.bed" from ch_inv_genes
-			file "ins.exons.bed" from ch_ins_exons
-			file "del.exons.bed" from ch_del_exons
-			file "dup.exons.bed" from ch_dup_exons
-			file "tra.exons.bed" from ch_tra_exons
-			file "inv.exons.bed" from ch_inv_exons
-		output:
-			file "${name_string}.survivor_results.csv"
-		script:
-		"""
-		/usr/bin/env Rscript ${projectDir}/bin/post_filt.R
-		mv survivor_results.csv ${name_string}.survivor_results.csv
-		"""
-	}
-	
-	process annotate_exons{
-    publishDir params.outdir, mode:'copy'
-    label 'midjob'
-    label 'pysam'
-    input:
-        val name_string from params.names
-        file "merged_vcf" from ch_merged_vcf
-        file "ins.exons.bed" from ch_ins_exons
-        file "del.exons.bed" from ch_del_exons
-        file "dup.exons.bed" from ch_dup_exons
-        file "tra.exons.bed" from ch_tra_exons
-        file "inv.exons.bed" from ch_inv_exons
-    output:
-        file "${name_string}.merged.annotated.vcf"
-    script:
-    """
-    /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v merged_vcf \
-        -i ins.exons.bed -d del.exons.bed \
-        -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
-        -o ${name_string}.merged.annotated.vcf
-    """
-	}
-	*/
 
 	// NEED TO CHANGE THIS TO HAVE CCS INCLUDED 
 	
@@ -1202,6 +1040,7 @@ process annotate_sv{
 	"""
 }
 
+ch_annot.into{ch_annot_1; ch_annot_2}
 
 process summarize_sv{
 	label 'mid_job'
@@ -1222,7 +1061,7 @@ process prep_beds{
 	label 'short_himem'
 	label 'tidyverse'
 	input:
-		file annot from ch_annot
+		file annot from ch_annot_1
 		file summary from ch_summary_1
 		val name_string from params.names
 	output:
@@ -1233,7 +1072,7 @@ process prep_beds{
 		file "${name_string}.tra.bed" into ch_tra
 	script:
 	"""
-	/usr/bin/env Rscript ${projectDir}/bin/surv_annot_process.R ${annot} ${summary} ${name_string}
+	/usr/bin/env Rscript ${projectDir}/bin/surv_annot_process.R ${name_string}
 	"""
 }
 
@@ -1248,11 +1087,11 @@ process intersect_beds{
 	label 'bedtools'
 	input:
 		val name_string from params.names
-		file "ins.bed" from ch_ins_1
-		file "inv.bed" from ch_inv_1
-		file "del.bed" from ch_del_1
-		file "dup.bed" from ch_dup_1
-		file "tra.bed" from ch_tra_1
+		file "${name_string}.ins.bed" from ch_ins_1
+		file "${name_string}.inv.bed" from ch_inv_1
+		file "${name_string}.del.bed" from ch_del_1
+		file "${name_string}.dup.bed" from ch_dup_1
+		file "${name_string}.tra.bed" from ch_tra_1
 	output:
 		file "${name_string}.ins.s.bed" into ch_ins_s
 		file "${name_string}.ins.e.bed" into ch_ins_e
@@ -1289,58 +1128,84 @@ process summarize_intersections{
 	label 'tidyverse'
 	input:
 		val name_string from params.names
-		file "summary.csv" from ch_summary_2
-		file "ins.bed" from ch_ins_2
-		file "dup.bed" from ch_dup_2
-		file "tra.bed" from ch_tra_2
-		file "inv.bed" from ch_inv_2
-		file "del.bed" from ch_del_2
-		file "ins.s.bed" from ch_ins_s
-		file "ins.e.bed" from ch_ins_e
-		file "del.s.bed" from ch_del_s
-		file "del.e.bed" from ch_del_e
-		file "dup.e.bed" from ch_dup_e
-		file "inv.e.bed" from ch_inv_e
-		file "tra.e.bed" from ch_tra_e
-		file "ins.genes.bed" from ch_ins_genes
-		file "del.genes.bed" from ch_del_genes
-		file "dup.genes.bed" from ch_dup_genes
-		file "tra.genes.bed" from ch_tra_genes
-		file "inv.genes.bed" from ch_inv_genes
-		file "ins.exons.bed" from ch_ins_exons_1
-		file "del.exons.bed" from ch_del_exons_1
-		file "dup.exons.bed" from ch_dup_exons_1
-		file "tra.exons.bed" from ch_tra_exons_1
-		file "inv.exons.bed" from ch_inv_exons_1
+		file "${name_string}.survivor_summary.csv" from ch_summary_2
+        file "${name_string}.merged.overlap.annotated.txt" from ch_annot_2
+		file "${name_string}.ins.bed" from ch_ins_2
+		file "${name_string}.dup.bed" from ch_dup_2
+		file "${name_string}.tra.bed" from ch_tra_2
+		file "${name_string}.inv.bed" from ch_inv_2
+		file "${name_string}.del.bed" from ch_del_2
+		file "${name_string}.ins.s.bed" from ch_ins_s
+		file "${name_string}.ins.e.bed" from ch_ins_e
+		file "${name_string}.del.s.bed" from ch_del_s
+		file "${name_string}.del.e.bed" from ch_del_e
+		file "${name_string}.dup.e.bed" from ch_dup_e
+		file "${name_string}.inv.e.bed" from ch_inv_e
+		file "${name_string}.tra.e.bed" from ch_tra_e
+		file "${name_string}.ins.genes.bed" from ch_ins_genes
+		file "${name_string}.del.genes.bed" from ch_del_genes
+		file "${name_string}.dup.genes.bed" from ch_dup_genes
+		file "${name_string}.tra.genes.bed" from ch_tra_genes
+		file "${name_string}.inv.genes.bed" from ch_inv_genes
+		file "${name_string}.ins.exons.bed" from ch_ins_exons_1
+		file "${name_string}.del.exons.bed" from ch_del_exons_1
+		file "${name_string}.dup.exons.bed" from ch_dup_exons_1
+		file "${name_string}.tra.exons.bed" from ch_tra_exons_1
+		file "${name_string}.inv.exons.bed" from ch_inv_exons_1
 	output:
-		file "${name_string}.survivor_results.csv"
+		file "${name_string}.survivor_joined_results.csv"
 	script:
 	"""
-	/usr/bin/env Rscript ${projectDir}/bin/post_filt.R
-	mv survivor_results.csv ${name_string}.survivor_results.csv
+	/usr/bin/env Rscript ${projectDir}/bin/post_filt.R ${name_string}
 	"""
 }
-	
-process annotate_exons{
-publishDir params.outdir, mode:'copy'
-label 'midjob'
-label 'pysam'
-input:
-	tuple sample_name, path(in_vcf) from vcf_merged_3
-	file "ins.exons.bed" from ch_ins_exons_2
-	file "del.exons.bed" from ch_del_exons_2
-	file "dup.exons.bed" from ch_dup_exons_2
-	file "tra.exons.bed" from ch_tra_exons_2
-	file "inv.exons.bed" from ch_inv_exons_2
-output:
-	file "${sample_name}.mergedCalls.InExon.BDLM.vcf"
-script:
-"""
-/usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${in_vcf} \
-	-i ins.exons.bed -d del.exons.bed \
-	-u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
-	-o ${sample_name}.mergedCalls.InExon.BDLM.vcf
-"""
+
+if (params.seqmode == 'pacbio') {
+	process annotate_exons_pacbio{
+	publishDir params.outdir, mode:'copy'
+	label 'midjob'
+	label 'pysam'
+	input:
+		tuple sample_name, path(in_vcf) from vcf_merged_3
+		file "ins.exons.bed" from ch_ins_exons_2
+		file "del.exons.bed" from ch_del_exons_2
+		file "dup.exons.bed" from ch_dup_exons_2
+		file "tra.exons.bed" from ch_tra_exons_2
+		file "inv.exons.bed" from ch_inv_exons_2
+	output:
+		file "${sample_name}.mergedCalls.InExon.PS.vcf"
+	script:
+	"""
+	/usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${in_vcf} \
+		-i ins.exons.bed -d del.exons.bed \
+		-u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
+		-o ${sample_name}.mergedCalls.InExon.PS.vcf
+	"""
+	}
+}
+
+if (params.seqmode == 'illumina') {
+	process annotate_exons_illumina{
+	publishDir params.outdir, mode:'copy'
+	label 'midjob'
+	label 'pysam'
+	input:
+		tuple sample_name, path(in_vcf) from vcf_merged_3
+		file "ins.exons.bed" from ch_ins_exons_2
+		file "del.exons.bed" from ch_del_exons_2
+		file "dup.exons.bed" from ch_dup_exons_2
+		file "tra.exons.bed" from ch_tra_exons_2
+		file "inv.exons.bed" from ch_inv_exons_2
+	output:
+		file "${sample_name}.mergedCalls.InExon.BDLM.vcf"
+	script:
+	"""
+	/usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${in_vcf} \
+		-i ins.exons.bed -d del.exons.bed \
+		-u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
+		-o ${sample_name}.mergedCalls.InExon.BDLM.vcf
+	"""
+	}
 }
 
 
