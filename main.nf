@@ -57,6 +57,7 @@ if (params.seqmode == 'pacbio') {
 	// ngmlr -t 4 -r reference.fasta -q reads.fastq -o test.sam
 	
 	process NGMLRmap{
+		tag "$sample_name"
 		label 'cpus_24'
 		label 'ngmlr'
 		stageInMode 'copy'
@@ -76,6 +77,7 @@ if (params.seqmode == 'pacbio') {
 	// SORT BAM
 		
 	process NGMLRsort{
+	  tag "$sample_name"
 	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'cpus_8'
 	  label 'samtools_1_9'
@@ -100,6 +102,7 @@ if (params.seqmode == 'pacbio') {
 	// CALL WITH SNIFFLES 
 	
 	process sniffles {
+		tag "$sample_name"
 		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 		label 'cpus_8'
 		label 'sniffles'
@@ -120,6 +123,7 @@ if (params.seqmode == 'pacbio') {
 	
 	process svim {
 		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
+		tag "$sample_name"
 		label 'cpus_8'
 		label 'svim'
 		input:
@@ -141,6 +145,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (params.pbmode == 'ccs') {
 		process cutesv_css {
+			tag "$sample_name"
 			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'cutesv'
@@ -164,6 +169,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (params.pbmode == 'clr') {
 		process cutesv_clr {
+			tag "$sample_name"
 			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'cutesv'
@@ -194,7 +200,7 @@ if (params.seqmode == 'pacbio') {
 	// BUILD INDEX
 
 	process BuildPBMM2index {
-		tag "${fasta}"
+		tag "$sample_name"
 		label 'cpus_8'
 		label 'pbmm2'
 		stageInMode 'copy'
@@ -211,6 +217,7 @@ if (params.seqmode == 'pacbio') {
 	// ALIGN CCS FASTQ DATA
 	if (params.pbmode == 'ccs') {
 		process PBMM2fastqMap_css{
+			tag "$sample_name"
 			label 'cpus_8'
 			label 'pbmm2'
 			publishDir "${params.outdir}/alignments", mode:'copy'
@@ -235,6 +242,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (params.pbmode == 'clr') {
 		process PBMM2fastqMap_clr{
+			tag "$sample_name"
 			label 'cpus_8'
 			label 'pbmm2'
 			publishDir "${params.outdir}/alignments", mode:'copy'
@@ -262,6 +270,7 @@ if (params.seqmode == 'pacbio') {
 	
 	if (ch_pbsvTandem == null) {
 		process pbsv_discovery_tandem{
+			tag "$sample_name"
 			label 'cpus_8'
 			label 'pbsv'
 			input:
@@ -282,6 +291,7 @@ if (params.seqmode == 'pacbio') {
 	
 	
 		process pbsv_discovery_no_tandem{
+			tag "$sample_name"
 			label 'cpus_8'
 			label 'pbsv'
 			input:
@@ -301,6 +311,7 @@ if (params.seqmode == 'pacbio') {
 
 	if (params.pbmode == 'ccs') {
 		process pbsv_call_ccs{
+			tag "$sample_name"
 			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'pbsv'
@@ -321,6 +332,7 @@ if (params.seqmode == 'pacbio') {
 
 	if (params.pbmode == 'clr') {
 		process pbsv_call_clr{
+			tag "$sample_name"
 			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
 			label 'cpus_8'
 			label 'pbsv'
@@ -339,7 +351,8 @@ if (params.seqmode == 'pacbio') {
 	}	
 	
 	process prep_vcf_list{
-    label 'tiny_job'
+    tag "$sample_name"
+	label 'tiny_job'
     input:
         file "pbsv_calls.vcf" from pbsv_vcf_ccs
         file "sniffles_calls.vcf" from sniffles_vcf
@@ -378,7 +391,7 @@ if (params.seqmode == 'illumina') {
 	if (params.fastq1){
 	params.bwa = params.genome && params.fasta && params.fastq1 ? params.genomes[params.genome].bwa ?: null : null
 	process BuildBWAindexes {
-		tag "${fasta}"
+		tag "$sample_name"
 		label 'bwa'
 		publishDir params.outdir, mode: 'copy'
 		input:
@@ -394,6 +407,7 @@ if (params.seqmode == 'illumina') {
 
 	ch_bwa = params.bwa ? Channel.value(file(params.bwa)) : bwa_built
 	process readgroup{
+	  tag "$sample_name"
 	  label 'python2'
 	  input:
 		file fq1 from ch_fastq1
@@ -407,6 +421,7 @@ if (params.seqmode == 'illumina') {
 	}
  
 	process map{
+	  tag "$sample_name"
 	  label 'bwa'
 	  label 'cpus_8'
 	  stageInMode 'copy'
@@ -427,6 +442,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process map2{
+	  tag "$sample_name"
 	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'cpus_8'
 	  label 'samtools'
@@ -447,6 +463,7 @@ if (params.seqmode == 'illumina') {
 	// end of optional mapping steps. ch_bam_und (either from mapping or from input) is passed to post processing and calling
 
 	process dedup{
+	  tag "$sample_name"
 	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'gatk'
 	  label 'cpus_8'
@@ -475,6 +492,7 @@ if (params.seqmode == 'illumina') {
 	}
 	
 	process avoid_race_condition{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'samtools'
 		output:
@@ -485,6 +503,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process avoid_race_condition_2{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'lumpy'
 		input:
@@ -497,6 +516,7 @@ if (params.seqmode == 'illumina') {
 	}
 	
 	process avoid_race_condition_3{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'breakdancer'
 		input:
@@ -509,6 +529,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process avoid_race_condition_4{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'manta'
 		input:
@@ -521,6 +542,7 @@ if (params.seqmode == 'illumina') {
 	} 
 
 	process avoid_race_condition_5{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'cnmops'
 		input:
@@ -533,6 +555,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process avoid_race_condition_6{
+		tag "$sample_name"
 		stageInMode 'copy'
 		label 'delly'
 		input:
@@ -545,6 +568,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process bam_insertsize{
+	  tag "$sample_name"	
 	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'samtools'
 	  input:
@@ -558,6 +582,7 @@ if (params.seqmode == 'illumina') {
 	}
 
 	process fastaindex{
+	  tag "$sample_name"
 	  publishDir "${params.outdir}/alignments", mode:'copy'
 	  label 'samtools'
 	  input:
@@ -1000,6 +1025,7 @@ if (params.seqmode == 'illumina') {
 //~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~  Merge all SV calls VCF files  ~~~~~
 
 process survivor{
+	tag "$sample_name"
 	label 'long_himem'
 	label 'survivor'
 	input:
@@ -1027,6 +1053,7 @@ process survivor{
 vcf_merged.into{vcf_merged_1; vcf_merged_2; vcf_merged_3}
 
 process annotate_sv{
+	tag "$sample_name"
 	label 'mid_job'
 	publishDir params.outdir, mode:'copy'
 	input:
@@ -1043,6 +1070,7 @@ process annotate_sv{
 ch_annot.into{ch_annot_1; ch_annot_2}
 
 process summarize_sv{
+	tag "$sample_name"
 	label 'mid_job'
 	label 'pyvcf'
 	input:
@@ -1058,6 +1086,7 @@ process summarize_sv{
 ch_summary.into{ch_summary_1; ch_summary_2}
 
 process prep_beds{
+	tag "$sample_name"
 	label 'short_himem'
 	label 'tidyverse'
 	input:
@@ -1083,6 +1112,7 @@ ch_dup.into{ch_dup_1; ch_dup_2}
 ch_tra.into{ch_tra_1; ch_tra_2}
 
 process intersect_beds{
+	tag "$sample_name"
 	label 'short_himem'
 	label 'bedtools'
 	input:
@@ -1123,6 +1153,7 @@ ch_dup_exons.into{ch_dup_exons_1; ch_dup_exons_2}
 ch_tra_exons.into{ch_tra_exons_1; ch_tra_exons_2}
 
 process summarize_intersections{
+	tag "$sample_name"
 	publishDir params.outdir, mode:'copy'
 	label 'short_himem'
 	label 'tidyverse'
@@ -1162,6 +1193,7 @@ process summarize_intersections{
 
 if (params.seqmode == 'pacbio') {
 	process annotate_exons_pacbio{
+	tag "$sample_name"
 	publishDir params.outdir, mode:'copy'
 	label 'midjob'
 	label 'pysam'
@@ -1186,6 +1218,7 @@ if (params.seqmode == 'pacbio') {
 
 if (params.seqmode == 'illumina') {
 	process annotate_exons_illumina{
+	tag "$sample_name"
 	publishDir params.outdir, mode:'copy'
 	label 'midjob'
 	label 'pysam'
