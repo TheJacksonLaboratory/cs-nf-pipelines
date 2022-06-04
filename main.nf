@@ -705,7 +705,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'lumpy'
 		label 'cpus_8'
-		publishDir "${params.outdir}/alignments/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'move'
+		publishDir "${params.outdir}/alignments/mapped_lumpy", pattern: "*_discordants.sorted.ba*", mode: 'copy'
 
 		//errorStrategy { task.exitStatus=141 ? 'ignore' : 'terminate' } // validExitStatus 141 for pairend_distro
 
@@ -757,7 +757,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/lumpySVOut", pattern: "*_lumpySort.vcf", mode: 'move'
+		publishDir "${params.outdir}/lumpySVOut", pattern: "*_lumpySort.vcf", mode: 'copy'
 
 		input:
 			val abs_outdir from abs_outdir
@@ -831,7 +831,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'move'
+		publishDir "${params.outdir}/BreakDancerSVOut", pattern: "*_BreakDancerSortVCF.vcf", mode: 'copy'
 
 		input:
 			val abs_outdir from abs_outdir
@@ -860,7 +860,7 @@ if (params.seqmode == 'illumina') {
 		label 'manta'
 		label 'cpus_8'
 		
-		publishDir "${params.outdir}/temps", pattern: "mantaSVOut", enabled: params.keep_intermediate
+		publishDir "${params.outdir}/temps", pattern: "mantaSVOut", mode: 'copy', enabled: params.keep_intermediate
 		cpus params.threads
 
 		input:
@@ -889,7 +889,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/mantaSVout", pattern: "${sample_name}_candidateSV.vcf", mode: 'move'
+		publishDir "${params.outdir}/mantaSVout", pattern: "${sample_name}_candidateSV.vcf", mode: 'copy'
 
 		input:
 			val abs_outdir from abs_outdir
@@ -904,7 +904,7 @@ if (params.seqmode == 'illumina') {
 			log.info "Reheading Manta SV VCF"
 			"""
 			printf "${sample_name}_manta\n" > rehead_manta.txt
-			mv candidateSV.vcf ${sample_name}_candidateSV.vcf
+			cp candidateSV.vcf ${sample_name}_candidateSV.vcf
 			echo ${abs_outdir}/mantaSVout/${sample_name}_candidateSV.vcf > vcf_path # for later merging
 			"""
 	}
@@ -964,7 +964,7 @@ if (params.seqmode == 'illumina') {
 		tag "$sample_name"
 		label 'bcftools'
 		label 'tiny_job'
-		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'move'
+		publishDir "${params.outdir}/DellySVOut", pattern: "*_dellySort.vcf", mode: 'copy'
 
 		input:
 			val abs_outdir from abs_outdir
