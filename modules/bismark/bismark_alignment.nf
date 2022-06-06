@@ -33,6 +33,6 @@ process BISMARK_ALIGNMENT {
   seed = params.aligner == "hisat2" ? "" : "-L ${params.seedLength}"
 
   """
-  bismark ${aligner} --parallel 4 --bam -p ${task.cpus} ${directionality}  ${seed} -N ${params.seedMismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
+  bismark ${aligner} --parallel 4 --bam ${directionality}  ${seed} -N ${params.seedMismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
   """
 }
