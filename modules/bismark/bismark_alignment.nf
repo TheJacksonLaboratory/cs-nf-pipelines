@@ -1,7 +1,7 @@
 process BISMARK_ALIGNMENT {
   tag "$sampleID"
 
-  cpus 8
+  cpus 20
   memory {60.GB * task.attempt}
   time {30.hour * task.attempt}
   errorStrategy 'retry' 
@@ -29,9 +29,10 @@ process BISMARK_ALIGNMENT {
   inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : "-1 ${fq_reads[0]}"
   directionality = params.non_directional ? '--non_directional': ''
 
-  aligner = params.aligner == "bismark_hisat" ? "--hisat2" : "--bowtie2"
+  aligner = params.aligner == "hisat2" ? "--hisat2" : "--bowtie2"
+  seed = params.aligner == "hisat2" ? "" : "-L ${params.seedLength}"
 
   """
-  bismark ${aligner} --bam -p ${task.cpus} ${directionality} -L ${params.seedLength} -N ${params.seedMismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
+  bismark ${aligner} --parallel 4 --bam ${directionality}  ${seed} -N ${params.seedMismatch} -minins ${params.MinInsert} -maxins ${params.MaxInsert}  --unmapped --ambiguous --genome ${params.ref_fa_index} ${inputfq}
   """
 }
