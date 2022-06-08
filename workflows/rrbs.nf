@@ -68,19 +68,23 @@ workflow RRBS {
 
   BISMARK_ALIGNMENT(TRIM_GALORE.out.trimmed_fastq)
 
+  ch_BISMARK_DEDUPLICATION_multiqc = Channel.empty()
+
   if (params.skip_deduplication) {
     BISMARK_METHYLATION_EXTRACTION(BISMARK_ALIGNMENT.out.bam)
   } else {
     BISMARK_DEDUPLICATION(BISMARK_ALIGNMENT.out.bam)
     BISMARK_METHYLATION_EXTRACTION(BISMARK_DEDUPLICATION.out.dedup_bam)
+    ch_BISMARK_DEDUPLICATION_multiqc = BISMARK_DEDUPLICATION.out.dedup_report
   }
+
 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trim_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trimmed_fastqc.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(BISMARK_ALIGNMENT.out.report.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(BISMARK_DEDUPLICATION.out.dedup_report.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_BISMARK_DEDUPLICATION_multiqc.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(BISMARK_METHYLATION_EXTRACTION.out.extractor_reports.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(BISMARK_METHYLATION_EXTRACTION.out.extractor_mbias.collect{it[1]}.ifEmpty([]))
 
