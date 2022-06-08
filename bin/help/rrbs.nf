@@ -32,7 +32,7 @@ Parameter | Default | Description
                | Pre-compiled Bismark Bowtie2 index files. Points to human reference when --gen_org human. JAX users should change this parameter only if changing aligner used.
 --aligner | 'bowtie2' | Options: bowtie2 and hisat2. Bismark alignment tool. If hisat2 is specified, change `ref_fa_index` to the appropriate index files. 
 
---skip_deduplication | false | Skip Bismark Deduplication step if `true`
+--skip_deduplication | true | Bismark Deduplication is used if `true`
 
 --cytosine_report | false | After the conversion to bedGraph has completed, the option --cytosine_report produces a genome-wide methylation report for all cytosines in the genome
 --comprehensive | true | Specifying this option will merge all four possible strand-specific methylation info into context-dependent output files.
