@@ -32,6 +32,7 @@ ______________________________________________________
 --MaxInsert            ${params.MaxInsert}
 --ref_fa_index         ${params.ref_fa_index}
 --aligner              ${params.aligner}
+--skip_deduplication   ${params.skip_deduplication}
 --cytosine_report      ${params.cytosine_report}
 --comprehensive        ${params.comprehensive}
 
@@ -71,6 +72,7 @@ ______________________________________________________
 --MaxInsert            ${params.MaxInsert}
 --ref_fa_index         ${params.ref_fa_index}
 --aligner              ${params.aligner}
+--skip_deduplication   ${params.skip_deduplication}
 --cytosine_report      ${params.cytosine_report}
 --comprehensive        ${params.comprehensive}
 
