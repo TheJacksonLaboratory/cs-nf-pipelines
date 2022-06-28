@@ -18,27 +18,26 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   script:
   log.info "----- Collect RNA Sequence Metrics on: ${sampleID} -----"
-  if (params.read_prep == "stranded")
 
-    """
-    picard CollectRnaSeqMetrics \
-    I=${bam} \
-    O=${sampleID}_picard_aln_metrics.txt \
-    REF_FLAT=${params.ref_flat} \
-    RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
-    STRAND=SECOND_READ_TRANSCRIPTION_STRAND \
-    CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
-    """
+  if (params.read_prep == "reverse_stranded") {
+    strand_setting = "SECOND_READ_TRANSCRIPTION_STRAND"
+  }
 
-  else if (params.read_prep != "stranded")
+  if (params.read_prep == "forward_stranded") {
+    strand_setting = "FIRST_READ_TRANSCRIPTION_STRAND"
+  }
 
-    """
-    picard CollectRnaSeqMetrics \
-    I=${reordered_sorted_bam} \
-    O=${sampleID}_picard_aln_metrics.txt \
-    REF_FLAT=${params.ref_flat} \
-    RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
-    STRAND=NONE \
-    CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
-    """
+  if (params.read_prep == "non_stranded") {
+    strand_setting = "NONE"
+  }
+
+  """
+  picard CollectRnaSeqMetrics \
+  I=${bam} \
+  O=${sampleID}_picard_aln_metrics.txt \
+  REF_FLAT=${params.ref_flat} \
+  RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
+  STRAND=${strand_setting} \
+  CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
+  """
 }
