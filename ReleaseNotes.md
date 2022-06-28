@@ -22,6 +22,8 @@ NONE
 ### Module Changes:
 
 1. Trimmomatic Trim stub module removed. 
+2. RSEM - forward stranded option added. 
+3. Picard Collect RNAseqMetrics - forward strand option added. 
 
 ## Release 0.1.2 
 
