@@ -1,5 +1,7 @@
 process TRIM_FASTQ {
-  cpus = 1
+  cpus 8
+  memory 10.GB
+  time '20:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'cutadapt' }", pattern: "*.log", mode: 'copy'
   container 'quay.io/biocontainers/cutadapt:2.3--py37h14c3975_0'
@@ -13,6 +15,9 @@ process TRIM_FASTQ {
 
   script:
   log.info "----- Cutadapt Running on: ${sampleID} -----"
+
+  paired_end = params.read_type == 'PE' ?  "-p ${sampleID}_R2_paired_trimmed.fq" : ''
+
   """
   cutadapt \
   -a ${params.cutadaptAdapterR1} \
@@ -21,8 +26,8 @@ process TRIM_FASTQ {
   --quality-cutoff ${params.cutadaptQualCutoff} \
   -j $task.cpus \
   -o ${sampleID}_R1_paired_trimmed.fq \
-  -p ${sampleID}_R2_paired_trimmed.fq \
-  ${fq_reads[0]} ${fq_reads[1]} \
+  ${paired_end} \
+  ${fq_reads} \
   > ${sampleID}_cutadapt.log \
   2>&1
   """

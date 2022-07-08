@@ -1,7 +1,9 @@
-process CHAIN_FILTER_READS_B6 {
+process CHAIN_FILTER_READS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 2
+  memory 4.GB
+  time = '10:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.log", mode: 'copy'
   container 'broadinstitute/gatk:4.2.4.1'

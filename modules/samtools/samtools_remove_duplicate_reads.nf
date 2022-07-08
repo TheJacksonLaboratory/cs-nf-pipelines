@@ -1,9 +1,11 @@
-process RM_DUPES_READS {
+process REMOVE_DUPLICATE_READS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 2
+  memory 4.GB
+  time '10:00:00'
 
-  container 'library://taihpw/collection/samtools-atac:1.3.1'
+  container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
   tuple val(sampleID), file(marked_bam_file)
@@ -15,6 +17,7 @@ process RM_DUPES_READS {
 
   script:
   log.info "----- Samtools Removing PCR Duplicates on: ${sampleID} -----"
+  // Exclude reads flagged as pcr or optical duplicates (0x400), marked with bit flag 1024 in the BAM.
   """
   samtools view -h -b -F 1024 ${marked_bam_file} > ${sampleID}.sorted.rmDup.bam
 

@@ -1,10 +1,12 @@
 process ALIGN_TRIMMED_FASTQ {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 16
+  memory 30.GB
+  time '48:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bowtie2' }", pattern: "*.log", mode: 'copy'
-  container 'docker://biocontainers/bowtie2:v2.4.1_cv1'
+  container 'biocontainers/bowtie2:v2.4.1_cv1'
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -15,9 +17,10 @@ process ALIGN_TRIMMED_FASTQ {
 
   script:
   log.info "----- Bowtie2 Running on: ${sampleID} -----"
+  String options = params.bowtieVSensitive  == 'true' ? '--very-sensitive' : ''
   """
   bowtie2 \
-  --very-sensitive \
+  ${options} \
   -X ${params.bowtieMaxInsert} \
   -q \
   -p $task.cpus \

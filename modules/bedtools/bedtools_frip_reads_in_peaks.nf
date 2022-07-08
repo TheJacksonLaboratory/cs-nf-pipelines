@@ -1,7 +1,9 @@
 process FRIP_READS_IN_PEAKS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 2
+  memory 4.GB 
+  time '04:00:00'
 
   container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'
 

@@ -1,7 +1,9 @@
 process FEATURE_COUNTS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 4
+  memory 4.GB
+  time '10:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'subread' }", pattern: "*_peaks_countMatrix.txt", mode: 'copy'
   container 'quay.io/biocontainers/subread:1.6.4--h84994c4_1'

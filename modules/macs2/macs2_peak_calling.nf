@@ -1,7 +1,9 @@
 process PEAK_CALLING {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 2
+  memory 10.GB
+  time '10:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'macs2' }", pattern: "*_peaks.narrowPeak", mode: 'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'macs2' }", pattern: "*_summits.bed", mode: 'copy'
@@ -20,11 +22,12 @@ process PEAK_CALLING {
 
   script:
   log.info "----- Performing Peak Calling on on ${sampleID} -----"
+  String genome = params.gen_org == 'human' ? 'hs' : 'mm'
   """
   macs2 callpeak \
   -f BAMPE \
   --nomodel \
-  -g ${params.g} \
+  -g ${genome} \
   --keep-dup all \
   --cutoff-analysis \
   --tempdir ${params.tmpdir} \

@@ -1,9 +1,11 @@
-process CHAIN_CONVERT_PEAK_B6 {
+process CHAIN_CONVERT_PEAK {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 1
+  memory 10.GB
+  time '10:00:00'
 
-  container 'library://taihpw/collection/g2gtools-atac:0.1.31'
+  container 'quay.io/jaxcompsci/g2gtools:0.1.31'
 
   input:
   tuple val(sampleID), file(bam_shifted)
@@ -14,7 +16,7 @@ process CHAIN_CONVERT_PEAK_B6 {
   when: params.chain != null
 
   script:
-  log.info "----- Converting Peak Coordinates to B6 on ${sampleID} -----"
+  log.info "----- Converting Peak Coordinates to Reference on ${sampleID} -----"
   """
   g2gtools convert \
   -r -f bam -c ${params.chain} \

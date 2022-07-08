@@ -1,7 +1,9 @@
 process FRAG_LEN_PLOT {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 1
+  memory 4.GB
+  time '04:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rstudio' }", pattern: "*fraglen_plot.pdf", mode: 'copy'
   container 'quay.io/jaxcompsci/rstudio:4.2.0' 

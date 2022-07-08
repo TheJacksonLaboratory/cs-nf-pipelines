@@ -1,11 +1,13 @@
 process LOG_PARSER {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 1
+  memory 4.GB
+  time '04:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'logparser' }", pattern: "*.summary_QC_metrics.txt", mode: 'copy'
 
-  container 'docker://python:3.8.10'
+  container 'python:3.8.10'
 
   input:
   tuple val(sampleID), file(log_cutadapt)

@@ -1,7 +1,9 @@
 process BAM_COVERAGE_BIGWIG {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 8
+  memory 10.GB
+  time '04:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'deeptools' }", pattern: "*.bigwig", mode: 'copy'
   container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
@@ -19,8 +21,8 @@ process BAM_COVERAGE_BIGWIG {
   --numberOfProcessors $task.cpus \
   --binSize 10 \
   --normalizeUsing RPGC \
-  --effectiveGenomeSize 2652783500 \
-  --bam *filtered.shifted.mm10.bam \
+  --effectiveGenomeSize ${params.effective_genome_size} \
+  --bam ${processed_bams[0]} \
   --outFileFormat bigwig \
   --outFileName ${sampleID}.bigwig
   """

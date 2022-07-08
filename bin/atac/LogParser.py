@@ -43,7 +43,7 @@ for file in glob.glob("*bowtie2.log"):
 
 print("----Duplication Metric Log----")
 
-for file in glob.glob("*sorted.metrics"):
+for file in glob.glob("*sorted.metrics.txt"):
     with open(file) as f:
         for line in islice(f, 7, 8):
             input_reads = line.split(sep='\t')[8]

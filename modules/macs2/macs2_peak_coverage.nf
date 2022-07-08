@@ -2,6 +2,8 @@ process PEAK_COVERAGE {
   tag "$sampleID"
 
   cpus = 1
+  memory 1.GB
+  time '01:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bash-utils' }", pattern: "*_peaks.narrowPeak.*", mode: 'copy'
   container 'quay.io/biocontainers/macs2:2.2.7.1--py39hbf8eff0_4'  

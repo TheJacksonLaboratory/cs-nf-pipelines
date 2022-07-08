@@ -1,7 +1,9 @@
-process FILTER_RMMULTI_SIEVE {
+process FILTER_REMOVE_MULTI_SIEVE {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 8
+  memory 4.GB
+  time '04:00:00'
 
   container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
 

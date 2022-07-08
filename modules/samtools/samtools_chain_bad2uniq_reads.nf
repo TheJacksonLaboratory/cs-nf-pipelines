@@ -1,9 +1,11 @@
 process CHAIN_BAD2UNIQ_READS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 1
+  memory 4.GB
+  time '04:00:00'
 
-  container 'library://taihpw/collection/samtools-atac:1.3.1'
+  container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
   tuple val(sampleID), file(bad_reads)
@@ -14,7 +16,8 @@ process CHAIN_BAD2UNIQ_READS {
   when: params.chain != null
 
   shell:
-  log.info "----- Removing 'bad reads' from bam file on ${sampleID} -----"
+  log.info "----- Getting 'bad reads' from bam file on ${sampleID} -----"
+  // Get unique 'bad read names' from bam file using gatk ValidateSamFile out results
   '''
   cat !{bad_reads} \
   | awk '{print $5}' \

@@ -1,7 +1,10 @@
 process CALC_PBC_METRICS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 4
+  memory 20.GB    
+  time = '10:00:00' 
+
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*.pbc.qc", mode: 'copy'
   container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'

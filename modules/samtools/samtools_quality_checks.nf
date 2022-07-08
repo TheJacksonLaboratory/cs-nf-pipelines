@@ -1,10 +1,12 @@
 process QUALITY_CHECKS {
   tag "$sampleID"
 
-  cpus = 1
+  cpus 2
+  memory 4.GB
+  time '04:00:00'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern: "*.fragment_length_count.txt", mode: 'copy'
-  container 'library://taihpw/collection/samtools-atac:1.3.1'
+  container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
   tuple val(sampleID), file(sort_rm_filter_bam)
@@ -15,6 +17,7 @@ process QUALITY_CHECKS {
   script:
   log.info "----- Quality checks on ${sampleID} -----"
   log.info "----- Fragment/Insert size on ${sampleID} -----"
+  // Get the fragment length count from bam file for Quality Checks.
   """
   samtools view \
   -@ $task.cpus ${sort_rm_filter_bam[0]} \
