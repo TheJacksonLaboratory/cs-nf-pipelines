@@ -14,17 +14,15 @@ cd $SLURM_SUBMIT_DIR
 module use --append /projects/omics_share/meta/modules
 module load nextflow
 
-
-
 # RUN PIPELINE
 nextflow ../main.nf \
 --workflow atac \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
---effective_genome_size <EFFECTIVE_GENOME_SIZE> \
---bowtieIndex <PATH_TO_YOUR_BOWTIE_INDEX> \
---chain <PATH_TO_YOUR_CHAIN_FILE> \
+--effective_genome_size 2652783500 \
+--bowtieIndex '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bowtie2/Mus_musculus.GRCm38.dna.primary_assembly.fa' \
+--chain '' \
 --pubdir '/fastscratch/outputDir' \
 -w '/fastscratch/outputDir/work' \
 --comment "This script will run atac sequencing on mouse samples using default mm10"
