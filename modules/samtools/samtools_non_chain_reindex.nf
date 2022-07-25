@@ -5,7 +5,7 @@ process NON_CHAIN_REINDEX {
   memory 8.GB
   time '10:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern: "*.filtered.shifted.*", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.filtered.shifted.*", mode: 'copy'
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:

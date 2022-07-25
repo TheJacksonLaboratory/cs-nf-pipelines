@@ -5,7 +5,7 @@ process CHAIN_FILTER_READS {
   memory 4.GB
   time = '10:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.log", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'gatk' }", pattern: "*.log", mode: 'copy'
   container 'broadinstitute/gatk:4.2.4.1'
 
   input:

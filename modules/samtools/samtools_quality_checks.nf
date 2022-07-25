@@ -5,7 +5,7 @@ process QUALITY_CHECKS {
   memory 4.GB
   time '04:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern: "*.fragment_length_count.txt", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'samtools' }", pattern: "*.fragment_length_count.txt", mode: 'copy'
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:

@@ -19,7 +19,7 @@ include {REMOVE_DUPLICATE_READS} from '../modules/samtools/samtools_remove_dupli
 include {CALC_MTDNA_FILTER_CHRM} from '../modules/samtools/samtools_calc_mtdna_filter_chrm'
 include {FILTER_REMOVE_MULTI_SHIFT} from '../modules/samtools/samtools_filter_remove_multi_shift'
 include {FILTER_REMOVE_MULTI_SIEVE} from '../modules/deeptools/deeptools_filter_remove_multi_sieve'
-include {CHAIN_CONVERT_PEAK} from '../modules/g2gtools/g2gtools_chain_convert_peak'
+include {CHAIN_CONVERT} from '../modules/g2gtools/g2gtools_chain_convert_peak'
 include {CHAIN_EXTRACT_BADREADS} from '../modules/gatk/gatk_chain_extract_badreads'
 include {CHAIN_BAD2UNIQ_READS} from '../modules/samtools/samtools_chain_bad2uniq_reads'
 include {CHAIN_FILTER_READS} from '../modules/gatk/gatk_chain_filter_reads'
@@ -121,10 +121,11 @@ workflow ATAC {
   // If Mouse
   if (params.gen_org=='mouse'){
     // Step 11: Convert peak coordinates
-    CHAIN_CONVERT_PEAK(SORT_SHIFTED_BAM.out[0])
+    //          Step occurs when chain != null || chain != false
+    CHAIN_CONVERT(SORT_SHIFTED_BAM.out[0])
 
     // Step 12: Sort bam by coordinates
-    SORT_LIFTOVER_BAM(CHAIN_CONVERT_PEAK.out[0], '')
+    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out[0], '')
 
     // Step 13: Extract a list of 'bad reads'
     CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out[0])
@@ -133,12 +134,13 @@ workflow ATAC {
     CHAIN_BAD2UNIQ_READS(CHAIN_EXTRACT_BADREADS.out.bad_reads)
 
     // Step 15: Filter list to unique names
-    CHAIN_FILTER_READS(SORT_ALIGN_TRIM.out[0], CHAIN_BAD2UNIQ_READS.out.uniq_reads)
+    CHAIN_FILTER_READS(SORT_LIFTOVER_BAM.out[0], CHAIN_BAD2UNIQ_READS.out.uniq_reads)
 
     // Step 16: Sort fixmate bam and filter mitochondrial reads
     CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out[0])
 
     // Step 17: Reference strain samples, filter mitochondrial, unplaced/unlocalized reads and reindex
+    //          Step occurs when chain == null || chain == false
     NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out[0])
 
     // Step 18 : Mix chain and non-chain

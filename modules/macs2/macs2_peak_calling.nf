@@ -7,7 +7,7 @@ process PEAK_CALLING {
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'macs2' }", pattern: "*_peaks.narrowPeak", mode: 'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'macs2' }", pattern: "*_summits.bed", mode: 'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'macs2' }", pattern: "*.log", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'macs2' }", pattern: "*.log", mode: 'copy'
   container 'quay.io/biocontainers/macs2:2.2.7.1--py39hbf8eff0_4'  
 
 

@@ -6,7 +6,7 @@ process CALC_PBC_METRICS {
   time = '10:00:00' 
 
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*.pbc.qc", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bedtools' }", pattern: "*.pbc.qc", mode: 'copy'
   container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'
 
   input:

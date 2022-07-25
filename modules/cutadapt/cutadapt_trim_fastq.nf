@@ -3,7 +3,7 @@ process TRIM_FASTQ {
   memory 10.GB
   time '20:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'cutadapt' }", pattern: "*.log", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'cutadapt' }", pattern: "*.log", mode: 'copy'
   container 'quay.io/biocontainers/cutadapt:2.3--py37h14c3975_0'
 
   input:

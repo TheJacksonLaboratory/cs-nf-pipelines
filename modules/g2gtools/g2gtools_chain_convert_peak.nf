@@ -1,4 +1,4 @@
-process CHAIN_CONVERT_PEAK {
+process CHAIN_CONVERT {
   tag "$sampleID"
 
   cpus 1
@@ -7,20 +7,23 @@ process CHAIN_CONVERT_PEAK {
 
   container 'quay.io/jaxcompsci/g2gtools:0.1.31'
 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'g2gtools' }", pattern: "*.log", mode:'copy'
+
   input:
   tuple val(sampleID), file(bam_shifted)
 
   output:
   tuple val(sampleID), file("*.tmp.mm10.ba*")
+  tuple val(sampleID), file("*g2gconvert.log")
 
   when: params.chain != null
 
   script:
-  log.info "----- Converting Peak Coordinates to Reference on ${sampleID} -----"
+  log.info "----- Converting Coordinates to Reference on ${sampleID} -----"
   """
   g2gtools convert \
   -r -f bam -c ${params.chain} \
   -i ${bam_shifted[0]} \
-  -o ${sampleID}.tmp.mm10.bam
+  -o ${sampleID}.tmp.mm10.bam 2> ${sampleID}_g2gconvert.log
   """
 }
