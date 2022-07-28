@@ -52,15 +52,26 @@ process RSEM_ALIGNMENT_EXPRESSION {
     stype=""
     trimmedfq="${reads[0]}"
   }
+  if (params.rsem_aligner == "bowtie2"){
+    aligner="--bowtie2"
+    outbam="--output-genome-bam"
+    seed_length="--seed-length ${params.seed_length}"
+  }
+  if (params.rsem_aligner == "star") {
+    aligner="--star"
+    outbam="--star-output-genome-bam"
+    seed_length=""
+  }
+
   """
   rsem-calculate-expression -p $task.cpus \
   ${prob} \
   ${stype} \
   ${frag} \
-  --${params.rsem_aligner} \
+  ${aligner} \
   --append-names \
-  --seed-length ${params.seed_length} \
-  --output-genome-bam \
+  ${seed_length} \
+  ${outbam} \
   ${trimmedfq} \
   ${params.rsem_ref_prefix} \
   ${sampleID} \
