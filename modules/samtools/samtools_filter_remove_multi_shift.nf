@@ -5,7 +5,7 @@ process FILTER_REMOVE_MULTI_SHIFT {
   memory 10.GB
   time '10:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'samtools' }", pattern: "*.sorted.rmDup.rmChrM.rmMulti.filtered.ba*", mode: 'copy' 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.sorted.rmDup.rmChrM.rmMulti.filtered.ba*", mode: 'copy' 
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
