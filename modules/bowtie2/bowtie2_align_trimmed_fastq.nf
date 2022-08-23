@@ -24,7 +24,7 @@ process ALIGN_TRIMMED_FASTQ {
   -X ${params.bowtieMaxInsert} \
   -q \
   -p $task.cpus \
-  -x ${params.bowtieIndex} \
+  -x ${params.bowtie2Index} \
   -1 ${fq_reads[0]} \
   -2 ${fq_reads[1]} \
   -S ${sampleID}.sam \
