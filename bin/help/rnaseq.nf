@@ -15,7 +15,7 @@ Parameter | Default | Description
 
 --gen_org | mouse | Options: mouse and human.
 
---read_prep | 'stranded' | Options: 'stranded' or 'non_stranded'. This determines how RNA quantification is done, and statistics are calculated.
+--read_prep | 'reverse_stranded' | Options: 'reverse_stranded', 'forward_stranded' or 'non_stranded'. This determines how RNA quantification is done, and statistics are calculated. It is based on the library strandedness. 
 
 --min_pct_hq_reads| '0.0' | The minimum percent of high-quality reads passing when trimming the fastq files.
 --rsem_ref_files | /projects/omics_share/mouse/GRCm38/transcriptome/indices/ensembl/v102/bowtie2 | Pre-compiled index files. Refers to human indices when --gen_org human. JAX users should not change this, unless using STAR indices.
