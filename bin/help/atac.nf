@@ -19,7 +19,7 @@ Parameter | Default | Description
                         
 --chain | null | The default value for Mouse Reference Strain -  g2gtools chain file to adjust coordinates to reference                                                              
 
---bowtieIndex | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bowtie2/Mus_musculus.GRCm38.dna.primary_assembly.fa' | The default value for mm10. 
+--bowtie2Index | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bowtie2/Mus_musculus.GRCm38.dna.primary_assembly.fa' | The default value for mm10. 
               | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bowtie2/hg38_noalt'.
               | Pre-compiled BOWTIE2 index files, points to human reference when --gen_org human.
 

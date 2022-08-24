@@ -20,7 +20,7 @@ ______________________________________________________
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
---bowtieIndex                   ${params.bowtieIndex}
+--bowtie2Index                  ${params.bowtie2Index}
 --bowtieMaxInsert               ${params.bowtieMaxInsert}
 --bowtieVSensitive              ${params.bowtieVSensitive}
 --cutadaptMinLength             ${params.cutadaptMinLength}
@@ -55,7 +55,7 @@ ______________________________________________________
 --organize_by                   ${params.organize_by}
 --effective_genome_size         ${params.effective_genome_size} 
 --chain                         ${params.chain}
---bowtieIndex                   ${params.bowtieIndex}
+--bowtie2Index                  ${params.bowtie2Index}
 --bowtieMaxInsert               ${params.bowtieMaxInsert}
 --bowtieVSensitive              ${params.bowtieVSensitive}
 --cutadaptMinLength             ${params.cutadaptMinLength}
