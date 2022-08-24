@@ -44,156 +44,7 @@ if (params.seqmode == 'pacbio') {
 	
 	ch_pbsvTandem = params.pbsv_tandemrepeats? Channel.value(file(params.pbsv_tandemrepeats)) : null
 
-	// CALLERS
-
-	// Sniffels
-	
-	// https://github.com/fritzsedlazeck/Sniffles
-	// Note: Sniffles prefers NGMLR based alignment
-	
-	// https://github.com/philres/ngmlr
-	
-	// ALIGN
-	// ngmlr -t 4 -r reference.fasta -q reads.fastq -o test.sam
-	
-	process NGMLRmap{
-		tag "$sample_name"
-		label 'cpus_24'
-		label 'ngmlr'
-		stageInMode 'copy'
-		input:
-			val name_string from params.names
-			file fasta from ch_fasta
-			file fq1 from ch_fastq1
-		output:
-			file "${name_string}.sam" into ngmlr_sam
-		script:
-		"""
-		ngmlr -t ${task.cpus} --bam-fix -r ${fasta} -q ${fq1} -o ${name_string}.sam
-		"""
-	}	
-	
-	
-	// SORT BAM
-		
-	process NGMLRsort{
-	  tag "$sample_name"
-	  publishDir "${params.outdir}/alignments", mode:'copy'
-	  label 'cpus_8'
-	  label 'samtools_1_9'
-	  input:
-	  	val name_string from params.names
-		file sam from ngmlr_sam
-	  output:
-		file "${name_string}.ngmlr.aligned.bam" into ch_bam_map
-		file "${name_string}.ngmlr.aligned.bam.bai" into ch_bam_index
-	  script:
-	  """
-	  samtools sort --threads ${task.cpus} -m 30G ${sam} > ${name_string}.ngmlr.aligned.bam
-	  samtools index ${name_string}.ngmlr.aligned.bam
-	  """
-	}
-	
-	// For Oxford Nanopore run:
-
-	// ngmlr -t 4 -r reference.fasta -q reads.fastq -o test.sam -x ont
-	
-	
-	// CALL WITH SNIFFLES 
-	
-	process sniffles {
-		tag "$sample_name"
-		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
-		label 'cpus_8'
-		label 'sniffles'
-		input:
-			file bam from ch_bam_map
-		output:
-			file "*.vcf" into sniffles_vcf
-			path(vcf_path) into vcf_sniffles_path
-		script:
-			  """
-			  sniffles -m ${bam} -v sniffles_calls.vcf
-			  echo ${params.outdir}/unmerged_calls/sniffles_calls.vcf > vcf_path # for later merging
-			  """
-	}
-	
-	
-	// CALL WITH SVIM 
-	
-	process svim {
-		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
-		tag "$sample_name"
-		label 'cpus_8'
-		label 'svim'
-		input:
-			val name_string from params.names
-			file bam from ch_bam_map
-			file fasta from ch_fasta
-		output:
-			path "${name_string}_svim" into svim_output
-			file "svim_variants.vcf" into svim_vcf
-		script:
-			  """
-			  svim alignment ${name_string}_svim ${bam} ${fasta}
-			  cp ${name_string}_svim/variants.vcf svim_variants.vcf
-			  """
-	}
-	
-	
-	// CALL WITH CUTESV 
-	
-	if (params.pbmode == 'ccs') {
-		process cutesv_css {
-			tag "$sample_name"
-			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
-			label 'cpus_8'
-			label 'cutesv'
-			input:
-				file bam from ch_bam_map
-				file bai from ch_bam_index
-				file fasta from ch_fasta
-			output:
-				file "cutesv_calls.vcf" into cutesv_css_vcf
-			script:
-				  """
-				  cuteSV ${bam} ${fasta} cutesv_calls.vcf ./ \
-				  --threads ${task.cpus} \
-                  --max_cluster_bias_INS 1000 \
-                  --diff_ratio_merging_INS 0.9 \
-                  --max_cluster_bias_DEL 1000 \
-                  --diff_ratio_merging_DEL 0.5
-				  """
-		}
-	}
-	
-	if (params.pbmode == 'clr') {
-		process cutesv_clr {
-			tag "$sample_name"
-			publishDir "${params.outdir}/unmerged_calls", mode:'copy'
-			label 'cpus_8'
-			label 'cutesv'
-			input:
-				file bam from ch_bam_map
-				file bai from ch_bam_index
-				file fasta from ch_fasta
-			output:
-				file "cutesv_calls.vcf" into cutesv_clr_vcf
-			script:
-				  """
-				  cuteSV ${bam} ${fasta} cutesv_calls.vcf ./ \
-				  --threads ${task.cpus} \
-                  --max_cluster_bias_INS 100 \
-                  --diff_ratio_merging_INS 0.3 \
-                  --max_cluster_bias_DEL 200 \
-                  --diff_ratio_merging_DEL 0.5
-				  """
-		}
-	}
-
 	// PBSV
-	
-	// NOTE: PBSV prefers PBMM2 based alignments
 	
 	// https://github.com/PacificBiosciences/pbmm2
 
@@ -348,7 +199,26 @@ if (params.seqmode == 'pacbio') {
 			echo "${params.outdir}/unmerged_calls/pbsv_calls.vcf" > vcf_path
 			"""
 		}
-	}	
+	}
+
+	// CALL WITH SNIFFLES
+
+	process sniffles {
+		tag "$sample_name"
+		publishDir "${params.outdir}/unmerged_calls", mode:'copy'
+		label 'cpus_8'
+		label 'sniffles'
+		input:
+			file bam from pbmm2_bam
+		output:
+			file "*.vcf" into sniffles_vcf
+			path(vcf_path) into vcf_sniffles_path
+		script:
+			"""
+			sniffles -m ${bam} -v sniffles_calls.vcf
+			echo ${params.outdir}/unmerged_calls/sniffles_calls.vcf > vcf_path # for later merging
+			"""
+	}
 	
 	process prep_vcf_list{
     tag "$sample_name"
