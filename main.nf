@@ -79,6 +79,7 @@ if (params.seqmode == 'pacbio') {
 
 			output:
 				file "${name_string}.pbmm2.aligned.bam" into pbmm2_bam_css
+				file "${name_string}.pbmm2.aligned.bam.bai" into pbmm2_bai_css
 			script:
 			"""
 			pbmm2 align ${mmi} ${fq1} ${name_string}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
@@ -87,7 +88,8 @@ if (params.seqmode == 'pacbio') {
 		// NOTE: removed `--rg \$(cat $rgr)`. It wasn't working. 
 		// NOTE: removed `file rgr from readgroup` from inputs
 	
-		pbmm2_bam = pbmm2_bam_css 
+		pbmm2_bam = pbmm2_bam_css
+		pbmm2_bai = pbmm2_bai_css
 	
 	}
 	
@@ -209,13 +211,15 @@ if (params.seqmode == 'pacbio') {
 		label 'cpus_8'
 		label 'sniffles'
 		input:
-			file bam from pbmm2_bam
+			val name_string from params.names
+			file "${name_string}.bam" from pbmm2_bam
+			file "${name_string}.bam.bai" from pbmm2_bai
 		output:
 			file "*.vcf" into sniffles_vcf
 			path(vcf_path) into vcf_sniffles_path
 		script:
 			"""
-			sniffles -m ${bam} -v sniffles_calls.vcf
+			sniffles --input "${name_string}.bam" --vcf sniffles_calls.vcf
 			echo ${params.outdir}/unmerged_calls/sniffles_calls.vcf > vcf_path # for later merging
 			"""
 	}
