@@ -3,8 +3,8 @@ process BUILDPBMM2INDEX {
     tag "$sampleID"
 
     cpus 8
-    memory 250.GB
-    time 72.h
+    memory { 40.GB * task.attempt }
+    time { 2.h * task.attempt }
     maxRetries 1
     errorStrategy 'retry'
 
@@ -26,8 +26,8 @@ process PBMM2MAPCCS {
     tag "$sampleID"
 
     cpus 8
-    memory 250.GB
-    time 72.h
+    memory { 40.GB * task.attempt }
+    time { 8.h * task.attempt }
     maxRetries 1
     errorStrategy 'retry'
 
@@ -38,7 +38,7 @@ process PBMM2MAPCCS {
         path(fq1)
         path(pbmm2_index)
     output:
-        tuple val(sampleID), file(pbmm2_bam), file(pbmm2_bai), emit: pbmm2_ccs 
+        tuple val(sampleID), file("${sampleID}.pbmm2.aligned.bam"), file("${sampleID}.pbmm2.aligned.bam.bai"), emit: pbmm2_ccs 
     script:
         """
 		pbmm2 align ${pbmm2_index} ${fq1} ${sampleID}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
@@ -50,8 +50,8 @@ process PBMM2MAPCLR {
     tag "$sampleID"
 
     cpus 8
-    memory 250.GB
-    time 72.h
+    memory { 40.GB * task.attempt }
+    time { 8.h * task.attempt }
     maxRetries 1
     errorStrategy 'retry'
 
@@ -62,7 +62,7 @@ process PBMM2MAPCLR {
         path(fq1)
         path(pbmm2_index)
     output:
-        tuple val(sampleID), file(pbmm2_bam), file(pbmm2_bai), emit: pbmm2_clr
+        tuple val(sampleID), file("${sampleID}.pbmm2.aligned.bam"), file("${sampleID}.pbmm2.aligned.bam.bai"), emit: pbmm2_clr
     script:
         """
         pbmm2 align ${mmi} ${fq1} ${sampleID}.pbmm2.aligned.bam --median-filter --sort -j ${task.cpus}
