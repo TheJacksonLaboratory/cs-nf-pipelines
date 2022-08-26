@@ -12,9 +12,9 @@ process BUILDPBMM2INDEX {
 
     input:
         val(sampleID)
-        file(fasta)
+        path(fasta)
     output:
-        file("${fasta.baseName}.mmi"), emit: pbmm2_index
+        path "${fasta.baseName}.mmi", emit: pbmm2_index
     script:
         """
         pbmm2 index ${fasta} ${fasta.baseName}.mmi
@@ -35,13 +35,13 @@ process PBMM2MAPCCS {
 
     input:
         val(sampleID)
-        file(fq1)
-        file(mmi)
+        path(fq1)
+        path(pbmm2_index)
     output:
         tuple val(sampleID), file(pbmm2_bam), file(pbmm2_bai), emit: pbmm2_ccs 
     script:
         """
-		pbmm2 align ${mmi} ${fq1} ${$sampleID}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
+		pbmm2 align ${pbmm2_index} ${fq1} ${sampleID}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
 		"""
         
 }
@@ -59,12 +59,12 @@ process PBMM2MAPCLR {
 
     input:
         val(sampleID)
-        file(fq1)
-        file(mmi)
+        path(fq1)
+        path(pbmm2_index)
     output:
         tuple val(sampleID), file(pbmm2_bam), file(pbmm2_bai), emit: pbmm2_clr
     script:
         """
-        pbmm2 align ${mmi} ${fq1} ${name_string}.pbmm2.aligned.bam --median-filter --sort -j ${task.cpus}
+        pbmm2 align ${mmi} ${fq1} ${sampleID}.pbmm2.aligned.bam --median-filter --sort -j ${task.cpus}
         """
 }
