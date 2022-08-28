@@ -27,7 +27,7 @@ process PBMM2MAPCCS {
 
     cpus 8
     memory { 40.GB * task.attempt }
-    time { 8.h * task.attempt }
+    time { 12.h * task.attempt }
     maxRetries 1
     errorStrategy 'retry'
 
@@ -41,8 +41,8 @@ process PBMM2MAPCCS {
         tuple val(sampleID), file("${sampleID}.pbmm2.aligned.bam"), file("${sampleID}.pbmm2.aligned.bam.bai"), emit: pbmm2_ccs 
     script:
         """
-		pbmm2 align ${pbmm2_index} ${fq1} ${sampleID}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
-		"""
+        pbmm2 align ${pbmm2_index} ${fq1} ${sampleID}.pbmm2.aligned.bam --preset CCS --sort -j ${task.cpus}
+        """
         
 }
 
