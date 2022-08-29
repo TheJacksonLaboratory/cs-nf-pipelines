@@ -196,13 +196,13 @@ process ANNOTATEPACBIO{
         tuple val(sampleID), file(survivor_vcf)
         tuple val(sampleID), file("ins.exons.bed"), file("del.exons.bed"), file("dup.exons.bed"), file("tra.exons.bed"), file("inv.exons.bed")
     output:
-        file("${sampleID}.mergedCalls.InExon.PS.vcf")
+        file("${sampleID}_Pacbio_PS_merged_variants.vcf")
     script:
     """
     /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${survivor_vcf} \
         -i ins.exons.bed -d del.exons.bed \
         -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
-        -o ${sampleID}.mergedCalls.InExon.PS.vcf
+        -o ${sampleID}_Pacbio_PS_merged_variants.vcf
     """
 }
 
@@ -224,12 +224,12 @@ process ANNOTATEILLUMINA{
         tuple val(sampleID), file(survivor_vcf)
         tuple val(sampleID), file("ins.exons.bed"), file("del.exons.bed"), file("dup.exons.bed"), file("tra.exons.bed"), file("inv.exons.bed")
     output:
-        file("${sampleID}.mergedCalls.InExon.BDLM.vcf")
+        file("${sampleID}_Illumina_BDLM_merged_variants.vcf")
     script:
     """
     /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${survivor_vcf} \
         -i ins.exons.bed -d del.exons.bed \
         -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
-        -o ${sampleID}.mergedCalls.InExon.BDLM.vcf
+        -o ${sampleID}_Illumina_BDLM_merged_variants.vcf
     """
 }
