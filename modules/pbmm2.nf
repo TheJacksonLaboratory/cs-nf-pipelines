@@ -33,6 +33,8 @@ process PBMM2MAPCCS {
 
     container 'quay.io/biocontainers/pbmm2:1.9.0--h9ee0642_0'
 
+    publishDir "${params.pubdir}/alignments", pattern: "${sampleID}.pbmm2.aligned.bam*", mode: "copy"
+
     input:
         val(sampleID)
         path(fq1)
