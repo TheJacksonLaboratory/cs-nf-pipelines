@@ -43,6 +43,8 @@ params.threads = 8
 params.keep_intermediate = false
 */
 
+params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
+
 if (params.workflow == "pacbio_ccs") {
 	include {PACBIO_CCS} from "./workflows/pacbio_ccs"
 }
