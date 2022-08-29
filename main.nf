@@ -23,7 +23,7 @@ def helpMessage() {
 }
 
 // Show help message
-//if (params.help) exit 0, helpMessage()
+if (params.help) exit 0, helpMessage()
 
 // fasta can be either given as a genome name in iGenomes or as a fasta file
 // params.fasta will be changed only if it's not previously defined
