@@ -3,14 +3,14 @@ nextflow.enable.dsl=2
 
 // import modules
 //include {help} from '../bin/help/rnaseq'
-include {param_log} from '../bin/log/pacbio'
+include {param_log} from "${projectDir}/bin/log/pacbio"
 include {BUILDPBMM2INDEX;
-         PBMM2MAPCCS} from "../modules/pbmm2"
+         PBMM2MAPCCS} from "${projectDir}/modules/pbmm2"
 
 include {DISCOVERTANDEM;
-         CALLCCS} from "../modules/pbsv"
+         CALLCCS} from "${projectDir}/modules/pbsv"
 
-include {SNIFFLES} from "../modules/sniffles"
+include {SNIFFLES} from "${projectDir}/modules/sniffles"
 
 include {MERGEPACBIO;
          ANNOTATE;
@@ -18,7 +18,7 @@ include {MERGEPACBIO;
          PREPBEDS;
          INTERSECTBEDS;
          SUMMARIZEINTERSECTIONS;
-         ANNOTATEPACBIO} from "../modules/survivor"
+         ANNOTATEPACBIO} from "${projectDir}/modules/survivor"
 
 // log paramater info
 param_log()
