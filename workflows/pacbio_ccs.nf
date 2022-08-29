@@ -2,14 +2,26 @@
 nextflow.enable.dsl=2
 
 // import modules
+//include {help} from '../bin/help/rnaseq'
+include {param_log} from '../bin/log/pacbio'
+include {BUILDPBMM2INDEX;
+         PBMM2MAPCCS} from "../modules/pbmm2"
 
-include {BUILDPBMM2INDEX} from "../modules/pbmm2"
+include {DISCOVERTANDEM;
+         CALLCCS} from "../modules/pbsv"
 
-include {PBMM2MAPCCS} from "../modules/pbmm2"
+include {SNIFFLES} from "../modules/sniffles"
 
-include {DISCOVERTANDEM} from "../modules/pbsv"
+include {MERGEPACBIO;
+         ANNOTATE;
+         SUMMARIZE;
+         PREPBEDS;
+         INTERSECTBEDS;
+         SUMMARIZEINTERSECTIONS;
+         ANNOTATEPACBIO} from "../modules/survivor"
 
-include {CALLCCS} from "../modules/pbsv"
+// log paramater info
+param_log()
 
 workflow PACBIO_CCS {
     // Step 1: Prepare index
@@ -24,4 +36,15 @@ workflow PACBIO_CCS {
 
     // Step 4: Call SV with Sniffles
     SNIFFLES(PBMM2MAPCCS.out.pbmm2_ccs)
+
+    // Step 5: SURVIVOR merge variant calls
+    MERGEPACBIO(CALLCCS.out.pbsv_vcf, SNIFFLES.out.sniffles_vcf, params.surv_dist, params.surv_supp, params.surv_type, params.surv_strand, params.surv_min)
+
+    // Step 6: Annotate SURVIVOR results
+    ANNOTATE(MERGEPACBIO.out.survivor_vcf, "pacbio")
+    SUMMARIZE(MERGEPACBIO.out.survivor_vcf)
+    PREPBEDS(ANNOTATE.out.annot, SUMMARIZE.out.summary)
+    INTERSECTBEDS(PREPBEDS.out.sv_beds)
+    SUMMARIZEINTERSECTIONS(PREPBEDS.out.sv_beds, INTERSECTBEDS.out.intersected_beds, SUMMARIZE.out.summary, ANNOTATE.out.annot)
+    ANNOTATEPACBIO(MERGEPACBIO.out.survivor_vcf, INTERSECTBEDS.out.intersected_exons)
 }
