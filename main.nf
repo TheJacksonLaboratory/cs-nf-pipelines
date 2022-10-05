@@ -18,6 +18,9 @@ if (params.workflow == "rrbs"){
 if (params.workflow == "atac"){
   include {ATAC} from './workflows/atac'
 }
+if (params.workflow == "chipseq"){
+  include {CHIPSEQ} from './workflows/chipseq'
+}
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "rnaseq"){
@@ -34,5 +37,8 @@ workflow{
     }
   if (params.workflow == "atac"){
     ATAC()
+    } 
+  if (params.workflow == "chipseq"){
+    CHIPSEQ()
     } 
 }
