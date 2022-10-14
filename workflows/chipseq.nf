@@ -5,6 +5,7 @@ nextflow.enable.dsl=2
 include {CHECK_DESIGN} from '../modules/utility_modules/chipseq_check_design'
 include {SAMTOOLS_FAIDX} from '../modules/samtools/samtools_faidx'
 include {MAKE_GENOME_FILTER} from '../modules/utility_modules/chipseq_make_genome_filter'
+include {FASTQC} from '../modules/fastqc/fastqc'
 
 
 // main workflow
@@ -45,7 +46,8 @@ workflow CHIPSEQ {
   SAMTOOLS_FAIDX(ch_fasta)
   MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out, params.blacklist)
 
-
+  // Step 3: Fastqc
+  FASTQC(read_ch)
 
 
 }
