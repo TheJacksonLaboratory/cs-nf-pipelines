@@ -3,7 +3,8 @@ nextflow.enable.dsl=2
 
 // import modules
 include {CHECK_DESIGN} from '../modules/utility_modules/chipseq_check_design'
-
+include {SAMTOOLS_FAIDX} from '../modules/samtools/samtools_faidx'
+include {MAKE_GENOME_FILTER} from '../modules/utility_modules/chipseq_make_genome_filter'
 
 
 // main workflow
@@ -36,12 +37,15 @@ workflow CHIPSEQ {
       .map { row -> [ row.sample_id, row.control_id, row.antibody, row.replicatesExist.toBoolean(), row.multipleGroups.toBoolean() ] }
 
 
-  // Test to see if sample sheet inputs are OK.
+  // Reference genome
+  ch_fasta = file(params.fasta, checkIfExists: true)
 
-  println "\nChecking Sample Sheet Inputs : \n"
 
-  read_ch.view { "value: $it" }
-  control_ch.view { "value: $it" }
+  // Step 2: Make genome filter
+  SAMTOOLS_FAIDX(ch_fasta)
+  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out, params.blacklist)
+
+
 
 
 }
