@@ -28,10 +28,8 @@ include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
 include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from '../modules/picard/picard_collectalignmentsummarymetrics'
 include {PICARD_COLLECTWGSMETRICS} from '../modules/picard/picard_collectwgsmetrics'
-include {GATK_REALIGNERTARGETCREATOR} from '../modules/gatk/gatk_realignertargetcreator'
 include {GATK_BASERECALIBRATOR} from '../modules/gatk/gatk_baserecalibrator'
 include {GATK_APPLYBQSR} from '../modules/gatk/gatk_applybqsr'
-include {GATK_INDELREALIGNER} from '../modules/gatk/gatk_indelrealigner'
 include {GATK_MERGEVCF} from '../modules/gatk/gatk_mergevcf'
 include {GATK_MERGEVCF_LIST} from '../modules/gatk/gatk_mergevcf_list'
 include {GATK_VARIANTANNOTATOR} from '../modules/gatk/gatk_variantannotator'
@@ -108,15 +106,10 @@ workflow WGS {
   // Step 4: Variant Preprocessing - Part 1
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
-  // Step 5 Depricated in GATK 4
-  GATK_REALIGNERTARGETCREATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-  GATK_INDELREALIGNER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                      GATK_REALIGNERTARGETCREATOR.out.intervals)
-
   // If Human
   if (params.gen_org=='human'){
-    GATK_BASERECALIBRATOR(GATK_INDELREALIGNER.out.bam)
-    GATK_APPLYBQSR(GATK_INDELREALIGNER.out.bam,
+    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+    GATK_APPLYBQSR(PICARD_MARKDUPLICATES.out.dedup_bam,
                     GATK_BASERECALIBRATOR.out.table)
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
@@ -144,11 +137,11 @@ workflow WGS {
 
   // If Mouse
   if (params.gen_org=='mouse'){
-    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_INDELREALIGNER.out.bam)
-    PICARD_COLLECTWGSMETRICS(GATK_INDELREALIGNER.out.bam)
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
+    PICARD_COLLECTWGSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
 
     // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
-    data = GATK_INDELREALIGNER.out.bam.join(GATK_INDELREALIGNER.out.bai)
+    data = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
     
     // Read a list of contigs from parameters to provide to GATK as intervals
     // for HaplotypeCaller variant regions
