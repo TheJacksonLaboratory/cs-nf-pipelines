@@ -2,8 +2,10 @@ process GATK_APPLYBQSR {
   tag "$sampleID"
 
   cpus = 1
-  memory = 35.GB
+  memory = {40.GB * task.attempt}
   time = '12:00:00'
+  errorStrategy 'retry' 
+  maxRetries 1
 
   container 'broadinstitute/gatk:4.2.4.1'
 
