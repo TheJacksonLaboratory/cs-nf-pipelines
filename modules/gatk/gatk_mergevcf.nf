@@ -10,8 +10,7 @@ process GATK_MERGEVCF {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(snp_vcf)
-  tuple val(sampleID), file(indel_vcf)
+  tuple val(sampleID), file(snp_vcf), file(indel_vcf)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf

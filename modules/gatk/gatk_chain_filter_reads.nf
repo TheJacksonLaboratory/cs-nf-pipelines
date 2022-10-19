@@ -9,8 +9,8 @@ process CHAIN_FILTER_READS {
   container 'broadinstitute/gatk:4.2.4.1'
 
   input:
-  tuple val(sampleID), file(bam_sort_mm10)
-  file(ReadName_unique) 
+  tuple val(sampleID), file(bam_sort_mm10), file(ReadName_unique)
+  
 
   output:
   tuple val(sampleID), file("*.tmp2.mm10.ba*")

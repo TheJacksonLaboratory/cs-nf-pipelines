@@ -78,7 +78,6 @@ workflow RRBS {
     ch_BISMARK_DEDUPLICATION_multiqc = BISMARK_DEDUPLICATION.out.dedup_report
   }
 
-
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trim_stats.collect{it[1]}.ifEmpty([]))

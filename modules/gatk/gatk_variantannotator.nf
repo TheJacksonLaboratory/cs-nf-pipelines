@@ -12,8 +12,7 @@ process GATK_VARIANTANNOTATOR {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(sample_vcf)
-  tuple val(sampleID), file(snpeff_vcf)
+  tuple val(sampleID), file(sample_vcf), file(snpeff_vcf)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf

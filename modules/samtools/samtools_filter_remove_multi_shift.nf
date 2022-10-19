@@ -9,8 +9,7 @@ process FILTER_REMOVE_MULTI_SHIFT {
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
-  tuple val(sampleID), file(mtdna_bam_file)
-  tuple val(sampleID), file(mtdna_bai_file)
+  tuple val(sampleID), file(mtdna_bam_file), file(mtdna_bai_file)
 
   output:
   tuple val(sampleID), file("*.shift.tmp0.ba*")

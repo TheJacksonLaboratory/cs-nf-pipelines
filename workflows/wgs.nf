@@ -93,13 +93,15 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
+  bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
-    BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+    BWA_MEM(bwa_mem_mapping)
     PICARD_SORTSAM(BWA_MEM.out.sam)
   }
   if (params.gen_org=='human'){ 
-  	BWA_MEM_HLA(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  	BWA_MEM_HLA(bwa_mem_mapping)
   	PICARD_SORTSAM(BWA_MEM_HLA.out.bam)
   }
 
@@ -109,8 +111,11 @@ workflow WGS {
   // If Human
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-    GATK_APPLYBQSR(PICARD_MARKDUPLICATES.out.dedup_bam,
-                    GATK_BASERECALIBRATOR.out.table)
+    
+    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+
+    GATK_APPLYBQSR(apply_bqsr)
+
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
@@ -162,20 +167,18 @@ workflow WGS {
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
   }
 
+
   // SNP
-    GATK_SELECTVARIANTS_SNP(GATK_MERGEVCF_LIST.out.vcf,
-                            GATK_MERGEVCF_LIST.out.idx,
-                           'SNP')
-    GATK_VARIANTFILTRATION_SNP(GATK_SELECTVARIANTS_SNP.out.vcf,
-                               GATK_SELECTVARIANTS_SNP.out.idx,
-                              'SNP')
+    select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+    GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+    var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+    GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
+
   // INDEL
-    GATK_SELECTVARIANTS_INDEL(GATK_MERGEVCF_LIST.out.vcf,
-                              GATK_MERGEVCF_LIST.out.idx,
-                             'INDEL')
-    GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
-                                 GATK_SELECTVARIANTS_INDEL.out.idx,
-                                'INDEL')
+    select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+    GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+    var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+    GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
   // Cat Output to vcf-annotate* and add dbSNP annotations. 
     VCF_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf, 'SNP')
@@ -197,28 +200,34 @@ workflow WGS {
       SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
       SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
       
-  // Merge SNP and INDEL and Aggregate Stats
-    GATK_MERGEVCF(SNPEFF_ONEPERLINE_SNP.out.vcf,
-                  SNPEFF_ONEPERLINE_INDEL.out.vcf)
+    // Merge SNP and INDEL and Aggregate Stats
+      vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      GATK_MERGEVCF(vcf_files)
 
-    SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
+      SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
   }
 
   // If Mouse
   if (params.gen_org=='mouse'){
     // Merge SNP and INDEL
-    GATK_MERGEVCF(VCF_ANNOTATE_SNP.out.vcf,
-                  VCF_ANNOTATE_INDEL.out.vcf)
+
+    vcf_files = VCF_ANNOTATE_SNP.out.vcf.join(VCF_ANNOTATE_INDEL.out.vcf)
+
+    GATK_MERGEVCF(vcf_files)
+
     SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'gatk')
-    GATK_VARIANTANNOTATOR(GATK_MERGEVCF.out.vcf,
-                          SNPEFF.out.vcf)
+
+    vcf_files = GATK_MERGEVCF.out.vcf.join(SNPEFF.out.vcf)
+
+    GATK_VARIANTANNOTATOR(vcf_files)
+
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 
   }
 
+  agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt).join(PICARD_COLLECTWGSMETRICS.out.txt)
+
   // may replace with multiqc
-  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-                  PICARD_MARKDUPLICATES.out.dedup_metrics,
-                  PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt,
-                  PICARD_COLLECTWGSMETRICS.out.txt)
+  AGGREGATE_STATS(agg_stats)
+
 }

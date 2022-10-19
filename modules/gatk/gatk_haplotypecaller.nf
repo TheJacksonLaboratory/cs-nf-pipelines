@@ -10,8 +10,7 @@ process GATK_HAPLOTYPECALLER {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(bai)
+  tuple val(sampleID), file(bam), file(bai)
   val(gvcf)
 
   output:

@@ -12,8 +12,7 @@ process GATK_APPLYBQSR {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(table)
+  tuple val(sampleID), file(bam), file(table)
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam
