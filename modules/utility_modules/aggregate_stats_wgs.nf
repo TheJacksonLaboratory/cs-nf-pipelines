@@ -9,10 +9,7 @@ process AGGREGATE_STATS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
 
   input:
-  tuple val(sampleID), file(filter_stats)
-  tuple val(sampleID), file(picard_met)
-  tuple val(sampleID), file(algn_met)
-  tuple val(sampleID), file(cov_met)
+  tuple val(sampleID), file(filter_stats), file(picard_met), file(algn_met), file(cov_met)
 
   output:
   tuple val(sampleID), file("*summary_stats.txt"), emit: txt

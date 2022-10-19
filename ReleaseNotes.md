@@ -2,9 +2,12 @@
 
 ## Release 0.2.0
 
+**NOTE:** This release contains a patch for multi-sample processing. Multi-sample processing done to this release should be re-run with v0.2.0+
+
 ### Pipelines Added:
 
 1. RRBS - Mouse & Human
+2. ATAC - Mouse & Human
 
 ### Modules Added: 
 
@@ -14,16 +17,24 @@
 4. Bismark Deduplicator
 5. Bismark Methylation Extractor 
 6. MultiQC
+7. Bedtools functions for ATAC QC summary
+8. Bowtie2
+9. Cutadapt
+10. Deeptools bamcoverage and alignmentSieve
+11. g2gTools chain convert
+12. Macs2 ATAC peak calling and ATAC peak coverage
+13. Subread feature counts
 
 ### Pipeline Changes:
 
-NONE
+1. Multiple pipeline changes related to multi-sample patch. 
 
 ### Module Changes:
 
-1. Trimmomatic Trim stub module removed. 
-2. RSEM - forward stranded option added. 
-3. Picard Collect RNAseqMetrics - forward strand option added. 
+1. Multiple module changes related to multi-sample patch. 
+2. Trimmomatic Trim stub module removed. 
+3. RSEM - forward stranded option added. 
+4. Picard Collect RNAseqMetrics - forward strand option added. 
 
 ## Release 0.1.2 
 

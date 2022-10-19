@@ -95,7 +95,8 @@ workflow WES {
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
   // Step 3: BWA-MEM Alignment
-  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
+  bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  BWA_MEM(bwa_mem_mapping)
 
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
@@ -106,37 +107,35 @@ workflow WES {
 
     // Step 5: Variant Pre-Processing - Part 2
       GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-      GATK_APPLYBQSR(PICARD_MARKDUPLICATES.out.dedup_bam,
-                     GATK_BASERECALIBRATOR.out.table)
+
+      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+      GATK_APPLYBQSR(apply_bqsr)
 
     // Step 6: Variant Pre-Processing - Part 3
-      PICARD_COLLECTHSMETRICS(GATK_APPLYBQSR.out.bam,
-                              GATK_APPLYBQSR.out.bai)
+      collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      PICARD_COLLECTHSMETRICS(collect_metrics)
 
     // Step 7: Variant Calling
-      GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam,
-                           GATK_APPLYBQSR.out.bai,
-                          'variant')
-      GATK_HAPLOTYPECALLER_GVCF(GATK_APPLYBQSR.out.bam,
-                                GATK_APPLYBQSR.out.bai,
-                               'gvcf')
+      haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
+
+      haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
 
     // Step 8: Variant Filtration
       // SNP
-        GATK_SELECTVARIANTS_SNP(GATK_HAPLOTYPECALLER.out.vcf,
-                                GATK_HAPLOTYPECALLER.out.idx,
-                               'SNP')
-        GATK_VARIANTFILTRATION_SNP(GATK_SELECTVARIANTS_SNP.out.vcf,
-                               GATK_SELECTVARIANTS_SNP.out.idx,
-                              'SNP')
+        select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+        GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+
+        var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+        GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
       // INDEL
-      	GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER.out.vcf,
-                                  GATK_HAPLOTYPECALLER.out.idx,
-                                 'INDEL')
-        GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
-                                     GATK_SELECTVARIANTS_INDEL.out.idx,
-                                    'INDEL')
+        select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      	GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+
+        var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+        GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
     // Step 9: Post Variant Calling Processing - Part 1
       // SNP
@@ -152,38 +151,39 @@ workflow WES {
         SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
     // Step 10: Post Variant Calling Processing - Part 2
-      GATK_MERGEVCF(SNPEFF_ONEPERLINE_SNP.out.vcf,
-                    SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      GATK_MERGEVCF(vcf_files)
       
       SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
-
 
   } else if (params.gen_org=='mouse'){
 
     // Step 6: Variant Pre-Processing - Part 3
-      PICARD_COLLECTHSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam,
-                              PICARD_MARKDUPLICATES.out.dedup_bai)
+      collecths_metric = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+      PICARD_COLLECTHSMETRICS(collecths_metric)
+                              
 
     // Step 7: Variant Calling
-      GATK_HAPLOTYPECALLER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                           PICARD_MARKDUPLICATES.out.dedup_bai,
-                          'variant')
+      haplotype_caller = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+      GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
 
     // Step 8: Variant Filtration
-      GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
-                             GATK_HAPLOTYPECALLER.out.idx,
-                            'BOTH')
+      var_filter = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      GATK_VARIANTFILTRATION(var_filter, 'BOTH')
 
     // Step 9: Post Variant Calling Processing
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf, 'BOTH', 'gatk')
-      GATK_VARIANTANNOTATOR(GATK_VARIANTFILTRATION.out.vcf,
-                            SNPEFF.out.vcf)
+
+      merged_vcf_files = GATK_VARIANTFILTRATION.out.vcf.join(SNPEFF.out.vcf)
+      GATK_VARIANTANNOTATOR(merged_vcf_files)
+
       SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 
   }
 
+  agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
+
   // Step 11: Aggregate Stats
-  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-						      PICARD_COLLECTHSMETRICS.out.hsmetrics,
-						      PICARD_MARKDUPLICATES.out.dedup_metrics)
+  AGGREGATE_STATS(agg_stats)
+  
 }

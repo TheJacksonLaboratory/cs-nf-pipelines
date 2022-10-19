@@ -85,8 +85,9 @@ workflow RNASEQ {
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
 
   // Step 4: Picard Alignment Metrics
-  PICARD_ADDORREPLACEREADGROUPS(READ_GROUPS.out.read_groups,
-                                RSEM_ALIGNMENT_EXPRESSION.out.bam)
+  add_replace_groups = READ_GROUPS.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION.out.bam)
+  PICARD_ADDORREPLACEREADGROUPS(add_replace_groups)
+
   PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam)
 
   // Step 5: Picard Alignment Metrics
@@ -95,21 +96,28 @@ workflow RNASEQ {
   PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
 
   // Step 6: Summary Stats
-  RNA_SUMMARY_STATS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats,
-                    QUALITY_STATISTICS.out.quality_stats,
-                    PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+
+  agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+
+  RNA_SUMMARY_STATS(agg_stats)
 
   // If gen_org human
   if ("${params.gen_org}" == 'human'){
     // Step 7: GATK Coverage Stats
       // CTP
-        GATK_DEPTHOFCOVERAGE_CTP(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.ctp_genes)
+        depth_of_coverage_ctp = PICARD_SORTSAM.out.bam.join(PICARD_SORTSAM.out.bai)        
+        GATK_DEPTHOFCOVERAGE_CTP(depth_of_coverage_ctp, params.ctp_genes)
+
         FORMAT_GATK_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt, params.ctp_genes)
+        
         COVCALC_GATK_CTP(FORMAT_GATK_CTP.out.txt, "CTP")
 
       // PROBES
-        GATK_DEPTHOFCOVERAGE_PROBES(PICARD_SORTSAM.out.bam, PICARD_SORTSAM.out.bai, params.probes)
+        depth_of_coverage_probes = PICARD_SORTSAM.out.bam.join(PICARD_SORTSAM.out.bai)
+        GATK_DEPTHOFCOVERAGE_PROBES(depth_of_coverage_probes, params.probes)
+
         FORMAT_GATK_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
+        
         COVCALC_GATK_PROBES(FORMAT_GATK_PROBES.out.txt, "PROBES")
 
   }

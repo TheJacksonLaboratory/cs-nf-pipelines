@@ -10,12 +10,7 @@ process LOG_PARSER {
   container 'python:3.8.10'
 
   input:
-  tuple val(sampleID), file(log_cutadapt)
-                       file(log_bowtie)
-                       file(log_sorted_metrics)
-                       file(log_mtdna_content)
-                       file(log_pbc_qc)
-                       file(log_fraction_reads)
+  tuple val(sampleID), file(log_cutadapt), file(log_bowtie), file(log_sorted_metrics), file(log_mtdna_content), file(log_pbc_qc), file(log_fraction_reads)
 
   output:
   tuple val(sampleID), file("*.summary_QC_metrics.txt")

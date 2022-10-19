@@ -103,13 +103,16 @@ workflow ATAC {
   PICARD_MARKDUPLICATES(SORT_ALIGN_TRIM.out) 
 
   // Step 6: Remove pcr duplicates
-  REMOVE_DUPLICATE_READS(PICARD_MARKDUPLICATES.out.dedup_bam, PICARD_MARKDUPLICATES.out.dedup_bai)
+  remove_duplicates = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+  REMOVE_DUPLICATE_READS(remove_duplicates)
 
   // Step 7: Calculate %mtDNA and filter mitochondrial reads
-  CALC_MTDNA_FILTER_CHRM(REMOVE_DUPLICATE_READS.out.rmDup_bam, REMOVE_DUPLICATE_READS.out.rmDup_bai)
+  mt_filter = REMOVE_DUPLICATE_READS.out.rmDup_bam.join(REMOVE_DUPLICATE_READS.out.rmDup_bai)
+  CALC_MTDNA_FILTER_CHRM(mt_filter)
 
   // Step 8: Filter non-unique and include only 'properly mapped reads' alignments
-  FILTER_REMOVE_MULTI_SHIFT(CALC_MTDNA_FILTER_CHRM.out.rmChrM_bam, CALC_MTDNA_FILTER_CHRM.out.rmChrM_bai)
+  filter_reads = CALC_MTDNA_FILTER_CHRM.out.rmChrM_bam.join(CALC_MTDNA_FILTER_CHRM.out.rmChrM_bai)
+  FILTER_REMOVE_MULTI_SHIFT(filter_reads)
 
   // Step 9: Run deeptools alignmentSieve 
   FILTER_REMOVE_MULTI_SIEVE(FILTER_REMOVE_MULTI_SHIFT.out[0])
@@ -134,7 +137,8 @@ workflow ATAC {
     CHAIN_BAD2UNIQ_READS(CHAIN_EXTRACT_BADREADS.out.bad_reads)
 
     // Step 15: Filter list to unique names
-    CHAIN_FILTER_READS(SORT_LIFTOVER_BAM.out[0], CHAIN_BAD2UNIQ_READS.out.uniq_reads)
+    filter_chain_reads = SORT_LIFTOVER_BAM.out[0].join(CHAIN_BAD2UNIQ_READS.out.uniq_reads)
+    CHAIN_FILTER_READS(filter_chain_reads)
 
     // Step 16: Sort fixmate bam and filter mitochondrial reads
     CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out[0])
@@ -144,7 +148,13 @@ workflow ATAC {
     NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out[0])
 
     // Step 18 : Mix chain and non-chain
+
     data_ch = CHAIN_SORT_FIXMATE_BAM.out[0].mix(NON_CHAIN_REINDEX.out[0])
+    // NOTE: This step will pass only 1 tuple forward [sample_id, [bam, bam.idx]].
+    //       The mix statement is required because step 11-16 will only run when `--chain [file]` is called (controlled via modules). 
+    //       Step 17 will only run when `--chain` is not used (controlled via modules). 
+    //       A bam file is required in the next step. `mix` ensures that one OR the other output is used. 
+    //       When '--gen_org == human' data_ch is set to the tuple output in step 10.  
 
   }
   else if (params.gen_org=='human'){
@@ -161,16 +171,19 @@ workflow ATAC {
   } 
 
   // Step 21: Fraction of reads in peaks (FRiP)
-  FRIP_READS_IN_PEAKS(data_ch, PEAK_CALLING.out.np) 
+  frip_start = data_ch.join(PEAK_CALLING.out.np)
+  FRIP_READS_IN_PEAKS(frip_start) 
 
   // Step 22: Final calculate (FRiP)
-  FINAL_CALC_FRIP(data_ch, FRIP_READS_IN_PEAKS.out[0]) 
+  frip_calc = data_ch.join(FRIP_READS_IN_PEAKS.out[0])
+  FINAL_CALC_FRIP(frip_calc) 
 
   // Step 23: Get coverage in each peak
   PEAK_COVERAGE(PEAK_CALLING.out.np) 
 
   // Step 24: Feature counts
-  FEATURE_COUNTS(data_ch, PEAK_COVERAGE.out) 
+  feature_counts = data_ch.join(PEAK_COVERAGE.out)
+  FEATURE_COUNTS(feature_counts) 
 
   if (params.gen_org=='mouse'){
     // Step 25: Feature count to bed
@@ -190,7 +203,8 @@ workflow ATAC {
   CALC_PBC_METRICS(SORT_MARK_DUP_BAM.out[0]) 
 
   // Step 30: Log Parser
-  LOG_PARSER(TRIM_FASTQ.out.cutadapt_log, ALIGN_TRIMMED_FASTQ.out.bowtie_log, PICARD_MARKDUPLICATES.out.dedup_metrics, CALC_MTDNA_FILTER_CHRM.out.mtdna_log, CALC_PBC_METRICS.out, FINAL_CALC_FRIP.out)
+  log_agg = TRIM_FASTQ.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
+  LOG_PARSER(log_agg)
 
 }
 
