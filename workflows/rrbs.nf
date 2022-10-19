@@ -1,17 +1,17 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/rrbs'
-include {param_log} from '../bin/log/rrbs'
-include {getLibraryId} from '../bin/shared/getLibraryId.nf'
-include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
-include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
-include {FASTQC} from '../modules/fastqc/fastqc'
-include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
-include {BISMARK_ALIGNMENT} from '../modules/bismark/bismark_alignment'
-include {BISMARK_DEDUPLICATION} from '../modules/bismark/bismark_deduplication'
-include {BISMARK_METHYLATION_EXTRACTION} from '../modules/bismark/bismark_methylation_extraction'
-include {MULTIQC} from '../modules/multiqc/multiqc'
+include {help} from "${projectDir}/bin/help/rrbs"
+include {param_log} from "${projectDir}/bin/log/rrbs"
+include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
+include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {TRIM_GALORE} from "${projectDir}/modules/trim_galore/trim_galore"
+include {BISMARK_ALIGNMENT} from "${projectDir}/modules/bismark/bismark_alignment"
+include {BISMARK_DEDUPLICATION} from "${projectDir}/modules/bismark/bismark_deduplication"
+include {BISMARK_METHYLATION_EXTRACTION} from "${projectDir}/modules/bismark/bismark_methylation_extraction"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
