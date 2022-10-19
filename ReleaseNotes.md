@@ -2,7 +2,7 @@
 
 ## Release 0.2.0
 
-**NOTE:** This release contains a patch for multi-sample processing. Multi-sample processing done to this release should be re-run with v0.2.0+
+**NOTE:** This release contains a patch for multi-sample processing. We strongly recommend multi-sample processing done prior to this release should be re-run with v0.2.0+
 
 ### Pipelines Added:
 
@@ -27,7 +27,9 @@
 
 ### Pipeline Changes:
 
-1. Multiple pipeline changes related to multi-sample patch. 
+1. Multiple pipeline changes related to multi-sample patch.
+2. Modified module load statements to invoke "${projectDir}" instead of relative "../" path.
+3. Removed CTP and Probe coverage calculations from human RNA-seq
 
 ### Module Changes:
 

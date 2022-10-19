@@ -2,40 +2,40 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/atac.nf'
-include {param_log} from '../bin/log/atac.nf'
-include {getLibraryId} from '../bin/shared/getLibraryId.nf'
-include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
-include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
-include {TRIM_FASTQ} from '../modules/cutadapt/cutadapt_trim_fastq'
-include {FASTQC} from '../modules/fastqc/fastqc'
-include {ALIGN_TRIMMED_FASTQ} from '../modules/bowtie2/bowtie2_align_trimmed_fastq'
+include {help} from "${projectDir}/bin/help/atac.nf"
+include {param_log} from "${projectDir}/bin/log/atac.nf"
+include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
+include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {TRIM_FASTQ} from "${projectDir}/modules/cutadapt/cutadapt_trim_fastq"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {ALIGN_TRIMMED_FASTQ} from "${projectDir}/modules/bowtie2/bowtie2_align_trimmed_fastq"
 include {SORT as SORT_ALIGN_TRIM;
          SORT as SORT_SHIFTED_BAM;
          SORT as SORT_MARK_DUP_BAM;
-         SORT as SORT_LIFTOVER_BAM } from '../modules/samtools/samtools_sort'
-include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
-include {REMOVE_DUPLICATE_READS} from '../modules/samtools/samtools_remove_duplicate_reads'
-include {CALC_MTDNA_FILTER_CHRM} from '../modules/samtools/samtools_calc_mtdna_filter_chrm'
-include {FILTER_REMOVE_MULTI_SHIFT} from '../modules/samtools/samtools_filter_remove_multi_shift'
-include {FILTER_REMOVE_MULTI_SIEVE} from '../modules/deeptools/deeptools_filter_remove_multi_sieve'
-include {CHAIN_CONVERT} from '../modules/g2gtools/g2gtools_chain_convert_peak'
-include {CHAIN_EXTRACT_BADREADS} from '../modules/gatk/gatk_chain_extract_badreads'
-include {CHAIN_BAD2UNIQ_READS} from '../modules/samtools/samtools_chain_bad2uniq_reads'
-include {CHAIN_FILTER_READS} from '../modules/gatk/gatk_chain_filter_reads'
-include {CHAIN_SORT_FIXMATE_BAM} from '../modules/samtools/samtools_chain_sort_fixmate_bam'
-include {NON_CHAIN_REINDEX} from '../modules/samtools/samtools_non_chain_reindex'
-include {PEAK_CALLING} from '../modules/macs2/macs2_peak_calling'
-include {BAM_COVERAGE_BIGWIG} from '../modules/deeptools/deeptools_bam_coverage_bigwig'
-include {FRIP_READS_IN_PEAKS} from '../modules/bedtools/bedtools_frip_reads_in_peaks'
-include {FINAL_CALC_FRIP} from '../modules/samtools/samtools_final_calc_frip'
-include {PEAK_COVERAGE} from '../modules/macs2/macs2_peak_coverage'
-include {FEATURE_COUNTS} from '../modules/subread/subread_feature_counts'
-include {FEATURE_COUNT2BED} from '../modules/bedtools/bedtools_feature_count2bed'
-include {QUALITY_CHECKS} from '../modules/samtools/samtools_quality_checks'
-include {FRAG_LEN_PLOT} from '../modules/rstudio/rstudio_frag_len_plot'
-include {CALC_PBC_METRICS} from '../modules/bedtools/bedtools_calc_pbc_metrics'
-include {LOG_PARSER} from '../modules/python/python_log_parser'
+         SORT as SORT_LIFTOVER_BAM } from "${projectDir}/modules/samtools/samtools_sort"
+include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
+include {REMOVE_DUPLICATE_READS} from "${projectDir}/modules/samtools/samtools_remove_duplicate_reads"
+include {CALC_MTDNA_FILTER_CHRM} from "${projectDir}/modules/samtools/samtools_calc_mtdna_filter_chrm"
+include {FILTER_REMOVE_MULTI_SHIFT} from "${projectDir}/modules/samtools/samtools_filter_remove_multi_shift"
+include {FILTER_REMOVE_MULTI_SIEVE} from "${projectDir}/modules/deeptools/deeptools_filter_remove_multi_sieve"
+include {CHAIN_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_chain_convert_peak"
+include {CHAIN_EXTRACT_BADREADS} from "${projectDir}/modules/gatk/gatk_chain_extract_badreads"
+include {CHAIN_BAD2UNIQ_READS} from "${projectDir}/modules/samtools/samtools_chain_bad2uniq_reads"
+include {CHAIN_FILTER_READS} from "${projectDir}/modules/gatk/gatk_chain_filter_reads"
+include {CHAIN_SORT_FIXMATE_BAM} from "${projectDir}/modules/samtools/samtools_chain_sort_fixmate_bam"
+include {NON_CHAIN_REINDEX} from "${projectDir}/modules/samtools/samtools_non_chain_reindex"
+include {PEAK_CALLING} from "${projectDir}/modules/macs2/macs2_peak_calling"
+include {BAM_COVERAGE_BIGWIG} from "${projectDir}/modules/deeptools/deeptools_bam_coverage_bigwig"
+include {FRIP_READS_IN_PEAKS} from "${projectDir}/modules/bedtools/bedtools_frip_reads_in_peaks"
+include {FINAL_CALC_FRIP} from "${projectDir}/modules/samtools/samtools_final_calc_frip"
+include {PEAK_COVERAGE} from "${projectDir}/modules/macs2/macs2_peak_coverage"
+include {FEATURE_COUNTS} from "${projectDir}/modules/subread/subread_feature_counts"
+include {FEATURE_COUNT2BED} from "${projectDir}/modules/bedtools/bedtools_feature_count2bed"
+include {QUALITY_CHECKS} from "${projectDir}/modules/samtools/samtools_quality_checks"
+include {FRAG_LEN_PLOT} from "${projectDir}/modules/rstudio/rstudio_frag_len_plot"
+include {CALC_PBC_METRICS} from "${projectDir}/modules/bedtools/bedtools_calc_pbc_metrics"
+include {LOG_PARSER} from "${projectDir}/modules/python/python_log_parser"
 
 // help if needed
 if (params.help){

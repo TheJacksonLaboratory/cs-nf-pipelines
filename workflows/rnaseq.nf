@@ -2,26 +2,20 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/rnaseq'
-include {param_log} from '../bin/log/rnaseq'
-include {getLibraryId} from '../bin/shared/getLibraryId.nf'
-include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
-include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
-include {READ_GROUPS} from '../modules/utility_modules/read_groups'
-include {RNA_SUMMARY_STATS} from '../modules/utility_modules/aggregate_stats_rna'
-include {BAMTOOLS_STATS} from '../modules/bamtools/bamtools_stats'
-include {RSEM_ALIGNMENT_EXPRESSION} from '../modules/rsem/rsem_alignment_expression'
-include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'
-include {PICARD_ADDORREPLACEREADGROUPS} from '../modules/picard/picard_addorreplacereadgroups'
-include {PICARD_REORDERSAM} from '../modules/picard/picard_reordersam'
-include {PICARD_COLLECTRNASEQMETRICS} from '../modules/picard/picard_collectrnaseqmetrics'
-include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
-include {GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_CTP;
-         GATK_DEPTHOFCOVERAGE as GATK_DEPTHOFCOVERAGE_PROBES} from '../modules/gatk/gatk_depthofcoverage'
-include {FORMAT_GATK as FORMAT_GATK_CTP;
-         FORMAT_GATK as FORMAT_GATK_PROBES} from '../modules/utility_modules/rna_format_gatk'
-include {COVCALC_GATK as COVCALC_GATK_CTP;
-         COVCALC_GATK as COVCALC_GATK_PROBES} from '../modules/utility_modules/rna_covcalc_gatk'
+include {help} from "${projectDir}/bin/help/rnaseq"
+include {param_log} from "${projectDir}/bin/log/rnaseq"
+include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
+include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
+include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
+include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
+include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
+include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
+include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
+include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 
 // help if needed
 if (params.help){
@@ -101,24 +95,4 @@ workflow RNASEQ {
 
   RNA_SUMMARY_STATS(agg_stats)
 
-  // If gen_org human
-  if ("${params.gen_org}" == 'human'){
-    // Step 7: GATK Coverage Stats
-      // CTP
-        depth_of_coverage_ctp = PICARD_SORTSAM.out.bam.join(PICARD_SORTSAM.out.bai)        
-        GATK_DEPTHOFCOVERAGE_CTP(depth_of_coverage_ctp, params.ctp_genes)
-
-        FORMAT_GATK_CTP(GATK_DEPTHOFCOVERAGE_CTP.out.txt, params.ctp_genes)
-        
-        COVCALC_GATK_CTP(FORMAT_GATK_CTP.out.txt, "CTP")
-
-      // PROBES
-        depth_of_coverage_probes = PICARD_SORTSAM.out.bam.join(PICARD_SORTSAM.out.bai)
-        GATK_DEPTHOFCOVERAGE_PROBES(depth_of_coverage_probes, params.probes)
-
-        FORMAT_GATK_PROBES(GATK_DEPTHOFCOVERAGE_PROBES.out.txt, params.probes)
-        
-        COVCALC_GATK_PROBES(FORMAT_GATK_PROBES.out.txt, "PROBES")
-
-  }
 }
