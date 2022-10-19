@@ -217,9 +217,9 @@ workflow WGS {
 
     SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'gatk')
 
-    vcf_files = GATK_MERGEVCF.out.vcf.join(SNPEFF.out.vcf)
+    merged_vcf_files = GATK_MERGEVCF.out.vcf.join(SNPEFF.out.vcf)
 
-    GATK_VARIANTANNOTATOR(vcf_files)
+    GATK_VARIANTANNOTATOR(merged_vcf_files)
 
     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 

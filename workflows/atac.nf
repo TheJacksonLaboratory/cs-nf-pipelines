@@ -149,8 +149,12 @@ workflow ATAC {
 
     // Step 18 : Mix chain and non-chain
 
-    // CHECK THIS STEP IN MULTI SAMPLE CONTEXT. 
     data_ch = CHAIN_SORT_FIXMATE_BAM.out[0].mix(NON_CHAIN_REINDEX.out[0])
+    // NOTE: This step will pass only 1 tuple forward [sample_id, [bam, bam.idx]].
+    //       The mix statement is required because step 11-16 will only run when `--chain [file]` is called (controlled via modules). 
+    //       Step 17 will only run when `--chain` is not used (controlled via modules). 
+    //       A bam file is required in the next step. `mix` ensures that one OR the other output is used. 
+    //       When '--gen_org == human' data_ch is set to the tuple output in step 10.  
 
   }
   else if (params.gen_org=='human'){

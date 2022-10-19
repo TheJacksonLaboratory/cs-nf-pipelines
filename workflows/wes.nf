@@ -174,9 +174,8 @@ workflow WES {
     // Step 9: Post Variant Calling Processing
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf, 'BOTH', 'gatk')
 
-      vcf_files = GATK_VARIANTFILTRATION.out.vcf.join(SNPEFF.out.vcf)
-
-      GATK_VARIANTANNOTATOR(vcf_files)
+      merged_vcf_files = GATK_VARIANTFILTRATION.out.vcf.join(SNPEFF.out.vcf)
+      GATK_VARIANTANNOTATOR(merged_vcf_files)
 
       SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 
