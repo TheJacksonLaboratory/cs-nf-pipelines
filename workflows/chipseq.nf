@@ -6,6 +6,8 @@ include {CHECK_DESIGN} from '../modules/utility_modules/chipseq_check_design'
 include {SAMTOOLS_FAIDX} from '../modules/samtools/samtools_faidx'
 include {MAKE_GENOME_FILTER} from '../modules/utility_modules/chipseq_make_genome_filter'
 include {FASTQC} from '../modules/fastqc/fastqc'
+include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
+
 
 
 // main workflow
@@ -48,6 +50,11 @@ workflow CHIPSEQ {
 
   // Step 3: Fastqc
   FASTQC(read_ch)
+  
+  // Step 4: Trim Galore
+  TRIM_GALORE(read_ch)
+
+
 
 
 }
