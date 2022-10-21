@@ -27,10 +27,12 @@ process BWA_MEM {
   if (params.read_type == "PE"){
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
     }
-
+    
+  score = params.bwa_min_score ? "-T ${params.bwa_min_score}" : ''
+  split_hits = params.workflow == "chipseq" ? "-M" : ''
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus ${params.mismatch_penalty} ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
   """
 }
