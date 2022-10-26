@@ -59,7 +59,8 @@ workflow CHIPSEQ {
   READ_GROUPS(TRIM_GALORE.out.trimmed_fastq, "gatk")
 
   // Step 6: BWA-MEM
-  BWA_MEM(TRIM_GALORE.out.trimmed_fastq, READ_GROUPS.out.read_groups)
+  bwa_mem_mapping = TRIM_GALORE.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  BWA_MEM(bwa_mem_mapping)
 
   // Step 7: Samtools Removing Unmapped
   SAMTOOLS_FILTER(BWA_MEM.out, '-F 0x0100')
