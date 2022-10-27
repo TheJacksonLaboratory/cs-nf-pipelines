@@ -12,8 +12,7 @@ process BWA_MEM {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(fq_reads)
-  tuple val(sampleID), file(read_groups)
+  tuple val(sampleID), file(fq_reads), file(read_groups)
 
   output:
   tuple val(sampleID), file("*.sam"), emit: sam
@@ -28,9 +27,11 @@ process BWA_MEM {
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
     }
 
+  score = params.bwa_min_score ? "-T ${params.bwa_min_score}" : ''
+  split_hits = params.workflow == "chipseq" ? "-M" : ''
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus ${params.mismatch_penalty} ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
   """
 }

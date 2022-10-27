@@ -7,8 +7,9 @@ include {SAMTOOLS_FAIDX} from '../modules/samtools/samtools_faidx'
 include {MAKE_GENOME_FILTER} from '../modules/utility_modules/chipseq_make_genome_filter'
 include {FASTQC} from '../modules/fastqc/fastqc'
 include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
-
-
+include {READ_GROUPS} from '../modules/utility_modules/read_groups'
+include {BWA_MEM} from '../modules/bwa/bwa_mem'
+include {SAMTOOLS_FILTER} from '../modules/samtools/samtools_filter'
 
 // main workflow
 workflow CHIPSEQ {
@@ -54,7 +55,14 @@ workflow CHIPSEQ {
   // Step 4: Trim Galore
   TRIM_GALORE(read_ch)
 
+  // Step 5: Get Read Group Information
+  READ_GROUPS(TRIM_GALORE.out.trimmed_fastq, "gatk")
 
+  // Step 6: BWA-MEM
+  bwa_mem_mapping = TRIM_GALORE.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  BWA_MEM(bwa_mem_mapping)
 
+  // Step 7: Samtools Removing Unmapped
+  SAMTOOLS_FILTER(BWA_MEM.out, '-F 0x0100')
 
 }
