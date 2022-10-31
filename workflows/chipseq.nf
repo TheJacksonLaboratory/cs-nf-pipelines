@@ -10,6 +10,9 @@ include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 include {READ_GROUPS} from '../modules/utility_modules/read_groups'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'
 include {SAMTOOLS_FILTER} from '../modules/samtools/samtools_filter'
+include {SORT} from '../modules/samtools/samtools_sort'
+include {SAMTOOLS_STATS} from '../modules/samtools/samtools_stats'
+
 
 // main workflow
 workflow CHIPSEQ {
@@ -64,5 +67,13 @@ workflow CHIPSEQ {
 
   // Step 7: Samtools Removing Unmapped
   SAMTOOLS_FILTER(BWA_MEM.out, '-F 0x0100')
+
+  // Step 8: Samtools Sort
+  SORT(SAMTOOLS_FILTER.out.bam, '')
+
+  // Step 9: Samtools Stats
+  SAMTOOLS_STATS(SORT.out[0])
+
+
 
 }
