@@ -9,8 +9,7 @@ process FINAL_CALC_FRIP {
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
-  tuple val(sampleID), file(processed_bams)
-  tuple val(sampleID), file(reads_peaks_bams)
+  tuple val(sampleID), file(processed_bams), file(reads_peaks_bams)
 
   output:
   tuple val(sampleID), file("*_Fraction_reads_in_peak.txt")

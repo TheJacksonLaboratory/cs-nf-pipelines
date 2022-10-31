@@ -2,43 +2,43 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from '../bin/help/wes.nf'
-include {param_log} from '../bin/log/wes.nf'
-include {getLibraryId} from '../bin/shared/getLibraryId.nf'
-include {CONCATENATE_READS_PE} from '../modules/utility_modules/concatenate_reads_PE'
-include {CONCATENATE_READS_SE} from '../modules/utility_modules/concatenate_reads_SE'
-include {BWA_MEM} from '../modules/bwa/bwa_mem'
-include {SAMTOOLS_INDEX} from '../modules/samtools/samtools_index'
-include {READ_GROUPS} from '../modules/utility_modules/read_groups'
-include {QUALITY_STATISTICS} from '../modules/utility_modules/quality_stats'
-include {AGGREGATE_STATS} from '../modules/utility_modules/aggregate_stats_wes'
+include {help} from "${projectDir}/bin/help/wes.nf"
+include {param_log} from "${projectDir}/bin/log/wes.nf"
+include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
+include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {COSMIC_ANNOTATION;
         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
-        COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from '../modules/cosmic/cosmic_annotation'
-include {PICARD_SORTSAM} from '../modules/picard/picard_sortsam'
-include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
-include {PICARD_COLLECTHSMETRICS} from '../modules/picard/picard_collecthsmetrics'
+        COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
+include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
+include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
 include {SNPEFF;
          SNPEFF as SNPEFF_SNP;
-         SNPEFF as SNPEFF_INDEL} from '../modules/snpeff_snpsift/snpeff_snpeff'
+         SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
 include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from '../modules/snpeff_snpsift/snpeff_oneperline'
-include {SNPSIFT_EXTRACTFIELDS} from '../modules/snpeff_snpsift/snpsift_extractfields'
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_oneperline"
+include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from '../modules/snpeff_snpsift/snpsift_dbnsfp'
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
 include {GATK_HAPLOTYPECALLER;
-         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from '../modules/gatk/gatk_haplotypecaller'
-include {GATK_INDEXFEATUREFILE} from '../modules/gatk/gatk_indexfeaturefile'
+         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
+include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
 include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from '../modules/gatk/gatk_variantfiltration'
-include {GATK_VARIANTANNOTATOR} from '../modules/gatk/gatk_variantannotator'
-include {GATK_MERGEVCF} from '../modules/gatk/gatk_mergevcf'
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
+include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk_variantannotator"
+include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 include {GATK_SELECTVARIANTS;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from '../modules/gatk/gatk_selectvariants'
-include {GATK_BASERECALIBRATOR} from '../modules/gatk/gatk_baserecalibrator'
-include {GATK_APPLYBQSR} from '../modules/gatk/gatk_applybqsr'
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 
 // help if needed
 if (params.help){
@@ -95,7 +95,8 @@ workflow WES {
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
   // Step 3: BWA-MEM Alignment
-  BWA_MEM(QUALITY_STATISTICS.out.trimmed_fastq, READ_GROUPS.out.read_groups )
+  bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  BWA_MEM(bwa_mem_mapping)
 
   // Step 4: Variant Preprocessing - Part 1
   PICARD_SORTSAM(BWA_MEM.out.sam)
@@ -106,37 +107,35 @@ workflow WES {
 
     // Step 5: Variant Pre-Processing - Part 2
       GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-      GATK_APPLYBQSR(PICARD_MARKDUPLICATES.out.dedup_bam,
-                     GATK_BASERECALIBRATOR.out.table)
+
+      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+      GATK_APPLYBQSR(apply_bqsr)
 
     // Step 6: Variant Pre-Processing - Part 3
-      PICARD_COLLECTHSMETRICS(GATK_APPLYBQSR.out.bam,
-                              GATK_APPLYBQSR.out.bai)
+      collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      PICARD_COLLECTHSMETRICS(collect_metrics)
 
     // Step 7: Variant Calling
-      GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam,
-                           GATK_APPLYBQSR.out.bai,
-                          'variant')
-      GATK_HAPLOTYPECALLER_GVCF(GATK_APPLYBQSR.out.bam,
-                                GATK_APPLYBQSR.out.bai,
-                               'gvcf')
+      haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
+
+      haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+      GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
 
     // Step 8: Variant Filtration
       // SNP
-        GATK_SELECTVARIANTS_SNP(GATK_HAPLOTYPECALLER.out.vcf,
-                                GATK_HAPLOTYPECALLER.out.idx,
-                               'SNP')
-        GATK_VARIANTFILTRATION_SNP(GATK_SELECTVARIANTS_SNP.out.vcf,
-                               GATK_SELECTVARIANTS_SNP.out.idx,
-                              'SNP')
+        select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+        GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+
+        var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+        GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
       // INDEL
-      	GATK_SELECTVARIANTS_INDEL(GATK_HAPLOTYPECALLER.out.vcf,
-                                  GATK_HAPLOTYPECALLER.out.idx,
-                                 'INDEL')
-        GATK_VARIANTFILTRATION_INDEL(GATK_SELECTVARIANTS_INDEL.out.vcf,
-                                     GATK_SELECTVARIANTS_INDEL.out.idx,
-                                    'INDEL')
+        select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      	GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+
+        var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+        GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
     // Step 9: Post Variant Calling Processing - Part 1
       // SNP
@@ -152,38 +151,39 @@ workflow WES {
         SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
     // Step 10: Post Variant Calling Processing - Part 2
-      GATK_MERGEVCF(SNPEFF_ONEPERLINE_SNP.out.vcf,
-                    SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      GATK_MERGEVCF(vcf_files)
       
       SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
-
 
   } else if (params.gen_org=='mouse'){
 
     // Step 6: Variant Pre-Processing - Part 3
-      PICARD_COLLECTHSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam,
-                              PICARD_MARKDUPLICATES.out.dedup_bai)
+      collecths_metric = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+      PICARD_COLLECTHSMETRICS(collecths_metric)
+                              
 
     // Step 7: Variant Calling
-      GATK_HAPLOTYPECALLER(PICARD_MARKDUPLICATES.out.dedup_bam,
-                           PICARD_MARKDUPLICATES.out.dedup_bai,
-                          'variant')
+      haplotype_caller = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+      GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
 
     // Step 8: Variant Filtration
-      GATK_VARIANTFILTRATION(GATK_HAPLOTYPECALLER.out.vcf,
-                             GATK_HAPLOTYPECALLER.out.idx,
-                            'BOTH')
+      var_filter = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      GATK_VARIANTFILTRATION(var_filter, 'BOTH')
 
     // Step 9: Post Variant Calling Processing
       SNPEFF(GATK_VARIANTFILTRATION.out.vcf, 'BOTH', 'gatk')
-      GATK_VARIANTANNOTATOR(GATK_VARIANTFILTRATION.out.vcf,
-                            SNPEFF.out.vcf)
+
+      merged_vcf_files = GATK_VARIANTFILTRATION.out.vcf.join(SNPEFF.out.vcf)
+      GATK_VARIANTANNOTATOR(merged_vcf_files)
+
       SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
 
   }
 
+  agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
+
   // Step 11: Aggregate Stats
-  AGGREGATE_STATS(QUALITY_STATISTICS.out.quality_stats,
-						      PICARD_COLLECTHSMETRICS.out.hsmetrics,
-						      PICARD_MARKDUPLICATES.out.dedup_metrics)
+  AGGREGATE_STATS(agg_stats)
+  
 }

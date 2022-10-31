@@ -9,9 +9,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(read_groups)
-  tuple val(sampleID), file(bam)
-
+  tuple val(sampleID), file(read_groups), file(bam)
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam

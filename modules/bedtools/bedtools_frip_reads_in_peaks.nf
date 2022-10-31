@@ -8,8 +8,7 @@ process FRIP_READS_IN_PEAKS {
   container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'
 
   input:
-  tuple val(sampleID), file(processed_bams)
-  tuple val(sampleID), file(narrow_peaks)
+  tuple val(sampleID), file(processed_bams), file(narrow_peaks)
 
   output:
   tuple val(sampleID), file("reads_in_peaks.tmp.ba*")
