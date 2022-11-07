@@ -81,12 +81,15 @@ workflow CHIPSEQ {
   // Step 10: Merge BAM files
   ch_sort_bam_merge = SORT.out.bam
 
+
   ch_sort_bam_merge
     .map { it -> [ it[0].split('_')[0..-2].join('_'), it[1] ] }
     .groupTuple(by: [0])
     .map { it ->  [ it[0], it[1].flatten() ] }
     .set { ch_sort_bam_merge }
 
+
+  // ch_sort_bam_merge = [sampleID, [bam]]
   PICARD_MERGESAMFILES(ch_sort_bam_merge)
 
   // Step 11: Mark Duplicates
