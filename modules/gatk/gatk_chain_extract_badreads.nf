@@ -20,7 +20,6 @@ process CHAIN_EXTRACT_BADREADS {
   when: params.chain != null
 
   script:
-  log.info "----- Extracting a list of 'bad reads' on ${sampleID} -----"
   """
   gatk ValidateSamFile \
   -I ${bam_sort_mm10[0]} \

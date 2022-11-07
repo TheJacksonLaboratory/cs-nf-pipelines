@@ -14,7 +14,6 @@ process COSMIC_ANNOTATION {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- Cosmic Annotation Running on: ${sampleID} -----"
   """
   ${projectDir}/bin/shared/Cosmic_Annotation_hg38.pl \
   -i1 ${params.cosmic} \

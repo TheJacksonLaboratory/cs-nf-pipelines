@@ -16,7 +16,6 @@ process Ensembl_Variant_Effect_Predictor {
   tuple val(sampleID), file("*.*annotated.vcf"), emit: vcf
 
   script:
-  log.info "----- Variant Effect Predictor Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

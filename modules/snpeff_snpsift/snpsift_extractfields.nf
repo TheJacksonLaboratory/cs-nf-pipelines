@@ -17,7 +17,6 @@ process SNPSIFT_EXTRACTFIELDS {
   tuple val(sampleID), file("*.txt"), emit: txt
 
   script:
-  log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
   // add suffix for snp indel both for output name
 
   String my_mem = (task.memory-1.GB).toString()

@@ -19,7 +19,6 @@ process GATK_APPLYBQSR {
   tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
-  log.info "----- GATK ApplyBQSR Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """

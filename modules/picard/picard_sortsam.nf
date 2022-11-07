@@ -17,7 +17,6 @@ process PICARD_SORTSAM {
   tuple val(sampleID), file("*_sortsam.bai"), emit: bai
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

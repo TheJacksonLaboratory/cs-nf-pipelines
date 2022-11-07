@@ -20,7 +20,6 @@ process PICARD_MARKDUPLICATES {
   tuple val(sampleID), file("*.txt"), emit: dedup_metrics
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

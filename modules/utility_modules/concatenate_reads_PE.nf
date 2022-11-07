@@ -15,7 +15,6 @@ process CONCATENATE_READS_PE {
   tuple val(sampleID), file("*fastq.gz"), emit: concat_fastq
 
   script:
-  log.info "----- Concatenate Reads Running on: ${sampleID} -----"
 
   """
   cat $R1 > ${sampleID}_R1.fastq.gz

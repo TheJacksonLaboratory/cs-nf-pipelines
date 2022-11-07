@@ -21,7 +21,6 @@ process PEAK_CALLING {
 
 
   script:
-  log.info "----- Performing Peak Calling on on ${sampleID} -----"
   String genome = params.gen_org == 'human' ? 'hs' : 'mm'
   """
   macs2 callpeak \

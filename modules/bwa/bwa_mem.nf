@@ -18,7 +18,6 @@ process BWA_MEM {
   tuple val(sampleID), file("*.sam"), emit: sam
 
   script:
-  log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
 
   if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"

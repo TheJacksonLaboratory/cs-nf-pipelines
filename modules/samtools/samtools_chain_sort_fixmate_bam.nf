@@ -17,7 +17,6 @@ process CHAIN_SORT_FIXMATE_BAM {
   when: params.chain != null
 
   script:
-  log.info "----- Performing sort, fixmate, filter the bam on ${sampleID} -----"
   // This module is for Non-Reference Strain Samples. 
   // To sort bam by read name, fix the mate information, re-sort by coordinates and filter Mitochondrial Reads from bam file. 
   """

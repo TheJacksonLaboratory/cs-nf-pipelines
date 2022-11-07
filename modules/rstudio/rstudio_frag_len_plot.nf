@@ -15,7 +15,6 @@ process FRAG_LEN_PLOT {
   tuple val(sampleID), file("*fraglen_plot.pdf")
 
   script:
-  log.info "----- Fragment Length Plot on ${sampleID} -----"
   """
   Rscript ${projectDir}/bin/atac/fragment_length_plot.R ${frag_len_count}
   mv fraglen_plot.pdf ${sampleID}_fraglen_plot.pdf

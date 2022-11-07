@@ -16,7 +16,6 @@ process VCF_ANNOTATE {
   container 'quay.io/biocontainers/perl-vcftools-vcf:0.1.16--pl5321hdfd78af_4'
 
   script:
-  log.info "----- CAT VCF-ANNOTATE Running on: ${sampleID} -----"
 
   if (params.gen_org=='mouse'){
     // make sure it does not break

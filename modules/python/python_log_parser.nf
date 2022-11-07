@@ -16,7 +16,6 @@ process LOG_PARSER {
   tuple val(sampleID), file("*.summary_QC_metrics.txt")
 
   script:
-  log.info "----- LogParser on ${sampleID} -----"
   """
   python ${projectDir}/bin/atac/LogParser.py > ${sampleID}.summary_QC_metrics.txt
   """

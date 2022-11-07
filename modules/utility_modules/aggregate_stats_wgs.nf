@@ -15,7 +15,6 @@ process AGGREGATE_STATS {
   tuple val(sampleID), file("*summary_stats.txt"), emit: txt
 
   script:
-  log.info "----- Generating Summary Stats for: ${sampleID} -----"
 
   """
   python ${projectDir}/bin/wgs/aggregate_stats_wgs.py ${sampleID}_summary_stats.txt ${filter_stats} ${picard_met} ${algn_met} ${cov_met}
