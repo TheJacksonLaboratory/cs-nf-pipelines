@@ -1,4 +1,4 @@
-\process GATK_FIX_MATE_INFORMATION {
+process GATK_FIX_MATE_INFORMATION {
   tag "$sampleID"
 
   cpus = 1
