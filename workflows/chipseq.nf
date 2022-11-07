@@ -11,7 +11,11 @@ include {READ_GROUPS} from '../modules/utility_modules/read_groups'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'
 include {SAMTOOLS_FILTER} from '../modules/samtools/samtools_filter'
 include {SORT} from '../modules/samtools/samtools_sort'
-include {SAMTOOLS_STATS} from '../modules/samtools/samtools_stats'
+include {SAMTOOLS_STATS;
+         SAMTOOLS_STATS as SAMTOOLS_STATS_MD} from '../modules/samtools/samtools_stats'
+include {PICARD_MERGESAMFILES} from '../modules/picard/picard_mergesamfiles'
+include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
+
 
 
 // main workflow
@@ -72,8 +76,24 @@ workflow CHIPSEQ {
   SORT(SAMTOOLS_FILTER.out.bam, '')
 
   // Step 9: Samtools Stats
-  SAMTOOLS_STATS(SORT.out[0])
+  SAMTOOLS_STATS(SORT.out.bam)
 
+  // Step 10: Merge BAM files
+  ch_sort_bam_merge = SORT.out.bam
+
+  ch_sort_bam_merge
+    .map { it -> [ it[0].split('_')[0..-2].join('_'), it[1] ] }
+    .groupTuple(by: [0])
+    .map { it ->  [ it[0], it[1].flatten() ] }
+    .set { ch_sort_bam_merge }
+
+  PICARD_MERGESAMFILES(ch_sort_bam_merge)
+
+  // Step 11: Mark Duplicates
+  PICARD_MARKDUPLICATES(PICARD_MERGESAMFILES.out.bam)
+
+  // Step 12: Samtools Stats
+  SAMTOOLS_STATS_MD(PICARD_MARKDUPLICATES.out.dedup_bam)
 
 
 }

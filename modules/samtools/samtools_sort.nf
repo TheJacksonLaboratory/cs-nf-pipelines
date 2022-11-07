@@ -12,7 +12,8 @@ process SORT {
   val(options)
 
   output:
-  tuple val(sampleID), file("*.sorted.bam*")
+  tuple val(sampleID), file("*.bam"), emit: bam
+  tuple val("sampleID"), file("*.bai"), emit: bai
 
   script:
   log.info "----- Samtools sort Running on: ${sampleID} -----"
