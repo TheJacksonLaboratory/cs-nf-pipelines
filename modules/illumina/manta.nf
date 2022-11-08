@@ -29,3 +29,4 @@ process STRELKA2 {
   # execute manta
   ${sampleID}/runWorkflow.py -j ${task.cpus}
   """
+}
