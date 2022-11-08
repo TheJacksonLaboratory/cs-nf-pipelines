@@ -6,7 +6,7 @@ process NOVOSORT_markDuplicates {
   time = '03:00:00'
 
   container 'quay.io/jaxcompsci/novosort:lastest'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'novosort' }", pattern:"*fixed_mate_dup_marked.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'novosort' }", pattern:"*_fixed_mate_dup_marked.bam", mode:'copy'
 
   input:
   tuple val(sampleID), file(fixed_mate_bam)
