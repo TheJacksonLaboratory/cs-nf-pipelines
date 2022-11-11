@@ -23,7 +23,6 @@ process SNPEFF{
   // tuple val(sampleID),file("*")
 
   script:
-  log.info "----- snpEff Running on: ${sampleID} -----"
   
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]

@@ -17,7 +17,6 @@ process GATK_VARIANTFILTRATION {
   tuple val(sampleID), file("*.idx"), emit: idx
 
   script:
-  log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   if (indel_snp == 'INDEL'){

@@ -15,7 +15,6 @@ process CALC_PBC_METRICS {
   tuple val(sampleID), file("*.pbc.qc")
 
   shell:
-  log.info "----- Calculate PBC Metrics on ${sampleID} -----"
   '''
 
   { # try

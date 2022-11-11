@@ -18,7 +18,6 @@ process QUALITY_STATISTICS {
   tuple val(sampleID), file("*filtered_trimmed"), emit: trimmed_fastq
 
   script:
-  log.info "----- Quality Stats Running on: ${sampleID} -----"
 
   if (params.read_type == "SE"){
     mode_HQ="-S -M"

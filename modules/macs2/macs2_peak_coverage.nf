@@ -14,7 +14,6 @@ process PEAK_COVERAGE {
   tuple val(sampleID), file("*_peaks.narrowPeak.saf")
 
   shell:
-  log.info "----- Get coverage in each peak on ${sampleID} -----"
   '''
   awk 'OFS="\\t" {print $1"."$2"."$3, $1, $2, $3, "."}' !{narrow_peaks} \
   > !{sampleID}_peaks.narrowPeak.saf

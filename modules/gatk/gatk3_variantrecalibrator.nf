@@ -19,7 +19,6 @@ process GATKv3_5_VariantRecalibrator {
   tuple val(sampleID), file("*.*plot.R"), emit: plot.R
 
   script:
-  log.info "----- GATK v3.5 VariantRecalibrator Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   

@@ -18,7 +18,6 @@ process SAMTOOLS_VIEW {
       tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-      log.info "----- Samtools View Running on: ${sampleID} -----"
 
     """
     samtools view ${view_string} ${sam} > ${sampleID}_${filename}.bam 

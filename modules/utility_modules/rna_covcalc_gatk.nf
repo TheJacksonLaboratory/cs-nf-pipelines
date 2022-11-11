@@ -18,7 +18,6 @@ process COVCALC_GATK {
   tuple val(sampleID), file("*.bed"), emit: bed
 
   script:
-  log.info "----- GATK COVCALC Running on: ${sampleID} -----"
 
   """
   python ${projectDir}/bin/rnaseq/coveragecalculator.py ${txt} ${sampleID}_${filename}_avg_median_coverage.bed

@@ -15,7 +15,6 @@ process SORT {
   tuple val(sampleID), file("*.sorted.bam*")
 
   script:
-  log.info "----- Samtools sort Running on: ${sampleID} -----"
 
   // check if not sorting by name
   if(options != "-n ")

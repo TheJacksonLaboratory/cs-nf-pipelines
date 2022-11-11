@@ -17,7 +17,6 @@ process NON_CHAIN_REINDEX {
   when: params.chain == null
 
   script:
-  log.info "----- Filtering Mitochondrial, Unplaced/Unlocalized Reads and reindex on ${sampleID} -----"
   // This module is for Reference Strain Samples.
   // To filter Mitochondrial, Unplaced/Unlocalized Reads from bam file.
   """
