@@ -24,7 +24,16 @@ process PICARD_MARKDUPLICATES {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
-  if (params.workflow != "atac")
+  prefix = "${sampleID}.mLb.mkD"
+
+  if (params.workflow == "atac"){
+    output = "${sampleID}.sorted.marked4_dedup.bam"
+  }
+  if (params.workflow == "chipseq"){
+    output = "${prefix}.sorted.marked4_dedup.bam"
+  } 
+
+  if (params.workflow != "atac" && params.workflow != "chipseq")
   """
   picard -Xmx${my_mem}G MarkDuplicates \
   I=${bam} \
@@ -38,7 +47,7 @@ process PICARD_MARKDUPLICATES {
   """
   picard -Xmx${my_mem}G MarkDuplicates \
   I=${bam[0]} \
-  O=${sampleID}.sorted.marked4_dedup.bam \
+  O=${output} \
   M=${sampleID}.sorted.metrics.txt \
   REMOVE_DUPLICATES=false \
   CREATE_INDEX=true \
