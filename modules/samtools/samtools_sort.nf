@@ -12,11 +12,19 @@ process SORT {
   val(options)
 
   output:
-  tuple val(sampleID), file("*.bam"), emit: bam
-  tuple val("sampleID"), file("*.bai"), emit: bai
+  // cannot use emit here as -n (name sort) option is incompatible with samtools index. 
+  tuple val(sampleID), file("*.sorted.bam*")
 
   script:
   log.info "----- Samtools sort Running on: ${sampleID} -----"
+
+  prefix = "${sampleID}.Lb"
+  if (params.workflow == "chipseq"){
+    output = "${prefix}.sorted.bam"
+  }
+  else{
+    output = "${sampleID}.sorted.bam"
+  }
 
   // check if not sorting by name
   if(options != "-n ")
@@ -25,11 +33,11 @@ process SORT {
   ${options} \
   -@ $task.cpus \
   -O bam \
-  -o ${sampleID}.sorted.bam \
+  -o ${output} \
   ${sam_file[0]}
 
   samtools index \
-  ${sampleID}.sorted.bam
+  ${output}
   """
   else
   """
@@ -37,7 +45,8 @@ process SORT {
   ${options} \
   -@ $task.cpus \
   -O bam \
-  -o ${sampleID}.sorted.bam \
+  -o ${output} \
   ${sam_file[0]}
+
   """
 }

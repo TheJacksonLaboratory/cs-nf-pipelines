@@ -10,12 +10,18 @@ include {TRIM_GALORE} from '../modules/trim_galore/trim_galore'
 include {READ_GROUPS} from '../modules/utility_modules/read_groups'
 include {BWA_MEM} from '../modules/bwa/bwa_mem'
 include {SAMTOOLS_FILTER} from '../modules/samtools/samtools_filter'
-include {SORT} from '../modules/samtools/samtools_sort'
+include {SORT;
+         SORT as PAIR_SORT;
+         SORT as NAME_SORT} from '../modules/samtools/samtools_sort'
 include {SAMTOOLS_STATS;
-         SAMTOOLS_STATS as SAMTOOLS_STATS_MD} from '../modules/samtools/samtools_stats'
+         SAMTOOLS_STATS as SAMTOOLS_STATS_MD;
+         SAMTOOLS_STATS as SAMTOOLS_STATS_PE;
+         SAMTOOLS_STATS as SAMTOOLS_STATS_BF} from '../modules/samtools/samtools_stats'
 include {PICARD_MERGESAMFILES} from '../modules/picard/picard_mergesamfiles'
 include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
-
+include {SAMTOOLS_MERGEBAM_FILTER} from '../modules/samtools/samtools_mergebam_filter'
+include {BAMTOOLS_FILTER} from '../modules/bamtools/bamtools_filter'
+include {BAMPE_RM_ORPHAN} from '../modules/utility_modules/chipseq_bampe_rm_orphan'
 
 
 // main workflow
@@ -73,13 +79,14 @@ workflow CHIPSEQ {
   SAMTOOLS_FILTER(BWA_MEM.out, '-F 0x0100')
 
   // Step 8: Samtools Sort
+  // cannot use emit as -n (name sort) option is incompatible with samtools index. 
   SORT(SAMTOOLS_FILTER.out.bam, '')
 
   // Step 9: Samtools Stats
-  SAMTOOLS_STATS(SORT.out.bam)
+  SAMTOOLS_STATS(SORT.out[0])
 
   // Step 10: Merge BAM files
-  ch_sort_bam_merge = SORT.out.bam
+  ch_sort_bam_merge = SORT.out
 
 
   ch_sort_bam_merge
@@ -89,7 +96,7 @@ workflow CHIPSEQ {
     .set { ch_sort_bam_merge }
 
 
-  // ch_sort_bam_merge = [sampleID, [bam]]
+  // ch_sort_bam_merge = [sampleID, [bam, index]]
   PICARD_MERGESAMFILES(ch_sort_bam_merge)
 
   // Step 11: Mark Duplicates
@@ -97,6 +104,34 @@ workflow CHIPSEQ {
 
   // Step 12: Samtools Stats
   SAMTOOLS_STATS_MD(PICARD_MARKDUPLICATES.out.dedup_bam)
+
+  // Step 13: Samtools Mergebam Filter
+  SAMTOOLS_MERGEBAM_FILTER(PICARD_MARKDUPLICATES.out.dedup_bam, MAKE_GENOME_FILTER.out[0])
+
+  // JSON files required by BAMTools for alignment filtering
+  if (params.read_type == 'SE'){
+    ch_bamtools_filter_config = file(params.bamtools_filter_se_config, checkIfExists: true)
+  } else {
+    ch_bamtools_filter_config = file(params.bamtools_filter_pe_config, checkIfExists: true)
+  }
+
+  // Step 14: Bamtools Filter
+  BAMTOOLS_FILTER(SAMTOOLS_MERGEBAM_FILTER.out.bam, ch_bamtools_filter_config) 
+
+  // Step 15: Samtools Stats
+  SAMTOOLS_STATS_BF(BAMTOOLS_FILTER.out.bam)
+
+  // Step 16: Samtools Name Sort
+  NAME_SORT(BAMTOOLS_FILTER.out.bam, '-n ')
+
+  // Step 17: Remove singleton reads from paired-end BAM file
+  BAMPE_RM_ORPHAN(SAMTOOLS_MERGEBAM_FILTER.out.bam)
+
+  // Step 18 : Samtools Pair Sort
+  PAIR_SORT(BAMPE_RM_ORPHAN.out.bam, '')
+
+  // Step 19 : Samtools Stats
+  SAMTOOLS_STATS_PE(PAIR_SORT.out[0])
 
 
 }

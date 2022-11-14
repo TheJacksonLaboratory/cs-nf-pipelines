@@ -17,9 +17,16 @@ process SAMTOOLS_FILTER {
   script:
   log.info "----- Samtools Removing Unmapped on: ${sampleID} -----"
   // Exclude reads based on input bit flag.
-  """
-  samtools view -h -b ${option} ${in_file} > ${sampleID}.Lb.bam
 
+  prefix = "${sampleID}.Lb"
+  if (params.workflow == "chipseq"){
+    output = "${prefix}.bam"
+  }
+  else{
+    output = "${sampleID}.bam"
+  }
+  """
+  samtools view -h -b ${option} ${in_file} > ${output}
   """
 
 }
