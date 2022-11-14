@@ -22,6 +22,8 @@ include {PICARD_MARKDUPLICATES} from '../modules/picard/picard_markduplicates'
 include {SAMTOOLS_MERGEBAM_FILTER} from '../modules/samtools/samtools_mergebam_filter'
 include {BAMTOOLS_FILTER} from '../modules/bamtools/bamtools_filter'
 include {BAMPE_RM_ORPHAN} from '../modules/utility_modules/chipseq_bampe_rm_orphan'
+include {PRESEQ} from '../modules/preseq/preseq'
+
 
 
 // main workflow
@@ -132,6 +134,9 @@ workflow CHIPSEQ {
 
   // Step 19 : Samtools Stats
   SAMTOOLS_STATS_PE(PAIR_SORT.out[0])
+
+  // Step 20 : Preseq
+  PRESEQ(PICARD_MARKDUPLICATES.out.dedup_bam)
 
 
 }
