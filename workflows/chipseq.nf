@@ -24,6 +24,9 @@ include {BAMTOOLS_FILTER} from '../modules/bamtools/bamtools_filter'
 include {BAMPE_RM_ORPHAN} from '../modules/utility_modules/chipseq_bampe_rm_orphan'
 include {PRESEQ} from '../modules/preseq/preseq'
 include {PICARD_COLLECTMULTIPLEMETRICS} from '../modules/picard/picard_collectmultiplemetrics'
+include {BEDTOOLS_GENOMECOV} from '../modules/bedtools/bedtools_genomecov'
+include {UCSC_BEDGRAPHTOBIGWIG} from '../modules/ucsc/ucsc_bedgraphtobigwig'
+
 
 
 // main workflow
@@ -140,6 +143,13 @@ workflow CHIPSEQ {
 
   // Step 21 : Collect Multiple Metrics
   PICARD_COLLECTMULTIPLEMETRICS(PAIR_SORT.out)  
+
+  // Step 22 : Bedtools Genome Coverage
+  BEDTOOLS_GENOMECOV(PAIR_SORT.out, SAMTOOLS_STATS_PE.out[0])
+
+  // Step 23 : USCS Bedgraph to bigwig
+  UCSC_BEDGRAPHTOBIGWIG(BEDTOOLS_GENOMECOV.out.bedgraph, MAKE_GENOME_FILTER.out[1])
+
 
 
 }
