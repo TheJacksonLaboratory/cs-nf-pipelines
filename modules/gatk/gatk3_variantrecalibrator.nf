@@ -8,15 +8,16 @@ process GATKv3_5_VariantRecalibrator {
   container 'broadinstitute/gatk3:3.5-0'
   
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.txt", mode:'copy'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(normal_germline_vcf)
+  tuple val(sampleID), file(normal_germline_vcf_index)
 
   output:
-  tuple val(sampleID), file("*.*recal"), emit: recal
-  tuple val(sampleID), file("*.*trances"), emit: trances
-  tuple val(sampleID), file("*.*plot.R"), emit: plot.R
+  tuple val(sampleID), file("*.*recal.txt"), emit: normal_germline_recal
+  tuple val(sampleID), file("*.*tranches.txt"), emit: normal_germline_tranches
+  tuple val(sampleID), file("*.*plot.R.txt"), emit: normal_germline_plot_R
 
   script:
   String my_mem = (task.memory-1.GB).toString()
@@ -34,8 +35,8 @@ process GATKv3_5_VariantRecalibrator {
   an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -an InbreedingCoeff \
   -mode SNP \
   -tranche 99.6
-  -recalFile ${sampleID}.recal \
-  -tranchesFile ${sampleID}.tranches \
-  -rscriptFile ${sampleID}.plots.R
+  -recalFile ${sampleID}.recal.txt \
+  -tranchesFile ${sampleID}.tranches.txt \
+  -rscriptFile ${sampleID}.plots.R.txt
   """
 }

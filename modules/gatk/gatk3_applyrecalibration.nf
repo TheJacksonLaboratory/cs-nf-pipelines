@@ -8,14 +8,17 @@ process GATKv3_5_ApplyRecalibration {
   container 'broadinstitute/gatk3:3.5-0'
   
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(normal_germline_vcf)
+  tuple val(sampleID), file(normal_germline_vcf_index)
+  tuple val(sampleID), file(normal_germline_recal)
+  tuple val(sampleID), file(normal_germline_tranches)
 
   output:
-  tuple val(sampleID), file("*.*recalibrated.filtered.vcf"), emit: vcf
-
+  tuple val(sampleID), file("*.*recalibrated.filtered.vcf"), emit: normal_germline_recalibrated_vcf
+  tuple val(sampleID), file("*.*recalibrated.filtered.vcf.idx"), emit: normal_germline_recalibrated_vcf_index
 
   script:
   String my_mem = (task.memory-1.GB).toString()
@@ -27,8 +30,8 @@ process GATKv3_5_ApplyRecalibration {
   -R ${params.ref_fa} \
   -input ${sampleID}_variants_raw.vcf \
   --ts_filter_level 99.6 \
-  -tranchesFile ${sampleID}.tranches \
-  -recalFile ${sampleID}.recal \
+  -tranchesFile ${sampleID}.tranches.txt \
+  -recalFile ${sampleID}.recal.txt \
   -mode SNP
   -o ${sampleID}_variants_raw.recalibrated.filtered.vcf
   """
