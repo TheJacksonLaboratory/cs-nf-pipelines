@@ -1,16 +1,16 @@
 process STRELKA2 {
-  tag "$sampleID"
+  tag "$meta.patient"
 
   cpus = 1
   memory = 8.GB
   time = '03:00:00'
 
   container 'quay.io/jaxcompsci/strelka2:latest'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'strelka' }", pattern:".vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'strelka' }", pattern:".vcf.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), file(tumor_bam)
-  tuple val(sampleID), file(normal_bam)
+  tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
+  tuple val(sampleID), file(tumor_bam), file(normal_bai), val(meta)
   tuple val(sampleID), file(manta_vcf)
 
   output:
