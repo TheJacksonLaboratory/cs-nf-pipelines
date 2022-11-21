@@ -7,38 +7,27 @@ process GATKv3_5_HAPLOTYPECALLER {
 
   container 'broadinstitute/gatk3:3.5-0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.gvcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam), file(bai)
-  val(gvcf)
+  tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
 
   output:
-  tuple val(sampleID), file("*.*vcf"), emit: vcf
-  tuple val(sampleID), file("*.idx"), emit: idx
+  tuple val(meta), file("*.gvcf"), emit: normal_germline_vcf
+  tuple val(meta), file("*.gvcf.idx"), emit: normal_germline_index
 
   script:
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
-  if (gvcf=='gvcf'){
-    delta="--emitRefConfidence GVCF"
-    output_suffix='gvcf'
-  }
-  else{
-    delta="--dbsnp ${params.dbSNP} "
-    output_suffix='vcf'
-  }
-
   """
   java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar GenomeAnalysisTK.jar \
   -T HaplotypeCaller  \
   -R ${params.ref_fa} \
-  -I ${bam} \
-  -o ${sampleID}_variants_raw.${output_suffix} \
+  -I ${normal_bam} \
+  -o ${sampleID}_variants_raw.gvcf \
   -L ${params.target_gatk} \
   -stand-call-conf ${params.call_val} \
-  ${params.ploidy_val} \
-  ${delta} \
+  -ERC GVCF
   """
 }
