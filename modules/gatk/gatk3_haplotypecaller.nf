@@ -13,8 +13,8 @@ process GATKv3_5_HAPLOTYPECALLER {
   tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
 
   output:
-  tuple val(meta), file("*.gvcf"), emit: normal_germline_vcf
-  tuple val(meta), file("*.gvcf.idx"), emit: normal_germline_index
+  tuple val(meta), file("*.gvcf"), emit: normal_germline_gvcf
+  tuple val(meta), file("*.gvcf.idx"), emit: normal_germline_gvcf_index
 
   script:
   String my_mem = (task.memory-1.GB).toString()

@@ -8,14 +8,15 @@ process GATKv3_5_GENOTYPEGVCF {
   container 'broadinstitute/gatk3:3.5-0'
   
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(gvcf)
+  tuple val(sampleID), file(normal_germline_gvcf)
+  tuple val(sampleID), file(normal_germline_gvcf_index)
 
   output:
-  tuple val(sampleID), file("*.*vcf"), emit: vcf
-  tuple val(sampleID), file("*.idx"), emit: idx
+  tuple val(sampleID), file("*.*vcf"), emit: normal_germline_vcf
+  tuple val(sampleID), file("*.vcf.idx"), emit: normal_germline_vcf_index
 
   script:
   String my_mem = (task.memory-1.GB).toString()
