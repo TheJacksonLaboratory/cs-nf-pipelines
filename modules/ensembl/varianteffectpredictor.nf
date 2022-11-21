@@ -7,13 +7,14 @@ process Ensembl_Variant_Effect_Predictor {
   
   container 'ensemblorg/ensembl-vep:release_93.5'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'vep' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(normal_germline_recalibrated_vcf)
+  tuple val(sampleID), file(normal_germline_recalibrated_vcf_index)
 
   output:
-  tuple val(sampleID), file("*.*annotated.vcf"), emit: vcf
+  tuple val(sampleID), file("*_vep_annotated.vcf"), emit: normal_germline_annotated_vcf
 
   script:
   String my_mem = (task.memory-1.GB).toString()
