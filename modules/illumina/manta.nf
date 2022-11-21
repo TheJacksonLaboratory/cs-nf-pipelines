@@ -1,4 +1,4 @@
-process STRELKA2 {
+process MANTA {
   tag "$meta.patient"
 
   cpus = 1
