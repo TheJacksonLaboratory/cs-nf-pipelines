@@ -11,7 +11,7 @@ process SvABA {
 
   input:
   tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
-  tuple val(sampleID), file(tumor_bam), file(normal_bai), val(meta)
+  tuple val(sampleID), file(tumor_bam), file(tumor_bai), val(meta)
 
   output:
   tuple val(meta), file("*_svaba.vcf"), emit: svaba_vcf
