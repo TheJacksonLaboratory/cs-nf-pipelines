@@ -30,5 +30,9 @@ process SvABA {
     -n ${normal_bam} \
     -p ${cpus} \
     -a ${meta.patient}_svaba \
-    -G ${params.ref_fa} 
+    -G ${params.ref_fa} \
+    -L 100000
+    --region ${callRegions.table}
+    -D ${dbsnpIndels}
+    -z on
   """
