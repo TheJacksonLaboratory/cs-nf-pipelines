@@ -31,8 +31,8 @@ process SvABA {
     -p ${cpus} \
     -a ${meta.patient}_svaba \
     -G ${params.ref_fa} \
-    -L 100000
-    --region ${callRegions.table}
-    -D ${dbsnpIndels}
+    -L 100000 \
+    --region ${callRegions.table} \
+    -D ${dbsnpIndels} \
     -z on
   """
