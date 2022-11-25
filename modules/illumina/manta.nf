@@ -24,9 +24,12 @@ process MANTA {
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --referenceFasta ${params.ref_fasta} \
+  --callRegions ${callRegions.table} \
   --rundir ${sampleID}
 
   # execute manta
-  ${sampleID}/runWorkflow.py -j ${task.cpus}
+  ${sampleID}/runWorkflow.py -j ${task.cpus} \
+  --mode local \
+  --memGb ${my_mem}
   """
 }
