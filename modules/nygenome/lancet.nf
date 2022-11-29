@@ -5,7 +5,7 @@ process LANCET {
   memory = 15.GB
   time = '10:00:00'
 
-  container 'quay.io/jaxcompsci/lancet:latest'
+  container 'quay.io/jaxcompsci/lancet:v1.1.0'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'lancet' }", pattern:".vcf", mode:'copy'
 
   input:
