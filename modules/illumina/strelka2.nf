@@ -25,7 +25,7 @@ process STRELKA2 {
   ./configureStrelkaGermlineWorkflow.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
-  --referenceFasta ${params.ref_fasta} \
+  --referenceFasta ${params.ref_fa} \
   --indelCandidates  ${projectDir}/manta/results/${sampleID}/results/variants/candidateSmallIndels.vcf.gz \
   --rundir ${sampleID}
 
