@@ -23,7 +23,7 @@ include {SAMTOOLS_MERGEBAM_FILTER} from '../modules/samtools/samtools_mergebam_f
 include {BAMTOOLS_FILTER} from '../modules/bamtools/bamtools_filter'
 include {BAMPE_RM_ORPHAN} from '../modules/utility_modules/chipseq_bampe_rm_orphan'
 include {PRESEQ} from '../modules/preseq/preseq'
-
+include {PICARD_COLLECTMULTIPLEMETRICS} from '../modules/picard/picard_collectmultiplemetrics'
 
 
 // main workflow
@@ -137,6 +137,9 @@ workflow CHIPSEQ {
 
   // Step 20 : Preseq
   PRESEQ(PICARD_MARKDUPLICATES.out.dedup_bam)
+
+  // Step 21 : Collect Multiple Metrics
+  PICARD_COLLECTMULTIPLEMETRICS(PAIR_SORT.out)  
 
 
 }
