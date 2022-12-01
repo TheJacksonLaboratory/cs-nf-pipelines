@@ -26,6 +26,8 @@ include {PRESEQ} from '../modules/preseq/preseq'
 include {PICARD_COLLECTMULTIPLEMETRICS} from '../modules/picard/picard_collectmultiplemetrics'
 include {BEDTOOLS_GENOMECOV} from '../modules/bedtools/bedtools_genomecov'
 include {UCSC_BEDGRAPHTOBIGWIG} from '../modules/ucsc/ucsc_bedgraphtobigwig'
+include {DEEPTOOLS_COMPUTEMATRIX} from '../modules/deeptools/deeptools_computematrix'
+include {DEEPTOOLS_PLOTPROFILE} from '../modules/deeptools/deeptools_plotprofile'
 
 
 
@@ -62,6 +64,8 @@ workflow CHIPSEQ {
   // Reference genome
   ch_fasta = file(params.fasta, checkIfExists: true)
 
+  // genes.bed
+  if (params.gene_bed)  { ch_gene_bed = file(params.gene_bed, checkIfExists: true) }
 
   // Step 2: Make genome filter
   SAMTOOLS_FAIDX(ch_fasta)
@@ -149,6 +153,12 @@ workflow CHIPSEQ {
 
   // Step 23 : USCS Bedgraph to bigwig
   UCSC_BEDGRAPHTOBIGWIG(BEDTOOLS_GENOMECOV.out.bedgraph, MAKE_GENOME_FILTER.out[1])
+
+  // Step 24 : Deeptools Compute matrix
+  DEEPTOOLS_COMPUTEMATRIX(UCSC_BEDGRAPHTOBIGWIG.out.bigwig, ch_gene_bed)
+
+  // Step 25 : Deeptools Plot Profile
+  DEEPTOOLS_PLOTPROFILE(DEEPTOOLS_COMPUTEMATRIX.out.matrix)
 
 
 
