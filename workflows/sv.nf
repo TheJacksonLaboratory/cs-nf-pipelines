@@ -19,6 +19,8 @@ include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_col
 include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor_pileup"
 include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
+include {GATKv3_5_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk3_haplotypecaller"
+include {GATKv3_5_VARIANTRECALIBRATOR} from "${projectDir}/modules/gatk/gatk3_variantrecalibrator"
 
 // help if needed
 if (params.help){
@@ -123,6 +125,11 @@ workflow SV {
     // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
+
+    // Step 13: Germline Calling
+    GATKv3_5_HAPLOTYPECALLER(ch_bam_normal_to_cross)
+    
+    GATKv3_5_VARIANTRECALIBRATOR(GATKv3_5_HAPLOTYPECALLER.out.normal_germline_gvcf, GATKv3_5_HAPLOTYPECALLER.out.normal_germline_gvcf_index)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
