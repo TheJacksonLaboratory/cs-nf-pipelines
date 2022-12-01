@@ -119,7 +119,7 @@ workflow SV {
             [meta, normal[2], tumor[2]]
         }
         // normal[2] is normal pileup, tumor[2] is tumor pileup. 
-        
+
     // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
@@ -128,16 +128,12 @@ workflow SV {
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
-
-
-
-
-
 }
 
 
 
 // Function to extract information (meta data + file(s)) from csv file(s)
+// https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084
 def extract_csv(csv_file) {
 
     // check that the sample sheet is not 1 line or less, because it'll skip all subsequent checks if so.
@@ -206,32 +202,6 @@ def extract_csv(csv_file) {
 
         if (meta.status == 0) sample_count_normal++
         else sample_count_tumor++
-
-        // // Two checks for ensuring that the pipeline stops with a meaningful error message if
-        // // 1. the sample-sheet only contains normal-samples, but some of the requested tools require tumor-samples, and
-        // // 2. the sample-sheet only contains tumor-samples, but some of the requested tools require normal-samples.
-        // if ((sample_count_normal == sample_count_all) && params.tools) { // In this case, the sample-sheet contains no tumor-samples
-        //     def tools_tumor = ['ascat', 'controlfreec', 'mutect2', 'msisensorpro']
-        //     def tools_tumor_asked = []
-        //     tools_tumor.each{ tool ->
-        //         if (params.tools.split(',').contains(tool)) tools_tumor_asked.add(tool)
-        //     }
-        //     if (!tools_tumor_asked.isEmpty()) {
-        //         log.error('The sample-sheet only contains normal-samples, but the following tools, which were requested with "--tools", expect at least one tumor-sample : ' + tools_tumor_asked.join(", "))
-        //         System.exit(1)
-        //     }
-        // } else if ((sample_count_tumor == sample_count_all) && params.tools) {  // In this case, the sample-sheet contains no normal/germline-samples
-        //     def tools_requiring_normal_samples = ['ascat', 'deepvariant', 'haplotypecaller', 'msisensorpro']
-        //     def requested_tools_requiring_normal_samples = []
-        //     tools_requiring_normal_samples.each{ tool_requiring_normal_samples ->
-        //         if (params.tools.split(',').contains(tool_requiring_normal_samples)) requested_tools_requiring_normal_samples.add(tool_requiring_normal_samples)
-        //     }
-        //     if (!requested_tools_requiring_normal_samples.isEmpty()) {
-        //         log.error('The sample-sheet only contains tumor-samples, but the following tools, which were requested by the option "tools", expect at least one normal-sample : ' + requested_tools_requiring_normal_samples.join(", "))
-        //         System.exit(1)
-        //     }
-        // }
-        // NOTE: Above is from SAREK on NF-Core. This code can be modified to deal with T/N and T-only differences in a pipeline. 
 
         // join meta to fastq
         if (row.fastq_2) {
