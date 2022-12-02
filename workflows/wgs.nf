@@ -32,7 +32,7 @@ include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecali
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
-include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk_variantannotator"
+include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
 include {GATK_HAPLOTYPECALLER_INTERVAL} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"

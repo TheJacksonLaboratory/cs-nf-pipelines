@@ -19,8 +19,12 @@ include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_col
 include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor_pileup"
 include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
-include {GATKv3_5_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk3_haplotypecaller"
-include {GATKv3_5_VARIANTRECALIBRATOR} from "${projectDir}/modules/gatk/gatk3_variantrecalibrator"
+include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
+include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
+include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
+include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
+include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
+include {BEDTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bedtools/bedtools_germline_filter"
 
 // help if needed
 if (params.help){
@@ -127,9 +131,16 @@ workflow SV {
     // NOTE: NEED HIGH COVERAGE TO TEST. 
 
     // Step 13: Germline Calling
-    GATKv3_5_HAPLOTYPECALLER(ch_bam_normal_to_cross)
+
+    // scatter gather of chr needed ... 
     
-    GATKv3_5_VARIANTRECALIBRATOR(GATKv3_5_HAPLOTYPECALLER.out.normal_germline_gvcf, GATKv3_5_HAPLOTYPECALLER.out.normal_germline_gvcf_index)
+    GATK_HAPLOTYPECALLER_SV_GERMLINE(ch_bam_normal_to_cross)
+    GATK_GENOTYPE_GVCF(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf, GATK_HAPLOTYPECALLER_SV_GERMLINE.out.idx)
+    GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf, GATK_GENOTYPE_GVCF.out.idx)
+    GATK_FILTER_VARIANT_TRANCHES(GATK_CNNSCORE_VARIANTS.out.vcf, GATK_CNNSCORE_VARIANTS.out.idx)
+    // NOTE: VARIANTS ARE NEEDED TO TEST. FAILURE WILL OCCUR IN SMALL SAMPLE DATA
+    GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf, GATK_FILTER_VARIANT_TRANCHES.out.idx)
+    BEDTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
