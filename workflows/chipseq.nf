@@ -28,7 +28,9 @@ include {BEDTOOLS_GENOMECOV} from '../modules/bedtools/bedtools_genomecov'
 include {UCSC_BEDGRAPHTOBIGWIG} from '../modules/ucsc/ucsc_bedgraphtobigwig'
 include {DEEPTOOLS_COMPUTEMATRIX} from '../modules/deeptools/deeptools_computematrix'
 include {DEEPTOOLS_PLOTPROFILE} from '../modules/deeptools/deeptools_plotprofile'
-
+include {DEEPTOOLS_PLOTHEATMAP} from '../modules/deeptools/deeptools_plotheatmap'
+include {PHANTOMPEAKQUALTOOLS} from '../modules/phantompeakqualtools/phantompeakqualtools'
+include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from '../modules/multiqc/multiqc_custom_phantompeakqualtools'
 
 
 // main workflow
@@ -61,6 +63,17 @@ workflow CHIPSEQ {
       .map { row -> [ row.sample_id, row.control_id, row.antibody, row.replicatesExist.toBoolean(), row.multipleGroups.toBoolean() ] }
 
 
+  // Header files for MultiQC
+  ch_spp_nsc_header           = file("/projects/compsci/vmp/slek/ref/assets/multiqc/spp_nsc_header.txt", checkIfExists: true)
+  ch_spp_rsc_header           = file("/projects/compsci/vmp/slek/ref/assets/multiqc/spp_rsc_header.txt", checkIfExists: true)
+  ch_spp_correlation_header   = file("/projects/compsci/vmp/slek/ref/assets/multiqc/spp_correlation_header.txt", checkIfExists: true)
+  ch_peak_count_header        = file("/projects/compsci/vmp/slek/ref/assets/multiqc/peak_count_header.txt", checkIfExists: true)
+  ch_frip_score_header        = file("/projects/compsci/vmp/slek/ref/assets/multiqc/frip_score_header.txt", checkIfExists: true)
+  ch_peak_annotation_header   = file("/projects/compsci/vmp/slek/ref/assets/multiqc/peak_annotation_header.txt", checkIfExists: true)
+  ch_deseq2_pca_header        = file("/projects/compsci/vmp/slek/ref/assets/multiqc/deseq2_pca_header.txt", checkIfExists: true)
+  ch_deseq2_clustering_header = file("/projects/compsci/vmp/slek/ref/assets/multiqc/deseq2_clustering_header.txt", checkIfExists: true)
+
+
   // Reference genome
   ch_fasta = file(params.fasta, checkIfExists: true)
 
@@ -88,7 +101,7 @@ workflow CHIPSEQ {
   SAMTOOLS_FILTER(BWA_MEM.out, '-F 0x0100')
 
   // Step 8: Samtools Sort
-  // cannot use emit as -n (name sort) option is incompatible with samtools index. 
+  // cannot use emit as -n (sampleID sort) option is incompatible with samtools index. 
   SORT(SAMTOOLS_FILTER.out.bam, '')
 
   // Step 9: Samtools Stats
@@ -160,6 +173,14 @@ workflow CHIPSEQ {
   // Step 25 : Deeptools Plot Profile
   DEEPTOOLS_PLOTPROFILE(DEEPTOOLS_COMPUTEMATRIX.out.matrix)
 
+  // Step 26 : Deeptools Plot Heatmap
+  DEEPTOOLS_PLOTHEATMAP(DEEPTOOLS_COMPUTEMATRIX.out.matrix)
 
+  // Step 27 : Phantompeakqualtools
+  PHANTOMPEAKQUALTOOLS(BAMPE_RM_ORPHAN.out.bam)
+
+  // Step 28 : Multiqc Custom Phantompeakqualtools
+  mcp_ch = PHANTOMPEAKQUALTOOLS.out.spp.join(PHANTOMPEAKQUALTOOLS.out.rdata, by: [0])
+  MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS(mcp_ch, ch_spp_nsc_header, ch_spp_rsc_header, ch_spp_correlation_header)
 
 }
