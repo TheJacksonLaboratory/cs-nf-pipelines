@@ -1,4 +1,4 @@
-process BEDTOOLS_GERMLINE_FILTER {
+process BCFTOOLS_GERMLINE_FILTER {
     // This modules is a port of the NYGC germline filtering scheme found at this site:
     // https://bitbucket.nygenome.org/projects/WDL/repos/somatic_dna_wdl/browse/germline/germline.wdl?at=7.4.0
 
@@ -8,25 +8,27 @@ process BEDTOOLS_GERMLINE_FILTER {
     memory = 2.GB
     time = '00:30:00'
 
-    container 'broadinstitute/gatk:4.2.4.1'
+    container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*.haplotypecaller.gatk.final.filtered.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)
-    tuple val(sampleID), file(vcf_index)
 
     output:
     tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz"), emit: vcf
-    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz.idx"), emit: idx
+    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz.tbi"), emit: idx
 
     script:
     """
+    bgzip ${vcf}
+    tabix -p vcf ${vcf}.gz
+
     ## Remove existing AF annotations from merged VCF
     bcftools annotate \
     -x INFO/AF \
     -Oz \
-    ${vcf} \
+    ${vcf}.gz \
     > noaf.vcf.gz
     
     tabix -p vcf noaf.vcf.gz
@@ -54,7 +56,7 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.whitelist} \
-    ${vcf} \
+    ${vcf}.gz \
     > ${sampleID}.whitelist.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.whitelist.filtered.vcf.gz
@@ -63,7 +65,7 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.pgx} \
-    ${vcf} \ 
+    ${vcf}.gz \
     > ${sampleID}.pgx.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.pgx.filtered.vcf.gz
@@ -72,7 +74,7 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.chdWhitelistVcf} \
-    ${vcf} \
+    ${vcf}.gz \
     > ${sampleID}.chdwhitelist.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.chdwhitelist.filtered.vcf.gz
@@ -81,7 +83,7 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.rwgsPgxBed} \
-    ${vcf} \
+    ${vcf}.gz \
     > ${sampleID}.rwgspgx.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.rwgspgx.filtered.vcf.gz
@@ -90,7 +92,7 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.deepIntronicsVcf} \
-    ${vcf} \
+    ${vcf}.gz \
     > ${sampleID}.deep_intronics.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.deep_intronics.filtered.vcf.gz
@@ -99,12 +101,12 @@ process BEDTOOLS_GERMLINE_FILTER {
     bcftools view \
     -Oz \
     -R ${params.clinvarIntronicsVcf} \
-    ${vcf} \
+    ${vcf}.gz \
     > ${sampleID}.clinvar_intronics.filtered.vcf.gz
 
     tabix -p vcf ${sampleID}.clinvar_intronics.filtered.vcf.gz
 
-    echo ${sampleId} > samples.txt
+    bcftools query -l ${vcf}.gz > samples.txt
 
     ## merge all filtered files for further processing
     bcftools concat \

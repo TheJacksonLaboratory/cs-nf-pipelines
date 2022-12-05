@@ -7,14 +7,11 @@ process GATK_CNNSCORE_VARIANTS {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
-
     input:
-    tuple val(sampleID), file(vcf)
-    tuple val(sampleID), file(vcf_index)
+    tuple val(sampleID), file(vcf), file(vcf_index), path(interval), val(index)
 
     output:
-    tuple val(sampleID), file("*.*vcf"), emit: vcf
+    tuple val(sampleID), file("*.vcf"), emit: vcf
     tuple val(sampleID), file("*.idx"), emit: idx
 
     script:
@@ -25,7 +22,7 @@ process GATK_CNNSCORE_VARIANTS {
     gatk --java-options "-Xmx${my_mem}G" CNNScoreVariants  \
     -R ${params.ref_fa} \
     -V ${vcf} \
-    -O ${sampleID}_haplotypecaller.annotated.vcf \
-    -L ${params.target_gatk} 
+    -O ${sampleID}_${index}_haplotypecaller.annotated.vcf \
+    -L ${interval} 
     """
 }

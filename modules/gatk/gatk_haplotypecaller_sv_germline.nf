@@ -7,11 +7,9 @@ process GATK_HAPLOTYPECALLER_SV_GERMLINE {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
-
     input:
-    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai)
-
+    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), path(interval), val(index)
+    
     output:
     tuple val(sampleID), file("*.*vcf"), emit: vcf
     tuple val(sampleID), file("*.idx"), emit: idx
@@ -24,8 +22,9 @@ process GATK_HAPLOTYPECALLER_SV_GERMLINE {
     gatk --java-options "-Xmx${my_mem}G" HaplotypeCaller  \
     -R ${params.ref_fa} \
     -I ${normal_bam} \
-    -O ${sampleID}_variants_raw.gvcf \
-    -L ${params.target_gatk} \
+    -O ${sampleID}_${index}_variants_raw.gvcf \
+    -L ${interval} \
+    -XL ${params.excludeIntervalList} \
     -stand-call-conf ${params.call_val} \
     -G StandardAnnotation \
     -G StandardHCAnnotation \

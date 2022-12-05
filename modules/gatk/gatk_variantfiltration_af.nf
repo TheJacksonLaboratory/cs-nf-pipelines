@@ -14,10 +14,9 @@ process GATK_VARIANTFILTRATION_AF {
 
     input:
     tuple val(sampleID), file(vcf), file(idx)
-    val(indel_snp)
 
     output:
-    tuple val(sampleID), file("*haplotypecaller.gatk.af-gq-filtered.vcf.gz"), emit: vcf
+    tuple val(sampleID), file("*haplotypecaller.gatk.af-gq-filtered.vcf"), emit: vcf
 
     script:
     String my_mem = (task.memory-1.GB).toString()
@@ -32,7 +31,7 @@ process GATK_VARIANTFILTRATION_AF {
     
     ## remove biallellic sites
     zcat ${sampleID}_haplotypecaller.gatk.af.vcf.gz \
-    | awk '($5 !~ ",")' \
+    | awk '(\$5 !~ ",")' \
     > ${sampleID}.biallellic.vcf
 
     ## Variant filtration
@@ -48,7 +47,7 @@ process GATK_VARIANTFILTRATION_AF {
     ## filter with AF (deliver)
     zcat ${sampleID}.haplotypecaller.af-gq-filtered.vcf.gz \
     | grep -v "AlleleFraction" \
-    > ${sampleID}_haplotypecaller.gatk.af-gq-filtered.vcf.gz
+    > ${sampleID}_haplotypecaller.gatk.af-gq-filtered.vcf
 
     """
 }
