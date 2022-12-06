@@ -23,7 +23,7 @@ process MANTA {
   ./configManta.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
-  --referenceFasta ${params.ref_fasta} \
+  --referenceFasta ${params.ref_fa} \
   --callRegions ${callRegions.table} \
   --rundir ${sampleID}
 

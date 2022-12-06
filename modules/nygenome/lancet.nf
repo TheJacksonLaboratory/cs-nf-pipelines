@@ -22,7 +22,7 @@ process LANCET {
   lancet \ 
   --tumor ${tumor_bam} \
   --normal ${normal_bam} \
-  --ref ${params.ref_fasta} \
+  --ref ${params.ref_fa} \
   --num-threads ${task.cpus} > ${sampleID}_lancet.vcf
   """
 }
