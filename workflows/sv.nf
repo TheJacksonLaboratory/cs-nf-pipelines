@@ -33,6 +33,8 @@ include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
 include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutectstats"
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
+include {MANTA} from "${projectDir}/modules/illumina/manta"
+include {STRELKA2} from "${projectDir}/modules/illumina/strelka2"
 
 // help if needed
 if (params.help){
@@ -184,6 +186,10 @@ workflow SV {
     // GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
     // BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
+
+// NEED TO ADD ANNOTATION OF GERMLINE. 
+
+
     // Step 14: Somatic Calling
 
     // Read a list of contigs from parameters to provide to GATK as intervals
@@ -203,23 +209,21 @@ workflow SV {
     // Merge vcfs and stats must be joined prior to 'filtermutectcalls'
 
     GATK_MUTECT2(somatic_calling_channel)
-    
     GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
-    
     GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
-    
     filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
     GATK_FILTERMUECTCALLS(filter_mutect_input)
-
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
     // Manta
-
-
+    MANTA(ch_cram_variant_calling_pair)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // FilterNonpass is also used with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
 
     // Strelka2
-
-
+    strekla2_input = ch_cram_variant_calling_pair.join(MANTA.out.manta_smallindel_vcf_tbi)
+    STRELKA2(strekla2_input)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
     // Lancet
 

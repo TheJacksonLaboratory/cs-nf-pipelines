@@ -1,35 +1,48 @@
 process MANTA {
   tag "$meta.patient"
 
-  cpus = 1
+  cpus = 4
   memory = 8.GB
   time = '03:00:00'
 
-  container 'quay.io/jaxcompsci/manta:v1.4.0'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'manta' }", pattern:".vcf.gz", mode:'copy'
+  container 'quay.io/jaxcompsci/manta:v1.5.0'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
-  tuple val(sampleID), file(tumor_bam), file(tumor_bai), val(meta)
+  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*.candidateSmallIndels.vcf.gz"), emit: manta_vcf
+  tuple val(sampleID), file("*candidateSmallIndels.vcf.gz"), file("*candidateSmallIndels.vcf.gz.tbi"), emit: manta_smallindel_vcf_tbi
+  tuple val(sampleID), file("*diploidSV.vcf.gz"), file("*diploidSV.vcf.gz.tbi"), emit: manta_diploidsv_tbi
+  tuple val(sampleID), file("*somaticSV.vcf.gz"), file("*somaticSV.vcf.gz.tbi"), emit: manta_somaticsv_tbi
+  tuple val(sampleID), file("*candidateSV.vcf.gz"), file("*candidateSV.vcf.gz.tbi"), emit: manta_candidatesv_tbi
+
 
   script:
-  log.info "----- Manta Running on: ${sampleID} -----"
+  String my_mem = (task.memory-1.GB).toString()
+  my_mem =  my_mem[0..-4]
 
   """
   # configure manta
-  ./configManta.py \
+  configManta.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --referenceFasta ${params.ref_fa} \
-  --callRegions ${callRegions.table} \
-  --rundir ${sampleID}
+  --callRegions ${params.callRegions} \
+  --runDir ${sampleID}
 
   # execute manta
   ${sampleID}/runWorkflow.py -j ${task.cpus} \
   --mode local \
   --memGb ${my_mem}
+  
+  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz ${sampleID}_candidateSmallIndels.vcf.gz
+  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz.tbi ${sampleID}_candidateSmallIndels.vcf.gz.tbi
+  mv ${sampleID}/results/variants/diploidSV.vcf.gz ${sampleID}_diploidSV.vcf.gz
+  mv ${sampleID}/results/variants/diploidSV.vcf.gz.tbi ${sampleID}_diploidSV.vcf.gz.tbi
+  mv ${sampleID}/results/variants/somaticSV.vcf.gz ${sampleID}_somaticSV.vcf.gz
+  mv ${sampleID}/results/variants/somaticSV.vcf.gz.tbi ${sampleID}_somaticSV.vcf.gz.tbi
+  mv ${sampleID}/results/variants/candidateSV.vcf.gz ${sampleID}_candidateSV.vcf.gz
+  mv ${sampleID}/results/variants/candidateSV.vcf.gz.tbi ${sampleID}_candidateSV.vcf.gz.tbi
   """
 }
