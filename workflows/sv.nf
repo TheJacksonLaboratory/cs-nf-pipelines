@@ -21,12 +21,18 @@ include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_norm
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
 include {GATK_SORTVCF as GATK_SORTVCF_GERMLINE;
-         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf"
+         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE;
+         GATK_SORTVCF as GATK_SORTVCF_MUTECT} from "${projectDir}/modules/gatk/gatk_sortvcf"
 include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
 include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
+include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
+         GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
+include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
+include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutectstats"
+include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
 
 // help if needed
 if (params.help){
@@ -93,6 +99,12 @@ workflow SV {
     ch_bam_normal_to_cross = chr_bam_status.normal.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
     ch_bam_tumor_to_cross = chr_bam_status.tumor.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
 
+    GATK_GETSAMPLENAME_NORMAL(ch_bam_normal_to_cross)
+    GATK_GETSAMPLENAME_TUMOR(ch_bam_tumor_to_cross)
+
+    ch_bam_normal_to_cross = ch_bam_normal_to_cross.join(GATK_GETSAMPLENAME_NORMAL.out.sample_name)
+    ch_bam_tumor_to_cross = ch_bam_tumor_to_cross.join(GATK_GETSAMPLENAME_TUMOR.out.sample_name)
+
     // Cross all normal and tumor by patient ID. 
     ch_cram_variant_calling_pair = ch_bam_normal_to_cross.cross(ch_bam_tumor_to_cross)
         .map { normal, tumor ->
@@ -103,75 +115,126 @@ workflow SV {
             meta.sex        = normal[1].sex
             meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
 
-            [meta, normal[2], normal[3], tumor[2], tumor[3]]
+            [normal[0], meta, normal[2], normal[3], normal[4], tumor[2], tumor[3], tumor[4]]
         }
-        // normal[0] is patient ID, normal[1] and tumor[1] are meta info, normal[2] is normal bam, normal[3] is bai. tumor[2] is bam, tumor[3] is bai.
+        // normal[0] is patient ID, 
+        // normal[1] and tumor[1] are meta info
+        // normal[2] is normal bam, normal[3] is bai, normal[4] is read group ID. 
+        // tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
 
-    // Step 13: Conpair pileup for T/N
-    CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
-    CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
+    // // Step 13: Conpair pileup for T/N
+    // CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
+    // CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
 
-    // output channel manipulation and cross/join
-    conpair_normal_to_cross = CONPAIR_NORMAL_PILEUP.out.normal_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
-    conpair_tumor_to_cross = CONPAIR_TUMOR_PILEUP.out.tumor_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
+    // // output channel manipulation and cross/join
+    // conpair_normal_to_cross = CONPAIR_NORMAL_PILEUP.out.normal_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
+    // conpair_tumor_to_cross = CONPAIR_TUMOR_PILEUP.out.tumor_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
 
-    conpair_input = conpair_normal_to_cross.cross(conpair_tumor_to_cross)
-        .map { normal, tumor ->
-            def meta = [:]
-            meta.patient    = normal[0]
-            meta.normal_id  = normal[1].sample
-            meta.tumor_id   = tumor[1].sample
-            meta.sex        = normal[1].sex
-            meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
+    // conpair_input = conpair_normal_to_cross.cross(conpair_tumor_to_cross)
+    //     .map { normal, tumor ->
+    //         def meta = [:]
+    //         meta.patient    = normal[0]
+    //         meta.normal_id  = normal[1].sample
+    //         meta.tumor_id   = tumor[1].sample
+    //         meta.sex        = normal[1].sex
+    //         meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
 
-            [meta, normal[2], tumor[2]]
-        }
-        // normal[2] is normal pileup, tumor[2] is tumor pileup. 
+    //         [meta, normal[2], tumor[2]]
+    //     }
+    //     // normal[2] is normal pileup, tumor[2] is tumor pileup. 
 
-    // the above channel manipulations will require a test in multiple sample mode. 
+    // // the above channel manipulations will require a test in multiple sample mode. 
 
-    // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
-    CONPAIR(conpair_input)
-    // NOTE: NEED HIGH COVERAGE TO TEST. 
+    // // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
+    // CONPAIR(conpair_input)
+    // // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // Step 13: Germline Calling
+    // // Step 13: Germline Calling
     
+    // // Read a list of contigs from parameters to provide to GATK as intervals
+    // // for HaplotypeCaller variant regions and GenotypeGVCF
+    // intervals = Channel
+    //  .fromPath("${params.chrom_intervals}")
+    //  .splitCsv(header: false)
+    //  .map{ row -> tuple(row[0], row[1]) }
+    
+    // // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
+    // chrom_channel = ch_bam_normal_to_cross.combine(intervals)
+
+    // // Variant calling. 
+    // GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
+
+    // // Applies gather to scattered haplotype calls.
+    // GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
+
+    // // Applies scatter intervals from above to the merged file, and genotype.
+    // genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
+    // // this will require a test in multiple sample mode. 
+
+    // GATK_GENOTYPE_GVCF(genotype_channel)
+    // GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
+
+    // // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
+    // GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
+
+    // // Variant tranche filtering. 
+    // GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
+    
+    // // Allele frequency and call refinement filtering. 
+    // GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
+    // BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
+
+    // Step 14: Somatic Calling
+
     // Read a list of contigs from parameters to provide to GATK as intervals
-    // for HaplotypeCaller variant regions and GenotypeGVCF
-    intervals = Channel
-     .fromPath("${params.chrom_contigs}")
-     .splitCsv(header: false)
-     .map{ row -> tuple(row[0], row[1]) }
+    // for HaplotypeCaller variant regions
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+
+    // Applies scatter intervals from above to the BQSR bam file
+    somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
     
-    // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
-    chrom_channel = ch_bam_normal_to_cross.combine(intervals)
+    // Mutect2
+    // Call on each chromosome. 
+    // Prior to 'filtermutectcalls' vcfs must be merged. (GATK best practice) 
+    // Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
+    // Merge vcfs and stats must be joined prior to 'filtermutectcalls'
 
-    // Variant calling. 
-    GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
-
-    // Applies gather to scattered haplotype calls.
-    GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
-
-    // Applies scatter intervals from above to the merged file, and genotype.
-    genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
-    // this will require a test in multiple sample mode. 
-
-    GATK_GENOTYPE_GVCF(genotype_channel)
-    GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
-
-    // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
-    GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
-
-    // Variant tranche filtering. 
-    GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
+    GATK_MUTECT2(somatic_calling_channel)
     
-    // Allele frequency and call refinement filtering. 
-    GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
-    BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
+    GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
+    
+    GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
+    
+    filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
+    GATK_FILTERMUECTCALLS(filter_mutect_input)
+
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+
+    // Manta
+
+
+
+    // Strelka2
+
+
+
+    // Lancet
+
+
+
+    // Gridss
+
+
+
+    // BicSeq2
+
 
     // Step NN: Get alignment and WGS metrics
-    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
-    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+    // PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    // PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
 }
 
