@@ -5,7 +5,7 @@ process BAM_COVERAGE_BIGWIG {
   memory 10.GB
   time '04:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'deeptools' }", pattern: "*.bigwig", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/deeptools' : 'deeptools' }", pattern: "*.bigwig", mode: 'copy'
   container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
 
   input:
