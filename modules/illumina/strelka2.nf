@@ -37,10 +37,10 @@ process STRELKA2 {
   --job ${task.cpus} \
   --memGb ${my_mem}
 
-  mv ${sampleID}/results/variants/somatic.snvs.vcf.gz ${sampleID}_somatic.snvs.vcf.gz
-  mv ${sampleID}/results/variants/somatic.snvs.vcf.gz.tbi ${sampleID}_somatic.snvs.vcf.gz.tbi
-  mv ${sampleID}/results/variants/somatic.indels.vcf.gz ${sampleID}_somatic.indels.vcf.gz
-  mv ${sampleID}/results/variants/somatic.indels.vcf.gz.tbi ${sampleID}_somatic.indels.vcf.gz.tbi
+  mv ${sampleID}/results/variants/somatic.snvs.vcf.gz ${sampleID}_strelka_somatic.snvs.vcf.gz
+  mv ${sampleID}/results/variants/somatic.snvs.vcf.gz.tbi ${sampleID}_strelka_somatic.snvs.vcf.gz.tbi
+  mv ${sampleID}/results/variants/somatic.indels.vcf.gz ${sampleID}_strelka_somatic.indels.vcf.gz
+  mv ${sampleID}/results/variants/somatic.indels.vcf.gz.tbi ${sampleID}_strelka_somatic.indels.vcf.gz.tbi
 
   """
 }

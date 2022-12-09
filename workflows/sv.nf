@@ -22,7 +22,8 @@ include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
 include {GATK_SORTVCF as GATK_SORTVCF_GERMLINE;
          GATK_SORTVCF as GATK_SORTVCF_GENOTYPE;
-         GATK_SORTVCF as GATK_SORTVCF_MUTECT} from "${projectDir}/modules/gatk/gatk_sortvcf"
+         GATK_SORTVCF as GATK_SORTVCF_MUTECT;
+         GATK_SORTVCF as GATK_SORTVCF_LANCET} from "${projectDir}/modules/gatk/gatk_sortvcf"
 include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
 include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
@@ -35,6 +36,12 @@ include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutec
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
 include {MANTA} from "${projectDir}/modules/illumina/manta"
 include {STRELKA2} from "${projectDir}/modules/illumina/strelka2"
+include {LANCET} from "${projectDir}/modules/nygenome/lancet"
+include {GRIDSS_PREPROCESS} from "${projectDir}/modules/gridss/gridss_preprocess"
+include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
+include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
+include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
+include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
 
 // help if needed
 if (params.help){
@@ -124,7 +131,7 @@ workflow SV {
         // normal[2] is normal bam, normal[3] is bai, normal[4] is read group ID. 
         // tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
 
-    // // Step 13: Conpair pileup for T/N
+    // Step 13: Conpair pileup for T/N
     // CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
     // CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
 
@@ -225,16 +232,40 @@ workflow SV {
     STRELKA2(strekla2_input)
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
+
     // Lancet
 
+    // Read a list of bed files from parameters to provide to LANCET as intervals
+    // for HaplotypeCaller variant regions
+    lancet_beds = Channel
+     .fromPath("${params.lancet_beds}")
+     .splitCsv(header: false)
+     .map{ row -> tuple(row[0], row[1]) }
+
+    // Applies scatter intervals from above to the BQSR bam file
+    lancet_calling_channel = ch_cram_variant_calling_pair.combine(lancet_beds)
+    LANCET(lancet_calling_channel)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    GATK_SORTVCF_LANCET(LANCET.out.lancet_vcf.groupTuple(), 'vcf')
+    //need to be able to capture this output. 
 
 
     // Gridss
-
+    GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
+    gridss_assemble_input = ch_cram_variant_calling_pair.join(GRIDSS_PREPROCESS.out.gridss_preproc)
+    GRIDSS_ASSEMBLE(gridss_assemble_input)
+    gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
+    GRIDSS_CALLING(gridss_call_input)
+    GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chroms)
+    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
+    // will need testing with large dataset. 
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
 
     // BicSeq2
 
+
+    // Svaba
 
     // Step NN: Get alignment and WGS metrics
     // PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)

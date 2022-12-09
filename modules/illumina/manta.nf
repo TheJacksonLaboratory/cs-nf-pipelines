@@ -36,13 +36,13 @@ process MANTA {
   --mode local \
   --memGb ${my_mem}
   
-  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz ${sampleID}_candidateSmallIndels.vcf.gz
-  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz.tbi ${sampleID}_candidateSmallIndels.vcf.gz.tbi
-  mv ${sampleID}/results/variants/diploidSV.vcf.gz ${sampleID}_diploidSV.vcf.gz
-  mv ${sampleID}/results/variants/diploidSV.vcf.gz.tbi ${sampleID}_diploidSV.vcf.gz.tbi
-  mv ${sampleID}/results/variants/somaticSV.vcf.gz ${sampleID}_somaticSV.vcf.gz
-  mv ${sampleID}/results/variants/somaticSV.vcf.gz.tbi ${sampleID}_somaticSV.vcf.gz.tbi
-  mv ${sampleID}/results/variants/candidateSV.vcf.gz ${sampleID}_candidateSV.vcf.gz
-  mv ${sampleID}/results/variants/candidateSV.vcf.gz.tbi ${sampleID}_candidateSV.vcf.gz.tbi
+  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz ${sampleID}_manta_candidateSmallIndels.vcf.gz
+  mv ${sampleID}/results/variants/candidateSmallIndels.vcf.gz.tbi ${sampleID}_manta_candidateSmallIndels.vcf.gz.tbi
+  mv ${sampleID}/results/variants/diploidSV.vcf.gz ${sampleID}_manta_diploidSV.vcf.gz
+  mv ${sampleID}/results/variants/diploidSV.vcf.gz.tbi ${sampleID}_manta_diploidSV.vcf.gz.tbi
+  mv ${sampleID}/results/variants/somaticSV.vcf.gz ${sampleID}_manta_somaticSV.vcf.gz
+  mv ${sampleID}/results/variants/somaticSV.vcf.gz.tbi ${sampleID}_manta_somaticSV.vcf.gz.tbi
+  mv ${sampleID}/results/variants/candidateSV.vcf.gz ${sampleID}_manta_candidateSV.vcf.gz
+  mv ${sampleID}/results/variants/candidateSV.vcf.gz.tbi ${sampleID}_manta_candidateSV.vcf.gz.tbi
   """
 }
