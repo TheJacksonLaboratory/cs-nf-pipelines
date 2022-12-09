@@ -32,7 +32,8 @@ include {DEEPTOOLS_PLOTHEATMAP} from '../modules/deeptools/deeptools_plotheatmap
 include {PHANTOMPEAKQUALTOOLS} from '../modules/phantompeakqualtools/phantompeakqualtools'
 include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from '../modules/multiqc/multiqc_custom_phantompeakqualtools'
 include {DEEPTOOLS_PLOTFINGERPRINT} from '../modules/deeptools/deeptools_plotfingerprint'
-
+include {PEAK_CALLING_CHIPSEQ} from '../modules/macs2/macs2_peak_calling_chipseq'
+include {FRIP_SCORE} from '../modules/utility_modules/frip_score'
 
 
 
@@ -203,6 +204,14 @@ workflow CHIPSEQ {
 
   // Step 29 : Deeptools plotFingerprint
   DEEPTOOLS_PLOTFINGERPRINT(ch_group_bam) 
+
+  // Step 30 : Call peaks with MACS2 
+  PEAK_CALLING_CHIPSEQ(ch_group_bam, ch_peak_count_header, ch_frip_score_header)
+
+  // Step 31 : Calculate FRiP score
+  FRIP_SCORE(ch_group_bam, PEAK_CALLING_CHIPSEQ.out.peak, ch_peak_count_header, ch_frip_score_header)
+
+
 
 
 }
