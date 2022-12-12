@@ -31,6 +31,9 @@ include {DEEPTOOLS_PLOTPROFILE} from '../modules/deeptools/deeptools_plotprofile
 include {DEEPTOOLS_PLOTHEATMAP} from '../modules/deeptools/deeptools_plotheatmap'
 include {PHANTOMPEAKQUALTOOLS} from '../modules/phantompeakqualtools/phantompeakqualtools'
 include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from '../modules/multiqc/multiqc_custom_phantompeakqualtools'
+include {DEEPTOOLS_PLOTFINGERPRINT} from '../modules/deeptools/deeptools_plotfingerprint'
+
+
 
 
 // main workflow
@@ -107,19 +110,20 @@ workflow CHIPSEQ {
   // Step 9: Samtools Stats
   SAMTOOLS_STATS(SORT.out[0])
 
+
   // Step 10: Merge BAM files
   ch_sort_bam_merge = SORT.out
 
-
+  // Merge BAM files for all libraries from same sample replicate
   ch_sort_bam_merge
     .map { it -> [ it[0].split('_')[0..-2].join('_'), it[1] ] }
     .groupTuple(by: [0])
     .map { it ->  [ it[0], it[1].flatten() ] }
     .set { ch_sort_bam_merge }
 
-
   // ch_sort_bam_merge = [sampleID, [bam, index]]
   PICARD_MERGESAMFILES(ch_sort_bam_merge)
+
 
   // Step 11: Mark Duplicates
   PICARD_MARKDUPLICATES(PICARD_MERGESAMFILES.out.bam)
@@ -182,5 +186,23 @@ workflow CHIPSEQ {
   // Step 28 : Multiqc Custom Phantompeakqualtools
   mcp_ch = PHANTOMPEAKQUALTOOLS.out.spp.join(PHANTOMPEAKQUALTOOLS.out.rdata, by: [0])
   MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS(mcp_ch, ch_spp_nsc_header, ch_spp_rsc_header, ch_spp_correlation_header)
+
+
+  // Create channel linking IP bams with control bams  
+  ch_genome_bam_bai = PAIR_SORT.out
+
+  ch_genome_bam_bai
+        .combine(ch_genome_bam_bai)
+        .set { ch_genome_bam_bai }
+
+  ch_group_bam = control_ch
+                    .combine(ch_genome_bam_bai )
+                    .filter { it[0] == it[5] && it[1] == it[7] }
+                    .join(SAMTOOLS_STATS_PE.out[0])
+                    .map { it ->  it[2..-1] }
+
+  // Step 29 : Deeptools plotFingerprint
+  DEEPTOOLS_PLOTFINGERPRINT(ch_group_bam) 
+
 
 }

@@ -8,7 +8,6 @@ process BAMTOOLS_FILTER {
 
   container 'quay.io/biocontainers/bamtools:2.5.1--h9a82719_9'
 
-  //publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'quality_stats' }", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam)
@@ -21,7 +20,7 @@ process BAMTOOLS_FILTER {
   log.info "----- Bamtools filter Running on: ${sampleID} -----"
   prefix = params.read_type == 'SE' ? "${sampleID}.mLb.clN" : "${sampleID}.mLb.flT"
   """
-  bamtools filter -in ${bam} -script ${bamtools_filter_config} > ${prefix}.sorted.bam
+  bamtools filter -in ${bam} -script ${bamtools_filter_config} -out ${prefix}.sorted.bam
   """
 
 }
