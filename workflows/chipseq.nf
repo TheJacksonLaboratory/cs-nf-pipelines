@@ -34,6 +34,7 @@ include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from '../modules/multiqc/multiqc_c
 include {DEEPTOOLS_PLOTFINGERPRINT} from '../modules/deeptools/deeptools_plotfingerprint'
 include {PEAK_CALLING_CHIPSEQ} from '../modules/macs2/macs2_peak_calling_chipseq'
 include {FRIP_SCORE} from '../modules/utility_modules/frip_score'
+include {HOMER_ANNOTATEPEAKS } from '../modules/homer/homer_annotatepeaks'
 
 
 
@@ -80,6 +81,7 @@ workflow CHIPSEQ {
 
   // Reference genome
   ch_fasta = file(params.fasta, checkIfExists: true)
+  ch_gtf   = file(params.gtf, checkIfExists: true)
 
   // genes.bed
   if (params.gene_bed)  { ch_gene_bed = file(params.gene_bed, checkIfExists: true) }
@@ -152,7 +154,7 @@ workflow CHIPSEQ {
   NAME_SORT(BAMTOOLS_FILTER.out.bam, '-n ')
 
   // Step 17: Remove singleton reads from paired-end BAM file
-  BAMPE_RM_ORPHAN(SAMTOOLS_MERGEBAM_FILTER.out.bam)
+  BAMPE_RM_ORPHAN(NAME_SORT.out[0])
 
   // Step 18 : Samtools Pair Sort
   PAIR_SORT(BAMPE_RM_ORPHAN.out.bam, '')
@@ -211,6 +213,8 @@ workflow CHIPSEQ {
   // Step 31 : Calculate FRiP score
   FRIP_SCORE(ch_group_bam, PEAK_CALLING_CHIPSEQ.out.peak, ch_peak_count_header, ch_frip_score_header)
 
+  // Step 32 : Homer Annotate Peaks
+  HOMER_ANNOTATEPEAKS(PEAK_CALLING_CHIPSEQ.out.ip_control_peak, ch_fasta, ch_gtf)
 
 
 
