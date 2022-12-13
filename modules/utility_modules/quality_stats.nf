@@ -14,7 +14,7 @@ process QUALITY_STATISTICS {
   tuple val(sampleID), file(fq_reads)
 
   output:
-  tuple val(sampleID), file("*.fastq.gz_stat"), emit: quality_stats
+  tuple val(sampleID), file("*_stat"), emit: quality_stats
   tuple val(sampleID), file("*filtered_trimmed"), emit: trimmed_fastq
 
   script:
