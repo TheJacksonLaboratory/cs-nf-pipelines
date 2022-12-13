@@ -42,6 +42,9 @@ include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
 include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
 include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
 include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
+include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_NORMAL;
+         SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_TUMOR} from "${projectDir}/modules/samtools/samtools_filter_unique_reads"
+
 
 // help if needed
 if (params.help){
@@ -200,11 +203,13 @@ workflow SV {
     // Step 14: Somatic Calling
 
     // Read a list of contigs from parameters to provide to GATK as intervals
-    // for HaplotypeCaller variant regions
     chroms = Channel
         .fromPath("${params.chrom_contigs}")
         .splitText()
         .map{it -> it.trim()}
+
+    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
+    chrom_list = chroms.collect().dropRight(1)
 
     // Applies scatter intervals from above to the BQSR bam file
     somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
@@ -235,8 +240,7 @@ workflow SV {
 
     // Lancet
 
-    // Read a list of bed files from parameters to provide to LANCET as intervals
-    // for HaplotypeCaller variant regions
+    // Read a list of bed files from parameters to provide to LANCET as interval
     lancet_beds = Channel
      .fromPath("${params.lancet_beds}")
      .splitCsv(header: false)
@@ -256,14 +260,19 @@ workflow SV {
     GRIDSS_ASSEMBLE(gridss_assemble_input)
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
-    GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chroms)
-    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
+    GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
+    // GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
     // will need testing with large dataset. 
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
-
     // BicSeq2
+    SAMTOOLS_FILTER_UNQIUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
+    SAMTOOLS_FILTER_UNQIUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
 
+    // 
+    // can parse this to get insert size and read length. 
+
+    // PICK UP WITH Bicseq2Norm
 
     // Svaba
 

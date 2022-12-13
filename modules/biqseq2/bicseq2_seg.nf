@@ -15,7 +15,6 @@ process BICSEQ2_seg {
   tuple val(sampleID), file("*.bicseq2.txt"), emit: bicseq2_output
 
   script:
-  log.info "----- BICSeq2-seg Running : ${sampleID} -----"
 
   """
   NBICseq-seg.pl \

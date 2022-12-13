@@ -15,7 +15,6 @@ process BICSEQ2_normal {
   tuple val(sampleID), file("*.normal.params.out"), emit: normal_sample_gam
 
   script:
-  log.info "----- BICSeq2-norm Running on normal: ${sampleID} -----"
 
   """
   NBICseq-norm.pl \

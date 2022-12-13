@@ -8,7 +8,7 @@ process QUALITY_STATISTICS {
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*fastq.gz_stat", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*_stat", mode:'copy'
 
   input:
   tuple val(sampleID), file(fq_reads)

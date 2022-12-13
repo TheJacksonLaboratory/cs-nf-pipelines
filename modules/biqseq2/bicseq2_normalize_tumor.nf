@@ -15,7 +15,6 @@ process BICSEQ2_tumor {
   tuple val(sampleID), file("*.tumor.params.out"), emit: tumor_sample_gam
 
   script:
-  log.info "----- BICSeq2-norm Running on tumor: ${sampleID} -----"
 
   """
   NBICseq-norm.pl \
