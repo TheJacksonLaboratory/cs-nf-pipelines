@@ -37,7 +37,7 @@ include {FRIP_SCORE} from '../modules/utility_modules/frip_score'
 include {HOMER_ANNOTATEPEAKS } from '../modules/homer/homer_annotatepeaks'
 include {PLOT_MACS2_QC} from '../modules/macs2/plot_macs2_qc'
 include {PLOT_HOMER_ANNOTATEPEAKS} from '../modules/homer/plot_homer_annotatepeaks'
-
+include {MACS2_CONSENSUS} from '../modules/macs2/macs2_consensus'
 
 
 
@@ -226,5 +226,21 @@ workflow CHIPSEQ {
   PLOT_HOMER_ANNOTATEPEAKS(HOMER_ANNOTATEPEAKS.out.txt.collect{ it[-1] }, ch_peak_annotation_header, '_peaks.annotatePeaks.txt')
 
 
+  // Create channel for CONSENSUS PEAKS ANALYSIS 
+  ch_macs_consensus = PEAK_CALLING_CHIPSEQ.out.ip_control_peak
+
+  // Group by ip from this point and carry forward boolean variables
+  ch_macs_consensus
+    .map { it ->  [ it[0], it[1], it[2], it[-1] ] }
+    .groupTuple()
+     .map { it ->  [ it[0], it[1][0], it[2][0], it[3].sort() ] }
+     .set { ch_macs_consensus }
+
+  
+  // Step 35 : Consensus peaks across samples, create boolean filtering file, SAF file
+  MACS2_CONSENSUS(ch_macs_consensus)
+
+
 
 }
+
