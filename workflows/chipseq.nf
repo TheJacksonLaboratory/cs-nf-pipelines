@@ -35,6 +35,9 @@ include {DEEPTOOLS_PLOTFINGERPRINT} from '../modules/deeptools/deeptools_plotfin
 include {PEAK_CALLING_CHIPSEQ} from '../modules/macs2/macs2_peak_calling_chipseq'
 include {FRIP_SCORE} from '../modules/utility_modules/frip_score'
 include {HOMER_ANNOTATEPEAKS } from '../modules/homer/homer_annotatepeaks'
+include {PLOT_MACS2_QC} from '../modules/macs2/plot_macs2_qc'
+include {PLOT_HOMER_ANNOTATEPEAKS} from '../modules/homer/plot_homer_annotatepeaks'
+
 
 
 
@@ -215,6 +218,12 @@ workflow CHIPSEQ {
 
   // Step 32 : Homer Annotate Peaks
   HOMER_ANNOTATEPEAKS(PEAK_CALLING_CHIPSEQ.out.ip_control_peak, ch_fasta, ch_gtf)
+
+  // Step 33 : Plot Macs2 QC
+  PLOT_MACS2_QC(PEAK_CALLING_CHIPSEQ.out.peak.collect{ it[-1] })
+
+  // Step 34 : Plot Homer Annotate Peaks
+  PLOT_HOMER_ANNOTATEPEAKS(HOMER_ANNOTATEPEAKS.out.txt.collect{ it[-1] }, ch_peak_annotation_header, '_peaks.annotatePeaks.txt')
 
 
 
