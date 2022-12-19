@@ -34,10 +34,14 @@ include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from '../modules/multiqc/multiqc_c
 include {DEEPTOOLS_PLOTFINGERPRINT} from '../modules/deeptools/deeptools_plotfingerprint'
 include {PEAK_CALLING_CHIPSEQ} from '../modules/macs2/macs2_peak_calling_chipseq'
 include {FRIP_SCORE} from '../modules/utility_modules/frip_score'
-include {HOMER_ANNOTATEPEAKS } from '../modules/homer/homer_annotatepeaks'
+
+include {HOMER_ANNOTATEPEAKS;
+         HOMER_ANNOTATEPEAKS as CONSENSUS_PEAKS_ANNOTATE} from '../modules/homer/homer_annotatepeaks'
+
 include {PLOT_MACS2_QC} from '../modules/macs2/plot_macs2_qc'
 include {PLOT_HOMER_ANNOTATEPEAKS} from '../modules/homer/plot_homer_annotatepeaks'
 include {MACS2_CONSENSUS} from '../modules/macs2/macs2_consensus'
+include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 
 
 
@@ -239,6 +243,12 @@ workflow CHIPSEQ {
   
   // Step 35 : Consensus peaks across samples, create boolean filtering file, SAF file
   MACS2_CONSENSUS(ch_macs_consensus)
+
+  // Step 36 : Consensus peaks annotation
+  CONSENSUS_PEAKS_ANNOTATE(MACS2_CONSENSUS.out.bed, ch_fasta, ch_gtf)
+
+  // Step 37 : Annotate boolean peaks
+  ANNOTATE_BOOLEAN_PEAKS(MACS2_CONSENSUS.out.boolean_txt, CONSENSUS_PEAKS_ANNOTATE.out.txt)
 
 
 
