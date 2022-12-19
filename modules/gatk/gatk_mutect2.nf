@@ -1,12 +1,11 @@
 process GATK_MUTECT2 {
   tag "$sampleID"
 
-  cpus = 1
+  cpus = 4
   memory = 15.GB
-  time '05:00:00'
-  // time {3.hour * task.attempt}
-  // errorStrategy 'retry' 
-  // maxRetries 1
+  time {10.hour * task.attempt}
+  errorStrategy 'retry' 
+  maxRetries 1
 
   container 'broadinstitute/gatk:4.2.4.1'
 
@@ -26,13 +25,14 @@ process GATK_MUTECT2 {
   my_mem =  my_mem[0..-4]
 
   """
-  gatk --java-options "-Xmx${my_mem}G" Mutect2 \
+  gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=4" Mutect2 \
     -R ${params.ref_fa} \
     -I ${tumor_bam} \
     -tumor ${tumor_name} \
     -I ${normal_bam} \
     -normal ${normal_name} \
     -L ${interval} \
+    --native-pair-hmm-threads 4 \
     -O ${meta.patient}_${interval}_somatic.vcf.gz
   """
 }
