@@ -49,7 +49,8 @@ include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_NORMAL;
 include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
          BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_TUMOR} from "${projectDir}/modules/biqseq2/bicseq2_normalize"
 include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
-
+include {SVABA} from "${projectDir}/modules/svaba/svaba"
+include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
 
 // help if needed
 if (params.help){
@@ -140,40 +141,40 @@ workflow SV {
         // tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
 
     // Step 13: Conpair pileup for T/N
-    // CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
-    // CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
+    CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
+    CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
 
-    // // output channel manipulation and cross/join
-    // conpair_normal_to_cross = CONPAIR_NORMAL_PILEUP.out.normal_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
-    // conpair_tumor_to_cross = CONPAIR_TUMOR_PILEUP.out.tumor_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
+    // output channel manipulation and cross/join
+    conpair_normal_to_cross = CONPAIR_NORMAL_PILEUP.out.normal_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
+    conpair_tumor_to_cross = CONPAIR_TUMOR_PILEUP.out.tumor_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
 
-    // conpair_input = conpair_normal_to_cross.cross(conpair_tumor_to_cross)
-    //     .map { normal, tumor ->
-    //         def meta = [:]
-    //         meta.patient    = normal[0]
-    //         meta.normal_id  = normal[1].sample
-    //         meta.tumor_id   = tumor[1].sample
-    //         meta.sex        = normal[1].sex
-    //         meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
+    conpair_input = conpair_normal_to_cross.cross(conpair_tumor_to_cross)
+        .map { normal, tumor ->
+            def meta = [:]
+            meta.patient    = normal[0]
+            meta.normal_id  = normal[1].sample
+            meta.tumor_id   = tumor[1].sample
+            meta.sex        = normal[1].sex
+            meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
 
-    //         [meta, normal[2], tumor[2]]
-    //     }
-    //     // normal[2] is normal pileup, tumor[2] is tumor pileup. 
+            [meta, normal[2], tumor[2]]
+        }
+        // normal[2] is normal pileup, tumor[2] is tumor pileup. 
 
-    // // the above channel manipulations will require a test in multiple sample mode. 
+    // the above channel manipulations will require a test in multiple sample mode. 
 
-    // // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
-    // CONPAIR(conpair_input)
-    // // NOTE: NEED HIGH COVERAGE TO TEST. 
+    // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
+    CONPAIR(conpair_input)
+    // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // // Step 13: Germline Calling
+    // Step 13: Germline Calling
     
-    // // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
-    // // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
+    // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
+    // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
     
-    // // Loads paths from a directory, collects into a list, sorts, 
-    // // maps to a set with indicies, flattens the map [file, index, file, index ...], 
-    // // collates the flattened map into pairs, then remaps to the pairs to tuple
+    // Loads paths from a directory, collects into a list, sorts, 
+    // maps to a set with indicies, flattens the map [file, index, file, index ...], 
+    // collates the flattened map into pairs, then remaps to the pairs to tuple
 
     intervals = Channel.fromPath( params.chrom_intervals+'/*/scattered.interval_list' )
                 .collect()
@@ -184,34 +185,34 @@ workflow SV {
                 .map { item, idx -> tuple( item, idx + 1 ) }
     // https://stackoverflow.com/a/67084467/18557826
 
-    // // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
-    // chrom_channel = ch_bam_normal_to_cross.combine(intervals)
+    // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
+    chrom_channel = ch_bam_normal_to_cross.combine(intervals)
 
-    // // Variant calling. 
-    // GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
+    // Variant calling. 
+    GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
-    // // Applies gather to scattered haplotype calls.
-    // GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
+    // Applies gather to scattered haplotype calls.
+    GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
 
-    // // Applies scatter intervals from above to the merged file, and genotype.
-    // genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
-    // // this will require a test in multiple sample mode. 
+    // Applies scatter intervals from above to the merged file, and genotype.
+    genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
+    // this will require a test in multiple sample mode. 
 
-    // GATK_GENOTYPE_GVCF(genotype_channel)
-    // GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
+    GATK_GENOTYPE_GVCF(genotype_channel)
+    GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
 
-    // // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
-    // GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
+    // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
+    GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
 
-    // // Variant tranche filtering. 
-    // GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
+    // Variant tranche filtering. 
+    GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
     
-    // // Allele frequency and call refinement filtering. 
-    // GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
-    // BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
+    // Allele frequency and call refinement filtering. 
+    GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
+    BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
 
-// NEED TO ADD ANNOTATION OF GERMLINE. 
+    // NEED TO ADD ANNOTATION OF GERMLINE. 
 
 
     // Step 14: Somatic Calling
@@ -251,11 +252,8 @@ workflow SV {
     STRELKA2(strekla2_input)
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
-
     // Lancet
-
     // Generate a list of chromosome beds. This is generated in the same manner as the calling `intervals` variable above. 
-
     lancet_beds = Channel.fromPath( params.lancet_beds_directory+'/*.bed' )
                     .collect()
                     .sort()
@@ -271,7 +269,7 @@ workflow SV {
     LANCET(lancet_calling_channel)
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
     GATK_SORTVCF_LANCET(LANCET.out.lancet_vcf.groupTuple(), 'vcf')
-    //need to be able to capture this output. 
+    //NOTE: :: ::: ::: :: We need to be able to capture this output. 
 
     // Gridss
     GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
@@ -281,10 +279,7 @@ workflow SV {
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
     GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
-    // gridss somatic filter will need testing with large dataset. 
-
-/// TURN ON ABOVE COMMAND FOR FINAL TESTING AND PRODUCTION 
-
+    // gridss somatic filter will need a higher coverage dataset for testing. 
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
     // BicSeq2
@@ -307,16 +302,21 @@ workflow SV {
 
     BICSEQ2_NORMALIZE_NORMAL(biqseq_norm_input_normal, fasta_files)
     BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
-    // bicseq2 normalize will need testing with large dataset. 
+    // bicseq2 normalize will need a higher coverage dataset for testing. 
 
     bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output.join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
     // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files. 
+    BICSEQ2_SEG(bicseq2_seg_input)
 
     // Svaba
+    SVABA(ch_cram_variant_calling_pair)
+
+    // Lumpy
+    LUMPY_SV(ch_cram_variant_calling_pair)
 
     // Step NN: Get alignment and WGS metrics
-    // PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
-    // PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
 }
 

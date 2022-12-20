@@ -13,7 +13,7 @@ process BICSEQ2_SEG {
 
   output:
   tuple val(sampleID), file("*.bicseq2.png"), emit: bicseq2_png
-  tuple val(sampleID), file("*.bicseq2.txt"), emit: bicseq2_output
+  tuple val(sampleID), file("*.bicseq2.txt"), emit: bicseq2_sv_calls
 
   script:
 
@@ -47,25 +47,9 @@ process BICSEQ2_SEG {
   touch ${sampleID}.bicseq2.png
   touch ${sampleID}.bicseq2.txt
   """
-
 }
 
 
-
-  // NBICseq-seg.pl \
-  // --control \
-  // --tmp ${sampleID}.tmp \
-  // --fig=${bicseq2PngPath} \
-  // --title=${sampleID} \
-  // --lambda=4 \
-  // ${segConfigFilePath} \
-  // ${bicseq2Path}
-
-
-    // command {
-    //     set -e -o pipefail
-
-    //     mkdir -p ~{pairName}
 
 
 

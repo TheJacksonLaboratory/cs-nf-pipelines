@@ -73,30 +73,30 @@ process BICSEQ2_NORMALIZE {
 
     stub:
     """
-    touch ${sampleID}_chr1.norm.bin.txt
-    touch ${sampleID}_chr2.norm.bin.txt
-    touch ${sampleID}_chr3.norm.bin.txt
-    touch ${sampleID}_chr4.norm.bin.txt
-    touch ${sampleID}_chr5.norm.bin.txt
-    touch ${sampleID}_chr6.norm.bin.txt
-    touch ${sampleID}_chr7.norm.bin.txt
-    touch ${sampleID}_chr8.norm.bin.txt
-    touch ${sampleID}_chr9.norm.bin.txt
-    touch ${sampleID}_chr10.norm.bin.txt
-    touch ${sampleID}_chr11.norm.bin.txt
-    touch ${sampleID}_chr12.norm.bin.txt
-    touch ${sampleID}_chr13.norm.bin.txt
-    touch ${sampleID}_chr14.norm.bin.txt
-    touch ${sampleID}_chr15.norm.bin.txt
-    touch ${sampleID}_chr16.norm.bin.txt
-    touch ${sampleID}_chr17.norm.bin.txt
-    touch ${sampleID}_chr18.norm.bin.txt
-    touch ${sampleID}_chr19.norm.bin.txt
-    touch ${sampleID}_chr20.norm.bin.txt
-    touch ${sampleID}_chr21.norm.bin.txt
-    touch ${sampleID}_chr22.norm.bin.txt
-    touch ${sampleID}_chrX.norm.bin.txt
-    touch ${sampleID}_chrY.norm.bin.txt
+    touch ${read_ID}_chr1.norm.bin.txt
+    touch ${read_ID}_chr2.norm.bin.txt
+    touch ${read_ID}_chr3.norm.bin.txt
+    touch ${read_ID}_chr4.norm.bin.txt
+    touch ${read_ID}_chr5.norm.bin.txt
+    touch ${read_ID}_chr6.norm.bin.txt
+    touch ${read_ID}_chr7.norm.bin.txt
+    touch ${read_ID}_chr8.norm.bin.txt
+    touch ${read_ID}_chr9.norm.bin.txt
+    touch ${read_ID}_chr10.norm.bin.txt
+    touch ${read_ID}_chr11.norm.bin.txt
+    touch ${read_ID}_chr12.norm.bin.txt
+    touch ${read_ID}_chr13.norm.bin.txt
+    touch ${read_ID}_chr14.norm.bin.txt
+    touch ${read_ID}_chr15.norm.bin.txt
+    touch ${read_ID}_chr16.norm.bin.txt
+    touch ${read_ID}_chr17.norm.bin.txt
+    touch ${read_ID}_chr18.norm.bin.txt
+    touch ${read_ID}_chr19.norm.bin.txt
+    touch ${read_ID}_chr20.norm.bin.txt
+    touch ${read_ID}_chr21.norm.bin.txt
+    touch ${read_ID}_chr22.norm.bin.txt
+    touch ${read_ID}_chrX.norm.bin.txt
+    touch ${read_ID}_chrY.norm.bin.txt
     """
 
 }
