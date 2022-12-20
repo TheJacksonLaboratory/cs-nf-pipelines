@@ -23,7 +23,6 @@ process GRIDSS_SOMATIC_FILTER {
     script:
 
     """
-
     tar -zxvf ${gridss_pon}
 
     Rscript /opt/gridss/gridss_somatic_filter \
@@ -35,6 +34,10 @@ process GRIDSS_SOMATIC_FILTER {
     --scriptdir /opt/gridss/ \
     --configdir /opt/gridss/ \
     --pondir pon/
-
+    """
+        
+    stub:
+    """
+    touch ${sampleID}_gridss_sv_somaticFiltered.vcf
     """
 }

@@ -42,8 +42,13 @@ include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
 include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
 include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
 include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
+include {SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_NORMAL;
+         SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_TUMOR} from "${projectDir}/modules/samtools/samtools_stats_insertsize"
 include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_NORMAL;
          SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_TUMOR} from "${projectDir}/modules/samtools/samtools_filter_unique_reads"
+include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
+         BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_TUMOR} from "${projectDir}/modules/biqseq2/bicseq2_normalize"
+include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
 
 
 // help if needed
@@ -163,13 +168,22 @@ workflow SV {
 
     // // Step 13: Germline Calling
     
-    // // Read a list of contigs from parameters to provide to GATK as intervals
-    // // for HaplotypeCaller variant regions and GenotypeGVCF
-    // intervals = Channel
-    //  .fromPath("${params.chrom_intervals}")
-    //  .splitCsv(header: false)
-    //  .map{ row -> tuple(row[0], row[1]) }
+    // // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
+    // // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
     
+    // // Loads paths from a directory, collects into a list, sorts, 
+    // // maps to a set with indicies, flattens the map [file, index, file, index ...], 
+    // // collates the flattened map into pairs, then remaps to the pairs to tuple
+
+    intervals = Channel.fromPath( params.chrom_intervals+'/*/scattered.interval_list' )
+                .collect()
+                .sort()
+                .map { items -> items.withIndex() }
+                .flatten()
+                .collate(2)
+                .map { item, idx -> tuple( item, idx + 1 ) }
+    // https://stackoverflow.com/a/67084467/18557826
+
     // // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
     // chrom_channel = ch_bam_normal_to_cross.combine(intervals)
 
@@ -240,11 +254,17 @@ workflow SV {
 
     // Lancet
 
-    // Read a list of bed files from parameters to provide to LANCET as interval
-    lancet_beds = Channel
-     .fromPath("${params.lancet_beds}")
-     .splitCsv(header: false)
-     .map{ row -> tuple(row[0], row[1]) }
+    // Generate a list of chromosome beds. This is generated in the same manner as the calling `intervals` variable above. 
+
+    lancet_beds = Channel.fromPath( params.lancet_beds_directory+'/*.bed' )
+                    .collect()
+                    .sort()
+                    .map { items -> items.withIndex() }
+                    .flatten()
+                    .collate(2)
+                    .map { item, idx -> tuple( item, idx + 1 ) }
+    // https://stackoverflow.com/a/67084467/18557826
+
 
     // Applies scatter intervals from above to the BQSR bam file
     lancet_calling_channel = ch_cram_variant_calling_pair.combine(lancet_beds)
@@ -253,7 +273,6 @@ workflow SV {
     GATK_SORTVCF_LANCET(LANCET.out.lancet_vcf.groupTuple(), 'vcf')
     //need to be able to capture this output. 
 
-
     // Gridss
     GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
     gridss_assemble_input = ch_cram_variant_calling_pair.join(GRIDSS_PREPROCESS.out.gridss_preproc)
@@ -261,18 +280,37 @@ workflow SV {
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
-    // GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
-    // will need testing with large dataset. 
+    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
+    // gridss somatic filter will need testing with large dataset. 
+
+/// TURN ON ABOVE COMMAND FOR FINAL TESTING AND PRODUCTION 
+
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
     // BicSeq2
+    SAMTOOLS_STATS_INSERTSIZE_NORMAL(ch_bam_normal_to_cross)
+    SAMTOOLS_STATS_INSERTSIZE_TUMOR(ch_bam_tumor_to_cross)
+
     SAMTOOLS_FILTER_UNQIUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
     SAMTOOLS_FILTER_UNQIUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
 
-    // 
-    // can parse this to get insert size and read length. 
+    biqseq_norm_input_normal = SAMTOOLS_FILTER_UNQIUE_NORMAL.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_NORMAL.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
+    biqseq_norm_input_tumor = SAMTOOLS_FILTER_UNQIUE_TUMOR.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_TUMOR.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
 
-    // PICK UP WITH Bicseq2Norm
+    fasta_files = Channel.fromPath( file(params.ref_fa).parent + '/*_chr*' )
+            .collect()
+    // collect individual chr fasta files. These are located in the same directory as the main reference. 
+    // if the extension of `name_chr#.fa` changes this match will break. 
+    // Can this be made more flexible without requiring another input parameter?
+
+    BICSEQ2_NORMALIZE_NORMAL(biqseq_norm_input_normal, fasta_files)
+    BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
+    // bicseq2 normalize will need testing with large dataset. 
+
+    bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output.join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
+    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files. 
 
     // Svaba
 

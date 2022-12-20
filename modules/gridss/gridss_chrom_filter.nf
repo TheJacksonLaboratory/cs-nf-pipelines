@@ -19,7 +19,6 @@ process GRIDSS_CHROM_FILTER {
     tuple val(sampleID), path('*_gridss_sv_unfiltered_chroms.vcf'), emit: gridss_chrom_vcf
     
     script:
-    params.chrom_contigs 
     chrom_list = chroms.collect { "$it" }.join(' ')
 
     """

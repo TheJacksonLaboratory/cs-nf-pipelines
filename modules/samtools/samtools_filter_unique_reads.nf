@@ -12,7 +12,7 @@ process SAMTOOLS_FILTER_UNIQUE {
     val(chroms)
 
     output:
-    tuple val(sampleID), file("seq_out/*.seq"), emit: uniq_seq
+    tuple val(sampleID), file("seq_out/*.seq"), val(read_ID), emit: uniq_seq
 
     script:
     chrom_list = chroms.collect { "$it" }.join(' ')

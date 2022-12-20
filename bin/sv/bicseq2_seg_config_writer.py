@@ -25,7 +25,9 @@ class Bicseq2Prep():
         ''' file: tumor--normal.bicseq2.seg.config
         prep fasta-specific but sample independent portion of config file'''
         data = pd.read_csv(self.seg_bicseq2_config, sep='\t')
-        assert ''.join(data.columns.tolist()) == 'chr', 'Error: initial config file should start with one column named chr'
+        # assert ''.join(data.columns.tolist()) == 'chr', 'Error: initial config file should start with one column named chr'
+        assert ''.join(data.columns.tolist()) == 'chr', 'Error: initial config file should start with one column named chrom_name'
+
         data['case'] = data.apply(lambda row: self.match_file(row, 
                                                               files=self.tumor_norms), axis=1)
         data['control'] = data.apply(lambda row: self.match_file(row, 

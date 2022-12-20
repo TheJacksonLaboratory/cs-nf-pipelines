@@ -26,4 +26,10 @@ process CONPAIR {
 
   python2 /Conpair-0.2/scripts/estimate_tumor_normal_contamination.py -T ${tumor_pileup} -N ${normal_pileup} --outfile ${meta.patient}_contamination.txt
   """
+
+  stub:
+  """
+  touch ${meta.patient}_concordance.txt
+  touch ${meta.patient}_contamination.txt
+  """
 }
