@@ -43,6 +43,8 @@ include {PLOT_HOMER_ANNOTATEPEAKS} from '../modules/homer/plot_homer_annotatepea
 include {MACS2_CONSENSUS} from '../modules/macs2/macs2_consensus'
 include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 
+include {SUBREAD_FEATURECOUNTS} from '../modules/subread/subread_feature_counts_chipseq'
+
 
 
 // main workflow
@@ -249,6 +251,21 @@ workflow CHIPSEQ {
 
   // Step 37 : Annotate boolean peaks
   ANNOTATE_BOOLEAN_PEAKS(MACS2_CONSENSUS.out.boolean_txt, CONSENSUS_PEAKS_ANNOTATE.out.txt)
+
+  
+  // Get BAM and SAF files for each ip
+  ch_group_bam
+      .map { it -> [ it[3], [ it[0], it[1], it[2] ] ] }
+      .join(BAMPE_RM_ORPHAN.out.bam)
+      .map { it -> [ it[1][0], it[1][1], it[1][2], it[2] ] }
+      .groupTuple()
+      .map { it -> [ it[0], it[1][0], it[2][0], it[3].flatten().sort() ] }
+      .join(MACS2_CONSENSUS.out.saf)
+      .set { ch_group_bam }
+
+
+  // Step 38 : Count reads in consensus peaks with featureCounts
+  SUBREAD_FEATURECOUNTS(ch_group_bam)
 
 
 
