@@ -44,6 +44,8 @@ include {MACS2_CONSENSUS} from '../modules/macs2/macs2_consensus'
 include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 
 include {SUBREAD_FEATURECOUNTS} from '../modules/subread/subread_feature_counts_chipseq'
+include {DESEQ2_QC} from '../modules/utility_modules/deseq2_qc'
+
 
 
 
@@ -266,6 +268,9 @@ workflow CHIPSEQ {
 
   // Step 38 : Count reads in consensus peaks with featureCounts
   SUBREAD_FEATURECOUNTS(ch_group_bam)
+
+  // Step 39 : Differential analysis with DESeq2
+  DESEQ2_QC(SUBREAD_FEATURECOUNTS.out.counts, ch_deseq2_pca_header, ch_deseq2_clustering_header)
 
 
 

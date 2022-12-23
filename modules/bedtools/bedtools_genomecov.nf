@@ -5,7 +5,7 @@ process BEDTOOLS_GENOMECOV {
   memory 4.GB 
   time '04:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bwa/mergedLibrary/bigwig' : 'bedtools' }", pattern: "*.txt", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bigwig' : 'bedtools' }", pattern: "*.txt", mode: 'copy'
  
   container 'quay.io/jaxcompsci/bedtools-sv_refs:2.30.0--hc088bd4_0'
  
