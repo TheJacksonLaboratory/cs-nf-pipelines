@@ -14,6 +14,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
 
     output:
     tuple val(sampleID), file("*.bigWig"), emit: bigwig
+    tuple val(sampleID), file("*.igv.txt"), emit: igv_txt
 
     script:
     """

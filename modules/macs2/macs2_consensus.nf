@@ -52,7 +52,7 @@ process MACS2_CONSENSUS {
 
     ${projectDir}/bin/chipseq/plot_peak_intersect.r -i ${prefix}.boolean.intersect.txt -o ${prefix}.boolean.intersect.plot.pdf
 
-    find * -type f -name "${prefix}.bed" -exec echo -e "${antibody}/macs2/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
+    find * -type f -name "${prefix}.bed" -exec echo -e "macs2/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
 
     echo "${prefix}.bed\t${antibody}/${prefix}.bed" > ${prefix}.antibody.txt
 

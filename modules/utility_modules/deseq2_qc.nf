@@ -24,7 +24,6 @@ process DESEQ2_QC {
     path "*sample.dists_mqc.tsv", optional:true, emit: dists_multiqc
     path "*.log"                , optional:true, emit: log
     path "size_factors"         , optional:true, emit: size_factors
-    path "*.igv.txt"            , optional:true, emit: igv_txt
 
 
     script:
@@ -48,8 +47,6 @@ process DESEQ2_QC {
     sed 's/deseq2_clustering/deseq2_clustering_${task.index}/g' <$deseq2_clustering_header >tmp.txt
     sed -i -e 's/DESeq2 /${antibody} DESeq2 /g' tmp.txt
     cat tmp.txt ${prefix}.sample.dists.txt > ${prefix}.sample.dists_mqc.tsv
-
-    find * -type f -name "*.FDR0.05.results.bed" -exec echo -e "${antibody}/deseq2/"{}"\\t255,0,0" \\; > ${prefix}.igv.txt
 
     """
 }
