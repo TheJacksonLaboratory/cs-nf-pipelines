@@ -10,15 +10,15 @@ process GATK_FILTERMUECTCALLS {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.filtered.vcf.gz", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_mutect2_somatic.filtered.vcf.gz", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf), file(tbi), file(stats)
 
   output:
-  tuple val(sampleID), file("*_somatic.filtered.vcf.gz"), emit: vcf
-  tuple val(sampleID), file("*_somatic.filtered.vcf.gz.tbi"), emit: tbi
+  tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz"), emit: vcf
+  tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz.tbi"), emit: tbi
   tuple val(sampleID), file("*.filteringStats.tsv"), emit: stats
 
   script:
@@ -30,6 +30,6 @@ process GATK_FILTERMUECTCALLS {
     -R ${params.ref_fa} \
     -V ${vcf} \
     --stats ${stats} \
-    -O ${sampleID}_somatic.filtered.vcf.gz
+    -O ${sampleID}_mutect2_somatic.filtered.vcf.gz
   """
 }

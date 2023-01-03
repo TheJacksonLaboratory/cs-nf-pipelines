@@ -30,7 +30,7 @@ process BICSEQ2_NORMALIZE {
 
     fasta_files = fasta_file_list.collect { "$it" }.join(' ')
     
-    if( read_length == '100') {
+    if( read_length == '100' || read_length == '101') {
         mappability_path = params.mappability_directory + '/100'
     } else if( read_length == '125') {
         mappability_path = params.mappability_directory + '/125'

@@ -1,9 +1,9 @@
 process SAMTOOLS_STATS_INSERTSIZE {
     tag "$sampleID"
 
-    cpus 1
+    cpus 8
     memory 1.GB
-    time '00:10:00'
+    time '01:00:00'
 
     container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
@@ -18,7 +18,7 @@ process SAMTOOLS_STATS_INSERTSIZE {
 
     script:
     """
-    samtools stats --insert-size 8000  ${bam} | grep ^SN | cut -f 2- > ${sampleID}_insert_size.txt
+    samtools stats --insert-size 8000  ${bam} --threads ${task.cpus} | grep ^SN | cut -f 2- > ${sampleID}_insert_size.txt
     read_length=`grep "maximum length" ${sampleID}_insert_size.txt | cut -d ':' -f2 | tr -d " \\t\\n\\r"`
     insert_size=`grep "insert size average" ${sampleID}_insert_size.txt | cut -d ':' -f2 | tr -d " \\t\\n\\r"`
     """

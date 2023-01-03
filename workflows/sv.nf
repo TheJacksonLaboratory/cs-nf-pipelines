@@ -227,13 +227,20 @@ workflow SV {
     chrom_list = chroms.collect().dropRight(1)
 
     // Applies scatter intervals from above to the BQSR bam file
-    somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
-    
+    somatic_calling_channel = ch_cram_variant_calling_pair.combine(intervals)
+
+    // // Applies scatter intervals from above to the BQSR bam file
+    // somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
+    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chr'. 
+    // //       Entire chromosomes are scattered. For WGS, this is computationally intensive. 
+    // //       We changed to calling to be done based on the same intervals passed to the germline caller. 
+    // //       If complete chromosomes are requried, the above line of code can be uncommented. 
+
     // Mutect2
-    // Call on each chromosome. 
-    // Prior to 'filtermutectcalls' vcfs must be merged. (GATK best practice) 
-    // Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
-    // Merge vcfs and stats must be joined prior to 'filtermutectcalls'
+    // STEPS: Call on each chromosome / interval. 
+    //        Prior to 'filtermutectcalls' vcfs must be merged. (GATK best practice) 
+    //        Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
+    //        Merge vcfs and stats must be Nextflow joined prior to 'filtermutectcalls' to avoid samples being confounded. 
 
     GATK_MUTECT2(somatic_calling_channel)
     GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
@@ -245,7 +252,7 @@ workflow SV {
     // Manta
     MANTA(ch_cram_variant_calling_pair)
     // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
-    // FilterNonpass is also used with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
+    // FilterNonpass is used in NYGC with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
 
     // Strelka2
     strekla2_input = ch_cram_variant_calling_pair.join(MANTA.out.manta_smallindel_vcf_tbi)

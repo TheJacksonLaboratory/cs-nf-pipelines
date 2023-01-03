@@ -3,7 +3,7 @@ process GATK_MUTECT2 {
 
   cpus = 4
   memory = 15.GB
-  time {10.hour * task.attempt}
+  time {15.hour * task.attempt}
   errorStrategy 'retry' 
   maxRetries 1
 
@@ -12,7 +12,7 @@ process GATK_MUTECT2 {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(interval)
+  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), path(interval), val(interval_index)
 
   output:
   tuple val(sampleID), file("*_somatic.vcf.gz"), emit: vcf
@@ -33,6 +33,6 @@ process GATK_MUTECT2 {
     -normal ${normal_name} \
     -L ${interval} \
     --native-pair-hmm-threads 4 \
-    -O ${meta.patient}_${interval}_somatic.vcf.gz
+    -O ${meta.patient}_${interval_index}_somatic.vcf.gz
   """
 }
