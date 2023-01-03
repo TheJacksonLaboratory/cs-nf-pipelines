@@ -46,7 +46,7 @@ include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 include {SUBREAD_FEATURECOUNTS} from '../modules/subread/subread_feature_counts_chipseq'
 include {DESEQ2_QC} from '../modules/utility_modules/deseq2_qc'
 include {IGV} from '../modules/utility_modules/igv'
-
+include {MULTIQC} from '../modules/multiqc/multiqc'
 
 
 // main workflow
@@ -274,6 +274,46 @@ workflow CHIPSEQ {
 
   // Step 40 : Create IGV session file
   IGV(ch_fasta, UCSC_BEDGRAPHTOBIGWIG.out.igv_txt.collect(), FRIP_SCORE.out.txt.collect(), MACS2_CONSENSUS.out.igv_txt.collect())
+
+
+  // Create channels for multi input files
+  ch_multiqc_files = Channel.empty()
+  
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trim_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(TRIM_GALORE.out.trimmed_fastqc.collect{it[1]}.ifEmpty([]))
+
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS.out[0].collect{it[1]}.ifEmpty([]))  
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS.out[1].collect{it[1]}.ifEmpty([]))  
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS.out[2].collect{it[1]}.ifEmpty([]))  
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out[0].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out[1].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out[2].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out[0].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out[1].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out[2].collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTMULTIPLEMETRICS.out.metrics.collect{it[1]}.ifEmpty([]))
+
+  ch_multiqc_files = ch_multiqc_files.mix(FRIP_SCORE.out.tsv.collect{it[1]}.ifEmpty([]))                          // ch_macs_mqc
+  ch_multiqc_files = ch_multiqc_files.mix(PLOT_HOMER_ANNOTATEPEAKS.out.tsv.collect())                             // ch_macs_qc_mqc
+  ch_multiqc_files = ch_multiqc_files.mix(SUBREAD_FEATURECOUNTS.out.summary.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(DESEQ2_QC.out.pca_multiqc.collect())
+  ch_multiqc_files = ch_multiqc_files.mix(DESEQ2_QC.out.dists_multiqc.collect())
+
+  ch_multiqc_files = ch_multiqc_files.mix(PRESEQ.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_PLOTFINGERPRINT.out.raw.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(DEEPTOOLS_PLOTPROFILE.out.table.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PHANTOMPEAKQUALTOOLS.out.spp.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS.out.nsc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS.out.rsc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS.out.correlation.collect{it[1]}.ifEmpty([]))
+   
+
+  // Step 41 : MultiQC  
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 
 }

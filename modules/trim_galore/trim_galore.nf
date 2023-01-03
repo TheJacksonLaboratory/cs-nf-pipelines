@@ -39,8 +39,23 @@ process TRIM_GALORE {
   refer to the RRBS guide for the meaning of CTOT and CTOB strands). 
   */
 
+  if (params.workflow == "chipseq" && params.read_type == 'SE')
   """
+    [ ! -f  ${sampleID}.fastq.gz ] && ln -s ${fq_reads} ${sampleID}.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}.fastq.gz
+  """
+  else if (params.workflow == "chipseq" && params.read_type == 'PE')
+  """
+    [ ! -f  ${sampleID}_1.fastq.gz ] && ln -s ${fq_reads[0]} ${sampleID}_1.fastq.gz
+    [ ! -f  ${sampleID}_2.fastq.gz ] && ln -s ${fq_reads[1]} ${sampleID}_2.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}_1.fastq.gz ${sampleID}_2.fastq.gz
+  """
+  else
+  """ 
     trim_galore --basename ${sampleID} --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${fq_reads}
   """
+
 }
 

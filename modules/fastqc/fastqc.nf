@@ -19,17 +19,23 @@ process FASTQC {
   script:
   log.info "----- FASTQC Running on: ${sampleID} -----"
 
-  if (params.workflow != "chipseq")
+  if (params.workflow == "chipseq" && params.read_type == 'SE')
   """
-    fastqc --quiet -t ${task.cpus} ${fq_reads}
+    [ ! -f  ${sampleID}.fastq.gz ] && ln -s ${fq_reads} ${sampleID}.fastq.gz
+    
+    fastqc --quiet -t ${task.cpus} ${sampleID}.fastq.gz
+  """
+  else if (params.workflow == "chipseq" && params.read_type == 'PE')
+  """
+    [ ! -f  ${sampleID}_1.fastq.gz ] && ln -s ${fq_reads[0]} ${sampleID}_1.fastq.gz
+    [ ! -f  ${sampleID}_2.fastq.gz ] && ln -s ${fq_reads[1]} ${sampleID}_2.fastq.gz
+
+    fastqc --quiet -t ${task.cpus} ${sampleID}_1.fastq.gz
+    fastqc --quiet -t ${task.cpus} ${sampleID}_2.fastq.gz
   """
   else
   """
-  [ ! -f  ${sampleID}_1.fastq.gz ] && ln -s ${fq_reads[0]} ${sampleID}_1.fastq.gz
-  [ ! -f  ${sampleID}_2.fastq.gz ] && ln -s ${fq_reads[1]} ${sampleID}_2.fastq.gz
-
-  fastqc --quiet -t ${task.cpus} ${sampleID}_1.fastq.gz
-  fastqc --quiet -t ${task.cpus} ${sampleID}_2.fastq.gz
+    fastqc --quiet -t ${task.cpus} ${fq_reads}
   """
 
 }
