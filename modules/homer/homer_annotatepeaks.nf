@@ -5,7 +5,17 @@ process HOMER_ANNOTATEPEAKS {
     memory 10.GB
     time '10:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? ip+'/macs2' : 'macs2' }", pattern: "*annotatePeaks.txt", mode: 'copy'
+    //publishDir "${params.pubdir}/${ params.organize_by=='sample' ? ip+'_vs_'+control+'/macs2' : 'macs2' }", pattern: "*annotatePeaks.txt", mode: 'copy'
+
+    //def type = peak =~ /bed/ ? "antibody" : "ip+_vs_+control"
+    //"${params.pubdir}/${ params.organize_by=='sample' ? ${type}+'/macs2' : 'macs2'}"
+
+
+    publishDir {
+        def type = peak =~ /bed/ ? antibody : ip+'_vs_'+control
+        "${params.pubdir}/${ params.organize_by=='sample' ? type+'/macs2' : 'macs2'}"
+    }, pattern: "*annotatePeaks.txt", mode: 'copy'
+
 
     container 'quay.io/biocontainers/homer:4.11--pl526hc9558a2_3'
 

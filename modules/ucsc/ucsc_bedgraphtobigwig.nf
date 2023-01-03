@@ -5,7 +5,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
     memory 10.GB
     time '04:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bwa/mergedLibrary/bigwig' : 'ucsc' }", pattern: "*.bigWig", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bigwig' : 'ucsc' }", pattern: "*.bigWig", mode: 'copy'
     container 'quay.io/biocontainers/ucsc-bedgraphtobigwig:377--h446ed27_1'
 
     input:
@@ -22,7 +22,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
         $sizes \\
         ${sampleID}.bigWig
 
-    find * -type f -name "*.bigWig" -exec echo -e "bwa/mergedLibrary/bigwig/"{}"\\t0,0,178" \\; > ${sampleID}.bigWig.igv.txt
+    find * -type f -name "*.bigWig" -exec echo -e "bigwig/"{}"\\t0,0,178" \\; > ${sampleID}.bigWig.igv.txt
 
     """
 }

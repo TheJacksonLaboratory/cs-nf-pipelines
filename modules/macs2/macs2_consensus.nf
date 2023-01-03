@@ -8,6 +8,8 @@ process MACS2_CONSENSUS {
     memory 10.GB
     time '10:00:00'
 
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? antibody+'/macs2' : 'macs2' }", pattern: "*_peaks.*", mode: 'copy'
+
     container 'quay.io/biocontainers/mulled-v2-2f48cc59b03027e31ead6d383fe1b8057785dd24:5d182f583f4696f4c4d9f3be93052811b383341f-0'
 
     input:
@@ -50,7 +52,7 @@ process MACS2_CONSENSUS {
 
     ${projectDir}/bin/chipseq/plot_peak_intersect.r -i ${prefix}.boolean.intersect.txt -o ${prefix}.boolean.intersect.plot.pdf
 
-    find * -type f -name "${prefix}.bed" -exec echo -e "bwa/mergedLibrary/macs/${peak_type}/consensus/${antibody}/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
+    find * -type f -name "${prefix}.bed" -exec echo -e "${antibody}/macs2/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
 
     echo "${prefix}.bed\t${antibody}/${prefix}.bed" > ${prefix}.antibody.txt
 
