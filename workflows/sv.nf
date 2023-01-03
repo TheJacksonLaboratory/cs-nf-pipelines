@@ -253,12 +253,12 @@ workflow SV {
     //        Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
     //        Merge vcfs and stats must be Nextflow joined prior to 'filtermutectcalls' to avoid samples being confounded. 
 
-    // GATK_MUTECT2(somatic_calling_channel)
-    // GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
-    // GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
-    // filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
-    // GATK_FILTERMUECTCALLS(filter_mutect_input)
-    // // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    GATK_MUTECT2(somatic_calling_channel)
+    GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
+    GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
+    filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
+    GATK_FILTERMUECTCALLS(filter_mutect_input)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
 
     // Manta
     MANTA(ch_cram_variant_calling_pair)
