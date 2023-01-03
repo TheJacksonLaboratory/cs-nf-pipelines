@@ -13,7 +13,9 @@ process PICARD_COLLECTMULTIPLEMETRICS {
   tuple val(sampleID), file(bam)
 
   output:
-  tuple val(sampleID), file("*.CollectMultipleMetrics.*")
+  tuple val(sampleID), file("*_metrics"), emit : metrics
+  tuple val(sampleID), file("*.pdf"), emit : pdf
+
 
   script:
   log.info "----- Picard CollectMultipleMetrics Running on: ${sampleID} -----"

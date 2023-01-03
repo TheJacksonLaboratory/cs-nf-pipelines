@@ -18,8 +18,8 @@ process FRIP_SCORE {
     file(frip_score_header)
 
     output:
-    tuple val(ip), path("*.tsv")
-    tuple val(ip), path("*.txt")
+    tuple val(ip), path("*.tsv"), emit : tsv
+    tuple val(ip), path("*.txt"), emit : txt
 
     script:
     def PEAK_TYPE = params.narrow_peak ? 'narrowPeak' : 'broadPeak'
@@ -28,7 +28,7 @@ process FRIP_SCORE {
     READS_IN_PEAKS=\$(intersectBed -a ${ipbam[0]} -b $peak -bed -c -f 0.20 | awk -F '\t' '{sum += \$NF} END {print sum}')i
     grep 'mapped (' $ipflagstat | awk -v a="\$READS_IN_PEAKS" -v OFS='\t' '{print "${ip}", a/\$1}' | cat $frip_score_header - > ${ip}_peaks.FRiP_mqc.tsv
 
-    find * -type f -name "*.${PEAK_TYPE}" -exec echo -e "macs2/"{}"\\t0,0,178" \\; > ${ip}_peaks.igv.txt
+    find * -type l -name "*.${PEAK_TYPE}" -exec echo -e "macs2/"{}"\\t0,0,178" \\; > ${ip}_peaks.igv.txt
 
     """
 }
