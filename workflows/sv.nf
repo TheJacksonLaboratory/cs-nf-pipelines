@@ -167,7 +167,7 @@ workflow SV {
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // Step 13: Germline Calling
+    // Step 13: Germline Calling and annotation
     
     // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
     // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
@@ -212,8 +212,15 @@ workflow SV {
     BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
 
-    // NEED TO ADD ANNOTATION OF GERMLINE. 
+    // Germline annotation 
 
+    // 1. SplitMultiAllelicRegions & compress & index
+    // 2. vepPublicSvnIndel
+    // 3. RemoveSpanning
+    // 4. AddCosmic
+    // 5. AddCancerResistanceMutations
+    // 6. AnnotateId
+    // 7. RenameCsqVcf
 
     // Step 14: Somatic Calling
 
