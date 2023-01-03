@@ -19,6 +19,14 @@ include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_col
 include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor_pileup"
 include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
+include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
+include {GATK_SORTVCF as GATK_SORTVCF_GERMLINE;
+         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf"
+include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
+include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
+include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
+include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
+include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
 
 // help if needed
 if (params.help){
@@ -120,9 +128,46 @@ workflow SV {
         }
         // normal[2] is normal pileup, tumor[2] is tumor pileup. 
 
+    // the above channel manipulations will require a test in multiple sample mode. 
+
     // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
+
+    // Step 13: Germline Calling
+    
+    // Read a list of contigs from parameters to provide to GATK as intervals
+    // for HaplotypeCaller variant regions and GenotypeGVCF
+    intervals = Channel
+     .fromPath("${params.chrom_contigs}")
+     .splitCsv(header: false)
+     .map{ row -> tuple(row[0], row[1]) }
+    
+    // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
+    chrom_channel = ch_bam_normal_to_cross.combine(intervals)
+
+    // Variant calling. 
+    GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
+
+    // Applies gather to scattered haplotype calls.
+    GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
+
+    // Applies scatter intervals from above to the merged file, and genotype.
+    genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
+    // this will require a test in multiple sample mode. 
+
+    GATK_GENOTYPE_GVCF(genotype_channel)
+    GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
+
+    // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
+    GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
+
+    // Variant tranche filtering. 
+    GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
+    
+    // Allele frequency and call refinement filtering. 
+    GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
+    BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)

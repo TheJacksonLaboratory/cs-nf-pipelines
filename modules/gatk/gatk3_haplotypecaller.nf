@@ -10,24 +10,26 @@ process GATKv3_5_HAPLOTYPECALLER {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.gvcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
+  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai)
 
   output:
-  tuple val(meta), file("*.gvcf"), emit: normal_germline_gvcf
-  tuple val(meta), file("*.gvcf.idx"), emit: normal_germline_gvcf_index
+  tuple val(sampleID), file("*.gvcf"), emit: normal_germline_gvcf
+  tuple val(sampleID), file("*.gvcf.idx"), emit: normal_germline_gvcf_index
 
   script:
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/GenomeAnalysisTK.jar \
   -T HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${normal_bam} \
   -o ${sampleID}_variants_raw.gvcf \
   -L ${params.target_gatk} \
-  -stand-call-conf ${params.call_val} \
-  -ERC GVCF
+  -stand_call_conf ${params.call_val} \
+  -ERC GVCF \
+  -variant_index_type LINEAR \
+  -variant_index_parameter 128000
   """
 }

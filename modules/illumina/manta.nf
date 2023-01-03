@@ -5,7 +5,7 @@ process MANTA {
   memory = 8.GB
   time = '03:00:00'
 
-  container 'quay.io/jaxcompsci/manta:latest'
+  container 'quay.io/jaxcompsci/manta:v1.4.0'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'manta' }", pattern:".vcf.gz", mode:'copy'
 
   input:
@@ -23,7 +23,7 @@ process MANTA {
   ./configManta.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
-  --referenceFasta ${params.ref_fasta} \
+  --referenceFasta ${params.ref_fa} \
   --callRegions ${callRegions.table} \
   --rundir ${sampleID}
 

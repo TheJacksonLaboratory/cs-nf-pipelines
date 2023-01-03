@@ -1,4 +1,4 @@
-process GATKv3_5_VariantRecalibrator {
+process GATKv3_5_VARIANTRECALIBRATOR {
   tag "$sampleID"
 
   cpus = 1
@@ -24,17 +24,17 @@ process GATKv3_5_VariantRecalibrator {
   my_mem =  my_mem[0..-4]
   
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar GenomeAnalysisTK.jar \
+  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /usr/GenomeAnalysisTK.jar \
   -T VariantRecalibrator \
   -R ${params.ref_fa} \
-  -input ${sampleID}_variants_raw.vcf \
+  -input ${normal_germline_vcf} \
   -resource:hapmap,known=false,training=true,truth=true,prior=15.0 hapmap_3.3.b37.sites.vcf \
   -resource:omni,known=false,training=true,truth=false,prior=12.0 1000G_omni2.5.b37.sites.vcf \
   -resource:1000G,known=false,training=true,truth=false,prior=10.0 1000G_phase1.snps.high_confidence.vcf \
   -resource:dbsnp,known=true,training=false,truth=false,prior=6.0 dbsnp_135.b37.vcf \
-  an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -an InbreedingCoeff \
+  -an QD -an MQ -an MQRankSum -an ReadPosRankSum -an FS -an SOR -an InbreedingCoeff \
   -mode SNP \
-  -tranche 99.6
+  -tranche 99.6 \
   -recalFile ${sampleID}.recal.txt \
   -tranchesFile ${sampleID}.tranches.txt \
   -rscriptFile ${sampleID}.plots.R.txt
