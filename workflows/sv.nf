@@ -30,6 +30,7 @@ include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_fil
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
 include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
 
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
@@ -228,6 +229,7 @@ workflow SV {
     // 1. SplitMultiAllelicRegions & compress & index
     BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
     // 2. vepPublicSvnIndel
+    VEP_GERMLINE(BCFTOOLS_FILTERMULTIALLELIC.out.vcf_idx)
     // 3. RemoveSpanning
     // 4. AddCosmic
     // 5. AddCancerResistanceMutations
