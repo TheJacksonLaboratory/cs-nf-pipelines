@@ -8,7 +8,7 @@ process BCFTOOLS_REMOVESPANNING {
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
     input:
-    tuple val(sampleID), file(vcf), file(index)
+    tuple val(sampleID), file(vcf)
 
     output:
     tuple val(sampleID), file("*.vcf"), emit: vcf
