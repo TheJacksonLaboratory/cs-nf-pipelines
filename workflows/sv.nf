@@ -34,7 +34,7 @@ include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredicto
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {COSMIC_CANCER_RESISTANCE_MUTATION} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations"
-
+include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
@@ -227,8 +227,7 @@ workflow SV {
     GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
     BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
-    // Germline annotation 
-
+    // Germline annotation - Filtered
     // 1. SplitMultiAllelicRegions & compress & index
     BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
     // 2. vepPublicSvnIndel
@@ -239,9 +238,12 @@ workflow SV {
     COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
     // 5. AddCancerResistanceMutations
     COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
-    // 6. AnnotateId
-    // 7. RenameCsqVcf
+    // 6. AnnotateId & RenameCsqVcf
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, filtered)
 
+    // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
+    //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
+=
     // Step 14: Somatic Calling
 
     // Applies scatter intervals from above to the BQSR bam file
