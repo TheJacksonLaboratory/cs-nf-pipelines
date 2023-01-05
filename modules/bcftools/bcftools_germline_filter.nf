@@ -18,6 +18,10 @@ process BCFTOOLS_GERMLINE_FILTER {
     output:
     tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz"), file("*haplotypecaller.gatk.final.filtered.vcf.gz.tbi"), emit: vcf_idx
 
+
+    // NOTE: These are hard coded to resources provided at: https://bitbucket.nygenome.org/projects/WDL/repos/somatic_dna_wdl/browse/config/fasta_references.json
+    //       Many of the files used in the filtering here are used again by VEP. Therefore, the reosource sets were combined to reduce the number of params. 
+
     script:
     """
     bgzip ${vcf}
@@ -34,7 +38,7 @@ process BCFTOOLS_GERMLINE_FILTER {
 
     ## Annotate with NYGC AF for filtering
     bcftools annotate \
-    --annotations ${params.nygcAf} \
+    --annotations ${params.vep_cache_directory}/annotations/04142020_NYGC_samples.vcf.gz \
     --columns 'INFO/AF,INFO/AC_Hom' \
     -Oz \
     noaf.vcf.gz \
@@ -54,7 +58,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## select whitelist variants
     bcftools view \
     -Oz \
-    -R ${params.whitelist} \
+    -R ${params.vep_cache_directory}/annotations/vep_whitelist_38.20201118.vcf.gz \
     ${vcf}.gz \
     > ${sampleID}.whitelist.filtered.vcf.gz
 
@@ -63,7 +67,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## select pgx variants
     bcftools view \
     -Oz \
-    -R ${params.pgx} \
+    -R ${params.vep_cache_directory}/annotations/pgx_vep_hg38.vcf.gz \
     ${vcf}.gz \
     > ${sampleID}.pgx.filtered.vcf.gz
 
@@ -72,7 +76,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## select chd whitelist variants
     bcftools view \
     -Oz \
-    -R ${params.chdWhitelistVcf} \
+    -R ${params.vep_cache_directory}/annotations/chd_whitelist.vcf.gz \
     ${vcf}.gz \
     > ${sampleID}.chdwhitelist.filtered.vcf.gz
 
@@ -81,7 +85,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## select rwgs pgx variants
     bcftools view \
     -Oz \
-    -R ${params.rwgsPgxBed} \
+    -R ${params.vep_cache_directory}/annotations/rWGS_PGx.bed.gz \
     ${vcf}.gz \
     > ${sampleID}.rwgspgx.filtered.vcf.gz
 
@@ -90,7 +94,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## Select deep intronics
     bcftools view \
     -Oz \
-    -R ${params.deepIntronicsVcf} \
+    -R ${params.vep_cache_directory}/annotations/deep_intronic_whitelist_08132020.vcf.gz \
     ${vcf}.gz \
     > ${sampleID}.deep_intronics.filtered.vcf.gz
 
@@ -99,7 +103,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     ## Select clinvar intronics
     bcftools view \
     -Oz \
-    -R ${params.clinvarIntronicsVcf} \
+    -R ${params.vep_cache_directory}/annotations/clinvar_deep_intronics_09012020.vcf.gz \
     ${vcf}.gz \
     > ${sampleID}.clinvar_intronics.filtered.vcf.gz
 
