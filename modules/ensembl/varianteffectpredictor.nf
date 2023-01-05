@@ -13,7 +13,7 @@ process VEP_GERMLINE {
   tuple val(sampleID), file(vcf), file(idx)
 
   output:
-  tuple val(sampleID), file("*_vep_annotated.vcf"), emit: normal_germline_annotated_vcf
+  tuple val(sampleID), file("*_vep_annotated.vcf"), emit: vcf
 
   script:
 
@@ -45,7 +45,7 @@ process VEP_GERMLINE {
   --dir_plugins ${params.vep_cache_directory}/Plugins \
   --plugin dbscSNV,${params.vep_cache_directory}/Plugins/dbscSNV1.1_GRCh38.txt.gz \
   --plugin MaxEntScan,${params.vep_cache_directory}/Plugins/maxentscan \
-  --plugin dbNSFP,${params.vep_cache_directory}/Plugins/dbNSFP4.3a.gz,${params.vep_cache_directory}/Plugins/dbNSFP_replacement_logic,REVEL_score,SIFT_pred,SIFT4G_pred,LRT_pred,MutationTaster_pred,MutationAssessor_pred,FATHMM_pred,PROVEAN_pred,MetaSVM_pred,PrimateAI_pred,fathmm-MKL_coding_pred,GERP++_RS,phyloP100way_vertebrate,CADD_phred,Polyphen2_HVAR_pred \
+  --plugin dbNSFP,${params.vep_cache_directory}/Plugins/dbNSFP4.3a_grch38.gz,${params.vep_cache_directory}/Plugins/dbNSFP_replacement_logic,REVEL_score,SIFT_pred,SIFT4G_pred,LRT_pred,MutationTaster_pred,MutationAssessor_pred,FATHMM_pred,PROVEAN_pred,MetaSVM_pred,PrimateAI_pred,fathmm-MKL_coding_pred,GERP++_RS,phyloP100way_vertebrate,CADD_phred,Polyphen2_HVAR_pred \
   --custom ${params.vep_cache_directory}/annotations/COSMIC_v97/CosmicCodingMuts.vcf.gz,CosmicCoding,vcf,exact,0,GENOMIC_ID,LEGACY_ID,CNT,CDS,AA \
   --custom ${params.vep_cache_directory}/annotations/COSMIC_v97/CosmicNonCodingVariants.normal.vcf.gz,CosmicNonCoding,vcf,exact,0,GENOMIC_ID,LEGACY_ID,CNT,CDS,AA \
   --custom ${params.vep_cache_directory}/annotations/04142020_NYGC_samples.vcf.gz,NYGC,vcf,exact,0,AF,Samples,AC_Het,AC_Hom \
@@ -94,7 +94,7 @@ process VEP_GERMLINE {
 // mkdir temp
 // zgrep -h -v ^#chr dbNSFP4.3a_variant.chr* | sort -T temp -k1,1 -k2,2n - | cat h - | bgzip -c > dbNSFP4.3a.gz
 // tabix -s 1 -b 2 -e 2 dbNSFP4.3a.gz
-// rm -rf temp dbNSFP4.3a_variant.chr* h dbNSFP4.3_gene.gz dbNSFP4.3_gene.complete.gz dbNSFP4.3a.zip dbNSFP4.3a.readme.txt search_dbNSFP43a.readme.pdf search_dbNSFP43a.class search_dbNSFP43a.jar
+// rm -rf temp dbNSFP4.3a_variant.chr* h dbNSFP4.3_gene.gz dbNSFP4.3_gene.complete.gz dbNSFP4.3a.zip search_dbNSFP43a.readme.pdf search_dbNSFP43a.class search_dbNSFP43a.jar
 
 
 // dbscSNV:
