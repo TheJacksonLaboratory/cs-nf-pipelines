@@ -25,7 +25,7 @@ process GATK_MUTECT2 {
   my_mem =  my_mem[0..-4]
 
   """
-  gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=4" Mutect2 \
+  gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" Mutect2 \
     -R ${params.ref_fa} \
     -I ${tumor_bam} \
     -tumor ${tumor_name} \

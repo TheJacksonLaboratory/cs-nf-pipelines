@@ -29,6 +29,8 @@ include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorev
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
+include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
@@ -188,6 +190,16 @@ workflow SV {
     // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
     chrom_channel = ch_bam_normal_to_cross.combine(intervals)
 
+    // Read a list of chromosome names from a parameter. These are provided to several tools. 
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+
+    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
+    chrom_list = chroms.collect().dropRight(1)
+    chrom_list_noY = chrom_list.dropRight(1)
+    
     // Variant calling. 
     GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
@@ -211,10 +223,10 @@ workflow SV {
     GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
     BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
-
     // Germline annotation 
 
     // 1. SplitMultiAllelicRegions & compress & index
+    BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
     // 2. vepPublicSvnIndel
     // 3. RemoveSpanning
     // 4. AddCosmic
@@ -224,23 +236,15 @@ workflow SV {
 
     // Step 14: Somatic Calling
 
-    // Read a list of contigs from parameters to provide to GATK as intervals
-    chroms = Channel
-        .fromPath("${params.chrom_contigs}")
-        .splitText()
-        .map{it -> it.trim()}
-
-    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
-    chrom_list = chroms.collect().dropRight(1)
-
     // Applies scatter intervals from above to the BQSR bam file
     somatic_calling_channel = ch_cram_variant_calling_pair.combine(intervals)
 
     // // Applies scatter intervals from above to the BQSR bam file
     // somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
-    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chr'. 
+    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chroms'. 
     // //       Entire chromosomes are scattered. For WGS, this is computationally intensive. 
     // //       We changed to calling to be done based on the same intervals passed to the germline caller. 
+    // //       These intervals are based on the 'noN' file make by BROAD/GATK. 
     // //       If complete chromosomes are requried, the above line of code can be uncommented. 
 
     // Mutect2

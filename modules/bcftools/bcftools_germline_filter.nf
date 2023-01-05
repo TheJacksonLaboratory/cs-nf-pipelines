@@ -16,8 +16,7 @@ process BCFTOOLS_GERMLINE_FILTER {
     tuple val(sampleID), file(vcf)
 
     output:
-    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz"), emit: vcf
-    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz.tbi"), emit: idx
+    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz"), file("*haplotypecaller.gatk.final.filtered.vcf.gz.tbi"), emit: vcf_idx
 
     script:
     """

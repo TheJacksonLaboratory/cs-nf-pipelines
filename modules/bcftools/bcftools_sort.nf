@@ -1,4 +1,4 @@
-process BCF_SORT {
+process BCFTOOLS_SORT {
   tag "$sampleID"
 
   cpus = 1
