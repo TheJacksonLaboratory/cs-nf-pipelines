@@ -2,8 +2,8 @@ process COSMIC_ANNOTATION {
   tag "$sampleID"
 
   cpus 1
-  memory { 5.GB * task.attempt }
-  time {1.hour * task.attempt}
+  memory { 1.GB * task.attempt }
+  time {5.hour * task.attempt}
   errorStrategy 'retry'
   maxRetries 1
 
