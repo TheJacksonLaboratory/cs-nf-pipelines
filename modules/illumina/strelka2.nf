@@ -22,7 +22,7 @@ process STRELKA2 {
 
   """
   # configure strelka
-  configureStrelkaSomaticWorkflow.py \
+  python configureStrelkaSomaticWorkflow.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --callRegions ${params.callRegions} \
@@ -32,7 +32,7 @@ process STRELKA2 {
   --runDir ${sampleID}
 
   # execute strelka
-  ${sampleID}/runWorkflow.py \
+  python ${sampleID}/runWorkflow.py \
   --mode local \
   --job ${task.cpus} \
   --memGb ${my_mem}

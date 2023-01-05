@@ -24,7 +24,7 @@ process MANTA {
 
   """
   # configure manta
-  configManta.py \
+  python configManta.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --referenceFasta ${params.ref_fa} \
@@ -32,7 +32,7 @@ process MANTA {
   --runDir ${sampleID}
 
   # execute manta
-  ${sampleID}/runWorkflow.py -j ${task.cpus} \
+  python ${sampleID}/runWorkflow.py -j ${task.cpus} \
   --mode local \
   --memGb ${my_mem}
   
