@@ -57,6 +57,7 @@ include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
 include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
 include {SVABA} from "${projectDir}/modules/svaba/svaba"
 include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
+include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
 // help if needed
 if (params.help){
@@ -244,6 +245,8 @@ workflow SV {
     // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
     //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
 
+
+
     // Step 14: Somatic Calling
 
     // Applies scatter intervals from above to the BQSR bam file
@@ -341,6 +344,11 @@ workflow SV {
 
     // Lumpy
     LUMPY_SV(ch_cram_variant_calling_pair)
+
+    // Step 15: MSI
+
+    // MSI
+    MSISENSOR2_MSI(ch_bam_tumor_to_cross)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
