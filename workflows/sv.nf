@@ -33,6 +33,7 @@ include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcfto
 include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
+include {COSMIC_CANCER_RESISTANCE_MUTATION} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations"
 
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
@@ -237,6 +238,7 @@ workflow SV {
     // 4. AddCosmic
     COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
     // 5. AddCancerResistanceMutations
+    COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId
     // 7. RenameCsqVcf
 
