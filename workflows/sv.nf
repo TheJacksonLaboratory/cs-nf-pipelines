@@ -29,6 +29,12 @@ include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorev
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
+include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
+include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
+include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
+include {COSMIC_CANCER_RESISTANCE_MUTATION} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations"
+include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
@@ -51,6 +57,7 @@ include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
 include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
 include {SVABA} from "${projectDir}/modules/svaba/svaba"
 include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
+include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
 // help if needed
 if (params.help){
@@ -167,7 +174,7 @@ workflow SV {
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // Step 13: Germline Calling
+    // Step 13: Germline Calling and annotation
     
     // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
     // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
@@ -188,6 +195,16 @@ workflow SV {
     // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
     chrom_channel = ch_bam_normal_to_cross.combine(intervals)
 
+    // Read a list of chromosome names from a parameter. These are provided to several tools. 
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+
+    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
+    chrom_list = chroms.collect().dropRight(1)
+    chrom_list_noY = chrom_list.dropRight(1)
+    
     // Variant calling. 
     GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
@@ -211,29 +228,36 @@ workflow SV {
     GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
     BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
 
+    // Germline annotation - Filtered
+    // 1. SplitMultiAllelicRegions & compress & index
+    BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
+    // 2. vepPublicSvnIndel
+    VEP_GERMLINE(BCFTOOLS_FILTERMULTIALLELIC.out.vcf_idx)
+    // 3. RemoveSpanning
+    BCFTOOLS_REMOVESPANNING(VEP_GERMLINE.out.vcf)
+    // 4. AddCosmic
+    COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
+    // 5. AddCancerResistanceMutations
+    COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
+    // 6. AnnotateId & RenameCsqVcf
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, 'filtered')
 
-    // NEED TO ADD ANNOTATION OF GERMLINE. 
+    // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
+    //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
+
 
 
     // Step 14: Somatic Calling
-
-    // Read a list of contigs from parameters to provide to GATK as intervals
-    chroms = Channel
-        .fromPath("${params.chrom_contigs}")
-        .splitText()
-        .map{it -> it.trim()}
-
-    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
-    chrom_list = chroms.collect().dropRight(1)
 
     // Applies scatter intervals from above to the BQSR bam file
     somatic_calling_channel = ch_cram_variant_calling_pair.combine(intervals)
 
     // // Applies scatter intervals from above to the BQSR bam file
     // somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
-    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chr'. 
+    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chroms'. 
     // //       Entire chromosomes are scattered. For WGS, this is computationally intensive. 
     // //       We changed to calling to be done based on the same intervals passed to the germline caller. 
+    // //       These intervals are based on the 'noN' file make by BROAD/GATK. 
     // //       If complete chromosomes are requried, the above line of code can be uncommented. 
 
     // Mutect2
@@ -320,6 +344,11 @@ workflow SV {
 
     // Lumpy
     LUMPY_SV(ch_cram_variant_calling_pair)
+
+    // Step 15: MSI
+
+    // MSI
+    MSISENSOR2_MSI(ch_bam_tumor_to_cross)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
