@@ -7,7 +7,7 @@ process COSMIC_CANCER_RESISTANCE_MUTATION {
     errorStrategy 'retry'
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/python-yaml:3.9.7'
+    container 'quay.io/jaxcompsci/python-yaml:3.9.7_ps'
 
     input:
     tuple val(sampleID), file(vcf)

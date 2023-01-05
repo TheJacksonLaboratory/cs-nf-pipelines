@@ -239,11 +239,11 @@ workflow SV {
     // 5. AddCancerResistanceMutations
     COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
-    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, filtered)
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, 'filtered')
 
     // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
     //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
-=
+
     // Step 14: Somatic Calling
 
     // Applies scatter intervals from above to the BQSR bam file

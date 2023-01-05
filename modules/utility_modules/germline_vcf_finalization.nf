@@ -7,7 +7,7 @@ process GERMLINE_VCF_FINALIZATION {
     errorStrategy 'retry'
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/python-yaml:3.9.7'
+    container 'quay.io/jaxcompsci/python-yaml:3.9.7_ps'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.vcf", mode:'copy'
 
