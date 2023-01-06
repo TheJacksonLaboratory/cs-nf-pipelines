@@ -22,7 +22,7 @@ process STRELKA2 {
 
   """
   # configure strelka
-  python configureStrelkaSomaticWorkflow.py \
+  python /usr/local/bin/configureStrelkaSomaticWorkflow.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --callRegions ${params.callRegions} \
