@@ -24,7 +24,7 @@ process MANTA {
 
   """
   # configure manta
-  python configManta.py \
+  python /usr/local/bin/configManta.py \
   --normalBam ${normal_bam} \
   --tumorBam ${tumor_bam} \
   --referenceFasta ${params.ref_fa} \
