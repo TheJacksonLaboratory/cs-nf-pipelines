@@ -256,13 +256,13 @@ workflow CHIPSEQ {
 
   
   // Get BAM and SAF files for each ip
-  ch_group_bam
-      .map { it -> [ it[3], [ it[0], it[1], it[2] ] ] }
-      .join(BAMPE_RM_ORPHAN.out.bam)
-      .map { it -> [ it[1][0], it[1][1], it[1][2], it[2] ] }
+  ch_group_bam                                                 // [antibody, replicatesExist, multipleGroups, sample_id, [bam, bai], control_id, [bam, bai], sample_id bam.flagstat] 
+      .map { it -> [ it[3], [ it[0], it[1], it[2] ] ] }        // [sample_id, [antibody, replicatesExist, multipleGroups]] 
+      .join(BAMPE_RM_ORPHAN.out.bam)                           // [sample_id, [antibody, replicatesExist, multipleGroups], Orphan Removed sample_id bam]
+      .map { it -> [ it[1][0], it[1][1], it[1][2], it[2] ] }   // [antibody, replicatesExist, multipleGroups, OR sample_id bam]
       .groupTuple()
-      .map { it -> [ it[0], it[1][0], it[2][0], it[3].flatten().sort() ] }
-      .join(MACS2_CONSENSUS.out.saf)
+      .map { it -> [ it[0], it[1][0], it[2][0], it[3].flatten().sort() ] } // [antibody, replicatesExist, multipleGroups, [OR sample_id1 R1 bam, OR sample_id1 R2 bam, OR sample_id2 R1 bam, OR sample_id2 R2 bam]]
+      .join(MACS2_CONSENSUS.out.saf)  // [antibody, replicatesExist, multipleGroups, [OR sample_id1 R1 bam, OR sample_id1 R2 bam, OR sample_id2 R1 bam, OR sample_id2 R2 bam], SAF]
       .set { ch_group_bam }
 
 

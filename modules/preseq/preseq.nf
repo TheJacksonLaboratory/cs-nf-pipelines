@@ -18,8 +18,7 @@ process PRESEQ {
     !params.skip_preseq
 
     script:
-    //pe = params.read_type == 'SE' ? '' : '-pe'
-    pe = params.read_type == 'SE' ? '' : ''
+    pe = params.read_type == 'SE' ? '' : '-pe'
     """
     preseq lc_extrap \\
     -output ${sampleID}.ccurve.txt \\
