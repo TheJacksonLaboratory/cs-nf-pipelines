@@ -1,4 +1,4 @@
-process BCF_SPLITMULTIALLELIC {
+process BCF_SPLITMULTIALLELICREGIONS {
   tag "$sampleID"
 
   cpus = 1
@@ -8,7 +8,7 @@ process BCF_SPLITMULTIALLELIC {
   container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), path(interval), val(index)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
@@ -21,6 +21,7 @@ process BCF_SPLITMULTIALLELIC {
   -m \
   -any \
   --threads ${task.cpus} \
+  --regions ${index} \
   --no-version \
   -f ${params.ref_fa} \
   -o ${sampleID}_split.vcf \
