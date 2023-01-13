@@ -2,6 +2,9 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {help} from '../bin/help/chipseq.nf'
+include {param_log} from '../bin/log/chipseq.nf'
+include {getLibraryId} from '../bin/shared/getLibraryId.nf'
 include {CHECK_DESIGN} from '../modules/utility_modules/chipseq_check_design'
 include {SAMTOOLS_FAIDX} from '../modules/samtools/samtools_faidx'
 include {MAKE_GENOME_FILTER} from '../modules/utility_modules/chipseq_make_genome_filter'
@@ -49,6 +52,17 @@ include {IGV} from '../modules/utility_modules/igv'
 include {MULTIQC} from '../modules/multiqc/multiqc'
 
 
+
+// help if needed
+if (params.help){
+    help()
+    exit 0
+}
+
+// log params
+param_log()
+
+
 // main workflow
 workflow CHIPSEQ {
 
@@ -91,7 +105,7 @@ workflow CHIPSEQ {
 
 
   // Reference genome
-  ch_fasta = file(params.fasta, checkIfExists: true)
+  ch_fasta = file(params.ref_fa, checkIfExists: true)
   ch_gtf   = file(params.gtf, checkIfExists: true)
 
   // genes.bed

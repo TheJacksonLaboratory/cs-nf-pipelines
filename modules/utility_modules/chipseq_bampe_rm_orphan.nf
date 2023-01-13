@@ -1,6 +1,9 @@
 process BAMPE_RM_ORPHAN {
     tag "$sampleID"
 
+    container 'quay.io/biocontainers/mulled-v2-57736af1eb98c01010848572c9fec9fff6ffaafd:402e865b8f6af2f3e58c6fc8d57127ff0144b2c7-0'
+
+
     input:
     tuple val(sampleID), file(bam)
 
