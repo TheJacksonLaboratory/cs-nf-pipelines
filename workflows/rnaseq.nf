@@ -53,7 +53,13 @@ if (params.concat_lanes){
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 // downstream resources (only load once so do it here)
-rsem_ref_files = file("${params.rsem_ref_files}/*")
+if (params.rsem_aligner == "bowtie2") {
+  rsem_ref_files = file("${params.rsem_bowtie_ref_files}/*")
+}
+else if (params.rsem_aligner == "star") {
+  rsem_ref_files = file("${params.rsem_star_ref_files}/*")
+}
+else error "${params.rsem_aligner} is not valid, use 'bowtie2' or 'star'"
 
 // main workflow
 workflow RNASEQ {
@@ -73,15 +79,7 @@ workflow RNASEQ {
   QUALITY_STATISTICS(read_ch)
 
   // Step 2: RSEM
-  if (params.rsem_aligner == "bowtie2") {
-    RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, "${params.rsem_bowtie_ref_files}")
-  }
-
-  else if (params.rsem_aligner == "star") {
-    RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, "${params.rsem_star_ref_files}")
-  }
-
-  else error "${params.rsem_aligner} is not a valid aligner, please re-run with 'bowtie2' or 'star'"
+  RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
 
   //Step 3: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
