@@ -25,6 +25,19 @@ process EMASE_CREATE_HYBRID {
     """
     create-hybrid -F ${params.genome_file_list} -s ${params.haplotype_list} -o ./ --create-bowtie-index
     """
+
+    stub:
+    """
+    touch emase.pooled.transcripts.fa
+    touch emase.pooled.transcripts.info
+    touch emase.gene2transcripts.tsv
+    touch bowtie.transcripts.4.ebwt
+    touch bowtie.transcripts.3.ebwt
+    touch bowtie.transcripts.2.ebwt
+    touch bowtie.transcripts.1.ebwt
+    touch bowtie.transcripts.rev.2.ebwt
+    touch bowtie.transcripts.rev.1.ebwt
+    """
 }
 
 

@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/generate_transcriptome.nf"
-include {param_log} from "${projectDir}/bin/log/generate_transcriptome.nf"
+include {help} from "${projectDir}/bin/help/prepare_emase.nf"
+include {param_log} from "${projectDir}/bin/log/prepare_emase.nf"
 include {EMASE_PREPARE_EMASE} from "${projectDir}/modules/emase/emase_prepare_emase"
 
 
@@ -17,6 +17,6 @@ if (params.help){
 param_log()
 
 // main workflow
-workflow GENERATE_TRANSCRIPTOME {
+workflow PREPARE_EMASE {
     EMASE_PREPARE_EMASE()    
 }
