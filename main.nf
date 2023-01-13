@@ -3,13 +3,13 @@
 nextflow.enable.dsl=2
 
 // import workflow of interest
-if (params.workflow == "generate_transcriptome"){
-  include {GENERATE_TRANSCRIPTOME} from './workflows/generate_transcriptome'
+if (params.workflow == "prepare_emase"){
+  include {prepare_emase} from './workflows/prepare_emase'
 }
 
 // conditional to kick off appropriate workflow
 workflow{
-  if (params.workflow == "generate_transcriptome"){
-    GENERATE_TRANSCRIPTOME()
+  if (params.workflow == "prepare_emase"){
+    PREPARE_EMASE()
     }
 }
