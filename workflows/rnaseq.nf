@@ -73,7 +73,15 @@ workflow RNASEQ {
   QUALITY_STATISTICS(read_ch)
 
   // Step 2: RSEM
-  RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
+  if (params.rsem_aligner == "bowtie2") {
+    RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, "${params.rsem_bowtie_ref_files}")
+  }
+
+  else if (params.rsem_aligner == "star") {
+    RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, "${params.rsem_star_ref_files}")
+  }
+
+  else error "${params.rsem_aligner} is not a valid aligner, please re-run with 'bowtie2' or 'star'"
 
   //Step 3: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
