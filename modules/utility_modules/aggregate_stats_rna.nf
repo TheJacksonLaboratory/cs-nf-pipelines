@@ -9,9 +9,7 @@ process RNA_SUMMARY_STATS {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'summary_stats' }", pattern: "*stats.txt", mode:'copy'
 
     input:
-    tuple val(sampleID), file(rsem_stats)
-    tuple val(sampleID), file(quality_stats)
-    tuple val(sampleID), file(picard_metrics)
+    tuple val(sampleID), file(rsem_stats), file(quality_stats), file(picard_metrics)
 
     output:
     tuple val(sampleID), file("*.txt")

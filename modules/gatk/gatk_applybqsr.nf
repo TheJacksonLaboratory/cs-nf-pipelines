@@ -2,16 +2,17 @@ process GATK_APPLYBQSR {
   tag "$sampleID"
 
   cpus = 1
-  memory = 35.GB
+  memory = {40.GB * task.attempt}
   time = '12:00:00'
+  errorStrategy 'retry' 
+  maxRetries 1
 
   container 'broadinstitute/gatk:4.2.4.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(table)
+  tuple val(sampleID), file(bam), file(table)
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam

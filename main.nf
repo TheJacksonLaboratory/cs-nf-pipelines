@@ -15,6 +15,9 @@ if (params.workflow == "wgs"){
 if (params.workflow == "rrbs"){
   include {RRBS} from './workflows/rrbs'
 }
+if (params.workflow == "atac"){
+  include {ATAC} from './workflows/atac'
+}
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "rnaseq"){
@@ -29,4 +32,7 @@ workflow{
   if (params.workflow == "rrbs"){
     RRBS()
     }
+  if (params.workflow == "atac"){
+    ATAC()
+    } 
 }

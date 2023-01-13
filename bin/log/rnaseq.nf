@@ -32,8 +32,6 @@ ______________________________________________________
 --picard_dict          ${params.picard_dict}
 --ref_flat             ${params.ref_flat}
 --ribo_intervals       ${params.ribo_intervals}
---probes               ${params.probes}
---ctp_genes            ${params.ctp_genes}
 
 Project Directory: ${projectDir}
 ______________________________________________________
