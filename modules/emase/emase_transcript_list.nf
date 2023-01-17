@@ -1,4 +1,4 @@
-process EMASE_PREPARE_EMASE {
+process EMASE_PREPARE_TRANSCRIPT_LIST {
 
     // give a fasta or group of fastas, gtf or group of gtfs, and a haplotype list 
     // 1. generate a hybrid genome
@@ -17,30 +17,22 @@ process EMASE_PREPARE_EMASE {
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.tsv', mode:'copy'
-    publishDir "${params.pubdir}/emase/bowtie", pattern: "*.ebwt", mode:'copy'
 
     output:
-    path("*.fa"), emit: pooled_transcript_fasta
-    path("*.info"), emit: pooled_transcript_info
-    path("*.tsv"), emit: pooled_gene_to_transcripts
-    path("*.ebwt"), emit: pooled_bowtie_index
+    path("*.fa"), emit: transcript_fasta
+    path("*.info"), emit: transcript_info
+    path("*.tsv"), emit: gene_to_transcripts
 
     script:
     """
-    prepare-emase -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m
+    prepare-emase -G ${params.base_genome} -g ${params.base_gtf} -o ./ --no-bowtie-index
     """
 
     stub:
     """
-    touch emase.pooled.transcripts.fa
-    touch emase.pooled.transcripts.info
+    touch emase.transcripts.fa
+    touch emase.transcripts.info
     touch emase.gene2transcripts.tsv
-    touch bowtie.transcripts.4.ebwt
-    touch bowtie.transcripts.3.ebwt
-    touch bowtie.transcripts.2.ebwt
-    touch bowtie.transcripts.1.ebwt
-    touch bowtie.transcripts.rev.2.ebwt
-    touch bowtie.transcripts.rev.1.ebwt
     """
 
 }

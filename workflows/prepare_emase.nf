@@ -18,5 +18,6 @@ param_log()
 
 // main workflow
 workflow PREPARE_EMASE {
-    EMASE_PREPARE_EMASE()    
+    EMASE_PREPARE_EMASE()
+    EMASE_TRANSCIPT_LIST()
 }
