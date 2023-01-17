@@ -20,7 +20,8 @@ RUN	conda config --add channels r
 RUN	conda config --add channels bioconda
 RUN	conda install -c kbchoi emase
 RUN conda install -c kbchoi gbrs
-RUN git clone https://github.com/churchill-lab/alntools && cd alntools && python setup.py install
+RUN cd / git clone https://github.com/churchill-lab/alntools && cd alntools && python setup.py install
 RUN conda install bowtie
 RUN conda install bowtie2
-RUN git clone https://github.com/churchill-lab/gbrs.git --branch release/0.1.6 && cd gbrs && python setup.py install
+RUN cd / && git clone https://github.com/churchill-lab/gbrs.git --branch release/0.1.6 && cd gbrs && python setup.py install
+RUN cd / && git clone https://github.com/churchill-lab/emase-zero.git && cd emase-zero/src && make 
