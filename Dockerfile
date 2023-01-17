@@ -5,7 +5,7 @@ ENV PATH="/usr/local/anaconda/bin:$PATH"
 RUN apt-get update \
     && apt-get install -y eatmydata \
     && eatmydata apt-get install -y build-essential wget bzip2 \
-      ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 \
+      ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 libz-dev \
       git \
     && apt-get clean
 
