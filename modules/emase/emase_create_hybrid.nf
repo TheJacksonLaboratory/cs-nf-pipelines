@@ -11,7 +11,7 @@ process EMASE_CREATE_HYBRID {
     errorStrategy 'retry' 
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:89bbb10'
+    container 'quay.io/jaxcompsci/emase_gbrs_alntools:daafe97'
 
     publishDir "${params.pubdir}/emase", pattern: "[*.fa, *.info, *.tsv]", mode:'copy'
     publishDir "${params.pubdir}/emase/bowtie", pattern: "[*.ebwt]", mode:'copy'
