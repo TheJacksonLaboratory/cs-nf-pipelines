@@ -66,7 +66,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${prob} \
   ${stype} \
   ${frag} \
-  ${params.rsem_aligner} \
+  --${params.rsem_aligner} \
   --append-names \
   ${seed_length} \
   ${outbam} \
