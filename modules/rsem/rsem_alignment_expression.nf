@@ -53,12 +53,10 @@ process RSEM_ALIGNMENT_EXPRESSION {
     trimmedfq="${reads[0]}"
   }
   if (params.rsem_aligner == "bowtie2"){
-    aligner="--bowtie2"
     outbam="--output-genome-bam"
     seed_length="--seed-length ${params.seed_length}"
   }
   if (params.rsem_aligner == "star") {
-    aligner="--star"
     outbam="--star-output-genome-bam"
     seed_length=""
   }
@@ -68,7 +66,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${prob} \
   ${stype} \
   ${frag} \
-  ${aligner} \
+  ${params.rsem_aligner} \
   --append-names \
   ${seed_length} \
   ${outbam} \
