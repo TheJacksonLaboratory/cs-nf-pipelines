@@ -18,6 +18,10 @@ ______________________________________________________
 --bowtie_index                  ${params.bowtie_index}
 --transcripts_info              ${params.transcripts_info}
 --gbrs_strain_list              ${params.gbrs_strain_list}
+--gene2transcript_list          ${params.gene2transcript_list}
+--full_transcript_list          ${params.full_transcript_list}
+--gbrs_model                    ${params.gbrs_model}
+
 Project Directory: ${projectDir}
 ______________________________________________________
 """

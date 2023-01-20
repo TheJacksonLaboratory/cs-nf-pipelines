@@ -6,15 +6,17 @@ process EMASE_CREATE_HYBRID {
     // 3. generate bowtie index. 
 
     cpus 1
-    memory {60.GB * task.attempt}
-    time {30.hour * task.attempt}
+    memory {15.GB * task.attempt}
+    time {24.hour * task.attempt}
     errorStrategy 'retry' 
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:daafe97'
+    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
 
-    publishDir "${params.pubdir}/emase", pattern: "[*.fa, *.info, *.tsv]", mode:'copy'
-    publishDir "${params.pubdir}/emase/bowtie", pattern: "[*.ebwt]", mode:'copy'
+    publishDir "${params.pubdir}/emase", pattern: "*.fa", mode:'copy'
+    publishDir "${params.pubdir}/emase", pattern: "*.info", mode:'copy'
+    publishDir "${params.pubdir}/emase", pattern: "*.tsv", mode:'copy'
+    publishDir "${params.pubdir}/emase/bowtie", pattern: "*.ebwt", mode:'copy'
 
     output:
     path file("*.fa"), emit: transcript_fasta

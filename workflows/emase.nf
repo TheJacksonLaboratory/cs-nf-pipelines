@@ -9,7 +9,10 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {BOWTIE} from "${projectDir}/modules/bowtie/bowtie"
 include {SAMTOOLS_VIEW} from "${projectDir}/modules/samtools/samtools_view"
-include {BAM_TO_EMASE} from "${projectDir}/modules/gbrs/gbrs_bam_to_emase"
+include {GBRS_BAM2EMASE} from "${projectDir}/modules/gbrs/gbrs_bam2emase"
+include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
+         GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
+include {GBRS_QUANTIFY} from "${projectDir}/modules/gbrs/gbrs_quantify"
 
 // help if needed
 if (params.help){
@@ -73,6 +76,23 @@ workflow EMASE {
 
     BOWTIE(read_ch)
     SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS')
-    BAM_TO_EMASE(SAMTOOLS_VIEW.out.bam)
+    GBRS_BAM2EMASE(SAMTOOLS_VIEW.out.bam)
+    GBRS_COMPRESS_SE(GBRS_BAM2EMASE.out.emase_h5, '')
+
+    if (params.read_type == 'PE'){
+        gbrs_compress_pairedReads_input = GBRS_COMPRESS_SE.out.compressed_emase_h5
+                                            .groupTuple()
+                                            .map { sampleID, reads -> tuple( sampleID, reads.sort{it.name} ) }
+        // collect GBRS compression. by sample ID then map and sort tuple to [sampleID, [R1, R2]]
+        // NOTE THIS NEEDS TO BE CHECKED FOR MULTI-SAMPLE MIXING. 
+        GBRS_COMPRESS_PE(gbrs_compress_pairedReads_input, 'merged')
+        gbrs_quantify_input = GBRS_COMPRESS_PE.out.compressed_emase_h5
+    } else {
+        gbrs_quantify_input = GBRS_COMPRESS_SE.out.compressed_emase_h5
+    }
+
+    GBRS_QUANTIFY(gbrs_quantify_input)
+
+    // gbrs_compress_pairedReads_input.view()
 
 }

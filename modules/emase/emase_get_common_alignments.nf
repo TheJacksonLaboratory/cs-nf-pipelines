@@ -1,18 +1,8 @@
-process EMASE_PREPARE_EMASE {
-
-    // give a fasta or group of fastas, gtf or group of gtfs, and a haplotype list 
-    // 1. generate a hybrid genome
-    // 2. generate transcript list
-    // 3. generate gene to transcript map
-    // 4. generate bowtie index. 
-
-    // NOTE: Transcript lists are 'pooled' but can be incomplete for certain haplotypes. 
-    //       Missing transcripts in haplotypes will cause errors in `run-emase`. 
-    //       Helper script `clean_transcript_info.py` can be used to add missing transcripts. 
+process EMASE_GET_COMMON_ALIGNMENTS {
 
     cpus 1
     memory {15.GB * task.attempt}
-    time {24.hour * task.attempt}
+    time {5.hour * task.attempt}
     errorStrategy 'retry' 
     maxRetries 1
 
@@ -31,7 +21,7 @@ process EMASE_PREPARE_EMASE {
 
     script:
     """
-    prepare-emase -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m
+    get-common-alignments -i ${EMASE_FILE_R1},${EMASE_FILE_R2} -o ${EMASE_FILE}
     """
 
     stub:
@@ -48,3 +38,4 @@ process EMASE_PREPARE_EMASE {
     """
 
 }
+
