@@ -54,10 +54,10 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 
 // downstream resources (only load once so do it here)
 if (params.rsem_aligner == "bowtie2") {
-  rsem_ref_files = file("${params.rsem_bowtie_ref_files}/*")
+  rsem_ref_files = file("${params.rsem_ref_files}/bowtie2/*")
 }
 else if (params.rsem_aligner == "star") {
-  rsem_ref_files = file("${params.rsem_star_ref_files}/*")
+  rsem_ref_files = file("${params.rsem_ref_files}/STAR/toplevel/${params.rsem_star_prefix}/*")
 }
 else error "${params.rsem_aligner} is not valid, use 'bowtie2' or 'star'"
 

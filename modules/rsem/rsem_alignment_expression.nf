@@ -56,13 +56,11 @@ process RSEM_ALIGNMENT_EXPRESSION {
     aligner="--bowtie2"
     outbam="--output-genome-bam"
     seed_length="--seed-length ${params.seed_length}"
-    rsem_ref_prefix="${params.rsem_bowtie_ref_prefix}"
   }
   if (params.rsem_aligner == "star") {
     aligner="--star"
     outbam="--star-output-genome-bam"
     seed_length=""
-    rsem_ref_prefix="${params.rsem_star_ref_prefix}"
   }
 
   """
@@ -75,7 +73,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${seed_length} \
   ${outbam} \
   ${trimmedfq} \
-  ${rsem_ref_prefix} \
+  ${params.rsem_ref_prefix} \
   ${sampleID} \
   2> rsem_aln_${sampleID}.stats
   """
