@@ -11,11 +11,13 @@ Parameter | Default | Description
 --strain | <comma,delim,string> | A comma delimilited string of strains/haplotypes. (e.g., 'A_J,CAST_EiJ,...')
 --genome_version | <string> | A genome ID string (e.g., 39)
 --diploid | boolean | Create diploid VCI file
---keep_fails | boolean | Keep track of VCF lines that could not be converted to VCI file
---pass_only | boolean | Use only VCF lines that have a PASS for the filter value
---quality_filter | <string> | Filter on quality, (e.g., 'FI=PASS')
---region | <seqid:start-end> | A region used in extraction. If using this option, the bed option can not be used.
---bed | /<BED_PATH> | A BED file with regions for extraction. This option cannot be used with region.
+--keep_fails | boolean | Default: false. Keep track of VCF lines that could not be converted to VCI file
+--pass_only | boolean | Default: false. Use only VCF lines that have a PASS for the filter value
+--quality_filter | <string> | Default: NULL. Filter on quality, (e.g., 'FI=PASS')
+--region | <seqid:start-end> | Default: NULL. A region used in extraction. If using this option, the bed option can not be used.
+--bed | /<BED_PATH> | Default: NULL. A BED file with regions for extraction. This option cannot be used with region.
+
+--keep_intermediate | boolean | Default: false. Keep intermediate files, not otherwise saved. 
 
 '''
 }

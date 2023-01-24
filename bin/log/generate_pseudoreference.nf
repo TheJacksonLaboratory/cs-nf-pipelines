@@ -24,6 +24,8 @@ ______________________________________________________
 --region                        ${params.region}
 --bed                           ${params.bed}
 
+--keep_intermediate               ${params.keep_intermediate}
+
 Project Directory: ${projectDir}
 ______________________________________________________
 """

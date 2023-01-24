@@ -15,6 +15,8 @@ ______________________________________________________
 --gtf_file_list                 ${params.gtf_file_list}
 --haplotype_list                ${params.haplotype_list}
 
+--keep_intermediate               ${params.keep_intermediate}
+
 Project Directory: ${projectDir}
 ______________________________________________________
 """

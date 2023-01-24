@@ -22,6 +22,8 @@ ______________________________________________________
 --full_transcript_list          ${params.full_transcript_list}
 --gbrs_model                    ${params.gbrs_model}
 
+--keep_intermediate               ${params.keep_intermediate}
+
 Project Directory: ${projectDir}
 ______________________________________________________
 """
