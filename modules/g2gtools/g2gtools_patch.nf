@@ -1,10 +1,8 @@
 process G2GTOOLS_PATCH {
 
     cpus 8
-    memory {15.GB * task.attempt}
-    time {10.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 8.GB
+    time '01:30:00'
 
     container 'quay.io/jaxcompsci/g2gtools:0.2.9'
 
