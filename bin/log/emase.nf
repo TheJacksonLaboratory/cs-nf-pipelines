@@ -11,6 +11,7 @@ ______________________________________________________
 --workflow                      ${params.workflow}
 -w                              ${workDir}
 -c                              ${params.config}
+--sample_folder                 ${params.sample_folder}
 --extension                     ${params.extension}
 --pattern                       ${params.pattern}
 --read_type                     ${params.read_type}
@@ -20,9 +21,9 @@ ______________________________________________________
 --gbrs_strain_list              ${params.gbrs_strain_list}
 --gene2transcript_list          ${params.gene2transcript_list}
 --full_transcript_list          ${params.full_transcript_list}
---gbrs_model                    ${params.gbrs_model}
+--emase_model                   ${params.emase_model}
 
---keep_intermediate               ${params.keep_intermediate}
+--keep_intermediate             ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
 ______________________________________________________

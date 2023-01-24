@@ -19,6 +19,8 @@ param_log()
 
 // main workflow
 workflow PREPARE_EMASE {
+    // Prepare emase reference, given list of genomes and gtf files. 
     EMASE_PREPARE_EMASE()
+    // clean transcript lists to add transcripts absent from certain haplotypes. 
     CLEAN_TRANSCRIPT_LISTS(EMASE_PREPARE_EMASE.out.pooled_transcript_info)
 }

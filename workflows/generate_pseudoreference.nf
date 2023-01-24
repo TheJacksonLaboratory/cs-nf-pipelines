@@ -58,4 +58,18 @@ workflow GENERATE_PSEUDOREFERENCE  {
     G2GTOOLS_EXTRACT_GENES(extract_input, 'genes')
     G2GTOOLS_EXTRACT_TRANSCRIPTS(extract_input, 'transcripts')
     G2GTOOLS_EXTRACT_EXONS(extract_input, 'exons')
+    
+    /*
+    For each STRAIN the following steps were run: 
+        1. Convert VCF to VCI (chain file equivalent)
+        2. Path SNPs into reference. 
+        3. Transform InDELs into patched reference. 
+        5. Convert the reference GTF to strain specific GTF.
+        6. Convert strain specific GTF to database format.
+        7. Extract sequence from strain specific fasta: 
+            a. genes.
+            b. transcripts.
+            c. exons.
+    */
+
 }
