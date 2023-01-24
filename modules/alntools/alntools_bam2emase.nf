@@ -31,4 +31,19 @@ process ALNTOOLS_BAM2EMASE {
     """
 }
 
+/*
+Usage: alntools bam2emase <options> bam_file emase_file
 
+  Convert a BAM file (bam_file) to an EMASE file (emase_file)
+
+Options:
+  -c, --chunks INTEGER            number of chunks to process
+  -d, --directory DIRECTORY       temp directory
+  -m, --mincount INTEGER          minimum count
+  --multisample
+  -p, --number-processes INTEGER  number of processes
+  --rangefile FILE                range file
+  -t, --targets FILE              target file
+  -v, --verbose                   enables verbose mode
+  -h, --help                      Show this message and exit.
+*/

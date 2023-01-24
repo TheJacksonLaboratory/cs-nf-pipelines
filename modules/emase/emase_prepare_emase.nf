@@ -48,3 +48,23 @@ process EMASE_PREPARE_EMASE {
     """
 
 }
+
+/*
+prepare-emase:
+Usage:
+    prepare-emase -G <genome_files> [ -g <gtf_files> -s <hap_list> -o <out_dir> -m -x ]
+
+Input:
+    -G <genome_files> : List of Genome files (comma delimited)
+    -g <gtf_files>    : List of gene annotation files (comma delimited, in the order of genomes)
+    -s <hap_list>     : Names of haplotypes to be used instead (comma delimited, in the order of genomes)
+    -o <out_dir>      : Output folder to store results (default: the current working directory)
+
+Parameters:
+    -h, --help            : shows this help message
+    -m, --save-g2tmap     : saves gene id to transcript id list in a tab-delimited text file
+    -x, --no-bowtie-index : skips building bowtie index
+
+Note:
+    Does not work if the input gtf file is older than Ensembl Release 75.
+*/

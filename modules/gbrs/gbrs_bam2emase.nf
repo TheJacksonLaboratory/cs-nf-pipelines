@@ -32,3 +32,18 @@ process GBRS_BAM2EMASE {
 }
 
 
+/*
+usage: gbrs bam2emase [-h] -i ALNFILE [-m LIDFILE] [-s HAPLOGYPES]
+                      [-o OUTFILE] [--delim DELIM] [--index-dtype INDEX_DTYPE]
+                      [--data-dtype DATA_DTYPE]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i ALNFILE, --bamfile ALNFILE
+  -m LIDFILE, --locus-ids LIDFILE
+  -s HAPLOGYPES, --haplotype-codes HAPLOGYPES
+  -o OUTFILE
+  --delim DELIM
+  --index-dtype INDEX_DTYPE
+  --data-dtype DATA_DTYPE
+*/

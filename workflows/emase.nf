@@ -13,6 +13,7 @@ include {GBRS_BAM2EMASE} from "${projectDir}/modules/gbrs/gbrs_bam2emase"
 include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
          GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
 include {GBRS_QUANTIFY} from "${projectDir}/modules/gbrs/gbrs_quantify"
+include {EMASE_RUN} from "${projectDir}/modules/emase/emase_run"
 
 // help if needed
 if (params.help){
@@ -54,8 +55,6 @@ if (params.concat_lanes){
 // if channel is empty give error message and exit
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
-
-
 // main workflow
 workflow EMASE {
     // Step 0: Concatenate Fastq files if required. 
@@ -72,7 +71,7 @@ workflow EMASE {
         }
     }
 
-    // CONCAT READS IN THIS CONTEXT NEEDS TESTING. 
+    // CONCAT READS IN THIS CONTEXT NEEDS TESTING. BOTH SE AND PE. 
 
     BOWTIE(read_ch)
     SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS')
@@ -92,7 +91,11 @@ workflow EMASE {
     }
 
     GBRS_QUANTIFY(gbrs_quantify_input)
+    // NOTE: gbrs quantify is a wrapper around the `run-emase` code.
 
+    EMASE_RUN(gbrs_quantify_input)
+    // CHECK OUTPUT FROM THIS AGAINST GBRS. IS IT THE SAME? 
+    
     // gbrs_compress_pairedReads_input.view()
 
 }

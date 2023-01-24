@@ -32,3 +32,13 @@ process GBRS_COMPRESS {
     touch ${output_name}
     """
 }
+
+/*
+usage: gbrs compress [-h] -i EMASEFILES -o OUTFILE [-c COMPLIB]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -i EMASEFILES, --emase-files EMASEFILES
+  -o OUTFILE
+  -c COMPLIB
+*/

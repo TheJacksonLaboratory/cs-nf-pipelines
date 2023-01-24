@@ -43,3 +43,17 @@ process EMASE_CREATE_HYBRID {
 }
 
 
+/*
+create-hybrid:
+Usage:
+    create-hybrid -F <fasta_files> [ -s <hap_list> -o <out_file> --create-bowtie-index ]
+
+Input:
+    -F <fasta_files> : List of fasta files (comma delimited)
+    -s <hap_list>    : Names of haplotypes to be used instead (comma delimited, in the order of genomes)
+    -o <out_file>    : Output file name (default: './emase.pooled.targets.fa')
+
+Parameters:
+    --help, -h            : shows this help message
+    --create-bowtie-index : builds bowtie1 index
+*/
