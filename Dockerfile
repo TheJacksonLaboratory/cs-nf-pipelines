@@ -4,8 +4,8 @@ ENV PATH="/usr/local/anaconda/bin:$PATH"
 
 RUN apt-get update \
     && apt-get install -y eatmydata \
-    && eatmydata apt-get install -y wget bzip2 \
-      ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 \
+    && eatmydata apt-get install -y build-essential wget bzip2 \
+      ca-certificates libglib2.0-0 libxext6 libsm6 libxrender1 libz-dev \
       git \
     && apt-get clean
 
@@ -24,4 +24,4 @@ RUN cd / && git clone https://github.com/churchill-lab/alntools && cd alntools &
 RUN conda install bowtie
 RUN conda install bowtie2
 RUN cd / && git clone https://github.com/churchill-lab/gbrs.git --branch release/0.1.6 && cd gbrs && python setup.py install
-RUN cd / && git clone https://github.com/churchill-lab/emase-zero.git && cd emase-zero/src && make 
+RUN cd / && git clone https://github.com/MikeWLloyd/emase-zero.git && cd emase-zero/src && make 
