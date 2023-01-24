@@ -9,12 +9,14 @@ process G2GTOOLS_VCF2VCI {
     container 'quay.io/jaxcompsci/g2gtools:0.2.9'
 
     publishDir "${params.pubdir}/g2gtools", pattern: '*.vci.gz*', mode:'copy'
+    publishDir "${params.pubdir}/g2gtools", pattern: '*.errors.vcf', mode:'copy'
 
     input:
     val(strain)
 
     output:
     tuple val(strain), path("*.vci.gz"), path("*vci.gz.tbi"), emit: vci_tbi
+    path("*.errors.vcf"), optional: true
 
     script:
 

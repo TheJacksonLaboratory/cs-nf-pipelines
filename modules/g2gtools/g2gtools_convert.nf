@@ -25,7 +25,7 @@ process G2GTOOLS_CONVERT {
     run_reverse = reverse ? '--reverse' : ''
 
     """
-    /g2gtools/bin/g2gtools convert ${debug_run} -i ${input_file} -c ${vci} ${format} ${run_reverse} -o ${strain}.${params.genome_version}.${format}
+    /g2gtools/bin/g2gtools convert ${debug_run} -i ${input_file} -c ${vci} --format ${format} ${run_reverse} -o ${strain}.${params.genome_version}.${format}
     """
 
     stub:

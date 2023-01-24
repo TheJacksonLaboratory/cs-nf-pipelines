@@ -21,7 +21,7 @@ process G2GTOOLS_GTF2DB {
     debug_run = params.debug ? '--debug' : ''
 
     """
-    /g2gtools/bin/g2gtools gtf2db ${debug_run} -i ${gtf} -c ${vci} -o ${strain}.${params.genome_version}.gtf.db
+    /g2gtools/bin/g2gtools gtf2db ${debug_run} -i ${gtf} -o ${strain}.${params.genome_version}.gtf.db
     """
 
     stub:

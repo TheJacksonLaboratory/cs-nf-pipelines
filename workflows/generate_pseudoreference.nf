@@ -28,8 +28,6 @@ if (params.region != '' && params.bed != '') {
 
 // main workflow
 workflow GENERATE_PSEUDOREFERENCE  {
-    // strain = .toSortedList()
-    // strain
 
     Channel
     .of( params.strain.split(',') )

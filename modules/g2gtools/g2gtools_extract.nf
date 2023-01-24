@@ -22,7 +22,7 @@ process G2GTOOLS_EXTRACT {
     debug_run = params.debug ? '--debug' : ''
 
     """
-    /g2gtools/bin/g2gtools extract ${debug_run} -i ${final_fasta} -db ${db} --${extract_type} -o ${strain}.${params.genome_version}.${extract_type}.fa
+    /g2gtools/bin/g2gtools extract ${debug_run} -i ${final_fasta} -db ${db} --${extract_type} > ${strain}.${params.genome_version}.${extract_type}.fa
     """
 
     stub:
