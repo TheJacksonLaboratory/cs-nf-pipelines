@@ -59,14 +59,12 @@ workflow EMASE {
     if (params.concat_lanes){
         if (params.read_type == 'PE'){
             CONCATENATE_READS_PE(read_ch)
-            CONCATENATE_READS_PE.out.concat_fastq.view()
             temp_read_ch = CONCATENATE_READS_PE.out.concat_fastq
             temp_read_ch.map{it -> [it[0], it[1][0], 'R1']}.set{r1}
             temp_read_ch.map{it -> [it[0], it[1][1], 'R2']}.set{r2}
             read_ch = r1.mix(r2)
         } else if (params.read_type == 'SE'){
             CONCATENATE_READS_SE(read_ch)
-            CONCATENATE_READS_SE.out.concat_fastq.view()
             temp_read_ch = CONCATENATE_READS_SE.out.concat_fastq
             temp_read_ch.map{it -> [it[0], it[1], 'R1']}.set{read_ch}
         }
