@@ -13,6 +13,14 @@ Parameter | Type | Description
 --read_type | <string> | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
 --concat_lanes | <boolean> | Options: false and true. Default: false. If this boolean is specific, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
 
+NOTE: When `--concat_lanes` is used. Unique Sample IDs must be parsed from FASTQ names. The following commands split FASTQ names on a delimiter and keep 'n' positions of the split array. 
+
+--concat_sampleID_delim | <string> | Default: '_'. The delimited to split FASTQ file names. 
+--concat_sampleID_positions | <numeric> | Default: 1. The number of elements to keep after splitting on the chosen delimiter in the sample name. 
+
+Examples: 
+    Given the input file name "SAMPLE_NAME_1_OTHER_STUFF-WeDont_WANT.txt" if this `concat_sampleID_delim` = '_' and `concat_sampleID_positions` = "3" the sample ID would be assigned as `SAMPLE_NAME_1`
+    Given the input file name "SAMPLE_NAME_1_OTHER_STUFF-WeDont_WANT.txt" if this `concat_sampleID_delim` = '-' and `concat_sampleID_positions` = "1" the sample ID would be assigned as `SAMPLE_NAME_1_OTHER_STUFF`
 
 --bowtie_index | /<PATH> | Path to the bowtie index. Include the bowtie prefix in this path (e.g., `/path/to/bowtie.transcripts` where bowtie.transcripts.* are the full set of index files in the directory.  
 --transcripts_info | /<PATH> | A file containing all transcript IDs. NOTE: These IDs must not contain haplotype IDs. This file must also have a 'length' column. Note that 'length' is not used in this context. ONLY IDs are used from this file. Can be obtained from `prepare_emase` workflow (emase.fullTranscripts.info)
