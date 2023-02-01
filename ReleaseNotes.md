@@ -1,5 +1,25 @@
 # RELEASE NOTES
 
+## Release 0.2.1
+
+Added STAR support to RNA-seq pipeline.
+
+### Pipelines Added:
+
+NONE
+
+### Modules Added:
+
+NONE
+
+### Pipeline Changes:
+
+1. RNA-seq pipeline now supports STAR and bowtie2 (default) through the RSEM module.
+
+### Module Changes:
+
+1. RSEM: --rsem_aligner accepts "bowtie2" or "star." The default STAR indices for mouse and human are 100 bp, with alternates suggested in the RNA-seq config file.
+
 ## Release 0.2.0
 
 **NOTE:** This release contains a patch for multi-sample processing. We strongly recommend multi-sample processing done prior to this release should be re-run with v0.2.0+
