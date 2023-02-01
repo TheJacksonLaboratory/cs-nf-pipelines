@@ -53,7 +53,13 @@ if (params.concat_lanes){
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 // downstream resources (only load once so do it here)
-rsem_ref_files = file("${params.rsem_ref_files}/*")
+if (params.rsem_aligner == "bowtie2") {
+  rsem_ref_files = file("${params.rsem_ref_files}/bowtie2/*")
+}
+else if (params.rsem_aligner == "star") {
+  rsem_ref_files = file("${params.rsem_ref_files}/STAR/${params.rsem_star_prefix}/*")
+}
+else error "${params.rsem_aligner} is not valid, use 'bowtie2' or 'star'"
 
 // main workflow
 workflow RNASEQ {
