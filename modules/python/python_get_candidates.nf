@@ -1,4 +1,4 @@
-process RENAME_VCF {
+process GET_CANDIDATES {
   tag "$sampleID"
 
   cpus 1
@@ -8,7 +8,7 @@ process RENAME_VCF {
   container 'python:3.8.10'
 
   input:
-  tuple val(sampleID), val(meta), file(vcf)
+  tuple val(sampleID), file(vcf)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: rename_vcf
@@ -16,11 +16,9 @@ process RENAME_VCF {
   script:
   """
    python \
-  ${projectDir}/bin/sv/rename_vcf.py \
-  ${sampleID}_merge_prep.vcf \
+  ${projectDir}/bin/sv/get_candidates.py \
+  ${sampleID}_start_candidates.vcf\
   ${sampleID}_rename.vcf \
-  ${normal} \
-  ${tumor} \
-  ${tool} 
+  ${sampleID}_candidate_merged_${chrom}.vcf
   """
 }
