@@ -11,7 +11,7 @@ process GET_CANDIDATES {
   tuple val(sampleID), file(vcf)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: rename_vcf
+  tuple val(sampleID), file("*.vcf"), emit: candidate_merged_vcf
 
   script:
   """
