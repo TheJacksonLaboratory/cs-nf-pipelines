@@ -5,7 +5,7 @@ process RENAME_VCF {
   memory 4.GB
   time '04:00:00'
 
-  container 'python:3.8.10'
+  container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
   tuple val(sampleID), val(meta), file(vcf)
