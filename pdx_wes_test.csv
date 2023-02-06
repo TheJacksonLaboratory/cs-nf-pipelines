@@ -1,0 +1,5 @@
+patient,sex,status,sample,lane,fastq_1,fastq_2
+112475,XX,1,112475_105-R_G2U,test_L1,https://pdmdb.cancer.gov/pdm/112475~105-R~G2U~v2.0.2.51.0~WES.R1.FASTQ.gz,https://pdmdb.cancer.gov/pdm/112475~105-R~G2U~v2.0.2.51.0~WES.R2.FASTQ.gz
+112475,XX,1,112475_105-R_G2UN84PK7,test_L1,https://pdmdb.cancer.gov/pdm/112475~105-R~G2UN84PK7~v2.0.2.51.0~WES.R1.FASTQ.gz,https://pdmdb.cancer.gov/pdm/112475~105-R~G2UN84PK7~v2.0.2.51.0~WES.R2.FASTQ.gz
+112475,XX,1,112475_105-R_G2U,test_L2,https://pdmdb.cancer.gov/pdm/112475~105-R~G2U~v2.0.2.51.0~WES.R1.FASTQ.gz,https://pdmdb.cancer.gov/pdm/112475~105-R~G2U~v2.0.2.51.0~WES.R2.FASTQ.gz
+112475,XX,1,112475_105-R_G2UN84PK7,test_L2,https://pdmdb.cancer.gov/pdm/112475~105-R~G2UN84PK7~v2.0.2.51.0~WES.R1.FASTQ.gz,https://pdmdb.cancer.gov/pdm/112475~105-R~G2UN84PK7~v2.0.2.51.0~WES.R2.FASTQ.gz
