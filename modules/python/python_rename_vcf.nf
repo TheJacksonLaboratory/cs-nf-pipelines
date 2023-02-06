@@ -18,7 +18,7 @@ process RENAME_VCF {
    python \
   ${projectDir}/bin/sv/rename_vcf.py \
   ${sampleID}_merge_prep.vcf \
-  --out ${sampleID}_rename.vcf \
+  ${sampleID}_rename.vcf \
   ${normal}
   ${tumor}
   ${tool} 
