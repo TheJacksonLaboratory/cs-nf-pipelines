@@ -11,7 +11,7 @@ process ADD_NYGC_ALLELE_COUNTS_TUMOR {
   tuple val(sampleID), val(meta), file(vcf)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: add_nygc_allele_counts_vcf
+  tuple val(sampleID), file("*.vcf"), emit: add_nygc_allele_counts_pair_vcf
 
   script:
   """
