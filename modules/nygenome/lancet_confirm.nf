@@ -1,4 +1,4 @@
-process LANCET {
+process LANCET_CONFIRM {
   tag "$meta.patient"
 
   cpus = 1
