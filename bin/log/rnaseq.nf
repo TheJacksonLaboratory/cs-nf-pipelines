@@ -32,6 +32,7 @@ ______________________________________________________
 --picard_dict          ${params.picard_dict}
 --ref_flat             ${params.ref_flat}
 --ribo_intervals       ${params.ribo_intervals}
+--pdx                  ${params.pdx}
 
 Project Directory: ${projectDir}
 ______________________________________________________
