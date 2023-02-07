@@ -18,6 +18,7 @@ include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picar
 include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
 include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -85,19 +86,18 @@ workflow RNASEQ {
   QUALITY_STATISTICS(read_ch)
 
   // Step 1a: Xenome if PDX data used.
+  ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
   if (params.pdx){
     // Xenome Classification
     XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+    ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
     // Xenome Read Sort
     XENOME_SORT(XENOME_CLASSIFY.out.xenome_fastq)
-
     rsem_input = XENOME_SORT.out.sorted_fastq
 
-  } else {
-    
+  } else { 
     rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
-
   }
 
 
@@ -123,5 +123,15 @@ workflow RNASEQ {
   agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
   RNA_SUMMARY_STATS(agg_stats)
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 }

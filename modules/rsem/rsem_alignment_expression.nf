@@ -22,6 +22,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   file "*stats"
   file "*results*"
   tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
+  tuple val(sampleID), file("*.stat/*.cnt"), emit: rsem_cnt
   tuple val(sampleID), file("*genes.results"), emit: rsem_genes
   tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
   tuple val(sampleID), file("*.genome.bam"), emit: bam
