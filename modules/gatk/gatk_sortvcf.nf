@@ -8,18 +8,23 @@ process GATK_SORTVCF {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lancet' }", pattern:"*_lancet_merged.vcf.gz", mode:'copy'
+
     input:
     tuple val(sampleID), path(list)
     val(gvcf)
 
     output:
-    tuple val(sampleID), file("*.vcf"), file("*.idx"), emit: vcf_idx
+    tuple val(sampleID), file("*.vcf"), file("*.idx"), emit: vcf_idx, optional: true
+    tuple val(sampleID), file("*_lancet_merged.vcf.gz"), emit: lancet_vcf, optional: true
 
     script:
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
 
     inputs = list.collect { "-I $it" }.join(' ')
+
+    lancet_check = (!!(list[0] =~ /lancet/))
 
     if (gvcf=='gvcf'){
         output_suffix='g.vcf'
@@ -33,5 +38,10 @@ process GATK_SORTVCF {
         -SD ${params.ref_fa_dict} \
         ${inputs} \
         -O ${sampleID}_merged.${output_suffix}
+
+    if [ $lancet_check = true ]; then
+        mv ${sampleID}_merged.${output_suffix} ${sampleID}_lancet_merged.vcf
+        bgzip ${sampleID}_lancet_merged.vcf
+    fi
     """
 }

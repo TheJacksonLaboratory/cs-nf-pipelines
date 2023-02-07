@@ -18,14 +18,16 @@ class Bicseq2Prep():
             
     def match_file(self, row, files):
         for temp_norm in files:
-            if os.path.basename(temp_norm).endswith('_' + str(row.chr) + '.norm.bin.txt'):
+            if os.path.basename(temp_norm).endswith('_' + str(row.chrom_name) + '.norm.bin.txt'):
                 return temp_norm
             
     def prep_pair(self):
         ''' file: tumor--normal.bicseq2.seg.config
         prep fasta-specific but sample independent portion of config file'''
         data = pd.read_csv(self.seg_bicseq2_config, sep='\t')
-        assert ''.join(data.columns.tolist()) == 'chr', 'Error: initial config file should start with one column named chr'
+        # assert ''.join(data.columns.tolist()) == 'chr', 'Error: initial config file should start with one column named chr'
+        assert ''.join(data.columns.tolist()) == 'chrom_name', 'Error: initial config file should start with one column named chrom_name'
+
         data['case'] = data.apply(lambda row: self.match_file(row, 
                                                               files=self.tumor_norms), axis=1)
         data['control'] = data.apply(lambda row: self.match_file(row, 
@@ -45,13 +47,13 @@ def get_args():
     '''
     parser = argparse.ArgumentParser()
     parser.add_argument('--tumor-norms',
-                        help='List of file paths ${tumor}_${chr}.norm.bin.txt '
+                        help='List of file paths ${tumor}_${chrom_name}.norm.bin.txt '
                         ' (Output from Bicseq2Norm ).',
                         required=True,
                         nargs='*'
                         )
     parser.add_argument('--normal-norms',
-                        help='List of file paths ${normal}_${chr}.norm.bin.txt '
+                        help='List of file paths ${normal}_${chrom_name}.norm.bin.txt '
                         ' (Output from Bicseq2Norm ).',
                         required=True,
                         nargs='*'

@@ -21,12 +21,45 @@ include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_norm
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
 include {GATK_SORTVCF as GATK_SORTVCF_GERMLINE;
-         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf"
+         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE;
+         GATK_SORTVCF as GATK_SORTVCF_MUTECT;
+         GATK_SORTVCF as GATK_SORTVCF_LANCET} from "${projectDir}/modules/gatk/gatk_sortvcf"
 include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
 include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
+include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
+include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
+include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
+include {COSMIC_CANCER_RESISTANCE_MUTATION} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations"
+include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
+include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
+include {SNPSIFT_EXTRACT_AND_PARSE} from "${projectDir}/modules/utility_modules/parse_extracted_sv_table"
+include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
+         GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
+include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
+include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutectstats"
+include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
+include {MANTA} from "${projectDir}/modules/illumina/manta"
+include {STRELKA2} from "${projectDir}/modules/illumina/strelka2"
+include {LANCET} from "${projectDir}/modules/nygenome/lancet"
+include {GRIDSS_PREPROCESS} from "${projectDir}/modules/gridss/gridss_preprocess"
+include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
+include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
+include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
+include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
+include {SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_NORMAL;
+         SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_TUMOR} from "${projectDir}/modules/samtools/samtools_stats_insertsize"
+include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_NORMAL;
+         SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_TUMOR} from "${projectDir}/modules/samtools/samtools_filter_unique_reads"
+include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
+         BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_TUMOR} from "${projectDir}/modules/biqseq2/bicseq2_normalize"
+include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
+include {SVABA} from "${projectDir}/modules/svaba/svaba"
+include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
+include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
 // help if needed
 if (params.help){
@@ -93,6 +126,12 @@ workflow SV {
     ch_bam_normal_to_cross = chr_bam_status.normal.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
     ch_bam_tumor_to_cross = chr_bam_status.tumor.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
 
+    GATK_GETSAMPLENAME_NORMAL(ch_bam_normal_to_cross)
+    GATK_GETSAMPLENAME_TUMOR(ch_bam_tumor_to_cross)
+
+    ch_bam_normal_to_cross = ch_bam_normal_to_cross.join(GATK_GETSAMPLENAME_NORMAL.out.sample_name)
+    ch_bam_tumor_to_cross = ch_bam_tumor_to_cross.join(GATK_GETSAMPLENAME_TUMOR.out.sample_name)
+
     // Cross all normal and tumor by patient ID. 
     ch_cram_variant_calling_pair = ch_bam_normal_to_cross.cross(ch_bam_tumor_to_cross)
         .map { normal, tumor ->
@@ -103,9 +142,12 @@ workflow SV {
             meta.sex        = normal[1].sex
             meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
 
-            [meta, normal[2], normal[3], tumor[2], tumor[3]]
+            [normal[0], meta, normal[2], normal[3], normal[4], tumor[2], tumor[3], tumor[4]]
         }
-        // normal[0] is patient ID, normal[1] and tumor[1] are meta info, normal[2] is normal bam, normal[3] is bai. tumor[2] is bam, tumor[3] is bai.
+        // normal[0] is patient ID, 
+        // normal[1] and tumor[1] are meta info
+        // normal[2] is normal bam, normal[3] is bai, normal[4] is read group ID. 
+        // tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
 
     // Step 13: Conpair pileup for T/N
     CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
@@ -134,18 +176,37 @@ workflow SV {
     CONPAIR(conpair_input)
     // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // Step 13: Germline Calling
+    // Step 13: Germline Calling and annotation
     
-    // Read a list of contigs from parameters to provide to GATK as intervals
-    // for HaplotypeCaller variant regions and GenotypeGVCF
-    intervals = Channel
-     .fromPath("${params.chrom_contigs}")
-     .splitCsv(header: false)
-     .map{ row -> tuple(row[0], row[1]) }
+    // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
+    // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
     
+    // Loads paths from a directory, collects into a list, sorts, 
+    // maps to a set with indicies, flattens the map [file, index, file, index ...], 
+    // collates the flattened map into pairs, then remaps to the pairs to tuple
+
+    intervals = Channel.fromPath( params.chrom_intervals+'/*/scattered.interval_list' )
+                .collect()
+                .sort()
+                .map { items -> items.withIndex() }
+                .flatten()
+                .collate(2)
+                .map { item, idx -> tuple( item, idx + 1 ) }
+    // https://stackoverflow.com/a/67084467/18557826
+
     // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
     chrom_channel = ch_bam_normal_to_cross.combine(intervals)
 
+    // Read a list of chromosome names from a parameter. These are provided to several tools. 
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+
+    // Get a list of primary chromosomes and exclude chrM (dropRight(1))
+    chrom_list = chroms.collect().dropRight(1)
+    chrom_list_noY = chrom_list.dropRight(1)
+    
     // Variant calling. 
     GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
@@ -168,6 +229,131 @@ workflow SV {
     // Allele frequency and call refinement filtering. 
     GATK_VARIANTFILTRATION_AF(GATK_FILTER_VARIANT_TRANCHES.out.vcf_idx)
     BCFTOOLS_GERMLINE_FILTER(GATK_VARIANTFILTRATION_AF.out.vcf)
+
+    // Germline annotation - Filtered
+    // 1. SplitMultiAllelicRegions & compress & index
+    BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
+    // 2. vepPublicSvnIndel
+    VEP_GERMLINE(BCFTOOLS_FILTERMULTIALLELIC.out.vcf_idx)
+    // 3. RemoveSpanning
+    BCFTOOLS_REMOVESPANNING(VEP_GERMLINE.out.vcf)
+    // 4. AddCosmic
+    COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
+    // 5. AddCancerResistanceMutations
+    COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
+    // 6. AnnotateId & RenameCsqVcf
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, 'filtered')
+
+    SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
+    SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
+    
+    // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
+    //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
+
+
+
+    // Step 14: Somatic Calling
+
+    // Applies scatter intervals from above to the BQSR bam file
+    somatic_calling_channel = ch_cram_variant_calling_pair.combine(intervals)
+
+    // // Applies scatter intervals from above to the BQSR bam file
+    // somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
+    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chroms'. 
+    // //       Entire chromosomes are scattered. For WGS, this is computationally intensive. 
+    // //       We changed to calling to be done based on the same intervals passed to the germline caller. 
+    // //       These intervals are based on the 'noN' file make by BROAD/GATK. 
+    // //       If complete chromosomes are requried, the above line of code can be uncommented. 
+
+    // Mutect2
+    // STEPS: Call on each chromosome / interval. 
+    //        Prior to 'filtermutectcalls' vcfs must be merged. (GATK best practice) 
+    //        Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
+    //        Merge vcfs and stats must be Nextflow joined prior to 'filtermutectcalls' to avoid samples being confounded. 
+
+    GATK_MUTECT2(somatic_calling_channel)
+    GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
+    GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
+    filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
+    GATK_FILTERMUECTCALLS(filter_mutect_input)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+
+    // Manta
+    MANTA(ch_cram_variant_calling_pair)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // FilterNonpass is used in NYGC with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
+
+    // Strelka2
+    strekla2_input = ch_cram_variant_calling_pair.join(MANTA.out.manta_smallindel_vcf_tbi)
+    STRELKA2(strekla2_input)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+
+    // Lancet
+    // Generate a list of chromosome beds. This is generated in the same manner as the calling `intervals` variable above. 
+    lancet_beds = Channel.fromPath( params.lancet_beds_directory+'/*.bed' )
+                    .collect()
+                    .sort()
+                    .map { items -> items.withIndex() }
+                    .flatten()
+                    .collate(2)
+                    .map { item, idx -> tuple( item, idx + 1 ) }
+    // https://stackoverflow.com/a/67084467/18557826
+
+
+    // Applies scatter intervals from above to the BQSR bam file
+    lancet_calling_channel = ch_cram_variant_calling_pair.combine(lancet_beds)
+    LANCET(lancet_calling_channel)
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    GATK_SORTVCF_LANCET(LANCET.out.lancet_vcf.groupTuple(), 'vcf')
+    //NOTE: :: ::: ::: :: We need to be able to capture this output. 
+
+    // Gridss
+    GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
+    gridss_assemble_input = ch_cram_variant_calling_pair.join(GRIDSS_PREPROCESS.out.gridss_preproc)
+    GRIDSS_ASSEMBLE(gridss_assemble_input)
+    gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
+    GRIDSS_CALLING(gridss_call_input)
+    GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
+    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
+    // gridss somatic filter will need a higher coverage dataset for testing. 
+    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+
+    // BicSeq2
+    SAMTOOLS_STATS_INSERTSIZE_NORMAL(ch_bam_normal_to_cross)
+    SAMTOOLS_STATS_INSERTSIZE_TUMOR(ch_bam_tumor_to_cross)
+
+    SAMTOOLS_FILTER_UNQIUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
+    SAMTOOLS_FILTER_UNQIUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
+
+    biqseq_norm_input_normal = SAMTOOLS_FILTER_UNQIUE_NORMAL.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_NORMAL.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
+    biqseq_norm_input_tumor = SAMTOOLS_FILTER_UNQIUE_TUMOR.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_TUMOR.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
+
+    fasta_files = Channel.fromPath( file(params.ref_fa).parent + '/*_chr*' )
+            .collect()
+    // collect individual chr fasta files. These are located in the same directory as the main reference. 
+    // if the extension of `name_chr#.fa` changes this match will break. 
+    // Can this be made more flexible without requiring another input parameter?
+
+    BICSEQ2_NORMALIZE_NORMAL(biqseq_norm_input_normal, fasta_files)
+    BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
+    // bicseq2 normalize will need a higher coverage dataset for testing. 
+
+    bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output.join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
+    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files. 
+    BICSEQ2_SEG(bicseq2_seg_input)
+
+    // Svaba
+    SVABA(ch_cram_variant_calling_pair)
+
+    // Lumpy
+    LUMPY_SV(ch_cram_variant_calling_pair)
+
+    // Step 15: MSI
+
+    // MSI
+    MSISENSOR2_MSI(ch_bam_tumor_to_cross)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
