@@ -1,41 +1,29 @@
-process BCFTOOLS_FILTERMULTIALLELIC {
-    tag "$sampleID"
+process BCFTOOLS_SPLITMULTIALLELIC {
+  tag "$sampleID"
 
-    cpus = 4
-    memory = 6.GB
-    time = '06:00:00'
+  cpus = 1
+  memory = 6.GB
+  time = '06:00:00'
 
-    container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
+  container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    input:
-    tuple val(sampleID), file(vcf), file(index)
-    val(chrom_list)
+  input:
+  tuple val(sampleID), file(vcf)
 
-    output:
-    tuple val(sampleID), file("*.vcf.gz"), file("*.vcf.gz.tbi"), emit: vcf_idx
+  output:
+  tuple val(sampleID), file("*.vcf"), emit: vcf
 
-    script:
-    
-    listOfChroms = chrom_list.collect { "$it" }.join(',')
+  script:
 
-    """
-    bcftools \
-        norm \
-        -m \
-        -any \
-        --threads ${task.cpus} \
-        --regions ${listOfChroms} \
-        --no-version \
-        -f ${params.ref_fa} \
-        -o ${sampleID}_split.vcf \
-        ${vcf}
-
-    bgzip \
-        -c \
-        ${sampleID}_split.vcf > ${sampleID}_split.vcf.gz
-
-    tabix ${sampleID}_split.vcf.gz
-
-    """
-
+  """
+  bcftools \
+  norm \
+  -m \
+  -any \
+  --threads ${task.cpus} \
+  --no-version \
+  -f ${params.ref_fa} \
+  -o ${sampleID}_split.vcf \
+  ${vcf}
+"""
 }

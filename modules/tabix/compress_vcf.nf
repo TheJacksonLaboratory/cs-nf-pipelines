@@ -1,4 +1,4 @@
-process COMPRESS_SOMATIC_VCFs {
+process COMPRESS_VCF {
   tag tag "$sampleID"
 
   cpus = 1

@@ -12,8 +12,8 @@ process STRELKA2 {
   tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), file(candidateSmallIndels), file(candidateSmallIndels_tbi)
 
   output:
-  tuple val(sampleID), file("*indels.vcf.gz"), file("*indels.vcf.gz.tbi"), emit: strelka_indel_vcf_tbi
-  tuple val(sampleID), file("*snvs.vcf.gz"), file("*snvs.vcf.gz.tbi"), emit: strelka_snv_vcf_tbi
+  tuple val(sampleID), file("*indels.vcf.gz"), file("*indels.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka'), emit: strelka_indel_vcf_tbi
+  tuple val(sampleID), file("*snvs.vcf.gz"), file("*snvs.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka'), emit: strelka_snv_vcf_tbi
 
   script:
 

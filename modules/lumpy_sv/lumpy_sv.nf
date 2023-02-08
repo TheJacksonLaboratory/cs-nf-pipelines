@@ -13,7 +13,7 @@ process LUMPY_SV {
   tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*_lumpy_sv.vcf"), emit: lumpy_sv_vcf
+  tuple val(sampleID), file("*_lumpy_sv.vcf"), val(meta), val(normal_name), val(tumor_name), val('lumpy'), emit: lumpy_sv_vcf
 
   script:
   """

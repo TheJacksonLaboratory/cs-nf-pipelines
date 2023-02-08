@@ -20,16 +20,16 @@ include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor
 include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
-include {GATK_SORTVCF as GATK_SORTVCF_GERMLINE;
-         GATK_SORTVCF as GATK_SORTVCF_GENOTYPE;
-         GATK_SORTVCF as GATK_SORTVCF_MUTECT;
+include {GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GERMLINE;
+         GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf_germline"
+include {GATK_SORTVCF as GATK_SORTVCF_MUTECT;
          GATK_SORTVCF as GATK_SORTVCF_LANCET} from "${projectDir}/modules/gatk/gatk_sortvcf"
 include {GATK_GENOTYPE_GVCF} from "${projectDir}/modules/gatk/gatk_genotype_gvcf"
 include {GATK_CNNSCORE_VARIANTS} from "${projectDir}/modules/gatk/gatk_cnnscorevariants"
 include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_filtervarianttranches"
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
-include {BCFTOOLS_FILTERMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+include {BCFTOOLS_SPLITMULTIALLELIC_REGIONS} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic_regions"
 include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
@@ -52,14 +52,23 @@ include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_fi
 include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
 include {SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_NORMAL;
          SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_TUMOR} from "${projectDir}/modules/samtools/samtools_stats_insertsize"
-include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_NORMAL;
-         SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNQIUE_TUMOR} from "${projectDir}/modules/samtools/samtools_filter_unique_reads"
+include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNIQUE_NORMAL;
+         SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNIQUE_TUMOR} from "${projectDir}/modules/samtools/samtools_filter_unique_reads"
 include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
          BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_TUMOR} from "${projectDir}/modules/biqseq2/bicseq2_normalize"
 include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
 include {SVABA} from "${projectDir}/modules/svaba/svaba"
 include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
+
+include {RENAME_METADATA} from "${projectDir}/modules/python/python_rename_metadata"
+include {MERGE_PREP} from "${projectDir}/modules/python/python_merge_prep"
+include {RENAME_VCF} from "${projectDir}/modules/python/python_rename_vcf"
+include {COMPRESS_VCF} from "${projectDir}/modules/tabix/compress_vcf"
+include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
+include {BCFTOOLS_SPLITMULTIALLELIC} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic"
+include {SPLIT_MNV} from "${projectDir}/modules/python/python_split_mnv"
+// include {GATK_MERGESORTVCF} from "${projectDir}/modules/gatk/gatk_merge_sort_vcf"
 
 // help if needed
 if (params.help){
@@ -232,9 +241,9 @@ workflow SV {
 
     // Germline annotation - Filtered
     // 1. SplitMultiAllelicRegions & compress & index
-    BCFTOOLS_FILTERMULTIALLELIC(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
+    BCFTOOLS_SPLITMULTIALLELIC_REGIONS(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
     // 2. vepPublicSvnIndel
-    VEP_GERMLINE(BCFTOOLS_FILTERMULTIALLELIC.out.vcf_idx)
+    VEP_GERMLINE(BCFTOOLS_SPLITMULTIALLELIC_REGIONS.out.vcf_idx)
     // 3. RemoveSpanning
     BCFTOOLS_REMOVESPANNING(VEP_GERMLINE.out.vcf)
     // 4. AddCosmic
@@ -267,26 +276,34 @@ workflow SV {
 
     // Mutect2
     // STEPS: Call on each chromosome / interval. 
-    //        Prior to 'filtermutectcalls' vcfs must be merged. (GATK best practice) 
-    //        Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged. (GATK best practice) 
+    //        Prior to 'filtermutectcalls' vcfs must be merged (GATK best practice). 
+    //             NOTE: The group and map statement ensures that VCFs are organzied by sampleID, and carry  and toolID is maintained through the process. 
+    //        Prior to 'filtermutectcalls' "stats" files from mutect2 must be merged (GATK best practice).
     //        Merge vcfs and stats must be Nextflow joined prior to 'filtermutectcalls' to avoid samples being confounded. 
 
     GATK_MUTECT2(somatic_calling_channel)
-    GATK_SORTVCF_MUTECT(GATK_MUTECT2.out.vcf.groupTuple(), 'vcf')
+
+    sort_merge_input_mutect2VCF = GATK_MUTECT2.out.vcf
+                                  .groupTuple()
+                                  .map {  sampleID, vcf, meta, normal, tumor, tool -> tuple( sampleID, vcf, meta.unique(), normal.unique(), tumor.unique(), tool.unique() )  }
+    
+    GATK_SORTVCF_MUTECT(sort_merge_input_mutect2VCF, 'vcf')
     GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
+    
     filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_idx.join(GATK_MERGEMUTECTSTATS.out.stats)
+
     GATK_FILTERMUECTCALLS(filter_mutect_input)
-    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // additional NYGC steps not used: add commands to VCF
 
     // Manta
     MANTA(ch_cram_variant_calling_pair)
-    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // additional NYGC steps not used: add commands to VCF
     // FilterNonpass is used in NYGC with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
 
     // Strelka2
     strekla2_input = ch_cram_variant_calling_pair.join(MANTA.out.manta_smallindel_vcf_tbi)
     STRELKA2(strekla2_input)
-    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // additional NYGC steps not used: add commands to VCF
 
     // Lancet
     // Generate a list of chromosome beds. This is generated in the same manner as the calling `intervals` variable above. 
@@ -303,9 +320,13 @@ workflow SV {
     // Applies scatter intervals from above to the BQSR bam file
     lancet_calling_channel = ch_cram_variant_calling_pair.combine(lancet_beds)
     LANCET(lancet_calling_channel)
-    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
-    GATK_SORTVCF_LANCET(LANCET.out.lancet_vcf.groupTuple(), 'vcf')
-    //NOTE: :: ::: ::: :: We need to be able to capture this output. 
+    // additional NYGC steps not used: add commands to VCF
+
+    sort_merge_input_lancetVCF = LANCET.out.vcf
+                                .groupTuple()
+                                .map {  sampleID, vcf, meta, normal, tumor, tool -> tuple( sampleID, vcf, meta.unique(), normal.unique(), tumor.unique(), tool.unique() )  }
+    
+    GATK_SORTVCF_LANCET(sort_merge_input_lancetVCF, 'vcf')
 
     // Gridss
     GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
@@ -316,19 +337,19 @@ workflow SV {
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
     GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
     // gridss somatic filter will need a higher coverage dataset for testing. 
-    // additional NYGC steps not used: add commands to VCF, and reorder VCF columns. 
+    // additional NYGC steps not used: add commands to VCF 
 
     // BicSeq2
     SAMTOOLS_STATS_INSERTSIZE_NORMAL(ch_bam_normal_to_cross)
     SAMTOOLS_STATS_INSERTSIZE_TUMOR(ch_bam_tumor_to_cross)
 
-    SAMTOOLS_FILTER_UNQIUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
-    SAMTOOLS_FILTER_UNQIUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
+    SAMTOOLS_FILTER_UNIQUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
+    SAMTOOLS_FILTER_UNIQUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
 
-    biqseq_norm_input_normal = SAMTOOLS_FILTER_UNQIUE_NORMAL.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_NORMAL.out.read_length_insert_size)
-    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
-    biqseq_norm_input_tumor = SAMTOOLS_FILTER_UNQIUE_TUMOR.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_TUMOR.out.read_length_insert_size)
-    // sampleID, individual_chr_seq_files, read_ID, read_length, insert_size. 
+    biqseq_norm_input_normal = SAMTOOLS_FILTER_UNIQUE_NORMAL.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_NORMAL.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, meta, read_ID, read_length, insert_size. 
+    biqseq_norm_input_tumor = SAMTOOLS_FILTER_UNIQUE_TUMOR.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_TUMOR.out.read_length_insert_size)
+    // sampleID, individual_chr_seq_files, meta, read_ID, read_length, insert_size. 
 
     fasta_files = Channel.fromPath( file(params.ref_fa).parent + '/*_chr*' )
             .collect()
@@ -340,20 +361,279 @@ workflow SV {
     BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
     // bicseq2 normalize will need a higher coverage dataset for testing. 
 
-    bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output.join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
-    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files. 
-    BICSEQ2_SEG(bicseq2_seg_input)
+    bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output
+                            .join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
+                            // .groupTuple()
+                            .map{sampleID, norm_files, meta_1, norm_readID, tumor_files, meta_2, tumor_readID -> tuple(sampleID, norm_files, tumor_files, meta_1, norm_readID, tumor_readID)}
+    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files, metadata, norm_readID, tumor_readID. 
 
+    BICSEQ2_SEG(bicseq2_seg_input)
+    
+    
     // Svaba
     SVABA(ch_cram_variant_calling_pair)
+    // NOTE: SVABA is not in calling_wkf.wdl or used in the 'merge' steps. 
 
     // Lumpy
     LUMPY_SV(ch_cram_variant_calling_pair)
+    // NOTE: LUMPY is not in calling_wkf.wdl or used in the 'merge' steps. 
 
-    // Step 15: MSI
-
-    // MSI
+    // // Step 15: MSI
     MSISENSOR2_MSI(ch_bam_tumor_to_cross)
+    
+
+
+
+
+    /*
+    Manta
+    MANTA.out.manta_somaticsv_tbi
+
+    Strelka_SV
+    STRELKA2.out.strelka_snv_vcf_tbi
+
+    Strelka_INDEL
+    STRELKA2.out.strelka_indel_vcf_tbi
+
+    Mutect2
+    GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi
+
+    Lancet
+    GATK_SORTVCF_LANCET.out.lancet_vcf
+
+    Gridss
+    GRIDSS_SOMATIC_FILTER.out.gridss_filtered_bgz
+
+    Bicseq2
+    BICSEQ2_SEG.out.bicseq2_sv_calls
+    */
+
+
+    MANTA.out.manta_somaticsv_tbi.view()
+
+
+    STRELKA2.out.strelka_snv_vcf_tbi.view()
+
+
+    STRELKA2.out.strelka_indel_vcf_tbi.view()
+
+
+    GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi.view()
+
+
+    GATK_SORTVCF_LANCET.out.lancet_vcf_tbi.view()
+
+
+    GRIDSS_SOMATIC_FILTER.out.gridss_filtered_bgz.view()
+
+
+    BICSEQ2_SEG.out.bicseq2_sv_calls.view()
+
+
+    // MANTA.out.manta_somaticsv_tbi.concat( b, a ).view()
+
+
+    // for each file: 
+    // rename metadata.
+    // mergeprep or mergeprep_support
+    // rename vcf
+    // compress vcf
+    // index vcf
+    // split multiallelic
+    // split mnv
+    // gatkmergesortvcf
+
+    // for all files:
+    // merge callers
+    // start candidates
+    // get candidates
+    // vcf to bed
+    // lancet wgs regional 
+    // compress lancet vcf
+    // index lancet vcf
+    // compress candidate vcf
+    // index candidate vcf
+    // intersect vcfs
+    
+    // rename lancet intersect vcfs metadata
+    // mergeprep support lancet intersect vcfs
+
+
+    // Step 16: Merge Somatic Calls
+    // MERGE_PREP_MANTA(MANTA.out.manta_candidatesv_tbi, 'manta')
+    // MERGE_PREP_STRELKA_SNV()
+    // MERGE_PREP_STRELKA_INDEL()
+    // MERGE_PREP_MUTECT2()
+    // MERGE_PREP_LANCET()
+
+            //     if (library == 'WGS') {
+            //     call mergeVcf.MergeVcf as wgsMergeVcf {
+            //         input:
+            //             external = external,
+            //             preMergedPairVcfInfo = preMergedPairVcfInfo,
+            //             referenceFa = referenceFa,
+            //             listOfChroms = listOfChroms,
+            //             intervalListBed = intervalListBed,
+            //             ponFile = ponWGSFile,
+            //             germFile = germFile
+
+            //     }
+            // }
+
+
+            // version 1.0
+
+            // import "prep_merge_vcf_wkf.wdl" as prepMergeVcf
+            // import "merge_callers_wkf.wdl" as mergeCallers
+            // import "merge_chroms_wkf.wdl" as mergeChroms
+            // import "../wdl_structs.wdl"
+
+            // workflow MergeVcf {
+            //     # command
+            //     #   Call variants in BAMs
+            //     #   merge and filter raw VCFs
+            //     #   annotate
+            //     input {
+            //         Boolean external = false
+            //         PreMergedPairVcfInfo preMergedPairVcfInfo
+            //         IndexedReference referenceFa
+            //         Array[String]+ listOfChroms
+                    
+            //         # merge callers
+            //         File intervalListBed
+            //         File ponFile
+            //         IndexedVcf germFile
+            //     }
+
+            //     call prepMergeVcf.PrepMergeVcf as filteredMantaSVPrepMergeVcf {
+            //         input:
+            //             callerVcf=preMergedPairVcfInfo.filteredMantaSV,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             tool='manta',
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa
+                        
+            //     }
+                
+            //     call prepMergeVcf.PrepMergeVcf as strelka2SnvPrepMergeVcf {
+            //         input:
+            //             callerVcf=preMergedPairVcfInfo.strelka2Snv,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             tool='strelka2',
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa
+                        
+            //     }
+                
+            //     call prepMergeVcf.PrepMergeVcf as strelka2IndelPrepMergeVcf {
+            //         input:
+            //             callerVcf=preMergedPairVcfInfo.strelka2Indel,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             tool='strelka2',
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa
+                        
+            //     }
+                
+            //     call prepMergeVcf.PrepMergeVcf as mutect2PrepMergeVcf {
+            //         input:
+            //             callerVcf=preMergedPairVcfInfo.mutect2,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             tool='mutect2',
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa
+                        
+            //     }
+                
+            //     call prepMergeVcf.PrepMergeVcf as lancetPrepMergeVcf {
+            //         input:
+            //             callerVcf=preMergedPairVcfInfo.lancet,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             tool='lancet',
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa
+                        
+            //     }
+                
+            //     call mergeCallers.MergeCallers {
+            //         input:
+            //             external=external,
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             listOfChroms=listOfChroms,
+            //             intervalListBed=intervalListBed,
+            //             referenceFa=referenceFa,
+            //             normalFinalBam=preMergedPairVcfInfo.normalFinalBam,
+            //             tumorFinalBam=preMergedPairVcfInfo.tumorFinalBam,
+            //             ponFile=ponFile,
+            //             germFile=germFile,
+            //             allVcfCompressed=[filteredMantaSVPrepMergeVcf.preppedVcf, 
+            //                 strelka2SnvPrepMergeVcf.preppedVcf,
+            //                 strelka2IndelPrepMergeVcf.preppedVcf,
+            //                 mutect2PrepMergeVcf.preppedVcf,
+            //                 lancetPrepMergeVcf.preppedVcf]
+                    
+            //     }
+                
+            //     call mergeChroms.MergeChroms {
+            //         input:
+            //             tumor=preMergedPairVcfInfo.tumor,
+            //             normal=preMergedPairVcfInfo.normal,
+            //             pairName=preMergedPairVcfInfo.pairId,
+            //             referenceFa=referenceFa,
+            //             finalChromVcf=MergeCallers.finalChromVcf,
+                        
+            //     }
+                
+            //     output {
+            //         File mergedVcf = MergeChroms.unannotatedVcf
+            //     }
+            // }
+
+
+
+            // PreMergedPairVcfInfo preMergedPairVcfInfo = object {
+            //     pairId : pairRelationship.pairId,
+            //     filteredMantaSV : Calling.filteredMantaSV,
+            //     strelka2Snv : Calling.strelka2Snv,
+            //     strelka2Indel : Calling.strelka2Indel,
+            //     mutect2 : Calling.mutect2,
+            //     lancet : Calling.lancet,
+            //     tumor : pairRelationship.tumorId,
+            //     normal : pairRelationship.normalId,
+            //     tumorFinalBam : Preprocess.finalBam[tumorGetIndex.index],
+            //     normalFinalBam : Preprocess.finalBam[normalGetIndex.index]
+
+
+            // File filteredMantaSV = mantaFilteredReorderVcfColumns.orderedVcf
+
+
+
+
+            // PairRawVcfInfo pairRawVcfInfo = object {
+            //     pairId : pairRelationship.pairId,
+            //     filteredMantaSV : Calling.filteredMantaSV,
+            //     strelka2Snv : Calling.strelka2Snv,
+            //     strelka2Indel : Calling.strelka2Indel,
+            //     mutect2 : Calling.mutect2,
+            //     lancet : Calling.lancet,
+            //     gridssVcf : Calling.gridssVcf,
+            //     bicseq2Png : Calling.bicseq2Png,
+            //     bicseq2 : Calling.bicseq2,
+            //     tumor : pairRelationship.tumorId,
+            //     normal : pairRelationship.normalId,
+            //     tumorFinalBam : Preprocess.finalBam[tumorGetIndex.index],
+            //     normalFinalBam : Preprocess.finalBam[normalGetIndex.index]
+
+            // }
+
+            // }
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
@@ -362,6 +642,7 @@ workflow SV {
 }
 
 
+// nextflow /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/main.nf -profile sumner --workflow sv --gen_org human --pubdir /projects/omics_share/meta/benchmarking/testing/sv -w /projects/omics_share/meta/benchmarking/testing/work --csv_input /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/sv_input.csv -resume -stub
 
 // Function to extract information (meta data + file(s)) from csv file(s)
 // https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084

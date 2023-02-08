@@ -15,10 +15,10 @@ process RENAME_METADATA {
 
   script:
   """
-   python \
+  python \
   ${projectDir}/bin/sv/rename_metadata.py \
-  ${callerVcf} \
-  ${sampleID}_rename_metadata.vcf \
+  ${vcf} \
+  ${vcf.baseName}_rename_metadata.vcf \
   ${tool} 
   """
 }

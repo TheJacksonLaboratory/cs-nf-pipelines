@@ -1,4 +1,4 @@
-process GATK_SORTMERGEVCF {
+process GATK_SORTVCF_GERMLINE {
 
     tag "$sampleID"
 
@@ -10,19 +10,28 @@ process GATK_SORTMERGEVCF {
 
     input:
     tuple val(sampleID), path(list)
+    val(gvcf)
 
     output:
-    tuple val(sampleID), file("*.vcf"), file("*.idx"), emit: vcf_idx
-    tuple val(sampleID), file("*merged_sort.vcf"), emit: merge_sort_vcf, 
+    tuple val(sampleID), file("*.vcf"), file("*.idx"), emit: vcf_idx, optional: true
 
     script:
+    String my_mem = (task.memory-1.GB).toString()
+    my_mem =  my_mem[0..-4]
 
     inputs = list.collect { "-I $it" }.join(' ')
+
+    if (gvcf=='gvcf'){
+        output_suffix='g.vcf'
+    }
+    else{
+        output_suffix='vcf'
+    }
 
     """
     gatk --java-options "-Xmx${my_mem}G" SortVcf  \
         -SD ${params.ref_fa_dict} \
         ${inputs} \
-        -O ${sampleID}_merged_sort.vcf
+        -O ${sampleID}_merged.${output_suffix}
     """
 }
