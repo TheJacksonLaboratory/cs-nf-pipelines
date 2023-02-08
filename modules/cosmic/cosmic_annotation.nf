@@ -16,20 +16,13 @@ process COSMIC_ANNOTATION {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  if ( vcf =~ 'germline') {
-    output_suffix = 'germline_vep_cosmic_annotated.vcf'
-  }
-
-  if (vcf =~ 'somatic') {
-    output_suffix = 'somatic_vep_cosmic_annotated.vcf'
-  }
   if (params.workflow == 'sv')
     """
     python \
     ${projectDir}/bin/sv/add_cancer_gene_census.py \
     ${params.cosmic} \
     ${vcf} \
-    ${sampleID}_${output_suffix}
+    ${sampleID}_germline_vep_cosmic_annotated.vcf
     """
   else
     """

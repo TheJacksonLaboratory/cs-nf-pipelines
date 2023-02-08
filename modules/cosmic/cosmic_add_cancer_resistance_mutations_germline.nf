@@ -1,4 +1,4 @@
-process COSMIC_CANCER_RESISTANCE_MUTATION {
+process COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE {
     tag "$sampleID"
 
     cpus 1
@@ -16,21 +16,12 @@ process COSMIC_CANCER_RESISTANCE_MUTATION {
     tuple val(sampleID), file("*.vcf"), emit: vcf
 
     script:
-
-    if ( vcf =~ 'germline') {
-        output_suffix = 'germline_vep_cosmic_annotated.vcf'
-    }
-
-    if (vcf =~ 'somatic') {
-        output_suffix = 'somatic_vep_cosmic_annotated.vcf'
-    }
-
     """
     python \
     ${projectDir}/bin/sv/add_cancer_resistance_mutations.py \
     ${params.cosmic_cancer_resistance_muts} \
     ${vcf} \
-    ${sampleID}_germline_vep_${output_suffix}_cancerResitMut_annotated.vcf
+    ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated.vcf
     """
 }
 

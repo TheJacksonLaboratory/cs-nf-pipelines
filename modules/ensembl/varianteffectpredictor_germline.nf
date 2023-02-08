@@ -1,4 +1,4 @@
-process VEP {
+process VEP_GERMLINE {
   tag "$sampleID"
 
   cpus = 4
@@ -11,7 +11,7 @@ process VEP {
 
   input:
   tuple val(sampleID), file(vcf), file(idx)
-  val(output_suffix)
+
   output:
   tuple val(sampleID), file("*_vep_annotated.vcf"), emit: vcf
 
@@ -20,7 +20,7 @@ process VEP {
   """
   vep \
   --input_file ${vcf} \
-  --output_file ${sampleID}_${output_suffix}_vep_annotated.vcf \
+  --output_file ${sampleID}_germline_vep_annotated.vcf \
   --fork ${task.cpus} \
   --buffer_size 50000 \
   --format vcf \
