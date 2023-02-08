@@ -61,6 +61,12 @@ include {SVABA} from "${projectDir}/modules/svaba/svaba"
 include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
+// SOMATIC ANNOTATION METHODS, commented here until merge methods implemented
+//include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
+//include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
+//include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic_add_cancer_resistance_mutations_somatic"
+//include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
+
 // help if needed
 if (params.help){
     help()
@@ -358,6 +364,15 @@ workflow SV {
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+
+    // Step NO: Somatic Annotation
+
+    // This method has an input tuple of the form
+    // [val(sampleID), file(vcf), file(idx), val(meta), val(normal_name), val(tumor_name)]
+    //VEP_SOMATIC(MERGED.out.vcf)
+    //COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
+    //COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
+    //SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf)
 
 }
 
