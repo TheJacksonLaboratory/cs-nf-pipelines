@@ -1,27 +1,25 @@
 process LANCET_CONFIRM {
-  tag "$meta.patient"
+  tag "$sampleID"
 
-  cpus = 1
+  cpus = 8
   memory = 15.GB
   time = '10:00:00'
 
   container 'quay.io/jaxcompsci/lancet:v1.1.0'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'lancet' }", pattern:".vcf", mode:'copy'
+  // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lancet' }", pattern:".vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(normal_bam), file(normal_bai), val(meta)
-  tuple val(sampleID), file(tumor_bam), file(tumor_bai), val(meta)
+  tuple val(sampleID), file(bed), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(chrom)
 
   output:
-  tuple val(sampleID), file("*_lancet.merged.vcf"), emit: lancet_merge_vcf
+  tuple val(sampleID), file("*.vcf"), val(meta), val(normal_name), val(tumor_name), val(chrom), emit: vcf
 
   script:
-
   """
-  lancet \ 
+  lancet \
   --tumor ${tumor_bam} \
   --normal ${normal_bam} \
-  --bed ${chrom_bed} \
+  --bed ${bed} \
   --ref ${params.ref_fa} \
   --min-k 11 \
   --low-cov 1 \
@@ -30,8 +28,8 @@ process LANCET_CONFIRM {
   --min-alt-count-tumor 3 \
   --min-vaf-tumor 0.04 \
   --padding 250 \
-  --window-size 2000
+  --window-size 2000 \
   --num-threads ${task.cpus} \
-  > ${sampleID}_lancet.merged.vcf
+  > ${sampleID}_lancet_merged_${chrom}.vcf
   """
 }

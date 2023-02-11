@@ -1,4 +1,4 @@
-process MERGE_COLUMNS_PAIR {
+process MERGE_COLUMNS {
   tag "$sampleID"
 
   cpus 1
@@ -8,18 +8,22 @@ process MERGE_COLUMNS_PAIR {
   container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), TBD
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: single_column_chrom_pair_vcf
 
   script:
+
+  normal = meta.normal_id
+  tumor = meta.tumor_id
+
   """
    python \
   ${projectDir}/bin/sv/merge_columns.py \
-  ${supportedChromVcf} \
+  ${vcf} \
   ${sampleID}_single_column_${chrom}.vcf \
-  ${tumor} \
-  ${normal}
+  ${normal} \
+  ${tumor}
   """
 }

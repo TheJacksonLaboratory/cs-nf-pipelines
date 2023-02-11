@@ -1,4 +1,4 @@
-process SPLIT_MNV {
+process REMOVE_CONTIG {
   tag "$sampleID"
 
   cpus 1
@@ -11,14 +11,13 @@ process SPLIT_MNV {
   tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name), val(tool)
 
   output:
-  tuple val(sampleID), file("*.vcf"), val(meta), val(normal_name), val(tumor_name), val(tool), emit: split_mnv_vcf
+  tuple val(sampleID), file("*.vcf"), val(meta), val(normal_name), val(tumor_name), val(tool), emit: remove_contig_vcf
 
   script:
   """
   python \
-  ${projectDir}/bin/sv/split_mnv.py \
+  ${projectDir}/bin/sv/remove_contig.py \
   ${vcf} \
-  ${vcf.baseName}_splitMNV.vcf \
-  ${tool}
+  ${vcf.baseName}_removeContig.vcf
   """
 }

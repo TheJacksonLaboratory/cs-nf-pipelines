@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#	USAGE: python merge_prep.py
+#	USAGE: python merge_columns.py
 #   DESCRIPTION:
 ################################################################################
 ##################### COPYRIGHT ################################################
@@ -297,9 +297,9 @@ def main():
     #  ==========================
     vcf_in = sys.argv[1]
     vcf_out_file = sys.argv[2]
-    tumor = sys.argv[3]
-    normal = sys.argv[4]
-    
+    normal = sys.argv[3]
+    tumor = sys.argv[4]
+
     assert os.path.isfile(vcf_in), 'Failed to find caller VCF call file :' + vcf_in
     #  ==========================
     #  Run prep

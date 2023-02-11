@@ -1,22 +1,24 @@
-process COMPRESS_VCF {
-  tag tag "$sampleID"
+process COMPRESS_INDEX_VCF {
+  tag "$sampleID"
 
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
 
-  container 'quay.io/quay.io/biocontainers/tabix:1.11--hdfd78af_0'
+  container 'quay.io/biocontainers/tabix:1.11--hdfd78af_0'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name), val(tool)
 
   output:
-  tuple val(sampleID), file("*.vcf.gz"), emit: compressed_vcf
+  tuple val(sampleID), file("*.vcf.gz"), file("*.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val(tool), emit: compressed_vcf_tbi
 
   """
   bgzip \
   -c \
-  ${vcf}.gz \
+  ${vcf} \
   > ${vcf}.gz
+
+  tabix ${vcf}.gz
   """
 }

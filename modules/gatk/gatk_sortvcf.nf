@@ -12,11 +12,9 @@ process GATK_SORTVCF {
 
     input:
     tuple val(sampleID), path(list), val(meta), val(normal_name), val(tumor_name), val(tool)
-    val(gvcf)
 
     output:
-    tuple val(sampleID), file("*.vcf"), file("*.idx"), val("${meta[0]}"), val("${normal_name[0]}"), val("${tumor_name[0]}"), val("${tool[0]}"), emit: vcf_idx, optional: true
-    tuple val(sampleID), file("*_lancet_merged.vcf.gz"), file("*.gz.tbi"), val("${meta[0]}"), val("${normal_name[0]}"), val("${tumor_name[0]}"), val("${tool[0]}"), emit: lancet_vcf_tbi, optional: true
+    tuple val(sampleID), file("*.vcf.gz"), file("*.tbi"), val(meta), val(normal_name), val(tumor_name), val(tool), emit: vcf_tbi
 
     script:
     String my_mem = (task.memory-1.GB).toString()
@@ -24,25 +22,26 @@ process GATK_SORTVCF {
 
     inputs = list.collect { "-I $it" }.join(' ')
 
-    lancet_check = (!!(list[0] =~ /lancet/))
+    if (tool == 'lancet_support') {
+        chrom_extract = (list =~ /\w+merged_(chr.+)_h.+/)
+        tool_name = "lancet_support_"+chrom_extract[0][1]
+        tool = chrom_extract[0][1]
+        // for final sort merge of lancet confirm, set 'tool_name' to include chrom.
+        // set tool to chrom. These steps are required for tuple build as input to final merge. 
 
-    if (gvcf=='gvcf'){
-        output_suffix='g.vcf'
-    }
-    else{
-        output_suffix='vcf'
+    } else {
+        tool_name = tool
     }
 
     """
     gatk --java-options "-Xmx${my_mem}G" SortVcf  \
         -SD ${params.ref_fa_dict} \
         ${inputs} \
-        -O ${sampleID}_merged.${output_suffix}
-
-    if [ $lancet_check = true ]; then
-        mv ${sampleID}_merged.${output_suffix} ${sampleID}_lancet_merged.vcf
-        bgzip ${sampleID}_lancet_merged.vcf
-        tabix ${sampleID}_lancet_merged.vcf.gz
-    fi
+        -O ${sampleID}_${tool_name}_merged.vcf
+        
+    bgzip ${sampleID}_${tool_name}_merged.vcf
+    tabix ${sampleID}_${tool_name}_merged.vcf.gz  
+    
     """
 }
+

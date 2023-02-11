@@ -8,17 +8,16 @@ process GET_CANDIDATES {
   container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), val(chrom)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: candidate_merged_vcf
+  tuple val(sampleID), file("*.vcf"), val(meta), val(chrom), emit: vcf
 
   script:
   """
    python \
   ${projectDir}/bin/sv/get_candidates.py \
-  ${sampleID}_start_candidates.vcf\
-  ${sampleID}_rename.vcf \
+  ${vcf} \
   ${sampleID}_candidate_merged_${chrom}.vcf
   """
 }

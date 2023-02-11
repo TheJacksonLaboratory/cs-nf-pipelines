@@ -3,6 +3,14 @@
 # DESCRIPTION: Print a VCF file with the sample order indicated in the 3rd
 # and 4th arguments
 
+
+# ## MWL NOTE: 
+# This script requires the header and input 'tumor/normal' names in the 3rd and 4th arg to match. 
+#       If you pass names NOT present in the header, it will simply emit the file AS IS.
+#       The script DOES NOT inform the user of if a change has been made in the sample order. 
+#       NOTE ALSO: if the header already contains the strings 'TUMOR' and 'NORMAL,
+#                  'TUMOR and NORMAL are RENAMED to string provided in 3rd and 4th args. 
+
 import sys
 import pandas as pd
 import shutil

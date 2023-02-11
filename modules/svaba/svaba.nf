@@ -37,7 +37,8 @@ process SVABA {
     -z on
   """
 }
-
+// NOTE: VCF Output header has the BAM file names as 'sampleID' e.g.,: 
+// #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	test-test_realigned_BQSR.bam	test-test2_realigned_BQSR.bam
 
 // Usage: svaba run -t <BAM/SAM/CRAM> -G <reference> -a myid [OPTIONS]
 

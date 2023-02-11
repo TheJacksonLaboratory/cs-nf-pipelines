@@ -8,16 +8,16 @@ process VCF_TO_BED {
   container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), val(chrom)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: candidate_merged_bed
+  tuple val(sampleID), file("*.bed"), val(meta), val(chrom), emit: bed
 
   script:
   """
    python \
   ${projectDir}/bin/sv/vcf_to_bed.py \
-  ${sampleID}_candidate_merged_${chrom}.vcf \
+  ${vcf} \
   | bedtools \
   merge \
   > ${sampleID}_candidate_merged_${chrom}.bed 
