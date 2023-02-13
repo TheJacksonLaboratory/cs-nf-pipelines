@@ -1,4 +1,4 @@
-process GATK_SORTMERGEVCF {
+process GATK_SORTVCF_SOMATIC {
 
     tag "$sampleID"
 
@@ -9,13 +9,14 @@ process GATK_SORTMERGEVCF {
     container 'broadinstitute/gatk:4.2.4.1'
 
     input:
-    tuple val(sampleID), path(list)
+    tuple val(sampleID), path(list), val(meta)
 
     output:
-    tuple val(sampleID), file("*.vcf"), file("*.idx"), emit: vcf_idx
-    tuple val(sampleID), file("*merged_sort.vcf"), emit: merge_sort_vcf, 
+    tuple val(sampleID), file("*.vcf"), file("*.idx"), val(meta), emit: vcf_idx, optional: true
 
     script:
+    String my_mem = (task.memory-1.GB).toString()
+    my_mem =  my_mem[0..-4]
 
     inputs = list.collect { "-I $it" }.join(' ')
 
@@ -23,6 +24,6 @@ process GATK_SORTMERGEVCF {
     gatk --java-options "-Xmx${my_mem}G" SortVcf  \
         -SD ${params.ref_fa_dict} \
         ${inputs} \
-        -O ${sampleID}_merged_sort.vcf
+        -O ${sampleID}_mnv_final_filtered_merged.vcf
     """
 }

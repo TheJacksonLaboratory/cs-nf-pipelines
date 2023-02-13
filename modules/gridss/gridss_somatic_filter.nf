@@ -14,11 +14,11 @@ process GRIDSS_SOMATIC_FILTER {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gridss' }", pattern: "*_gridss_sv_somaticFiltered.vcf.bgz", mode:'copy'
 
     input:
-    tuple val(sampleID), path(vcf)
+    tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name)
     path(gridss_pon)
 
     output:
-    tuple val(sampleID), path('*_gridss_sv_somaticFiltered.vcf.bgz'), emit: gridss_filtered_bgz
+    tuple val(sampleID), path('*_gridss_sv_somaticFiltered.vcf.bgz'), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('gridss'), emit: gridss_filtered_bgz
 
     script:
 

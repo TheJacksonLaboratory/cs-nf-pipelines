@@ -12,7 +12,7 @@ process LANCET {
   tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), path(bed), val(index)
 
   output:
-  tuple val(sampleID), file("*_lancet.vcf"), emit: lancet_vcf
+  tuple val(sampleID), file("*_lancet.vcf"), val(meta), val(normal_name), val(tumor_name), val('lancet'), emit: vcf
 
   script:
   """

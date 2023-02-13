@@ -12,11 +12,11 @@ process GRIDSS_CHROM_FILTER {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gridss' }", pattern: "*_gridss_sv_unfiltered_chroms.vcf", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), path(vcf)
+    tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name)
     val(chroms)
 
     output:
-    tuple val(sampleID), path('*_gridss_sv_unfiltered_chroms.vcf'), emit: gridss_chrom_vcf
+    tuple val(sampleID), path('*_gridss_sv_unfiltered_chroms.vcf'), val(meta), val(normal_name), val(tumor_name), emit: gridss_chrom_vcf
     
     script:
     chrom_list = chroms.collect { "$it" }.join(' ')

@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#	USAGE: python merge_prep.py
+#	USAGE: python merge_columns.py
 #   DESCRIPTION:
 ################################################################################
 ##################### COPYRIGHT ################################################
@@ -40,7 +40,11 @@ class Naming(object):
         '''
             Make list of tumor-only and normal-only sample names
             NOTE: N/T order is reversed by bcftools merge.
+
+            MWL NOTE: This does not appear to be true! Sanity check is needed with real data. 
+
         '''
+        print(self.get_originals(self.samples[0]))
         if self.get_originals(self.samples[0]) == self.normal:
             self.tumor_samples = self.samples[1::2]
             self.normal_samples = self.samples[::2]
@@ -55,8 +59,9 @@ class Naming(object):
             get original sample names. NOTE: N/T order is
             reversed by bcftools merge if alpha order is reversed.
         '''
-        return '_'.join(sample.split('_')[1:])
-
+        return '_'.join(sample.split('_')[1:]).replace('indel_', '').replace('support_','').replace('sv_','')
+        # // MWL NOTE: replace statements added to remove additions to sample names that were made to clarify what tools calls originated from.
+        #   i.e., lancet_support_<sampleID>, strelka2_sv_<sampleID>, strelka2_indel_<sampleID>. 
 
 class Variant(Naming):
     '''
@@ -297,9 +302,11 @@ def main():
     #  ==========================
     vcf_in = sys.argv[1]
     vcf_out_file = sys.argv[2]
-    tumor = sys.argv[3]
-    normal = sys.argv[4]
+    normal = sys.argv[3]
+    tumor = sys.argv[4]
     
+    # NOTE: Order was changed to be consistent with prior scripts. 
+
     assert os.path.isfile(vcf_in), 'Failed to find caller VCF call file :' + vcf_in
     #  ==========================
     #  Run prep
