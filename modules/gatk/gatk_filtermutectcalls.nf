@@ -14,11 +14,10 @@ process GATK_FILTERMUECTCALLS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
 
   input:
-  tuple val(sampleID), file(vcf), file(tbi), file(stats)
+  tuple val(sampleID), path(vcf), path(tbi), val(meta), val(normal_name), val(tumor_name), val(tool), path(stats)
 
   output:
-  tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz"), emit: vcf
-  tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz.tbi"), emit: tbi
+  tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz"), file("*_mutect2_somatic.filtered.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('mutect2'), emit: mutect2_vcf_tbi
   tuple val(sampleID), file("*.filteringStats.tsv"), emit: stats
 
   script:

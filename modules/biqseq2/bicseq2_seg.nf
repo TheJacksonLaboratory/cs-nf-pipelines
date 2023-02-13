@@ -9,11 +9,11 @@ process BICSEQ2_SEG {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'biqseq2' }", pattern:"{*.txt,*.png}", mode:'copy'
 
   input:
-  tuple val(sampleID), file(individual_normal_norm_bin_files), file(individual_tumor_norm_bin_files)
+  tuple val(sampleID), file(individual_normal_norm_bin_files), file(individual_tumor_norm_bin_files), val(meta), val(normal_name), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*.bicseq2.png"), emit: bicseq2_png
-  tuple val(sampleID), file("*.bicseq2.txt"), emit: bicseq2_sv_calls
+  tuple val(sampleID), file("*.bicseq2.png"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('bicseq2'), emit: bicseq2_png
+  tuple val(sampleID), file("*.bicseq2.txt"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('bicseq2'), emit: bicseq2_sv_calls
 
   script:
 

@@ -179,7 +179,8 @@ def main():
                         required=True)
     parser.add_argument('-t', '--tool',
                         dest='tool',
-                        choices=['strelka2',
+                        choices=['strelka2_sv',
+                                 'strelka2_indel',
                                  'mutect2',
                                  'svaba',
                                  'lancet',
