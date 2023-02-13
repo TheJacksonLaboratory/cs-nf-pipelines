@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#	USAGE: python filter_vcf.py GRM_FILE VCF_FILE OUT_FILE
+#	USAGE: python vcf_filter.py GRM_FILE VCF_FILE OUT_FILE
 #   DESCRIPTION:
 ################################################################################
 ##################### COPYRIGHT ################################################
