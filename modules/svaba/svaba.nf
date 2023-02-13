@@ -14,11 +14,11 @@ process SVABA {
   tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*svaba.germline.indel.vcf.gz"), emit: svaba_germline_indel_vcf
-  tuple val(sampleID), file("*svaba.germline.sv.vcf.gz"), emit: svaba_germline_sv_vcf
-  tuple val(sampleID), file("*svaba.somatic.indel.vcf.gz"), emit: svaba_somatic_indel_vcf
-  tuple val(sampleID), file("*svaba.somatic.sv.vcf.gz"), emit: svaba_somatic_sv_vcf
-  tuple val(sampleID), file("*svaba.bps.txt.gz"), emit: svaba_unfiltered_variants
+  tuple val(sampleID), file("*svaba.germline.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_indel_vcf
+  tuple val(sampleID), file("*svaba.germline.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_sv_vcf
+  tuple val(sampleID), file("*svaba.somatic.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_indel_vcf
+  tuple val(sampleID), file("*svaba.somatic.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_sv_vcf
+  tuple val(sampleID), file("*svaba.bps.txt.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_unfiltered_variants
   tuple val(sampleID), file("*svaba.contigs.bam"), emit: svaba_contigs_bam
   tuple val(sampleID), file("*svaba.discordant.txt.gz"), emit: svaba_discordants
   tuple val(sampleID), file("*svaba.log"), emit: svaba_log
@@ -37,7 +37,8 @@ process SVABA {
     -z on
   """
 }
-
+// NOTE: VCF Output header has the BAM file names as 'sampleID' e.g.,: 
+// #CHROM	POS	ID	REF	ALT	QUAL	FILTER	INFO	FORMAT	test-test_realigned_BQSR.bam	test-test2_realigned_BQSR.bam
 
 // Usage: svaba run -t <BAM/SAM/CRAM> -G <reference> -a myid [OPTIONS]
 

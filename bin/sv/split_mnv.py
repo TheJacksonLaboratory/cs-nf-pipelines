@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#	USAGE: python merge_prep.py
+#	USAGE: python split_mnv.py
 #   DESCRIPTION:
 ################################################################################
 ##################### COPYRIGHT ################################################

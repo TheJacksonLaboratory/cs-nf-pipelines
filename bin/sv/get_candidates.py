@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#	USAGE: python filter_pon.py GRM_FILE VCF_FILE OUT_FILE
+#	USAGE: python get_candidates.py VCF_FILE OUT_FILE
 #   DESCRIPTION:
 ################################################################################
 ##################### COPYRIGHT ################################################
@@ -63,7 +63,7 @@ def main():
     '''
         Only print calls that are:
         1) Not already called by Lancet
-        2) Only supported by on caller
+        2) Only supported by on caller #MWL NOTE: on caller = one caller? 
         3) Not Supported by a support caller
     '''
     vcf_file = sys.argv[1]
