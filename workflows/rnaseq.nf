@@ -7,6 +7,8 @@ include {param_log} from "${projectDir}/bin/log/rnaseq"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
@@ -16,6 +18,7 @@ include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picar
 include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
 include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -52,6 +55,10 @@ if (params.concat_lanes){
 // if channel is empty give error message and exit
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
+if (params.pdx && params.gen_org == 'mouse') {
+    exit 1, "PDX analysis was specified with `--pdx`. `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
+}
+
 // downstream resources (only load once so do it here)
 if (params.rsem_aligner == "bowtie2") {
   rsem_ref_files = file("${params.rsem_ref_files}/bowtie2/*")
@@ -78,8 +85,24 @@ workflow RNASEQ {
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
 
+  // Step 1a: Xenome if PDX data used.
+  ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+  if (params.pdx){
+    // Xenome Classification
+    XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+    ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
+
+    // Xenome Read Sort
+    XENOME_SORT(XENOME_CLASSIFY.out.xenome_fastq)
+    rsem_input = XENOME_SORT.out.sorted_fastq
+
+  } else { 
+    rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
+  }
+
+
   // Step 2: RSEM
-  RSEM_ALIGNMENT_EXPRESSION(QUALITY_STATISTICS.out.trimmed_fastq, rsem_ref_files)
+  RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files)
 
   //Step 3: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
@@ -100,5 +123,15 @@ workflow RNASEQ {
   agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
   RNA_SUMMARY_STATS(agg_stats)
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 }
