@@ -5,7 +5,7 @@ process GET_CANDIDATES {
   memory 4.GB
   time '04:00:00'
 
-  container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
+  container 'quay.io/jaxcompsci/bedtools-python3:2.26.0'
 
   input:
   tuple val(sampleID), file(vcf), val(meta), val(chrom)
