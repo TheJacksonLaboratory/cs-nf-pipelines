@@ -1,4 +1,4 @@
-process ADD_NYGC_ALLELE_COUNTS_TUMOR {
+process ADD_NYGC_ALLELE_COUNTS {
   tag "$sampleID"
 
   cpus 1
@@ -8,10 +8,10 @@ process ADD_NYGC_ALLELE_COUNTS_TUMOR {
   container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
-  tuple val(sampleID), val(meta), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), file(normal_bam), file(normal_bai), file(tumor_bam), file(tumor_bai), val(chrom)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: add_nygc_allele_counts_pair_vcf
+  tuple val(sampleID), file("*.vcf"), val(meta), val(chrom), emit: vcf
 
   script:
   """
@@ -19,7 +19,7 @@ process ADD_NYGC_ALLELE_COUNTS_TUMOR {
   ${projectDir}/bin/sv/add_nygc_allele_counts_to_vcf.py \
   -t ${tumor_bam} \
   -n ${normal_bam} \
-  -v ${tumor}_single_column_${chrom}.vcf \
+  -v ${vcf} \
   -b 10 \
   -m 10 \
   -o ${sampleID}_pre_count_${chrom}.vcf

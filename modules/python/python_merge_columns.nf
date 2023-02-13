@@ -8,10 +8,10 @@ process MERGE_COLUMNS {
   container 'quay.io/jaxcompsci/bedtools-python2:2.26.0'
 
   input:
-  tuple val(sampleID), file(vcf), val(meta), TBD
+  tuple val(sampleID), file(vcf), file(tbi), val(meta), val('empty_name'), val('empty_name'), val(chrom)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: single_column_chrom_pair_vcf
+  tuple val(sampleID), file("*.vcf"), val(meta), val(chrom), emit: mergeColumn_vcf
 
   script:
 
@@ -27,3 +27,7 @@ process MERGE_COLUMNS {
   ${tumor}
   """
 }
+  /*
+  NOTE: This script will take 'tumor' and 'normal' names and match string based on a simple split on '_'. 
+        Sample names are currently <tool>_<tumor_name> or <tool>_<normal_name>. This script merged based on the index[1] of split('_'). 
+  */

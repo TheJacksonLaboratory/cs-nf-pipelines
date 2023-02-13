@@ -46,7 +46,7 @@ include {LANCET} from "${projectDir}/modules/nygenome/lancet"
 include {GATK_SORTVCF as GATK_SORTVCF_MUTECT;
          GATK_SORTVCF as GATK_SORTVCF_LANCET;
          GATK_SORTVCF as GATK_SORTVCF_TOOLS;
-         GATK_SORTVCF as GATK_SORTVCF_TOOLS_LANCET} from "${projectDir}/modules/gatk/gatk_sortvcf"
+         GATK_SORTVCF as GATK_SORTVCF_TOOLS_LANCET} from "${projectDir}/modules/gatk/gatk_sortvcf_somatic_tools"
 include {GRIDSS_PREPROCESS} from "${projectDir}/modules/gridss/gridss_preprocess"
 include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
 include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
@@ -68,7 +68,7 @@ include {RENAME_METADATA;
 include {MERGE_PREP;
          MERGE_PREP as MERGE_PREP_LANCET} from "${projectDir}/modules/python/python_merge_prep"
 include {RENAME_VCF;
-         RENAME_VCF as RENAME_VCF_LANCET} from "${projectDir}/modules/python/python_rename_vcf"
+         RENAME_VCF as RENAME_VCF_LANCET;} from "${projectDir}/modules/python/python_rename_vcf"
 include {COMPRESS_INDEX_VCF;
          COMPRESS_INDEX_VCF as COMPRESS_INDEX_VCF_LANCET;
          COMPRESS_INDEX_VCF as COMPRESS_INDEX_VCF_REGION_LANCET} from "${projectDir}/modules/tabix/compress_vcf"
@@ -85,10 +85,19 @@ include {GET_CANDIDATES} from "${projectDir}/modules/python/python_get_candidate
 include {VCF_TO_BED} from "${projectDir}/modules/python/python_vcf_to_bed"
 include {LANCET_CONFIRM} from "${projectDir}/modules/nygenome/lancet_confirm"
 include {COMPRESS_INDEX_VCF_REGION;
-         COMPRESS_INDEX_VCF_REGION as COMPRESS_INDEX_VCF_ALL_CALLERS;} from "${projectDir}/modules/tabix/compress_vcf_region"
+         COMPRESS_INDEX_VCF_REGION as COMPRESS_INDEX_VCF_ALL_CALLERS;
+         COMPRESS_INDEX_VCF_REGION as COMPRESS_INDEX_VCF_MERGED} from "${projectDir}/modules/tabix/compress_vcf_region"
 include {BCFTOOLS_INTERSECTVCFS} from "${projectDir}/modules/bcftools/bcftools_intersect_lancet_candidates"
 
 include {MERGE_COLUMNS} from "${projectDir}/modules/python/python_merge_columns"
+include {ADD_NYGC_ALLELE_COUNTS} from "${projectDir}/modules/python/python_add_nygc_allele_counts"
+include {ADD_FINAL_ALLELE_COUNTS} from "${projectDir}/modules/python/python_add_final_allele_counts"
+include {FILTER_PON} from "${projectDir}/modules/python/python_filter_pon"
+include {FILTER_VCF} from "${projectDir}/modules/python/python_filter_vcf"
+include {SNV_TO_MNV_FINAL_FILTER} from "${projectDir}/modules/python/python_snv_to_mnv_final_filter"
+
+include {GATK_SORTVCF_SOMATIC} from "${projectDir}/modules/gatk/gatk_sortvcf_somatic_merge"
+include {REORDER_VCF_COLUMNS} from "${projectDir}/modules/python/python_reorder_vcf_columns"
 
 // help if needed
 if (params.help){
@@ -544,90 +553,56 @@ workflow SV {
     // 8. Sort VCF. 
     GATK_SORTVCF_TOOLS_LANCET(REMOVE_CONTIG.out.remove_contig_vcf)
 
-    // ** Merge lancet confirmed back to all merged callers. 
+    // ** Merge lancet confirmed back to all merged callers. Compress and index merged calls.  
     allCalls_lancetConfirm_merge_input = COMPRESS_INDEX_VCF_ALL_CALLERS.out.compressed_vcf_tbi
                                          .join(GATK_SORTVCF_TOOLS_LANCET.out.vcf_tbi, by: [0,6])
                                          .map{sampleID, chrom, vcf, tbi, meta, empty_name, empty_name2, vcf2, tbi2, meta2, normal_name, tumor_name -> tuple( sampleID, [vcf, vcf2], [tbi, tbi2], meta, chrom )}
     // BCFTOOLS_MERGE Requires an input tuple as follows: [val(sampleID), file(vcf), file(idx), val(meta), val(chrom)]
     // Join the output streams on sampleID and chrom, and then map to the require tuple structure. Note that [vcf, vcf2] makes a list that is understoon by the module. 
 
-    allCalls_lancetConfirm_merge_input.view()
-
     BCFTOOLS_MERGECALLERS_FINAL(allCalls_lancetConfirm_merge_input)
-
-    BCFTOOLS_MERGECALLERS_FINAL.out.vcf.view()
+    COMPRESS_INDEX_VCF_MERGED(BCFTOOLS_MERGECALLERS_FINAL.out.vcf)
     
     // ** Manipulation of VCF into final file to be passed to annotation modules. 
-
     // 1. Merge Columns. 
     //    See script merge_columns.py for the three features used in merge (script docs provided by original dev).
-    // MERGE_COLUMNS(BCFTOOLS_MERGECALLERS_FINAL.out.vcf)
+    MERGE_COLUMNS(COMPRESS_INDEX_VCF_MERGED.out.compressed_vcf_tbi)
+    //  NOTE: !! !! !! The merge and re-arrangment require sanity checks. 
+    
+    // 2. Add Allele Count to VCF.
+    //    "Runs pileup on tumor and normal bam files to compute allele counts for bi-allelic SNV and Indel variants in VCF file and adds pileup format columns to the VCF file.""
+    addAlleleCounts_confirm_input = MERGE_COLUMNS.out.mergeColumn_vcf                         
+                           .combine(ch_cram_variant_calling_pair, by: 0)
+                           .map{sampleID, vcf, meta, chrom, meta2, normal_bam, normal_bai, normal_name, tumor_bam, tumor_bai, tumor_name -> tuple( sampleID, vcf, meta, normal_bam, normal_bai, tumor_bam, tumor_bai, chrom )  }
+    ADD_NYGC_ALLELE_COUNTS(addAlleleCounts_confirm_input)
 
-        // THIS SCRIPT NEEDS TUMOR AND NORMAL NAMES...WHAT ARE THOSE NAMES? ARE WE JUST REDEFINING THEM, OR IS THE SCRIPT DOING SOMETHING WITH THE CURRENT TEXT?
-        // I WILL NEED TO TEST THE BEHAVIOR OF THIS SCRIPT.
+    // 3. Add Final Allele Counts to VCF
+    ADD_FINAL_ALLELE_COUNTS(ADD_NYGC_ALLELE_COUNTS.out.vcf)
+    // NOTE: !! !! !! Sanity check is needed. Based on the addition of '_indel' and '_sv' and '_support' to strelka2 and lancet call names. 
 
+    // 4. Filter VCF based on PON
+    FILTER_PON(ADD_FINAL_ALLELE_COUNTS.out.vcf)
 
+    // 5. Filter VCF based on gnomad and "ALL_GRCh38_sites"
+    FILTER_VCF(FILTER_PON.out.vcf)
 
-
-
-
-
-    // MWL NOTE: THE STEPS STAY SCATTERED ON CHROM THROUGH THE END OF THIS PROCESS> 
-    //     #  =================================================================
-    //     #                     Merge columns
-    //     #  =================================================================
-
-    //     call mergeVcf.MergeColumns {
-    //         input:
-    //             chrom = chrom,
-    //             tumor = tumor,
-    //             normal = normal,
-    //             pairName = pairName,
-    //             supportedChromVcf = lancetMergeCallers.mergedChromVcf
-    //     }
-
-    //     call mergeVcf.AddNygcAlleleCountsToVcf {
-    //         input:
-    //             chrom = chrom,
-    //             pairName = pairName,
-    //             columnChromVcf = MergeColumns.columnChromVcf,
-    //             normalFinalBam = normalFinalBam,
-    //             tumorFinalBam = tumorFinalBam
-    //     }
-
-    //     call mergeVcf.AddFinalAlleleCountsToVcf {
-    //         input:
-    //             chrom = chrom,
-    //             pairName = pairName,
-    //             preCountsChromVcf = AddNygcAlleleCountsToVcf.preCountsChromVcf
-    //     }
-
-    //     call mergeVcf.FilterPon {
-    //         input:
-    //             chrom = chrom,
-    //             pairName = pairName,
-    //             countsChromVcf = AddFinalAlleleCountsToVcf.countsChromVcf,
-    //             ponFile = ponFile
-    //     }
-
-    //     call mergeVcf.FilterVcf {
-    //         input:
-    //             chrom = chrom,
-    //             pairName = pairName,
-    //             ponOutFile = FilterPon.ponOutFile,
-    //             germFile = germFile
-    //     }
-
-    //     call mergeVcf.SnvstomnvsCountsbasedfilterAnnotatehighconf {
-    //         input:
-    //             chrom = chrom,
-    //             pairName = pairName,
-    //             filteredOutFile = FilterVcf.filteredOutFile
-    //     }
-
-    // }
+    // 6. "SnvstomnvsCountsbasedfilterAnnotatehighconf" 
+    //    Parses file and converts adjacent SNVs to MNVs if they have they match the MNV_ID and called_by fields.
+    SNV_TO_MNV_FINAL_FILTER(FILTER_VCF.out.vcf)
 
 
+    // ** Collect and Merge Chroms. 
+
+    chrom_merge_input = SNV_TO_MNV_FINAL_FILTER.out.vcf
+                        .groupTuple()
+                        .map{sampleID, vcf, meta, chrom -> tuple( sampleID, vcf, meta.unique()[0] )  }
+                        // Collect scattered chroms, remap to tuple without chrom names. 
+
+    GATK_SORTVCF_SOMATIC(chrom_merge_input)
+    REORDER_VCF_COLUMNS(GATK_SORTVCF_SOMATIC.out.vcf_idx)
+    // output tuple = val(sampleID), path("*_mergePrep.vcf"), val(meta). 
+    // meta = [patient:test, normal_id:test, tumor_id:test2, sex:XX, id:test2_vs_test] 
+    //         This named list can be accessed in the script section prior to """ via calls like: meta.patient
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
