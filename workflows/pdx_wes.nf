@@ -56,6 +56,7 @@ include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
 include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
 
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -250,54 +251,52 @@ workflow PDX_WES {
     GATK_MUTECT2(mutect2_caller_input)
     GATK_FILTERMUECTCALLS(GATK_MUTECT2.out.vcf_tbi_stats)
 
+    // Step 8: Variant Filtration
+    // SNP
+    GATK_SELECTVARIANTS_SNP(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'SNP')
 
-    // // Step 8: Variant Filtration
-    // // SNP
-    // select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
-    // GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+    var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+    GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
-    // var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
-    // GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
+    // INDEL
+    GATK_SELECTVARIANTS_INDEL(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'INDEL')
 
-    // // INDEL
-    // select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
-    // GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+    var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+    GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
-    // var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
-    // GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
+    // Step 9: Post Variant Calling Processing - Part 1
+    // SNP
+    COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
+    SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
+    SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
+    SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
 
-    // // Step 9: Post Variant Calling Processing - Part 1
-    // // SNP
-    // COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-    // SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
-    // SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
-    // SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
+    // INDEL
+    COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+    SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
+    SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
+    SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
-    // // INDEL
-    // COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
-    // SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
-    // SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
-    // SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
+    // Step 10: Post Variant Calling Processing - Part 2
+    vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+    GATK_MERGEVCF(vcf_files)
 
-    // // Step 10: Post Variant Calling Processing - Part 2
-    // vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
-    // GATK_MERGEVCF(vcf_files)
+    SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
 
-    // SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
+    agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
 
-    // agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
+    // Step 11: Aggregate Stats
+    AGGREGATE_STATS(agg_stats)
 
-    // // Step 11: Aggregate Stats
-    // AGGREGATE_STATS(agg_stats)
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(GATK_FILTERMUECTCALLS.out.stats.collect{it[1]}.ifEmpty([]))
 
-    // multiQC files. 
-    //XENOME_CLASSIFY.out.xenome_stats 
-    // GATK_FILTERMUECTCALLS.out.stats
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 
 }
-
-
-
-
-
-
