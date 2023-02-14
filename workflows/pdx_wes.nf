@@ -56,6 +56,14 @@ param_log()
 if (params.csv_input) {
 
     ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
+    
+    if (params.read_type == 'PE'){
+        ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    } else if (params.read_type == 'SE') {
+        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    }
 
 } else if (params.concat_lanes){
   
@@ -87,10 +95,9 @@ if (params.csv_input) {
 
 }
 
-// nextflow /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/main.nf -profile sumner --workflow pdx_wes --gen_org human --download_data --pubdir /projects/compsci/omics_share/meta/benchmarking/pdx_test -w /projects/compsci/omics_share/meta/benchmarking/pdx_test/work --csv_input /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/pdx_wes_test.csv -resume
-
-
-// add check and log statements to say 'Workflow was provided CSV input manifest. The settings: concat_lanes, sample_folder, pattern, extension are ignored.'
+if (params.gen_org == 'mouse') {
+    exit 1, "PDX workflow was called; however, `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
+}
 
 // main workflow
 workflow PDX_WES {
@@ -111,7 +118,14 @@ workflow PDX_WES {
         }
         .mix()
     }
+    /* 
+        remap the data to individual R1 / R2 tuples. 
+        These individual tuples are then mixed to pass individual files to the downloader. 
+        R1 vs. R2 is maintained in the mix. Order is irrelavent here as data are grouped
+        by sampleID downstream. 
+    */
 
+    // Download files. 
     ARIA_DOWNLOAD(aria_download_input)
 
     concat_input = ARIA_DOWNLOAD.out.file
@@ -132,27 +146,34 @@ workflow PDX_WES {
                             pass:  it[1] == 1
                         }
     /* 
-        remap the output to exclude lane from meta. 
-        The number of lanes in the grouped lane list per sample is used to determine if concatenation is needed. 
-        The branch statement determines if concat is needed or if the sample is passed to the next step. 
+        remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_num: R1|R2.
+        The number of lanes in the grouped data is used to determine if concatenation is needed. 
+        The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
     */
 
     no_concat_samples = concat_input.pass
                         .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
     /* 
-        this map statement delists the single fastq samples (i.e., non-concat samples)
+        this delists the single fastq samples (i.e., non-concat samples).
     */
 
+    // Concatenate samples as needed. 
     CONCATENATE_READS_SAMPLESHEET(concat_input.concat)
 
     read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
     .mix(no_concat_samples)
     .groupTuple(by: [0,2])
     .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
-    .view()
 
     read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
     read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+    /*
+        Mix concatenation files, with non-concat files. 'mix' allows for, all, some, or no files to have 
+        gone through concatenation. 
+
+        Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
+        do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
+    */
 
   }
 
@@ -166,19 +187,19 @@ workflow PDX_WES {
     }
   }
 
-  // // Step 1: Qual_Stat
+//   // Step 1: Qual_Stat
 //   QUALITY_STATISTICS(read_ch)
 
-  // // Step 2: Get Read Group Information
-  // READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+//   // Step 2: Get Read Group Information
+//   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
-  // // Step 3: BWA-MEM Alignment
-  // bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-  // BWA_MEM(bwa_mem_mapping)
+//   // Step 3: BWA-MEM Alignment
+//   bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+//   BWA_MEM(bwa_mem_mapping)
 
-  // // Step 4: Variant Preprocessing - Part 1
-  // PICARD_SORTSAM(BWA_MEM.out.sam)
-  // PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+//   // Step 4: Variant Preprocessing - Part 1
+//   PICARD_SORTSAM(BWA_MEM.out.sam)
+//   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // // If Human: Step 5-10
   // if (params.gen_org=='human'){
