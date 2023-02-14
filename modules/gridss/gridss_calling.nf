@@ -13,7 +13,7 @@ process GRIDSS_CALLING {
     tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(gridss_assembled)
 
     output:
-    tuple val(sampleID), path('*_gridss_sv.vcf.gz'), emit: gridss_vcf
+    tuple val(sampleID), path('*_gridss_sv.vcf.gz'), val(meta), val(normal_name), val(tumor_name), emit: gridss_vcf
 
     script:
     String my_mem = (task.memory-1.GB).toString()

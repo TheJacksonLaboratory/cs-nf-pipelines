@@ -14,7 +14,7 @@ process MANTA {
   output:
   tuple val(sampleID), file("*candidateSmallIndels.vcf.gz"), file("*candidateSmallIndels.vcf.gz.tbi"), emit: manta_smallindel_vcf_tbi
   tuple val(sampleID), file("*diploidSV.vcf.gz"), file("*diploidSV.vcf.gz.tbi"), emit: manta_diploidsv_tbi
-  tuple val(sampleID), file("*somaticSV.vcf.gz"), file("*somaticSV.vcf.gz.tbi"), emit: manta_somaticsv_tbi
+  tuple val(sampleID), file("*somaticSV.vcf.gz"), file("*somaticSV.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('manta'), emit: manta_somaticsv_tbi
   tuple val(sampleID), file("*candidateSV.vcf.gz"), file("*candidateSV.vcf.gz.tbi"), emit: manta_candidatesv_tbi
 
 
