@@ -10,19 +10,40 @@ include {ARIA_DOWNLOAD} from "${projectDir}/modules/utility_modules/aria_downloa
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
+include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
-include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
-include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
-include {COSMIC_ANNOTATION;
-        COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
-        COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
+
+include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
+
+include {GATK_VARIANTFILTRATION;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
+
+include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
+
+include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
+include {GATK_SELECTVARIANTS;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
+
+include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2_tumorOnly"
+include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_tumorOnly"
+
+include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2_tumorOnly"
+
+include {COSMIC_ANNOTATION;
+         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
+         COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
+
 include {SNPEFF;
          SNPEFF as SNPEFF_SNP;
          SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
@@ -31,19 +52,10 @@ include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
-include {GATK_HAPLOTYPECALLER;
-         GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
-include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
-include {GATK_VARIANTFILTRATION;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
-include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
-include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
-include {GATK_SELECTVARIANTS;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
-include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
+include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
+
+include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 
 // help if needed
 if (params.help){
@@ -225,12 +237,19 @@ workflow PDX_WES {
     collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
     PICARD_COLLECTHSMETRICS(collect_metrics)
 
-    // // Step 7: Variant Calling
-    // haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-    // GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
+    // Step 8: MSI
+    MSISENSOR2_MSI(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai))
 
-    // haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-    // GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
+    // Step 9: Get sample names
+    GATK_GETSAMPLENAME(collect_metrics)
+
+    // ** Variant Calling
+    mutect2_caller_input = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai).join(GATK_GETSAMPLENAME.out.sample_name)
+    
+    // Step 10: Mutect2
+    GATK_MUTECT2(mutect2_caller_input)
+    GATK_FILTERMUECTCALLS(GATK_MUTECT2.out.vcf_tbi_stats)
+
 
     // // Step 8: Variant Filtration
     // // SNP
@@ -273,6 +292,7 @@ workflow PDX_WES {
 
     // multiQC files. 
     //XENOME_CLASSIFY.out.xenome_stats 
+    // GATK_FILTERMUECTCALLS.out.stats
 
 }
 
