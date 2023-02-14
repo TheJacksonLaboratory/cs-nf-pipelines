@@ -5,9 +5,11 @@ nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/wes.nf"
 include {param_log} from "${projectDir}/bin/log/wes.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {ARIA_DOWNLOAD} from "${projectDir}/modules/utility_modules/aria_download"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -55,9 +57,6 @@ if (params.csv_input) {
 
     ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
 
-    ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
-    ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
-
 } else if (params.concat_lanes){
   
   if (params.read_type == 'PE'){
@@ -72,6 +71,8 @@ if (params.csv_input) {
                 .groupTuple()
                 .map{t-> [t[0], t[1].flatten()]}
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 } else {
   
@@ -81,24 +82,79 @@ if (params.csv_input) {
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 }
 
 // nextflow /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/main.nf -profile sumner --workflow pdx_wes --gen_org human --download_data --pubdir /projects/compsci/omics_share/meta/benchmarking/pdx_test -w /projects/compsci/omics_share/meta/benchmarking/pdx_test/work --csv_input /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/pdx_wes_test.csv -resume
 
-// if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+
+// add check and log statements to say 'Workflow was provided CSV input manifest. The settings: concat_lanes, sample_folder, pattern, extension are ignored.'
 
 // main workflow
 workflow PDX_WES {
   // Step 0: Concatenate Fastq files if required. 
 
   if (params.download_data){
-    ARIA_DOWNLOAD(ch_input_sample)
-    read_ch = ARIA_DOWNLOAD.out.fastq
-  }
+    if (params.read_type == 'PE') {
+        aria_download_input = ch_input_sample
+        .multiMap { it ->
+            R1: tuple(it[0], it[1], 'R1', it[2])
+            R2: tuple(it[0], it[1], 'R2', it[3])
+        }
+        .mix()
+    } else {
+        aria_download_input = ch_input_sample
+        .multiMap { it ->
+            R1: tuple(it[0], it[1], 'R1', it[2])
+        }
+        .mix()
+    }
 
-  // LEVERAGE THE LANE METADATA TO MERGE. 
+    ARIA_DOWNLOAD(aria_download_input)
+
+    concat_input = ARIA_DOWNLOAD.out.file
+                        .map { it ->
+                            def meta = [:]
+                            meta.sample   = it[1].sample
+                            meta.patient  = it[1].patient
+                            meta.sex      = it[1].sample
+                            meta.status   = it[1].sample
+                            meta.id       = it[1].id
+
+                            [it[0], it[1].lane, meta, it[2], it[3]]
+                        }    
+                        .groupTuple(by: [0,2,3])
+                        .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])}
+                        .branch{
+                            concat: it[1] > 1
+                            pass:  it[1] == 1
+                        }
+    /* 
+        remap the output to exclude lane from meta. 
+        The number of lanes in the grouped lane list per sample is used to determine if concatenation is needed. 
+        The branch statement determines if concat is needed or if the sample is passed to the next step. 
+    */
+
+    no_concat_samples = concat_input.pass
+                        .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
+    /* 
+        this map statement delists the single fastq samples (i.e., non-concat samples)
+    */
+
+    CONCATENATE_READS_SAMPLESHEET(concat_input.concat)
+
+    read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
+    .mix(no_concat_samples)
+    .groupTuple(by: [0,2])
+    .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
+    .view()
+
+    read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+    read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+
+  }
 
   if (params.concat_lanes && !params.csv_input){
     if (params.read_type == 'PE'){
@@ -111,7 +167,7 @@ workflow PDX_WES {
   }
 
   // // Step 1: Qual_Stat
-  // QUALITY_STATISTICS(read_ch)
+//   QUALITY_STATISTICS(read_ch)
 
   // // Step 2: Get Read Group Information
   // READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
@@ -215,97 +271,3 @@ workflow PDX_WES {
 
 
 
-// Function to extract information (meta data + file(s)) from csv file(s)
-// https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084
-def extract_csv(csv_file) {
-
-    // check that the sample sheet is not 1 line or less, because it'll skip all subsequent checks if so.
-    file(csv_file).withReader('UTF-8') { reader ->
-        def line, numberOfLinesInSampleSheet = 0;
-        while ((line = reader.readLine()) != null) {numberOfLinesInSampleSheet++}
-        if (numberOfLinesInSampleSheet < 2) {
-            log.error "Samplesheet had less than two lines. The sample sheet must be a csv file with a header, so at least two lines."
-            System.exit(1)
-        }
-    }
-
-    // Additional check of sample sheet:
-    // 1. Each row should specify a lane and the same combination of patient, sample and lane shouldn't be present in different rows.
-    // 2. The same sample shouldn't be listed for different patients.
-    def sample2patient = [:]
-
-    Channel.from(csv_file).splitCsv(header: true)
-        .map{ row ->
-            if (!sample2patient.containsKey(row.sample.toString())) {
-                sample2patient[row.sample.toString()] = row.patient.toString()
-            } else if (sample2patient[row.sample.toString()] != row.patient.toString()) {
-                log.error('The sample "' + row.sample.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sample.toString()] + '" in the sample sheet.')
-                System.exit(1)
-            }
-        }
-
-    sample_count_all = 0
-    sample_count_normal = 0
-    sample_count_tumor = 0
-
-    Channel.from(csv_file).splitCsv(header: true)
-        //Retrieves number of lanes by grouping together by patient and sample and counting how many entries there are for this combination
-        .map{ row ->
-            sample_count_all++
-            if (!(row.patient && row.sample)){
-                log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sample'."
-                System.exit(1)
-            }
-            [[row.patient.toString(), row.sample.toString()], row]
-        }.groupTuple()
-        .map{ meta, rows ->
-            size = rows.size()
-            [rows, size]
-        }.transpose()
-        .map{ row, numLanes -> //from here do the usual thing for csv parsing
-
-        def meta = [:]
-
-        // Meta data to identify samplesheet
-        // Both patient and sample are mandatory
-        // Several sample can belong to the same patient
-        // Sample should be unique for the patient
-        if (row.patient) meta.patient = row.patient.toString()
-        if (row.sample)  meta.sample  = row.sample.toString()
-
-        // If no sex specified, sex is not considered
-        if (row.sex) meta.sex = row.sex.toString()
-        else meta.sex = 'NA'
-
-        // If no lane specified, lane is not considered
-        if (row.lane) meta.lane = row.lane.toString()
-        else meta.lane = 'NA'
-        
-        // If no status specified, sample is assumed normal
-        if (row.status) meta.status = row.status.toInteger()
-        else meta.status = 0
-
-        if (meta.status == 0) sample_count_normal++
-        else sample_count_tumor++
-
-        // join meta to fastq
-        if (row.fastq_2) {
-            meta.id         = "${row.patient}-${row.sample}".toString()
-            def fastq_1     = row.fastq_1
-            def fastq_2     = row.fastq_2
-            
-            // def fastq_1     = file(row.fastq_1, checkIfExists: false)
-            // def fastq_2     = file(row.fastq_2, checkIfExists: false)
-
-            meta.data_type  = 'fastq'
-
-            meta.size       = 1 // default number of splitted fastq
-
-            return [meta.id, meta, [fastq_1, fastq_2]]
-
-        } else {
-            log.error "Missing or unknown field in csv file header. Please check your samplesheet"
-            System.exit(1)
-        }
-    }
-}
