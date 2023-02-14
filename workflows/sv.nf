@@ -98,6 +98,7 @@ include {SNV_TO_MNV_FINAL_FILTER} from "${projectDir}/modules/python/python_snv_
 
 include {GATK_SORTVCF_SOMATIC} from "${projectDir}/modules/gatk/gatk_sortvcf_somatic_merge"
 include {REORDER_VCF_COLUMNS} from "${projectDir}/modules/python/python_reorder_vcf_columns"
+include {COMPRESS_INDEX_MERGED_VCF} from "${projectDir}/modules/tabix/compress_merged_vcf"
 // SOMATIC ANNOTATION METHODS, commented here until merge methods implemented
 //include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
 //include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
@@ -609,11 +610,14 @@ workflow SV {
     // meta = [patient:test, normal_id:test, tumor_id:test2, sex:XX, id:test2_vs_test] 
     //         This named list can be accessed in the script section prior to """ via calls like: meta.patient
 
+    // 7. Compress and index the merged vcf
+    COMPRESS_INDEX_MERGED_VCF(REORDER_VCF_COLUMNS.out.vcf)
+
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
-    // Step NO: Somatic Annotation
+    
 
     // This method has an input tuple of the form
     // [val(sampleID), file(vcf), file(idx), val(meta), val(normal_name), val(tumor_name)]
