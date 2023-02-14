@@ -10,6 +10,8 @@ include {ARIA_DOWNLOAD} from "${projectDir}/modules/utility_modules/aria_downloa
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
+include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -99,192 +101,179 @@ if (params.gen_org == 'mouse') {
     exit 1, "PDX workflow was called; however, `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
 }
 
-// main workflow
+
 workflow PDX_WES {
-  // Step 0: Concatenate Fastq files if required. 
 
-  if (params.download_data){
-    if (params.read_type == 'PE') {
-        aria_download_input = ch_input_sample
-        .multiMap { it ->
-            R1: tuple(it[0], it[1], 'R1', it[2])
-            R2: tuple(it[0], it[1], 'R2', it[3])
+    // Step 0: Download data and concat Fastq files if needed. 
+    if (params.download_data){
+        if (params.read_type == 'PE') {
+            aria_download_input = ch_input_sample
+            .multiMap { it ->
+                R1: tuple(it[0], it[1], 'R1', it[2])
+                R2: tuple(it[0], it[1], 'R2', it[3])
+            }
+            .mix()
+        } else {
+            aria_download_input = ch_input_sample
+            .multiMap { it ->
+                R1: tuple(it[0], it[1], 'R1', it[2])
+            }
+            .mix()
         }
-        .mix()
-    } else {
-        aria_download_input = ch_input_sample
-        .multiMap { it ->
-            R1: tuple(it[0], it[1], 'R1', it[2])
+        /* 
+            remap the data to individual R1 / R2 tuples. 
+            These individual tuples are then mixed to pass individual files to the downloader. 
+            R1 vs. R2 is maintained in the mix. Order is irrelavent here as data are grouped
+            by sampleID downstream. 
+        */
+
+        // Download files. 
+        ARIA_DOWNLOAD(aria_download_input)
+
+        concat_input = ARIA_DOWNLOAD.out.file
+                            .map { it ->
+                                def meta = [:]
+                                meta.sample   = it[1].sample
+                                meta.patient  = it[1].patient
+                                meta.sex      = it[1].sample
+                                meta.status   = it[1].sample
+                                meta.id       = it[1].id
+
+                                [it[0], it[1].lane, meta, it[2], it[3]]
+                            }    
+                            .groupTuple(by: [0,2,3])
+                            .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])}
+                            .branch{
+                                concat: it[1] > 1
+                                pass:  it[1] == 1
+                            }
+        /* 
+            remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_num: R1|R2.
+            The number of lanes in the grouped data is used to determine if concatenation is needed. 
+            The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
+        */
+
+        no_concat_samples = concat_input.pass
+                            .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
+        /* 
+            this delists the single fastq samples (i.e., non-concat samples).
+        */
+
+        // Concatenate samples as needed. 
+        CONCATENATE_READS_SAMPLESHEET(concat_input.concat)
+
+        read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
+        .mix(no_concat_samples)
+        .groupTuple(by: [0,2])
+        .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
+
+        read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+        read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+        /*
+            Mix concatenation files, with non-concat files. 'mix' allows for, all, some, or no files to have 
+            gone through concatenation. 
+
+            Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
+            do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
+        */
+
+    }
+
+
+    // Step 0: Concat local Fastq files if required.
+    if (params.concat_lanes && !params.csv_input){
+        if (params.read_type == 'PE'){
+            CONCATENATE_READS_PE(read_ch)
+            read_ch = CONCATENATE_READS_PE.out.concat_fastq
+        } else if (params.read_type == 'SE'){
+            CONCATENATE_READS_SE(read_ch)
+            read_ch = CONCATENATE_READS_SE.out.concat_fastq
         }
-        .mix()
     }
-    /* 
-        remap the data to individual R1 / R2 tuples. 
-        These individual tuples are then mixed to pass individual files to the downloader. 
-        R1 vs. R2 is maintained in the mix. Order is irrelavent here as data are grouped
-        by sampleID downstream. 
-    */
 
-    // Download files. 
-    ARIA_DOWNLOAD(aria_download_input)
+    // ** MAIN workflow starts: 
 
-    concat_input = ARIA_DOWNLOAD.out.file
-                        .map { it ->
-                            def meta = [:]
-                            meta.sample   = it[1].sample
-                            meta.patient  = it[1].patient
-                            meta.sex      = it[1].sample
-                            meta.status   = it[1].sample
-                            meta.id       = it[1].id
+    // Step 1: Qual_Stat
+    QUALITY_STATISTICS(read_ch)
 
-                            [it[0], it[1].lane, meta, it[2], it[3]]
-                        }    
-                        .groupTuple(by: [0,2,3])
-                        .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])}
-                        .branch{
-                            concat: it[1] > 1
-                            pass:  it[1] == 1
-                        }
-    /* 
-        remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_num: R1|R2.
-        The number of lanes in the grouped data is used to determine if concatenation is needed. 
-        The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
-    */
+    // Step 2: Xenome classify and sort. 
+    XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+    ch_XENOME_CLASSIFY_multiqc = //set log file for multiqc
 
-    no_concat_samples = concat_input.pass
-                        .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
-    /* 
-        this delists the single fastq samples (i.e., non-concat samples).
-    */
+    // Xenome Read Sort
+    XENOME_SORT(XENOME_CLASSIFY.out.xenome_fastq)
 
-    // Concatenate samples as needed. 
-    CONCATENATE_READS_SAMPLESHEET(concat_input.concat)
+    // Step 3: Get Read Group Information
+    READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
-    read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
-    .mix(no_concat_samples)
-    .groupTuple(by: [0,2])
-    .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
+    // Step 4: BWA-MEM Alignment
+    bwa_mem_mapping = XENOME_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
 
-    read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
-    read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
-    /*
-        Mix concatenation files, with non-concat files. 'mix' allows for, all, some, or no files to have 
-        gone through concatenation. 
+    BWA_MEM(bwa_mem_mapping)
 
-        Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
-        do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
-    */
+    // Step 5: Variant Preprocessing - Part 1
+    PICARD_SORTSAM(BWA_MEM.out.sam)
+    PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
-  }
+    // Step 6: Variant Pre-Processing - Part 2
+    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
 
-  if (params.concat_lanes && !params.csv_input){
-    if (params.read_type == 'PE'){
-        CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_PE.out.concat_fastq
-    } else if (params.read_type == 'SE'){
-        CONCATENATE_READS_SE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
-    }
-  }
+    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+    GATK_APPLYBQSR(apply_bqsr)
 
-//   // Step 1: Qual_Stat
-//   QUALITY_STATISTICS(read_ch)
+    // Step 7: Variant Pre-Processing - Part 3
+    collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+    PICARD_COLLECTHSMETRICS(collect_metrics)
 
-//   // Step 2: Get Read Group Information
-//   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+    // // Step 7: Variant Calling
+    // haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+    // GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
 
-//   // Step 3: BWA-MEM Alignment
-//   bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-//   BWA_MEM(bwa_mem_mapping)
+    // haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+    // GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
 
-//   // Step 4: Variant Preprocessing - Part 1
-//   PICARD_SORTSAM(BWA_MEM.out.sam)
-//   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+    // // Step 8: Variant Filtration
+    // // SNP
+    // select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+    // GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
 
-  // // If Human: Step 5-10
-  // if (params.gen_org=='human'){
+    // var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+    // GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
-  //   // Step 5: Variant Pre-Processing - Part 2
-  //     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+    // // INDEL
+    // select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+    // GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
 
-  //     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
-  //     GATK_APPLYBQSR(apply_bqsr)
+    // var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+    // GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
-  //   // Step 6: Variant Pre-Processing - Part 3
-  //     collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-  //     PICARD_COLLECTHSMETRICS(collect_metrics)
+    // // Step 9: Post Variant Calling Processing - Part 1
+    // // SNP
+    // COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
+    // SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
+    // SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
+    // SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
 
-  //   // Step 7: Variant Calling
-  //     haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-  //     GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
+    // // INDEL
+    // COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+    // SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
+    // SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
+    // SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
-  //     haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-  //     GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
+    // // Step 10: Post Variant Calling Processing - Part 2
+    // vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+    // GATK_MERGEVCF(vcf_files)
 
-  //   // Step 8: Variant Filtration
-  //     // SNP
-  //       select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
-  //       GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+    // SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
 
-  //       var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
-  //       GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
+    // agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
 
-  //     // INDEL
-  //       select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
-  //     	GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+    // // Step 11: Aggregate Stats
+    // AGGREGATE_STATS(agg_stats)
 
-  //       var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
-  //       GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
+    // multiQC files. 
+    //XENOME_CLASSIFY.out.xenome_stats 
 
-  //   // Step 9: Post Variant Calling Processing - Part 1
-  //     // SNP
-  //       COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-  //       SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
-  //       SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
-  //       SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
-
-  //     // INDEL
-  //       COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
-  //       SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
-  //       SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
-  //       SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
-
-  //   // Step 10: Post Variant Calling Processing - Part 2
-  //     vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
-  //     GATK_MERGEVCF(vcf_files)
-      
-  //     SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
-
-  // } else if (params.gen_org=='mouse'){
-
-  //   // Step 6: Variant Pre-Processing - Part 3
-  //     collecths_metric = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
-  //     PICARD_COLLECTHSMETRICS(collecths_metric)
-                              
-
-  //   // Step 7: Variant Calling
-  //     haplotype_caller = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
-  //     GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
-
-  //   // Step 8: Variant Filtration
-  //     var_filter = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
-  //     GATK_VARIANTFILTRATION(var_filter, 'BOTH')
-
-  //   // Step 9: Post Variant Calling Processing
-  //     SNPEFF(GATK_VARIANTFILTRATION.out.vcf, 'BOTH', 'gatk')
-
-  //     merged_vcf_files = GATK_VARIANTFILTRATION.out.vcf.join(SNPEFF.out.vcf)
-  //     GATK_VARIANTANNOTATOR(merged_vcf_files)
-
-  //     SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
-
-  // }
-
-  // agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
-
-  // // Step 11: Aggregate Stats
-  // AGGREGATE_STATS(agg_stats)
-  
 }
 
 
