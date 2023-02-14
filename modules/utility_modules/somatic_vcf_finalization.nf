@@ -40,8 +40,10 @@ process SOMATIC_VCF_FINALIZATION {
 
     python \
     ${projectDir}/bin/sv/make_txt.py \
-    ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.vcf \
-    ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.txt
+    --vcf ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.vcf \
+    --txt ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.txt \
+    --tumor ${tumor_name} \
+    --normal ${normal_name} 
 
     python \
     ${projectDir}/bin/sv/make_maf.py \
