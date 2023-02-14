@@ -101,7 +101,7 @@ include {REORDER_VCF_COLUMNS} from "${projectDir}/modules/python/python_reorder_
 include {COMPRESS_INDEX_MERGED_VCF} from "${projectDir}/modules/tabix/compress_merged_vcf"
 include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
-include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic_add_cancer_resistance_mutations_somatic"
+include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
 include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
 
 // help if needed
@@ -283,9 +283,9 @@ workflow SV {
     // 4. AddCosmic
     COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
     // 5. AddCancerResistanceMutations
-    COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
+    COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
-    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, 'filtered')
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
 
     SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
     SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
@@ -614,10 +614,10 @@ workflow SV {
 
     // ** Annotation of somatic calls
 
-    VEP_SOMATIC(MERGED.out.vcf)
+    VEP_SOMATIC(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
     COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
     COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
-    SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf)
+    SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf, 'filtered')
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
