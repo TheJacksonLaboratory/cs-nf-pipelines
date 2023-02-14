@@ -15,7 +15,7 @@ process GATK_MUTECT2 {
   tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), path(interval), val(interval_index)
 
   output:
-  tuple val(sampleID), file("*_somatic.vcf.gz"), emit: vcf
+  tuple val(sampleID), file("*_somatic.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('mutect2'), emit: vcf
   tuple val(sampleID), file("*_somatic.vcf.gz.tbi"), emit: tbi
   tuple val(sampleID), file("*.stats"), emit: stats
 
