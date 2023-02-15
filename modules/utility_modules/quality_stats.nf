@@ -30,5 +30,6 @@ process QUALITY_STATISTICS {
 
   """
   python ${projectDir}/bin/shared/filter_trim.py $mode_HQ ${params.min_pct_hq_reads}  $inputfq
+  mv *_stat ${sampleID}_stat
   """
 }
