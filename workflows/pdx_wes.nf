@@ -11,6 +11,7 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
@@ -214,7 +215,9 @@ workflow PDX_WES {
 
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
-    read_ch.view()
+
+    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
 
@@ -298,6 +301,7 @@ workflow PDX_WES {
 
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
