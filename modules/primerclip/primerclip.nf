@@ -11,8 +11,6 @@ process PRIMERCLIP {
 
     input:
       tuple val(sampleID), file(sam)
-      val(view_string)
-      val(filename)
 
     output:
       tuple val(sampleID), file("*.sam"), emit: bam
@@ -23,8 +21,3 @@ process PRIMERCLIP {
     primerclip ${params.masterfile} ${sam} ${sam.baseName}_primerclip.sam
     """
 }
-
-
-
-
-

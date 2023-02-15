@@ -11,6 +11,12 @@ include {TRIM_FASTQ as CUTADAPT} from "${projectDir}/modules/cutadapt/cutadapt_t
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {PRIMERCLIP} from "${projectDir}/modules/primerclip/primerclip"
+include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+include {GATK_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
+
 
 // help if needed
 if (params.help){
@@ -71,9 +77,35 @@ workflow AMPLICON {
     bwa_mem_mapping = CUTADAPT.out.paired_trimmed_fastq.join(READ_GROUPS.out.read_groups)
     BWA_MEM(bwa_mem_mapping)
 
+    PRIMERCLIP(BWA_MEM.out.sam)
 
-// multiqc input
-// FASTQC.out.quality_stats
-// CUTADAPT.out.cutadapt_log
+    PRIMERCLIP.out.sam.join(READ_GROUPS.out.read_groups)
+
+    PICARD_ADDORREPLACEREADGROUPS(PRIMERCLIP.out.sam) // is this step needed as read group is used in BWA? 
+
+    // Picard CollectTargetedPcrMetrics : this module needs to be made and figured out https://gatk.broadinstitute.org/hc/en-us/articles/360037438131-CollectTargetedPcrMetrics-Picard-
+
+    // Bedtools coverageBed : this module needs to be made, and figured out what to do with the output. 
+    /*
+    Important: While the use of the Picard tool, MarkDuplicates, is a common quality control step to identify
+    low-complexity libraries, MarkDuplicates cannot be used on data derived from PCR-based target enrichment
+    methods such as the xGen Amplicon Panels. Since these targeted panels contain high numbers of identical
+    library fragments (particularly regarding alignment start position), MarkDuplicates cannot appropriately 
+    analyze Amplicon libraries.
+    https://sfvideo.blob.core.windows.net/sitefinity/docs/default-source/application-note/primerclip-a-tool-for-trimming-primer-sequences-application-note.pdf?sfvrsn=cf83e107_14
+    */
+
+    GATK_BASERECALIBRATOR(PICARD_ADDORREPLACEREADGROUPS.out.bam.join(PICARD_ADDORREPLACEREADGROUPS.out.bai))
+    
+    GATK_APPLYBQSR(PICARD_ADDORREPLACEREADGROUPS.out.bam.join(GATK_BASERECALIBRATOR.out.table))
+
+    GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai))
+
+    // multiqc input
+    // FASTQC.out.quality_stats
+    // CUTADAPT.out.cutadapt_log
+    // CollectTargetedPcrMetrics
+    // coverage metrics? 
+    // primer clip likely has an output log. Once we can run, this can be collected. However, primerclip is not in multiQC.
 
 }
