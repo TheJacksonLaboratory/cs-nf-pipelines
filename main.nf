@@ -9,6 +9,9 @@ if (params.workflow == "rnaseq"){
 if (params.workflow == "wes"){
   include {WES} from './workflows/wes'
 }
+if (params.workflow == "pdx_wes"){
+  include {PDX_WES} from './workflows/pdx_wes'
+}
 if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
 }
@@ -29,6 +32,9 @@ workflow{
   if (params.workflow == "wes"){
     WES()
     }
+  if (params.workflow == "pdx_wes"){
+    PDX_WES()
+  }
   if (params.workflow == "wgs"){
     WGS()
     }
