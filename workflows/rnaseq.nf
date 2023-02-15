@@ -100,7 +100,7 @@ workflow RNASEQ {
     rsem_input = FASTQ_SORT.out.sorted_fastq
 
   } else { 
-    rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
+    rsem_input = FASTQ_PAIR.out.paired_fastq
   }
 
   // Step 2: RSEM
