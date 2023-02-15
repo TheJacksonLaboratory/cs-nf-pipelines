@@ -214,7 +214,7 @@ workflow PDX_WES {
 
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
-
+    read_ch.view()
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
 
