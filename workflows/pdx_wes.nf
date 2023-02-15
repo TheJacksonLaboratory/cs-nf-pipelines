@@ -13,7 +13,6 @@ include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modu
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-pair/fastq-pair"
-include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
