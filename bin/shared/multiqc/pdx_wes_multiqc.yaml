@@ -7,8 +7,8 @@ export_plots: true
 
 module_order:
   - xenome
-  - rsem
   - picard
 
 extra_fn_clean_exts:
   - "_sortsam"
+  - "_realigned_BQSR"
