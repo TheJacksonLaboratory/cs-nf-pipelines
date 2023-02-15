@@ -7,7 +7,7 @@ process COSMIC_ANNOTATION {
   errorStrategy 'retry'
   maxRetries 1
 
-  container 'quay.io/jaxcompsci/py3_perl_pylibs:v1'
+  container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
   input:
   tuple val(sampleID), file(vcf)

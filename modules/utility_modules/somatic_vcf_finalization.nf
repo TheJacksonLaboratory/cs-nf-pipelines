@@ -7,7 +7,7 @@ process SOMATIC_VCF_FINALIZATION {
     errorStrategy 'retry'
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/py3_perl_pylibs:v1'
+    container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.vcf", mode:'copy'
 
