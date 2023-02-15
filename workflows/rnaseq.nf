@@ -8,7 +8,8 @@ include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-pair/fastq-pair"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
+include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
@@ -84,22 +85,23 @@ workflow RNASEQ {
 
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
+  
+  FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
 
   // Step 1a: Xenome if PDX data used.
   ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
   if (params.pdx){
     // Xenome Classification
-    XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+    XENOME_CLASSIFY(FASTQ_PAIR.out.paired_fastq)
     ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
     // Xenome Read Sort
-    FASTQ_PAIR(XENOME_CLASSIFY.out.xenome_fastq)
-    rsem_input = FASTQ_PAIR.out.paired_fastq
+    FASTQ_SORT(XENOME_CLASSIFY.out.xenome_fastq)
+    rsem_input = FASTQ_SORT.out.sorted_fastq
 
   } else { 
     rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
   }
-
 
   // Step 2: RSEM
   RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files)

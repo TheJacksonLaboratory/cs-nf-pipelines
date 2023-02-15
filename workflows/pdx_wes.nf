@@ -12,7 +12,8 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-pair/fastq-pair"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
+include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
@@ -198,7 +199,6 @@ workflow PDX_WES {
 
     }
 
-
     // Step 0: Concat local Fastq files if required.
     if (params.concat_lanes && !params.csv_input){
         if (params.read_type == 'PE'){
@@ -220,12 +220,13 @@ workflow PDX_WES {
 
     // Xenome Read Sort
     FASTQ_PAIR(XENOME_CLASSIFY.out.xenome_fastq)
+    FASTQ_SORT(FASTQ_PAIR.out.paired_fastq)
 
     // Step 3: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
     // Step 4: BWA-MEM Alignment
-    bwa_mem_mapping = FASTQ_PAIR.out.paired_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = FASTQ_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
 
     BWA_MEM(bwa_mem_mapping)
 
