@@ -8,7 +8,7 @@ include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-pair/fastq-pair"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
@@ -93,8 +93,8 @@ workflow RNASEQ {
     ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
     // Xenome Read Sort
-    XENOME_SORT(XENOME_CLASSIFY.out.xenome_fastq)
-    rsem_input = XENOME_SORT.out.sorted_fastq
+    FASTQ_PAIR(XENOME_CLASSIFY.out.xenome_fastq)
+    rsem_input = FASTQ_PAIR.out.paired_fastq
 
   } else { 
     rsem_input = QUALITY_STATISTICS.out.trimmed_fastq

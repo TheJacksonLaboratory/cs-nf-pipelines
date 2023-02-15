@@ -24,12 +24,6 @@ process COSMIC_ANNOTATION {
     ${vcf} \
     ${sampleID}_germline_vep_cosmic_annotated.vcf
     """
-  else
-    """
-    ${projectDir}/bin/shared/Cosmic_Annotation_hg38.pl \
-    -i1 ${params.cosmic} \
-    -i2 ${vcf} > ${sampleID}_cosmic_annotation.vcf
-    """
 }
 
 // cosmic for 'sv' pipeline comes from: 

@@ -12,6 +12,7 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-pair/fastq-pair"
 include {FASTQ_SORT as XENOME_SORT} from "${projectDir}/modules/fastq_sort/fastq-tools_sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -43,6 +44,12 @@ include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2_tumor
 include {COSMIC_ANNOTATION;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
+
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+
 
 include {SNPEFF;
          SNPEFF as SNPEFF_SNP;
@@ -211,16 +218,15 @@ workflow PDX_WES {
 
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
-    ch_XENOME_CLASSIFY_multiqc = //set log file for multiqc
 
     // Xenome Read Sort
-    XENOME_SORT(XENOME_CLASSIFY.out.xenome_fastq)
+    FASTQ_PAIR(XENOME_CLASSIFY.out.xenome_fastq)
 
     // Step 3: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
     // Step 4: BWA-MEM Alignment
-    bwa_mem_mapping = XENOME_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = FASTQ_PAIR.out.paired_fastq.join(READ_GROUPS.out.read_groups)
 
     BWA_MEM(bwa_mem_mapping)
 
@@ -265,15 +271,17 @@ workflow PDX_WES {
     GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
     // Step 9: Post Variant Calling Processing - Part 1
-    // SNP
-    COSMIC_ANNOTATION_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf)
-    SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
+    // 
+    SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+    SNPSIFT_ANNOTATE_SNP_COSMIC(SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+    SNPEFF_SNP(SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf, 'SNP', 'vcf')
     SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
     SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
 
     // INDEL
-    COSMIC_ANNOTATION_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf)
-    SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
+    SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+    SNPSIFT_ANNOTATE_INDEL_COSMIC(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+    SNPEFF_INDEL(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf, 'INDEL', 'vcf')
     SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
     SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
