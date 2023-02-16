@@ -58,9 +58,6 @@ workflow FILE_DOWNLOAD {
             The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
         */
 
-        concat_input.pass.view()
-        concat_input.concat.view()
-
         no_concat_samples = concat_input.pass
                             .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
         /* 
