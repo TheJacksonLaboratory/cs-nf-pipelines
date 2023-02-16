@@ -24,6 +24,9 @@ if (params.workflow == "atac"){
 if (params.workflow == "sv"){
   include {SV} from './workflows/sv'
 }
+if (params.workflow == "amplicon"){
+  include {AMPLICON} from '.workflows/amplicon'
+}
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "rnaseq"){
@@ -47,4 +50,7 @@ workflow{
   if (params.workflow == "sv"){
     SV()
   } 
+  if (params.workflow == "amplicon"){
+    AMPLICON()
+  }
 }

@@ -24,6 +24,7 @@ include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wgs"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
@@ -89,6 +90,8 @@ workflow WGS {
   }
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
+
+  FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")

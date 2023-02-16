@@ -11,6 +11,7 @@ include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {COSMIC_ANNOTATION;
         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
@@ -90,6 +91,8 @@ workflow WES {
 
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)
+
+  FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
