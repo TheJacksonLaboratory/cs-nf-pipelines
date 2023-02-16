@@ -11,6 +11,7 @@ include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
 include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
@@ -88,6 +89,8 @@ workflow RNASEQ {
   
   FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
 
+  FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+
   // Step 1a: Xenome if PDX data used.
   ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
   if (params.pdx){
@@ -128,6 +131,7 @@ workflow RNASEQ {
 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
