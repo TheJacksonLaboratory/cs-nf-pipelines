@@ -12,7 +12,7 @@ process ARIA_DOWNLOAD {
     tuple val(sampleID), val(meta), val(read_num), val(link)
 
     output:
-    tuple val(sampleID), val(meta), val(read_num), file("*"), emit: file
+    tuple val(sampleID), val(meta), val(read_num), path("*"), emit: file
 
     script:
 

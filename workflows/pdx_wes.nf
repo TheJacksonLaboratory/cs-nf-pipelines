@@ -6,10 +6,9 @@ include {help} from "${projectDir}/bin/help/wes.nf"
 include {param_log} from "${projectDir}/bin/log/wes.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
-include {ARIA_DOWNLOAD} from "${projectDir}/modules/utility_modules/aria_download"
+include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {CONCATENATE_READS_SAMPLESHEET} from "${projectDir}/modules/utility_modules/concatenate_reads_sampleSheet"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
@@ -22,35 +21,25 @@ include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markdu
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
-
 include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
-
 include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
-
 include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
-
 include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 include {GATK_SELECTVARIANTS;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
-
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2_tumorOnly"
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_tumorOnly"
-
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2_tumorOnly"
-
 include {COSMIC_ANNOTATION;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
-
 include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
-
-
 include {SNPEFF;
          SNPEFF as SNPEFF_SNP;
          SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
@@ -59,9 +48,7 @@ include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
-
 include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
-
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
@@ -126,77 +113,10 @@ workflow PDX_WES {
 
     // Step 0: Download data and concat Fastq files if needed. 
     if (params.download_data){
-        if (params.read_type == 'PE') {
-            aria_download_input = ch_input_sample
-            .multiMap { it ->
-                R1: tuple(it[0], it[1], 'R1', it[2])
-                R2: tuple(it[0], it[1], 'R2', it[3])
-            }
-            .mix()
-        } else {
-            aria_download_input = ch_input_sample
-            .multiMap { it ->
-                R1: tuple(it[0], it[1], 'R1', it[2])
-            }
-            .mix()
-        }
-        /* 
-            remap the data to individual R1 / R2 tuples. 
-            These individual tuples are then mixed to pass individual files to the downloader. 
-            R1 vs. R2 is maintained in the mix. Order is irrelavent here as data are grouped
-            by sampleID downstream. 
-        */
+        FILE_DOWNLOAD(ch_input_sample)
 
-        // Download files. 
-        ARIA_DOWNLOAD(aria_download_input)
-
-        concat_input = ARIA_DOWNLOAD.out.file
-                            .map { it ->
-                                def meta = [:]
-                                meta.sample   = it[1].sample
-                                meta.patient  = it[1].patient
-                                meta.sex      = it[1].sample
-                                meta.status   = it[1].sample
-                                meta.id       = it[1].id
-
-                                [it[0], it[1].lane, meta, it[2], it[3]]
-                            }    
-                            .groupTuple(by: [0,2,3])
-                            .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])}
-                            .branch{
-                                concat: it[1] > 1
-                                pass:  it[1] == 1
-                            }
-        /* 
-            remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_num: R1|R2.
-            The number of lanes in the grouped data is used to determine if concatenation is needed. 
-            The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
-        */
-
-        no_concat_samples = concat_input.pass
-                            .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
-        /* 
-            this delists the single fastq samples (i.e., non-concat samples).
-        */
-
-        // Concatenate samples as needed. 
-        CONCATENATE_READS_SAMPLESHEET(concat_input.concat)
-
-        read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
-        .mix(no_concat_samples)
-        .groupTuple(by: [0,2])
-        .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
-
-        read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
-        read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
-        /*
-            Mix concatenation files, with non-concat files. 'mix' allows for, all, some, or no files to have 
-            gone through concatenation. 
-
-            Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
-            do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
-        */
-
+        FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+        FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
     }
 
     // Step 0: Concat local Fastq files if required.
@@ -214,7 +134,7 @@ workflow PDX_WES {
 
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
-    read_ch.view()
+
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
 

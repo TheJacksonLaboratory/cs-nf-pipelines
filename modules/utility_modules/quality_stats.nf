@@ -11,7 +11,7 @@ process QUALITY_STATISTICS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*_stat", mode:'copy'
 
   input:
-  tuple val(sampleID), file(fq_reads)
+  tuple val(sampleID), path(fq_reads)
 
   output:
   tuple val(sampleID), file("*_stat"), emit: quality_stats

@@ -5,6 +5,8 @@ nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/rnaseq"
 include {param_log} from "${projectDir}/bin/log/rnaseq"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
+include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
@@ -30,8 +32,22 @@ if (params.help){
 // log paramiter info
 param_log()
 
+
 // prepare reads channel
-if (params.concat_lanes){
+if (params.csv_input) {
+
+    ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
+    
+    if (params.read_type == 'PE'){
+        ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    } else if (params.read_type == 'SE') {
+        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    }
+
+} else if (params.concat_lanes){
+  
   if (params.read_type == 'PE'){
     read_ch = Channel
             .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
@@ -44,18 +60,21 @@ if (params.concat_lanes){
                 .groupTuple()
                 .map{t-> [t[0], t[1].flatten()]}
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+
 } else {
+  
   if (params.read_type == 'PE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
   }
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+
 }
-
-// if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
-
 if (params.pdx && params.gen_org == 'mouse') {
     exit 1, "PDX analysis was specified with `--pdx`. `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
 }
@@ -72,16 +91,26 @@ else error "${params.rsem_aligner} is not valid, use 'bowtie2' or 'star'"
 // main workflow
 workflow RNASEQ {
 
-  // Step 0: Concatenate Fastq files if required. 
-  if (params.concat_lanes){
-    if (params.read_type == 'PE'){
-        CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_PE.out.concat_fastq
-    } else if (params.read_type == 'SE'){
-        CONCATENATE_READS_SE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
-    }
+  // Step 0: Download data and concat Fastq files if needed. 
+  if (params.download_data){
+      FILE_DOWNLOAD(ch_input_sample)
+
+      FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+      FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
   }
+
+  // Step 0: Concat local Fastq files if required.
+  if (params.concat_lanes && !params.csv_input){
+      if (params.read_type == 'PE'){
+          CONCATENATE_READS_PE(read_ch)
+          read_ch = CONCATENATE_READS_PE.out.concat_fastq
+      } else if (params.read_type == 'SE'){
+          CONCATENATE_READS_SE(read_ch)
+          read_ch = CONCATENATE_READS_SE.out.concat_fastq
+      }
+  }
+  
+  // ** MAIN workflow starts: 
 
   // Step 1: Qual_Stat
   QUALITY_STATISTICS(read_ch)

@@ -9,10 +9,10 @@ process CONCATENATE_READS_SAMPLESHEET {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*fastq.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), val(num_lanes), val(meta), val(read_num), file(reads)
+  tuple val(sampleID), val(num_lanes), val(meta), val(read_num), path(reads)
 
   output:
-  tuple val(sampleID), val(num_lanes), val(meta), val(read_num), file("*fastq.gz"), emit: concat_fastq
+  tuple val(sampleID), val(num_lanes), val(meta), val(read_num), path("*fastq.gz"), emit: concat_fastq
 
   when:
   num_lanes > 1
