@@ -99,8 +99,6 @@ workflow RNA_FUSION {
 
     FASTQ_PAIR(GUNZIP.out.gunzip_fastq)
 
-    FASTQ_PAIR.out.paired_fastq.view()
-
     FASTQC(GUNZIP.out.gunzip_fastq)
 
     // Step 1a: Xenome if PDX data used.
@@ -128,6 +126,7 @@ workflow RNA_FUSION {
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect()
