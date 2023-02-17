@@ -25,7 +25,10 @@ if (params.workflow == "sv"){
   include {SV} from './workflows/sv'
 }
 if (params.workflow == "amplicon"){
-  include {AMPLICON} from '.workflows/amplicon'
+  include {AMPLICON} from './workflows/amplicon'
+}
+if (params.workflow == "rna_fusion"){
+  include {RNA_FUSION} from './workflows/rna_fusion'
 }
 // conditional to kick off appropriate workflow
 workflow{
@@ -52,5 +55,8 @@ workflow{
   } 
   if (params.workflow == "amplicon"){
     AMPLICON()
+  }
+  if (params.workflow == "rna_fusion"){
+    RNA_FUSION()
   }
 }

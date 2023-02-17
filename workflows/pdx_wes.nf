@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/wes.nf"
-include {param_log} from "${projectDir}/bin/log/wes.nf"
+include {help} from "${projectDir}/bin/help/pdx_wes.nf"
+include {param_log} from "${projectDir}/bin/log/pdx_wes.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
