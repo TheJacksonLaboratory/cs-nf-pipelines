@@ -1,5 +1,27 @@
 # RELEASE NOTES
 
+## Release 0.2.2
+
+* Change WES and WGS COMSIC annotation to use SNPsift. 
+* Added explicit dbSNP annotation. 
+
+### Pipelines Added:
+
+NONE
+
+### Modules Added:
+
+1. SNPSIFT_ANNOTATE 
+
+### Pipeline Changes:
+
+1. WES and WGS now use SNPSift to annotate COSMIC and dbSNP IDs onto variants. 
+
+### Module Changes:
+
+1. COSMIC_ANNOTATION and associated perl scripts removed. 
+
+
 ## Release 0.2.1
 
 Added STAR support to RNA-seq pipeline.
