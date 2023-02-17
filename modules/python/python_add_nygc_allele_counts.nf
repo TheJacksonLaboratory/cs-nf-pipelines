@@ -3,7 +3,7 @@ process ADD_NYGC_ALLELE_COUNTS {
 
   cpus 1
   memory 4.GB
-  time '04:00:00'
+  time '12:00:00'
 
   container 'quay.io/jaxcompsci/bedtools-python3:2.26.0'
 
