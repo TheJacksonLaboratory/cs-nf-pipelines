@@ -103,6 +103,8 @@ include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
 include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
+//include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
+
 
 // help if needed
 if (params.help){
@@ -612,12 +614,16 @@ workflow SV {
     // Compress and index the merged vcf
     COMPRESS_INDEX_MERGED_VCF(REORDER_VCF_COLUMNS.out.vcf)
 
-    // ** Annotation of somatic calls
+    // ** Annotation of somatic indels and snps
 
     VEP_SOMATIC(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
     COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
     COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
     SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf, 'filtered')
+
+    // ** Annotation of somatic CNV and SV
+
+    // ANNOTATE_BICSEQ2_CNV(BICSEQ2_SEG.out.bicseq2_sv_calls, chrom_list_noY)
 
     // Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
