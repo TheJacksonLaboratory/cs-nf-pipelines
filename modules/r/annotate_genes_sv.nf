@@ -9,11 +9,11 @@ process ANNOTATE_GENES_SV {
 
   input:
     // ANNOTATE_SV.out.annot_sv_bedpe
-    tuple val(sampleID), file(annot_sv_bedpe), val(meta), val(normal_name), val(tumor_name)
+    tuple val(sampleID), file(annot_sv_bedpe), val(meta)
     val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("*.manta_gridss_sv_annotated_genes*.bed"), val(meta), val(normal_name), val(tumor_name), emit: annot_sv_genes_bedpe
+    tuple val(sampleID), file("*.manta_gridss_sv_annotated_genes*.bed"), val(meta), emit: annot_sv_genes_bedpe
 
   script:
 
