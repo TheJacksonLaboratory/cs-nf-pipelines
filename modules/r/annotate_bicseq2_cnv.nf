@@ -8,6 +8,7 @@ process ANNOTATE_BICSEQ2_CNV {
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
 
   input:
+    //BICSEQ2_SEG.out.bicseq2_sv_calls
     tuple val(sampleID), file(bicseq2_calls), val(no_idx), val(meta), val(normal_name), val(tumor_name), val(bicseq2)
     val(chrom_list)
 
