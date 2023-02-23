@@ -1,3 +1,7 @@
+## BJS Note: this script was located in the root path of the Docker container
+## gcr.io/nygc-public/sv_cnv@sha256:1c14a50d131323a2a4bab323cf224879776af8de37f93df79292fd2e63269274
+## It is reproduced below as it exists there without modification
+
 ## Filter a bedpe for somatic variants (i.e., not in specified germline databases), and 
 ## high-confidence variants (2+ callers or 1 caller with a nearby copy number changepoint)
 libs = c('optparse', 'GenomicRanges')

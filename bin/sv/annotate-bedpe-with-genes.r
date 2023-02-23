@@ -1,3 +1,7 @@
+## BJS Note: this script was located in the root path of the Docker container
+## gcr.io/nygc-public/sv_cnv@sha256:1c14a50d131323a2a4bab323cf224879776af8de37f93df79292fd2e63269274
+## It is reproduced below as it exists there without modification
+
 ## Annotate a merged & annotated BEDPE with gene information
 libs = c('optparse', 'StructuralVariantAnnotation', 'VariantAnnotation', 'rtracklayer', 'gUtils')
 invisible(suppressPackageStartupMessages(sapply(libs, require, character.only=T, quietly=T)))

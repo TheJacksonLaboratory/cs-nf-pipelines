@@ -5,7 +5,7 @@ process FILTER_BEDPE {
   memory 8.GB
   time '04:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedpe'}", patterh: "*.bedpe", mode: 'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedpe'}", pattern: "*.bedpe", mode: 'copy'
   
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
 
