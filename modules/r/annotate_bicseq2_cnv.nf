@@ -2,7 +2,7 @@ process ANNOTATE_BICSEQ2_CNV {
   tag "$sampleID"
 
   cpus 1
-  memory 4.GB
+  memory 36.GB
   time '04:00:00'
 
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
