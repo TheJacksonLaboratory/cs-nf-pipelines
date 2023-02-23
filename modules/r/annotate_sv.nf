@@ -17,7 +17,7 @@ process ANNOTATE_SV {
   script:
 
     """
-    Rscript /annotate-bedpe-with-databases.r \
+    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-databases.r \
         --db_names=gap,DGV,1000G,PON,COSMIC \
         --db_files=${params.gap},${params.dgvBedpe},${params.thousandGVcf},${params.svPon},${params.cosmicBedPe} \
         --slop=500 \
