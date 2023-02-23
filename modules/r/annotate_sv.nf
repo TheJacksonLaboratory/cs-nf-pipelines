@@ -10,12 +10,14 @@ process ANNOTATE_SV {
   input:
     // MERGE_SV.out.merged
     tuple val(sampleID), file(merged_sv_bed), val(meta)
+    val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated.bed"), val(meta), emit: annot_sv_bedpe
+    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated*.bed"), val(meta), emit: annot_sv_bedpe
 
   script:
 
+    if (suppl_switch == "main")
     """
     Rscript ${projectDir}/bin/sv/annotate-bedpe-with-databases.r \
         --db_names=gap,DGV,1000G,PON,COSMIC \
@@ -25,5 +27,15 @@ process ANNOTATE_SV {
         --bedpe=${merged_sv_bed} \
         --out_file=${sampleID}.manta_gridss_sv_annotated.bed
 
+    """
+    else if (suppl_switch == "supplemental")
+    """
+    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-databases.r \
+        --db_names=gap,DGV,1000G,PON,COSMIC \
+        --db_files=${params.gap},${params.dgvBedpe},${params.thousandGVcf},${params.svPon},${params.cosmicBedPe} \
+        --slop=500 \
+        --db_ignore_strand=COSMIC \
+        --bedpe=${merged_sv_bed} \
+        --out_file=${sampleID}.manta_gridss_sv_annotated_supplemental.bed
     """
 }

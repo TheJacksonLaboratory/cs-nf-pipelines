@@ -9,16 +9,26 @@ process ANNOTATE_SV_WITH_CNV {
 
   input:
     tuple val(sampleID), val(meta), file(bicseq_annot), file(annot_sv_genes_bedpe)
+    val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated_genes_cnv.bed"), val(meta), emit: sv_genes_cnv_bedpe
+    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated_genes_cnv*.bed"), val(meta), emit: sv_genes_cnv_bedpe
  
   script:
 
+    if (suppl_switch == "main")
     """
     Rscript ${projectDir}/bin/sv/annotate-bedpe-with-cnv.r \
         --cnv=${bicseq_annot} \
         --bedpe=${annot_sv_genes_bedpe} \
         --out_file=${sampleID}.manta_gridss_sv_annotated_genes_cnv.bed
     """
+
+    else if (suppl_switch == "supplemental")
+    """
+    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-cnv.r \
+        --cnv=${bicseq_annot} \
+        --bedpe=${annot_sv_genes_bedpe} \
+        --out_file=${sampleID}.manta_gridss_sv_annotated_genes_cnv_supplemental.bed
+    """    
 }
