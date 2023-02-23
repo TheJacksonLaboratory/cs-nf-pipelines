@@ -13,8 +13,8 @@ process ANNOTATE_BICSEQ2_CNV {
     val(chrom_list)
 
   output:
-    tuple val(sampleID), file("${sampleID}.bicseq2_annotated.bed"), val(meta), val(normal_name), val(tumor_name), emit: bicseq_annot
-    tuple val(sampleID), file("${sampleID}.bicseq2_annotated_supplemental.bed"), val(meta), val(normal_name), val(tumor_name), emit: bicseq_annot_suppl
+    tuple val(sampleID), file("${sampleID}.bicseq2_annotated.bed"), val(meta), emit: bicseq_annot
+    tuple val(sampleID), file("${sampleID}.bicseq2_annotated_supplemental.bed"), val(meta), emit: bicseq_annot_suppl
 
   script:
     listOfChroms = chrom_list.collect { "$it" }.join(',')
