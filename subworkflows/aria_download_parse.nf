@@ -11,6 +11,20 @@ workflow FILE_DOWNLOAD {
         ch_input_sample
 
     main:
+
+    /* 
+        General note: 
+
+        Input tuple expected from the CSV sheet: 
+            it[0] is sample ID. 
+            it[1] is metadata information
+            it[2] and it[3] are R1 and R2 if PE. it[3] is empty if SE. 
+
+        All steps expect that sampleID is in position [0] of tuples. 
+
+    */
+
+
         if (params.read_type == 'PE') {
             aria_download_input = ch_input_sample
             .multiMap { it ->
@@ -38,30 +52,30 @@ workflow FILE_DOWNLOAD {
         concat_input = ARIA_DOWNLOAD.out.file
                             .map { it ->
                                 def meta = [:]
-                                meta.sample   = it[1].sample
-                                meta.patient  = it[1].patient
-                                meta.sex      = it[1].sample
-                                meta.status   = it[1].sample
-                                meta.id       = it[1].id
-
-                                [it[0], it[1].lane, meta, it[2], it[3]]
+                                meta.sampleID   = it[1].sampleID
+                                [it[0], it[1].lane, meta, it[2], it[3]] // sampleID, laneID, meta, read_ID:[R1|R2], file
                             }    
-                            .groupTuple(by: [0,2,3])
-                            .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])}
+                            .groupTuple(by: [0,2,3]) // sampleID, meta, read_ID
+                            .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])} // sampleID, num_lanes, meta, read_ID:[R1|R2], file
                             .branch{
                                 concat: it[1] > 1
                                 pass:  it[1] == 1
                             }
         /* 
-            remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_num: R1|R2.
+            remap the downloaded files to exclude lane from meta, and group on sampleID, meta, and read_ID: R1|R2.
             The number of lanes in the grouped data is used to determine if concatenation is needed. 
-            The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated. 
+            The branch statement makes a 'concat' set for concatenation and a 'pass' set that isn't concatenated.
+            The branch is using it[1].size() from the preceding step, i.e., the list size of lanes for the sample.  
+
+            Metadata inclusion here is for future expansion. As implimented above, metadata is redundant to sampleID in `it[0]`. 
+            However, if additional metadata are added to sample sheets, those metadata can be added and tracked above.
+
         */
 
         no_concat_samples = concat_input.pass
-                            .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])}
+                            .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])} // sampleID, num_lanes, meta, read_ID:[R1|R2], file
         /* 
-            this delists the single fastq samples (i.e., non-concat samples).
+            this delists the the file in `it[4]` as it is a single fastq sample (i.e., non-concat samples).
         */
 
         // Concatenate samples as needed. 
@@ -69,7 +83,7 @@ workflow FILE_DOWNLOAD {
 
         read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
         .mix(no_concat_samples)
-        .groupTuple(by: [0,2])
+        .groupTuple(by: [0,2]) // sampleID, meta
         .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
 
         /*
