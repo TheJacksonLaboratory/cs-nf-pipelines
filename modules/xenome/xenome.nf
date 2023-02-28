@@ -16,6 +16,7 @@ process XENOME_CLASSIFY {
 
     output:
     tuple val(sampleID), file("human*.fastq"), emit: xenome_fastq
+    tuple val(sampleID), file("mouse*.fastq"), emit: xenome_mouse_fastq
     tuple val(sampleID), file("*.txt"), emit: xenome_stats
 
     script:

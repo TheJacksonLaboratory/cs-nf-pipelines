@@ -20,6 +20,5 @@ process FASTQ_PAIR {
 
     """
     fastq_pair ${reads[0]} ${reads[1]}
-
     """
 }
