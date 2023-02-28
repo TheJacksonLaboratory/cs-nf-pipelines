@@ -7,11 +7,13 @@ include {param_log} from "${projectDir}/bin/log/rnaseq"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
+include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
-include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
+include {FASTQ_SORT as FASTQ_SORT_HUMAN;
+         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
@@ -33,6 +35,13 @@ if (params.help){
 // log paramiter info
 param_log()
 
+if (params.download_data && !params.csv_input) {
+    exit 1, "Data download was specified with `--download_data`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--download_data` requires a CSV manifest. See `--help` for information."
+}
+
+if (params.pdx && params.gen_org == 'mouse') {
+    exit 1, "PDX analysis was specified with `--pdx`. `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `--gen_org` must == 'human' for PDX analysis."
+}
 
 // prepare reads channel
 if (params.csv_input) {
@@ -76,9 +85,6 @@ if (params.csv_input) {
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 }
-if (params.pdx && params.gen_org == 'mouse') {
-    exit 1, "PDX analysis was specified with `--pdx`. `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
-}
 
 // downstream resources (only load once so do it here)
 if (params.rsem_aligner == "bowtie2") {
@@ -100,7 +106,14 @@ workflow RNASEQ {
       FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
   }
 
-  // Step 0: Concat local Fastq files if required.
+  // Step 00: Concat local Fastq files from CSV input if required.
+  if (!params.download_data && params.csv_input){
+      CONCATENATE_LOCAL_FILES(ch_input_sample)
+      CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+      CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+  }
+  
+  // Step 00: Concat local Fastq files if required.
   if (params.concat_lanes && !params.csv_input){
       if (params.read_type == 'PE'){
           CONCATENATE_READS_PE(read_ch)
@@ -128,8 +141,9 @@ workflow RNASEQ {
     ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
     // Xenome Read Sort
-    FASTQ_SORT(XENOME_CLASSIFY.out.xenome_fastq)
-    rsem_input = FASTQ_SORT.out.sorted_fastq
+    FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
+    FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
+    rsem_input = FASTQ_SORT_HUMAN.out.sorted_fastq
 
   } else { 
     rsem_input = FASTQ_PAIR.out.paired_fastq
