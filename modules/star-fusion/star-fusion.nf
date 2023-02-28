@@ -3,10 +3,10 @@ process STAR_FUSION {
     tag "$sampleID"
 
     cpus 12
-    memory { 84.GB * task.attempt }
+    memory { 42.GB * task.attempt }
     time { 24.h * task.attempt }
     errorStrategy 'finish'
-    //maxRetries 1
+    maxRetries 1
 
     container 'trinityctat/starfusion:1.12.0'
 
@@ -16,8 +16,8 @@ process STAR_FUSION {
         tuple val(sampleID), file(reads)
 
     output:
-        tuple val(sampleID), file("${sampleID}_star-fusion.tsv"), optional: true, emit: star_fusion_fusions
-        tuple val(sampleID), file("${sampleID}_abridged.tsv"), optional: true, emit: star_fusion_fusions_abridge
+        tuple val(sampleID), file("${sampleID}_star-fusion.tsv"), emit: star_fusion_fusions
+        tuple val(sampleID), file("${sampleID}_abridged.tsv"), emit: star_fusion_fusions_abridge
         tuple val(sampleID), file("${sampleID}_abridged.coding_effect.tsv"), optional: true, emit: star_fusion_abridge_coding
 
     script:
@@ -66,3 +66,28 @@ process STAR_FUSION {
 }
 
 //`--readFilesCommand zcat` this option is included in STAR if files are compressed. 
+
+/*
+    export TMPDIR=/fastscratch/lloydm/tmp
+    
+    wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam34.0/Pfam-A.hmm.gz --no-check-certificate
+    wget https://github.com/FusionAnnotator/CTAT_HumanFusionLib/releases/download/v0.3.0/fusion_lib.Mar2021.dat.gz -O CTAT_HumanFusionLib_Mar2021.dat.gz --no-check-certificate
+    wget https://data.broadinstitute.org/Trinity/CTAT_RESOURCE_LIB/AnnotFilterRule.pm -O AnnotFilterRule.pm --no-check-certificate
+    wget https://www.dfam.org/releases/Dfam_3.4/infrastructure/dfamscan/homo_sapiens_dfam.hmm --no-check-certificate
+    wget https://www.dfam.org/releases/Dfam_3.4/infrastructure/dfamscan/homo_sapiens_dfam.hmm.h3f --no-check-certificate
+    wget https://www.dfam.org/releases/Dfam_3.4/infrastructure/dfamscan/homo_sapiens_dfam.hmm.h3i --no-check-certificate
+    wget https://www.dfam.org/releases/Dfam_3.4/infrastructure/dfamscan/homo_sapiens_dfam.hmm.h3m --no-check-certificate
+    wget https://www.dfam.org/releases/Dfam_3.4/infrastructure/dfamscan/homo_sapiens_dfam.hmm.h3p --no-check-certificate
+    gunzip Pfam-A.hmm.gz && hmmpress Pfam-A.hmm
+    
+    singularity exec /projects/omics_share/meta/containers/trinityctat-starfusion-1.12.0.img \
+    /usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl \
+        --genome_fa /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/gencode/v37/kallisto/references/ensembl/Homo_sapiens.GRCh38.102.all.fa \
+        --gtf /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/gencode/v37/kallisto/references/ensembl/Homo_sapiens.GRCh38.102.chr.gtf \
+        --annot_filter_rule AnnotFilterRule.pm \
+        --fusion_annot_lib CTAT_HumanFusionLib_Mar2021.dat.gz \
+        --pfam_db Pfam-A.hmm \
+        --dfam_db homo_sapiens_dfam.hmm \
+        --max_readlength 150 \
+        --CPU 8
+*/

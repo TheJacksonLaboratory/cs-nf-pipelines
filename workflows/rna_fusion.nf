@@ -16,6 +16,8 @@ include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
+include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
+include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {FUSION_REPORT} from "${projectDir}/modules/fusion_report/fusion_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
@@ -131,18 +133,30 @@ workflow RNA_FUSION {
     }
 
     // Step 3: Star-fusion
-    STAR_FUSION(fusion_tool_input)
+    // STAR_FUSION(fusion_tool_input)
+
+    // squid
+
+    // pizzly
+    KALLISTO_QUANT(fusion_tool_input)
+    PIZZLY(KALLISTO_QUANT.out.kallisto_fusions)
+
+    // arriba
+
+    // jaffa
+
+    // fusioncatcher. 
 
     // Step 4: Fusion Reporter
-    FUSION_REPORT(STAR_FUSION.out.star_fusion_fusions)
+    // FUSION_REPORT(STAR_FUSION.out.star_fusion_fusions)
 
     // Step 5: MultiQC
-    ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = Channel.empty()
+    // ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    // ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
 
-    MULTIQC (
-        ch_multiqc_files.collect()
-    )
+    // MULTIQC (
+        // ch_multiqc_files.collect()
+    // )
 }
