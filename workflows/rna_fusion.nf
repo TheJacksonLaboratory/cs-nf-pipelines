@@ -9,7 +9,6 @@ include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
-include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {GUNZIP} from "${projectDir}/modules/utility_modules/gunzip"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
@@ -18,6 +17,7 @@ include {FASTQ_SORT as FASTQ_SORT_HUMAN;
 include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
 include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
 include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
+include {JAFFA} from "${projectDir}/modules/jaffa/jaffa"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {FUSION_REPORT} from "${projectDir}/modules/fusion_report/fusion_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
@@ -38,44 +38,32 @@ if (params.gen_org == 'mouse') {
     exit 1, "This pipeline currently only supports human data analysis."
 }
 
+if (params.read_type == 'SE') {
+    exit 1, "This pipeline supports only paired end data."
+}
+
 // prepare reads channel
 if (params.csv_input) {
 
     ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
     
-    if (params.read_type == 'PE'){
-        ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
-        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
-    } else if (params.read_type == 'SE') {
-        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
-        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
-    }
-
+    ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+    ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    
 } else if (params.concat_lanes){
   
-  if (params.read_type == 'PE'){
     read_ch = Channel
             .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
             .map { file, file1, file2 -> tuple(getLibraryId(file), file1, file2) }
             .groupTuple()
-  }
-  else if (params.read_type == 'SE'){
-    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}", checkExists:true, size:1 )
-                .map { file, file1 -> tuple(getLibraryId(file), file1) }
-                .groupTuple()
-                .map{t-> [t[0], t[1].flatten()]}
-  }
+  
     // if channel is empty give error message and exit
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
 } else {
-  
-  if (params.read_type == 'PE'){
+
     read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
-  }
-  else if (params.read_type == 'SE'){
-    read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
-  }
+
     // if channel is empty give error message and exit
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
 
@@ -101,13 +89,8 @@ workflow RNA_FUSION {
 
     // Step 0: Concat local Fastq files if required.
     if (params.concat_lanes && !params.csv_input){
-        if (params.read_type == 'PE'){
-            CONCATENATE_READS_PE(read_ch)
-            read_ch = CONCATENATE_READS_PE.out.concat_fastq
-        } else if (params.read_type == 'SE'){
-            CONCATENATE_READS_SE(read_ch)
-            read_ch = CONCATENATE_READS_SE.out.concat_fastq
-        }
+        CONCATENATE_READS_PE(read_ch)
+        read_ch = CONCATENATE_READS_PE.out.concat_fastq
     }
 
     GUNZIP(read_ch)
@@ -132,20 +115,28 @@ workflow RNA_FUSION {
         fusion_tool_input = FASTQ_PAIR.out.paired_fastq
     }
 
-    // Step 3: Star-fusion
-    // STAR_FUSION(fusion_tool_input)
 
-    // squid
+    // arriba
+
+
+    // fusioncatcher
+
+
+    // jaffa
+    JAFFA(fusion_tool_input)
 
     // pizzly
     KALLISTO_QUANT(fusion_tool_input)
     PIZZLY(KALLISTO_QUANT.out.kallisto_fusions)
 
-    // arriba
+    // Step 3: Star-fusion
+    STAR_FUSION(fusion_tool_input)
 
-    // jaffa
 
-    // fusioncatcher. 
+    // squid
+
+    // STAR_FUSION.out.star_fusion_fusions.join()
+
 
     // Step 4: Fusion Reporter
     // FUSION_REPORT(STAR_FUSION.out.star_fusion_fusions)

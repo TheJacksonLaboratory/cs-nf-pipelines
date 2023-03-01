@@ -1,5 +1,5 @@
     
-    
+    docker.io/nfcore/rnafusion:squid_1.5-star2.7.1a
     
     
     

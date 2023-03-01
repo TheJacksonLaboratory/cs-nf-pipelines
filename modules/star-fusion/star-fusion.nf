@@ -10,15 +10,15 @@ process STAR_FUSION {
 
     container 'trinityctat/starfusion:1.12.0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'star-fusion' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'star-fusion' }", pattern: "*.{tsv,txt}", mode:'copy'
 
     input:
         tuple val(sampleID), file(reads)
 
     output:
-        tuple val(sampleID), file("${sampleID}_star-fusion.tsv"), emit: star_fusion_fusions
-        tuple val(sampleID), file("${sampleID}_abridged.tsv"), emit: star_fusion_fusions_abridge
-        tuple val(sampleID), file("${sampleID}_abridged.coding_effect.tsv"), optional: true, emit: star_fusion_abridge_coding
+        tuple val(sampleID), file("*_star-fusion_results.tsv"), emit: star_fusion_fusions
+        tuple val(sampleID), file("*_abridged.tsv"), emit: star_fusion_fusions_abridge
+        tuple val(sampleID), file("*_abridged.coding_effect.tsv"), optional: true, emit: star_fusion_abridge_coding
 
     script:
     def avail_mem = task.memory ? "--limitBAMsortRAM ${task.memory.toBytes() - 100000000}" : ''
@@ -27,7 +27,7 @@ process STAR_FUSION {
 
     """
     STAR \\
-        --genomeDir ${params.star_index} \\
+        --genomeDir ${params.star_fusion_star_index} \\
         --readFilesIn ${reads} \\
         --twopassMode Basic \\
         --outReadsUnmapped None \\
@@ -59,9 +59,9 @@ process STAR_FUSION {
         --examine_coding_effect \\
         --output_dir . ${extra_params}
 
-    mv star-fusion.fusion_predictions.tsv ${sampleID}_star-fusion.tsv
-    mv star-fusion.fusion_predictions.abridged.tsv ${sampleID}_abridged.tsv
-    mv star-fusion.fusion_predictions.abridged.coding_effect.tsv ${sampleID}_abridged.coding_effect.tsv
+    mv star-fusion.fusion_predictions.tsv ${sampleID}_star-fusion_results.tsv
+    mv star-fusion.fusion_predictions.abridged.tsv ${sampleID}_star-fusion_abridged.tsv
+    mv star-fusion.fusion_predictions.abridged.coding_effect.tsv ${sampleID}_star-fusion_abridged.coding_effect.tsv
     """
 }
 

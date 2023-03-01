@@ -8,7 +8,7 @@ process ARRIBA {
     errorStrategy 'finish'
     //maxRetries 1
 
-    container 'TBD TBD TBD TBD TBD'
+    container 'quay.io/biocontainers/arriba:2.4.0--ha04fe3b_0'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'star-fusion' }", pattern: "*.{tsv,txt}", mode:'copy'
 
