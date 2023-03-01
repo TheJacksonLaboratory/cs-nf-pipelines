@@ -132,7 +132,6 @@ workflow RNA_FUSION {
     // Step 3: Star-fusion
     STAR_FUSION(fusion_tool_input)
 
-
     // squid
 
     // STAR_FUSION.out.star_fusion_fusions.join()

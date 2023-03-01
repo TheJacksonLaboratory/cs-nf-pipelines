@@ -13,17 +13,20 @@ process PIZZLY {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'pizzly' }", pattern: "*_pizzly_results.txt", mode:'copy'
 
     input:
-        tuple val(sampleID), path(kallisto_fusions)
+        tuple val(sampleID), path(kallisto_fusions), path(kallisto_abundance)
 
     output:
         tuple val(sampleID), path("*_pizzly_results.txt"), emit: pizzly_fusions
 
     script:
     """
+
+    max_insert_size=`python ${projectDir}/bin/rna_fusion/compute_insert_size.py ${kallisto_abundance}`
+
     pizzly \
     -k 31 \
     --align-score 2 \
-    --insert-size 400 \
+    --insert-size "\${max_insert_size}" \
     --cache index.cache.txt \
     --gtf ${params.gtf} \
     --fasta ${params.transcript_fasta} \
@@ -33,3 +36,5 @@ process PIZZLY {
 
     """
 }
+
+

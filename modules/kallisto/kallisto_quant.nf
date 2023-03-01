@@ -11,10 +11,10 @@ process KALLISTO_QUANT {
     container 'quay.io/biocontainers/kallisto:0.48.0--h15996b6_2'
 
     input:
-        tuple val(sampleID), file(reads)
+        tuple val(sampleID), path(reads)
 
     output:
-        tuple val(sampleID), file("${sampleID}.kallisto_quant.fusions.txt"), emit: kallisto_fusions
+        tuple val(sampleID), path("*kallisto_quant.fusions.txt"), path("*abundance.h5"), emit: kallisto_fusions
 
     script:
     """
@@ -25,6 +25,7 @@ process KALLISTO_QUANT {
         -o . \
         ${reads}
     mv fusion.txt ${sampleID}.kallisto_quant.fusions.txt
+    mv abundance.h5 ${sampleID}.abundance.h5
     """
 }
 // NOTE: 
