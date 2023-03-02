@@ -9,8 +9,10 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
-include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
-         COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
          VCF_ANNOTATE as VCF_ANNOTATE_INDEL} from "${projectDir}/modules/vcftools/vcf_annotate"
 include {SNPEFF;
@@ -193,13 +195,15 @@ workflow WGS {
   if (params.gen_org=='human'){
 
     // SNP
-      COSMIC_ANNOTATION_SNP(VCF_ANNOTATE_SNP.out.vcf)
-      SNPEFF_SNP(COSMIC_ANNOTATION_SNP.out.vcf, 'SNP', 'vcf')
+      SNPSIFT_ANNOTATE_SNP_DBSNP(VCF_ANNOTATE_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+      SNPSIFT_ANNOTATE_SNP_COSMIC(SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+      SNPEFF_SNP(SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf, 'SNP', 'vcf')
       SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
       SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
     // INDEL
-      COSMIC_ANNOTATION_INDEL(VCF_ANNOTATE_INDEL.out.vcf)
-      SNPEFF_INDEL(COSMIC_ANNOTATION_INDEL.out.vcf, 'INDEL', 'vcf')
+      SNPSIFT_ANNOTATE_INDEL_DBSNP(VCF_ANNOTATE_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+      SNPSIFT_ANNOTATE_INDEL_COSMIC(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+      SNPEFF_INDEL(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf, 'INDEL', 'vcf')
       SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
       SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
       
