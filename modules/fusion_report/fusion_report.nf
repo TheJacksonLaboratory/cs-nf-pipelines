@@ -12,10 +12,7 @@ process FUSION_REPORT {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/Fusion-Report/' : 'star-fusion' }", mode:'copy'
 
     input:
-        //set val(sample), file(reads), file(arriba), file(ericscript), file(fusioncatcher), file(pizzly), file(squid), file(starfusion) from files_and_reports_summary
-        // code left if ever expanded to multiple tools. 
-
-        tuple val(sampleID), file(starfusion)
+        tuple val(sampleID), path(arriba), path(fusioncatcher), path(jaffa), path(pizzly), path(squid), path(starfusion)
 
     output:
         tuple val(sampleID), file("${sampleID}_fusion_list.tsv"), emit: fusion_inspector_input_list
@@ -24,16 +21,15 @@ process FUSION_REPORT {
     
     script:
     def extra_params = params.fusion_report_opt ? params.fusion_report_opt : ''
-    // def tools = !arriba.empty() ? "--arriba ${arriba} " : ''
-    // tools += !ericscript.empty() ? "--ericscript ${ericscript} " : ''
-    // tools += !fusioncatcher.empty() ? "--fusioncatcher ${fusioncatcher} " : ''
-    // tools += !pizzly.empty() ? "--pizzly ${pizzly} " : ''
-    // tools += !squid.empty() ? "--squid ${squid} " : ''
-    // tools += !starfusion.empty() ? "--starfusion ${starfusion} " : ''
-    // Code left if ever expanded to multiple tools. 
+    def tools =  !arriba.empty() ? "--arriba ${arriba} " : ''
+        tools += !jaffa.empty() ? "--jaffa ${jaffa} " : ''
+        tools += !fusioncatcher.empty() ? "--fusioncatcher ${fusioncatcher} " : ''
+        tools += !pizzly.empty() ? "--pizzly ${pizzly} " : ''
+        tools += !squid.empty() ? "--squid ${squid} " : ''
+        tools += !starfusion.empty() ? "--starfusion ${starfusion} " : ''
 
     """
-    fusion_report run ${sampleID} . ${params.databases} --starfusion ${starfusion} ${extra_params}
+    fusion_report run ${sampleID} . ${params.databases} ${tools} ${extra_params}
     mv fusion_list.tsv ${sampleID}_fusion_list.tsv
     mv fusion_list_filtered.tsv ${sampleID}_fusion_list_filtered.tsv
     mv fusion_genes_mqc.json ${sampleID}_fusion_genes_mqc.json

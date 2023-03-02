@@ -16,7 +16,7 @@ process SQUID_ANNOTATE {
         tuple val(sampleID), path(txt)
 
     output:
-        tuple val(meta), path("*annotated.txt"), emit: squid_fusions_annotated
+        tuple val(sampleID), path("*annotated.txt"), emit: squid_fusions_annotated
 
     script:
     """

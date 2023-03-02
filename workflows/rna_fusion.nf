@@ -136,7 +136,7 @@ workflow RNA_FUSION {
         fusion_tool_input = FASTQ_PAIR.out.paired_fastq
     }
 
-
+    // Step 3: Callers:
     // arriba
     STAR_ARRIBA(fusion_tool_input, params.arriba_star_args)
     SORT_ARRIBA(STAR_ARRIBA.out.bam, '')
@@ -158,34 +158,26 @@ workflow RNA_FUSION {
 
     // squid
     STAR_SQUID(fusion_tool_input, params.squid_star_args)
-    // NOTE: The sam file from STAR_SQUID contains chimeric reads. Per passed arguments. 
-    SAMTOOLS_VIEW_SQUID(STAR_SQUID.out.sam, '-Sb', '_chimeric')
+    SAMTOOLS_VIEW_SQUID(STAR_SQUID.out.sam, '-Sb', '_chimeric') // NOTE: The sam file from STAR_SQUID contains chimeric reads. Per STAR passed arguments. 
     SORT_SQUID(SAMTOOLS_VIEW_SQUID.out.bam, '')
-
     squid_input = STAR_SQUID.out.bam_sorted.join(SORT_SQUID.out.sorted_bam )
-
-    squid_input.view()
-
     SQUID(squid_input)
     SQUID_ANNOTATE(SQUID.out.squid_fusions)
     
-    // Step 3: Star-fusion
+    // star-fusion
     STAR_FUSION(fusion_tool_input)
 
-
-    // STAR_FUSION.out.star_fusion_fusions.join()
-
-
     // Step 4: Fusion Reporter
-    // FUSION_REPORT(STAR_FUSION.out.star_fusion_fusions)
+    fusion_report_input = ARRIBA.out.arriba_fusions.join(FUSIONCATCHER.out.fusioncatcher_fusions).join(JAFFA.out.jaffa_fusions).join(PIZZLY.out.pizzly_fusions).join(SQUID_ANNOTATE.out.squid_fusions_annotated).join(STAR_FUSION.out.star_fusion_fusions)
+    FUSION_REPORT(fusion_report_input)
 
     // Step 5: MultiQC
-    // ch_multiqc_files = Channel.empty()
-    // ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-    // ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
 
-    // MULTIQC (
-        // ch_multiqc_files.collect()
-    // )
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 }
