@@ -15,12 +15,15 @@ include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 
-include {STAR_ALIGN as STAR_ARRIBA} from "${projectDir}/modules/star/star_align"
+include {STAR_ALIGN as STAR_ARRIBA;
+         STAR_ALIGN as STAR_SQUID} from "${projectDir}/modules/star/star_align"
 
 include {SAMTOOLS_SORT as SORT_ARRIBA} from "${projectDir}/modules/samtools/samtools_sort_only"
 include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"
 
 include {ARRIBA} from "${projectDir}/modules/arriba/arriba"
+
+include {FUSIONCATCHER} from "${projectDir}/modules/fusioncatcher/fusioncatcher"
 
 include {JAFFA} from "${projectDir}/modules/jaffa/jaffa"
 
@@ -136,7 +139,7 @@ workflow RNA_FUSION {
     ARRIBA(arriba_input)
 
     // fusioncatcher
-
+    FUSIONCATCHER(fusion_tool_input)
 
     // jaffa
     JAFFA(fusion_tool_input)
@@ -151,6 +154,32 @@ workflow RNA_FUSION {
     STAR_FUSION(fusion_tool_input)
 
     // squid
+    // STAR_SQUID(fusion_tool_input, params.squid_star_args)
+
+            // STAR_FOR_SQUID( reads, ch_starindex_ensembl_ref, ch_gtf, params.star_ignore_sjdbgtf, '', params.seq_center ?: '')
+            // ch_versions = ch_versions.mix(STAR_FOR_SQUID.out.versions )
+
+            // STAR_FOR_SQUID.out.sam
+            // .map { meta, sam ->
+            // return [meta, sam, []]
+            // }.set { sam_indexed }
+
+            // SAMTOOLS_VIEW_FOR_SQUID ( sam_indexed, [] )
+            // ch_versions = ch_versions.mix(SAMTOOLS_VIEW_FOR_SQUID.out.versions )
+
+            // SAMTOOLS_SORT_FOR_SQUID ( SAMTOOLS_VIEW_FOR_SQUID.out.bam )
+            // ch_versions = ch_versions.mix(SAMTOOLS_SORT_FOR_SQUID.out.versions )
+
+            // bam_sorted = STAR_FOR_SQUID.out.bam_sorted.join(SAMTOOLS_SORT_FOR_SQUID.out.bam )
+
+            // SQUID ( bam_sorted )
+            // ch_versions = ch_versions.mix(SQUID.out.versions)
+
+            // SQUID_ANNOTATE ( SQUID.out.fusions, ch_gtf )
+            // ch_versions = ch_versions.mix(SQUID_ANNOTATE.out.versions)
+
+            // ch_squid_fusions = SQUID_ANNOTATE.out.fusions_annotated
+
 
     // STAR_FUSION.out.star_fusion_fusions.join()
 
