@@ -14,35 +14,24 @@ include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
-
 include {STAR_ALIGN as STAR_ARRIBA;
          STAR_ALIGN as STAR_SQUID} from "${projectDir}/modules/star/star_align"
-
 include {SAMTOOLS_SORT as SORT_ARRIBA;
          SAMTOOLS_SORT as SORT_SQUID} from "${projectDir}/modules/samtools/samtools_sort_only"
 include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"
-
 include {ARRIBA} from "${projectDir}/modules/arriba/arriba"
-
 include {FUSIONCATCHER} from "${projectDir}/modules/fusioncatcher/fusioncatcher"
-
 include {JAFFA} from "${projectDir}/modules/jaffa/jaffa"
-
 include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
 include {KALLISTO_INSERT_SIZE} from "${projectDir}/modules/kallisto/kallisto_insert_size"
 include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
-
 include {SQUID} from "${projectDir}/modules/squid/squid_call"
 include {SQUID_ANNOTATE} from "${projectDir}/modules/squid/squid_annotate"
-
 include {SAMTOOLS_VIEW as SAMTOOLS_VIEW_SQUID} from "${projectDir}/modules/samtools/samtools_view"
-
 include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
-
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {FUSION_REPORT} from "${projectDir}/modules/fusion_report/fusion_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
-
 
 // log params
 param_log()

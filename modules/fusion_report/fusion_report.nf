@@ -9,7 +9,7 @@ process FUSION_REPORT {
 
     container 'quay.io/biocontainers/fusion-report:2.1.5--pyhdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/Fusion-Report/' : 'star-fusion' }", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/fusion-report/' : 'star-fusion' }", mode:'copy'
 
     input:
         tuple val(sampleID), path(arriba), path(fusioncatcher), path(jaffa), path(pizzly), path(squid), path(starfusion)
