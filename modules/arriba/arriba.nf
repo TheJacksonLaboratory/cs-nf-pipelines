@@ -2,64 +2,42 @@ process ARRIBA {
 
     tag "$sampleID"
 
-    cpus 12
-    memory { 84.GB * task.attempt }
-    time { 24.h * task.attempt }
+    cpus 1
+    memory { 10.GB * task.attempt }
+    time { 2.h * task.attempt }
     errorStrategy 'finish'
-    //maxRetries 1
+    // maxRetries 1
 
     container 'quay.io/biocontainers/arriba:2.4.0--ha04fe3b_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'star-fusion' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions' : 'arriba' }", pattern: "*.{tsv,txt}", mode:'copy'
 
     input:
-        tuple val(sampleID), file(reads)
+        tuple val(sampleID), path(bam), path(bai)
 
     output:
-        tuple val(sampleID), file("${sampleID}_star-fusion.tsv"), optional: true, emit: star_fusion_fusions
-        tuple val(sampleID), file("${sampleID}_abridged.tsv"), optional: true, emit: star_fusion_fusions_abridge
-        tuple val(sampleID), file("${sampleID}_abridged.coding_effect.tsv"), optional: true, emit: star_fusion_abridge_coding
-
+        tuple val(sampleID), path("*_arriba_results.tsv"), emit: arriba_fusions
+        tuple val(sampleID), path("*_arriba_fusions_discarded.tsv"), emit: arriba_fusions_fail
+    
     script:
 
     """
     arriba \\
-        -x $bam \\
-        -a $fasta \\
-        -g $gtf \\
-        -o ${prefix}.fusions.tsv \\
-        -O ${prefix}.fusions.discarded.tsv \\
-        $blacklist \\
-        $known_fusions \\
-        $structural_variants \\
-        $tags \\
-        $protein_domains \\
-        $args
+        -x ${bam} \\
+        -a ${params.fasta} \\
+        -g ${params.gtf} \\
+        -o ${sampleID}_arriba_results.tsv \\
+        -O ${sampleID}_arriba_fusions_discarded.tsv \\
+        -b ${params.arriba_blacklist} \\
+        -k ${params.arriba_known_fusions} \\
+        -t ${params.arriba_known_fusions} \\
+        -p ${params.arriba_protein_domains}
     """
 }
 
-
-
-    withName: STAR_FOR_ARRIBA {
-        publishDir = [
-            path: { "${params.outdir}/star_for_arriba" },
-            mode: params.publish_dir_mode,
-            saveAs: { filename -> filename.equals('versions.yml') ? null : filename },
-        ]
-        ext.args = '--readFilesCommand zcat \
-        --outSAMtype BAM Unsorted \
-        --outSAMunmapped Within \
-        --outBAMcompression 0 \
-        --outFilterMultimapNmax 50 \
-        --peOverlapNbasesMin 10 \
-        --alignSplicedMateMapLminOverLmate 0.5 \
-        --alignSJstitchMismatchNmax 5 -1 5 5 \
-        --chimSegmentMin 10 \
-        --chimOutType WithinBAM HardClip \
-        --chimJunctionOverhangMin 10 \
-        --chimScoreDropMax 30 \
-        --chimScoreJunctionNonGTAG 0 \
-        --chimScoreSeparation 1 \
-        --chimSegmentReadGapMax 3 \
-        --chimMultimapNmax 50'
-    }
+/*
+From the documentation: 
+    Note: In this execution, the same file is passed to the parameters -k and -t, because it is used for two purposes: 
+    applying sensitive filtering parameters to known fusions (-k) and tagging known fusions in the tags column (-t).
+    However, it is possible to use different files for these two parameters if a user wants to separate the two tasks.
+*/

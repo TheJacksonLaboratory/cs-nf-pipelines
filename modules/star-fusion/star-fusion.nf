@@ -4,7 +4,7 @@ process STAR_FUSION {
 
     cpus 12
     memory { 42.GB * task.attempt }
-    time { 24.h * task.attempt }
+    time { 5.h * task.attempt }
     errorStrategy 'finish'
     maxRetries 1
 

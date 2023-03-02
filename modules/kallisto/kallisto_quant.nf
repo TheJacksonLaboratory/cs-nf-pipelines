@@ -14,7 +14,8 @@ process KALLISTO_QUANT {
         tuple val(sampleID), path(reads)
 
     output:
-        tuple val(sampleID), path("*kallisto_quant.fusions.txt"), path("*abundance.h5"), emit: kallisto_fusions
+        tuple val(sampleID), path("*kallisto_quant.fusions.txt"), emit: kallisto_fusions
+        tuple val(sampleID), path("*abundance.h5"), emit: kallisto_abundance
 
     script:
     """

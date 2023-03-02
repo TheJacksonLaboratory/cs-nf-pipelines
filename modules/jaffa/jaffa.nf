@@ -4,7 +4,7 @@ process JAFFA {
 
     cpus 12
     memory { 84.GB * task.attempt }
-    time { 24.h * task.attempt }
+    time { 10.h * task.attempt }
     errorStrategy 'finish'
     maxRetries 1
 

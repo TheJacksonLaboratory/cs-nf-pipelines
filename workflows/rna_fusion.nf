@@ -14,10 +14,22 @@ include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
-include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
-include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
-include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
+
+include {STAR_ALIGN as STAR_ARRIBA} from "${projectDir}/modules/star/star_align"
+
+include {SAMTOOLS_SORT as SORT_ARRIBA} from "${projectDir}/modules/samtools/samtools_sort_only"
+include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"
+
+include {ARRIBA} from "${projectDir}/modules/arriba/arriba"
+
 include {JAFFA} from "${projectDir}/modules/jaffa/jaffa"
+
+include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
+include {KALLISTO_INSERT_SIZE} from "${projectDir}/modules/kallisto/kallisto_insert_size"
+include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
+
+include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
+
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {FUSION_REPORT} from "${projectDir}/modules/fusion_report/fusion_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
@@ -117,7 +129,11 @@ workflow RNA_FUSION {
 
 
     // arriba
-
+    STAR_ARRIBA(fusion_tool_input, params.arriba_star_args)
+    SORT_ARRIBA(STAR_ARRIBA.out.bam, '')
+    INDEX_ARRIBA(SORT_ARRIBA.out.sorted_bam)
+    arriba_input = SORT_ARRIBA.out.sorted_bam.join(INDEX_ARRIBA.out.bai)
+    ARRIBA(arriba_input)
 
     // fusioncatcher
 
@@ -127,7 +143,9 @@ workflow RNA_FUSION {
 
     // pizzly
     KALLISTO_QUANT(fusion_tool_input)
-    PIZZLY(KALLISTO_QUANT.out.kallisto_fusions)
+    KALLISTO_INSERT_SIZE(KALLISTO_QUANT.out.kallisto_abundance)
+    pizzly_input = KALLISTO_QUANT.out.kallisto_fusions.join(KALLISTO_INSERT_SIZE.out.kallisto_insert_size)
+    PIZZLY(pizzly_input)
 
     // Step 3: Star-fusion
     STAR_FUSION(fusion_tool_input)

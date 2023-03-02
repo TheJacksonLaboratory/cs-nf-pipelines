@@ -10,10 +10,10 @@ process SAMTOOLS_INDEX {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern:"*.ba*", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val("sampleID"), file(bam)
+  tuple val(sampleID), file(bam)
 
   output:
-  tuple val("sampleID"), file("*.bai"), emit: bai
+  tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
 
