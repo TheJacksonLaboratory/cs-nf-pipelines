@@ -16,7 +16,7 @@ process ARRIBA {
         tuple val(sampleID), path(bam), path(bai)
 
     output:
-        tuple val(sampleID), path("*_arriba_results.tsv"), emit: arriba_fusions
+        tuple val(sampleID), path("*_arriba_fusions.tsv"), emit: arriba_fusions
         tuple val(sampleID), path("*_arriba_fusions_discarded.tsv"), emit: arriba_fusions_fail
     
     script:
@@ -26,7 +26,7 @@ process ARRIBA {
         -x ${bam} \\
         -a ${params.fasta} \\
         -g ${params.gtf} \\
-        -o ${sampleID}_arriba_results.tsv \\
+        -o ${sampleID}_arriba_fusions.tsv \\
         -O ${sampleID}_arriba_fusions_discarded.tsv \\
         -b ${params.arriba_blacklist} \\
         -k ${params.arriba_known_fusions} \\

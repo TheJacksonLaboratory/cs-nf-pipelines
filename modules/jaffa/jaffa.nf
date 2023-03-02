@@ -10,15 +10,15 @@ process JAFFA {
 
     container 'quay.io/jaxcompsci/jaffa:d1587c9'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'jaffa' }", pattern: "*jaffa_results.csv", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'jaffa' }", pattern: "*jaffa_results.fasta", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'jaffa' }", pattern: "*_jaffa_fusions.csv", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'jaffa' }", pattern: "*_jaffa_fusions.fasta", mode:'copy', enabled: params.keep_intermediate
 
     input:
         tuple val(sampleID), path(reads)
 
     output:
-        tuple val(sampleID), path("*jaffa_results.csv"), emit: jaffa_fusions
-        tuple val(sampleID), path("*jaffa_results.fasta"), emit: jaffa_fasta
+        tuple val(sampleID), path("*_jaffa_fusions.csv"), emit: jaffa_fusions
+        tuple val(sampleID), path("*_jaffa_fusions.fasta"), emit: jaffa_fasta
 
     script:
     ext = reads[0].getExtension()
@@ -35,8 +35,8 @@ process JAFFA {
     ${reads[0]} \
     ${reads[1]}
 
-    mv jaffa_results.csv ${sampleID}_jaffa_results.csv
-    mv jaffa_results.fasta ${sampleID}_jaffa_results.fasta ; 
+    mv jaffa_results.csv ${sampleID}_jaffa_fusions.csv
+    mv jaffa_results.fasta ${sampleID}_jaffa_fusions.fasta ; 
 
     """
 }

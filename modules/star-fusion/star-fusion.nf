@@ -16,7 +16,7 @@ process STAR_FUSION {
         tuple val(sampleID), file(reads)
 
     output:
-        tuple val(sampleID), file("*_star-fusion_results.tsv"), emit: star_fusion_fusions
+        tuple val(sampleID), file("*_star-fusion_fusions.tsv"), emit: star_fusion_fusions
         tuple val(sampleID), file("*_abridged.tsv"), emit: star_fusion_fusions_abridge
         tuple val(sampleID), file("*_abridged.coding_effect.tsv"), optional: true, emit: star_fusion_abridge_coding
 
@@ -59,7 +59,7 @@ process STAR_FUSION {
         --examine_coding_effect \\
         --output_dir . ${extra_params}
 
-    mv star-fusion.fusion_predictions.tsv ${sampleID}_star-fusion_results.tsv
+    mv star-fusion.fusion_predictions.tsv ${sampleID}_star-fusion_fusions.tsv
     mv star-fusion.fusion_predictions.abridged.tsv ${sampleID}_star-fusion_abridged.tsv
     mv star-fusion.fusion_predictions.abridged.coding_effect.tsv ${sampleID}_star-fusion_abridged.coding_effect.tsv
     """

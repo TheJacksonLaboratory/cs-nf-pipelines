@@ -12,7 +12,7 @@ process SAMTOOLS_SORT {
   val(options)
 
   output:
-  tuple val(sampleID), file("*.sorted.bam*"), emit: sorted_bam
+  tuple val(sampleID), file("*.sorted.bam"), emit: sorted_bam
 
   script:
   """
@@ -20,7 +20,7 @@ process SAMTOOLS_SORT {
   ${options} \
   -@ ${task.cpus} \
   -O bam \
-  -o ${sampleID}.sorted.bam \
-  ${sam_file[0]}
+  -o ${sam_file.baseName}.sorted.bam \
+  ${sam_file}
   """
 }

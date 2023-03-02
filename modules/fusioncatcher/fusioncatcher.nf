@@ -17,7 +17,7 @@ process FUSIONCATCHER {
         tuple val(sampleID), path(reads)
 
     output:
-        tuple val(sampleID), path("*_fusioncatcher_fusion-genes.txt"), optional:true, emit: fusioncatcher_fusions
+        tuple val(sampleID), path("*_fusioncatcher_fusions.txt"), optional:true, emit: fusioncatcher_fusions
         tuple val(sampleID), path("*_fusioncatcher_summary.txt"), optional:true, emit: fusioncatcher_summary
         tuple val(sampleID), path("*_fusioncatcher.log"), emit: fusioncatcher_log
 
@@ -34,7 +34,7 @@ process FUSIONCATCHER {
         --skip-blat \\
         --limitSjdbInsertNsj ${params.fusioncatcher_limitSjdbInsertNsj}
 
-    mv final-list_candidate-fusion-genes.txt ${sampleID}_fusioncatcher_results.txt
+    mv final-list_candidate-fusion-genes.txt ${sampleID}_fusioncatcher_fusions.txt
     mv summary_candidate_fusions.txt ${sampleID}_fusioncatcher_summary.txt
     mv fusioncatcher.log ${sampleID}_fusioncatcher.log
 
@@ -43,4 +43,3 @@ process FUSIONCATCHER {
 
 
 }
-

@@ -18,7 +18,8 @@ include {FASTQ_SORT as FASTQ_SORT_HUMAN;
 include {STAR_ALIGN as STAR_ARRIBA;
          STAR_ALIGN as STAR_SQUID} from "${projectDir}/modules/star/star_align"
 
-include {SAMTOOLS_SORT as SORT_ARRIBA} from "${projectDir}/modules/samtools/samtools_sort_only"
+include {SAMTOOLS_SORT as SORT_ARRIBA;
+         SAMTOOLS_SORT as SORT_SQUID} from "${projectDir}/modules/samtools/samtools_sort_only"
 include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"
 
 include {ARRIBA} from "${projectDir}/modules/arriba/arriba"
@@ -30,6 +31,11 @@ include {JAFFA} from "${projectDir}/modules/jaffa/jaffa"
 include {KALLISTO_QUANT} from "${projectDir}/modules/kallisto/kallisto_quant"
 include {KALLISTO_INSERT_SIZE} from "${projectDir}/modules/kallisto/kallisto_insert_size"
 include {PIZZLY} from "${projectDir}/modules/pizzly/pizzly"
+
+include {SQUID} from "${projectDir}/modules/squid/squid_call"
+include {SQUID_ANNOTATE} from "${projectDir}/modules/squid/squid_annotate"
+
+include {SAMTOOLS_VIEW as SAMTOOLS_VIEW_SQUID} from "${projectDir}/modules/samtools/samtools_view"
 
 include {STAR_FUSION as STAR_FUSION} from "${projectDir}/modules/star-fusion/star-fusion"
 
@@ -150,35 +156,21 @@ workflow RNA_FUSION {
     pizzly_input = KALLISTO_QUANT.out.kallisto_fusions.join(KALLISTO_INSERT_SIZE.out.kallisto_insert_size)
     PIZZLY(pizzly_input)
 
+    // squid
+    STAR_SQUID(fusion_tool_input, params.squid_star_args)
+    // NOTE: The sam file from STAR_SQUID contains chimeric reads. Per passed arguments. 
+    SAMTOOLS_VIEW_SQUID(STAR_SQUID.out.sam, '-Sb', '_chimeric')
+    SORT_SQUID(SAMTOOLS_VIEW_SQUID.out.bam, '')
+
+    squid_input = STAR_SQUID.out.bam_sorted.join(SORT_SQUID.out.sorted_bam )
+
+    squid_input.view()
+
+    SQUID(squid_input)
+    SQUID_ANNOTATE(SQUID.out.squid_fusions)
+    
     // Step 3: Star-fusion
     STAR_FUSION(fusion_tool_input)
-
-    // squid
-    // STAR_SQUID(fusion_tool_input, params.squid_star_args)
-
-            // STAR_FOR_SQUID( reads, ch_starindex_ensembl_ref, ch_gtf, params.star_ignore_sjdbgtf, '', params.seq_center ?: '')
-            // ch_versions = ch_versions.mix(STAR_FOR_SQUID.out.versions )
-
-            // STAR_FOR_SQUID.out.sam
-            // .map { meta, sam ->
-            // return [meta, sam, []]
-            // }.set { sam_indexed }
-
-            // SAMTOOLS_VIEW_FOR_SQUID ( sam_indexed, [] )
-            // ch_versions = ch_versions.mix(SAMTOOLS_VIEW_FOR_SQUID.out.versions )
-
-            // SAMTOOLS_SORT_FOR_SQUID ( SAMTOOLS_VIEW_FOR_SQUID.out.bam )
-            // ch_versions = ch_versions.mix(SAMTOOLS_SORT_FOR_SQUID.out.versions )
-
-            // bam_sorted = STAR_FOR_SQUID.out.bam_sorted.join(SAMTOOLS_SORT_FOR_SQUID.out.bam )
-
-            // SQUID ( bam_sorted )
-            // ch_versions = ch_versions.mix(SQUID.out.versions)
-
-            // SQUID_ANNOTATE ( SQUID.out.fusions, ch_gtf )
-            // ch_versions = ch_versions.mix(SQUID_ANNOTATE.out.versions)
-
-            // ch_squid_fusions = SQUID_ANNOTATE.out.fusions_annotated
 
 
     // STAR_FUSION.out.star_fusion_fusions.join()
