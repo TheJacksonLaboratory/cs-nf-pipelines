@@ -15,6 +15,8 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 --concat_lanes                  ${params.concat_lanes}
+--csv_input                     ${params.csv_input}
+--download_data                 ${params.download_data}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
@@ -31,7 +33,6 @@ ______________________________________________________
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}
 --call_val                      ${params.call_val}
---ploidy_val                    ${params.ploidy_val}
 --gen_ver                       ${params.gen_ver}
 --gold_std_indels               ${params.gold_std_indels}
 --phase1_1000G                  ${params.phase1_1000G}

@@ -12,11 +12,12 @@ process XENOME_CLASSIFY {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats': 'xenome' }", pattern: "*.txt", mode:'copy'
 
     input:
-    tuple val(sampleID), file(trimmed)
+    tuple val(sampleID), path(trimmed)
 
     output:
-    tuple val(sampleID), file("human*.fastq"), emit: xenome_fastq
-    tuple val(sampleID), file("*.txt"), emit: xenome_stats
+    tuple val(sampleID), path("human*.fastq"), emit: xenome_fastq
+    tuple val(sampleID), path("mouse*.fastq"), emit: xenome_mouse_fastq
+    tuple val(sampleID), path("*.txt"), emit: xenome_stats
 
     script:
 

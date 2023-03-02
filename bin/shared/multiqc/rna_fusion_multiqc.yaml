@@ -6,9 +6,9 @@ report_comment: >
 export_plots: true
 
 module_order:
-  - fastqc
   - xenome
-  - fusion_report
+  - rsem
+  - picard
 
 extra_fn_clean_exts:
   - "_sortsam"

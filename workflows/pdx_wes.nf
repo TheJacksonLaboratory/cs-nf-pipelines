@@ -2,27 +2,27 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/wes.nf"
-include {param_log} from "${projectDir}/bin/log/wes.nf"
+include {help} from "${projectDir}/bin/help/pdx_wes.nf"
+include {param_log} from "${projectDir}/bin/log/pdx_wes.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
+include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
-include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
+include {FASTQ_SORT as FASTQ_SORT_HUMAN;
+         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
-include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
-include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
 include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
@@ -63,6 +63,15 @@ if (params.help){
 param_log()
 
 // prepare reads channel
+
+if (params.download_data && !params.csv_input) {
+    exit 1, "Data download was specified with `--download_data`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--download_data` requires a CSV manifest. See `--help` for information."
+}
+
+if (params.gen_org == 'mouse') {
+    exit 1, "PDX workflow was called; however, `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `--gen_org` must == 'human' for PDX analysis."
+}
+
 if (params.csv_input) {
 
     ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
@@ -105,9 +114,6 @@ if (params.csv_input) {
 
 }
 
-if (params.gen_org == 'mouse') {
-    exit 1, "PDX workflow was called; however, `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `params.gen_org` must == 'human' for PDX analysis."
-}
 
 
 workflow PDX_WES {
@@ -120,7 +126,14 @@ workflow PDX_WES {
         FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
     }
 
-    // Step 0: Concat local Fastq files if required.
+    // Step 00: Concat local Fastq files from CSV input if required.
+    if (!params.download_data && params.csv_input){
+        CONCATENATE_LOCAL_FILES(ch_input_sample)
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+    }
+
+    // Step 00: Concat local Fastq files from directory if required.
     if (params.concat_lanes && !params.csv_input){
         if (params.read_type == 'PE'){
             CONCATENATE_READS_PE(read_ch)
@@ -136,20 +149,22 @@ workflow PDX_WES {
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
 
+    FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+
     FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
     // Step 2: Xenome classify and sort. 
-    XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+    XENOME_CLASSIFY(FASTQ_PAIR.out.paired_fastq)
 
     // Xenome Read Sort
-    FASTQ_PAIR(XENOME_CLASSIFY.out.xenome_fastq)
-    FASTQ_SORT(FASTQ_PAIR.out.paired_fastq)
+    FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
+    FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')
 
     // Step 3: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
     // Step 4: BWA-MEM Alignment
-    bwa_mem_mapping = FASTQ_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = FASTQ_SORT_HUMAN.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
 
     BWA_MEM(bwa_mem_mapping)
 
