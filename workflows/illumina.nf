@@ -56,4 +56,7 @@ workflow ILLUMINA {
 
     // Remove optical duplicates from alignment
     GATK_MARK_DUPLICATES(ch_bam_undup)
+
+    // Quantify insert sizes
+    SAMTOOLS_STATS(GATK_MARK_DUPLICATES.out.bam_and_index)
 }
