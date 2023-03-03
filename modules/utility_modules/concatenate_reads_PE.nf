@@ -6,7 +6,7 @@ process CONCATENATE_READS_PE {
   memory 15.GB
   time '03:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*fastq.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*fastq.gz", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(R1), file(R2)

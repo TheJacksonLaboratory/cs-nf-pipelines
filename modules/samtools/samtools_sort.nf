@@ -1,4 +1,4 @@
-process SORT {
+process SAMTOOLS_SORT {
   tag "$sampleID"
 
   cpus 4
@@ -12,30 +12,15 @@ process SORT {
   val(options)
 
   output:
-  tuple val(sampleID), file("*.sorted.bam*")
+  tuple val(sampleID), file("*.sorted.bam"), emit: sorted_bam
 
   script:
-
-  // check if not sorting by name
-  if(options != "-n ")
   """
   samtools sort \
   ${options} \
-  -@ $task.cpus \
+  -@ ${task.cpus} \
   -O bam \
-  -o ${sampleID}.sorted.bam \
-  ${sam_file[0]}
-
-  samtools index \
-  ${sampleID}.sorted.bam
-  """
-  else
-  """
-  samtools sort \
-  ${options} \
-  -@ $task.cpus \
-  -O bam \
-  -o ${sampleID}.sorted.bam \
-  ${sam_file[0]}
+  -o ${sam_file.baseName}.sorted.bam \
+  ${sam_file}
   """
 }
