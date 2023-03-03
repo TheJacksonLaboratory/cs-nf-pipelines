@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 
 //include {param_log} from 
 include {BWA_INDEX} from "${projectDir}/modules/bwa/bwa_index"
+include {SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
@@ -35,6 +36,9 @@ workflow ILLUMINA {
         BWA_INDEX(params.fasta)
         params.bwa_index = BWA_INDEX.out.bwa_index
     }
+
+    // Index reference fasta
+    SAMTOOLS_FAIDX(params.fasta)
 
     // ** Optional mapping steps when input are FASTQ files
     if (params.fastq1) {
