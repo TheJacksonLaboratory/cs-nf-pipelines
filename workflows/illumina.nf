@@ -7,6 +7,7 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
+include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -30,9 +31,9 @@ workflow ILLUMINA {
     }
 
     // Step 0: Generate reference index if neccesary
-    if(!params.fasta_index && params.genome) {
+    if(!params.bwa_index || params.genome) {
         BWA_INDEX(params.fasta)
-        params.fasta_index = BWA_INDEX.out.bwa_index
+        params.bwa_index = BWA_INDEX.out.bwa_index
     }
 
     // ** Optional mapping steps when input are FASTQ files
@@ -42,7 +43,7 @@ workflow ILLUMINA {
 
         // Map reads to reference
         bwa_mem_input = fq_reads.join(READ_GROUPS.out.read_groups)
-        BWA_MEM(bwa_mem_input, params.fasta_index)
+        BWA_MEM(bwa_mem_input, params.bwa_index)
 
         // Sort and compress to BAM
         SAMTOOLS_SORT(BWA_MEM.out.sam)
