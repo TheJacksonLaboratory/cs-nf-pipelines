@@ -9,6 +9,7 @@ include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
 include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats"
+include {LUMPY_PREP} from "${projectDir}/modules/lumpy/lumpy_prep"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -63,4 +64,7 @@ workflow ILLUMINA {
 
     // Quantify insert sizes
     SAMTOOLS_STATS(GATK_MARK_DUPLICATES.out.bam_and_index)
+
+    // Prep BAM for Lumpy (Map clipped reads, read group info, extract discordant alignments)
+    LUMPY_PREP(GATK_MARK_DUPLICATES.out.bam_and_index)
 }
