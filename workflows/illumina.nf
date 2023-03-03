@@ -10,6 +10,9 @@ include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
 include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats"
 include {LUMPY_PREP} from "${projectDir}/modules/lumpy/lumpy_prep"
+include {PICARD_SORTSAM as LUMPY_SORTSAM,
+         PICARD_SORTSAM as LUMPY_SORTSAM_DISCORDANT,
+         PICARD_SORTSAM as LUMPY_SORTSAM_SPLIT} from "${projectDir}/modules/picard/picard_sortsam"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -67,4 +70,8 @@ workflow ILLUMINA {
 
     // Prep BAM for Lumpy (Map clipped reads, read group info, extract discordant alignments)
     LUMPY_PREP(GATK_MARK_DUPLICATES.out.bam_and_index)
+
+    // Sort prepped LUMPY bams
+    LUMPY_SORTSAM(LUMPY_PREP.out.bam_bwa_lumpy)
+    LUMPY_SORTSAM_DISCORDANT(LUMPY_PREP.out.dis_unsorted_bam)
 }
