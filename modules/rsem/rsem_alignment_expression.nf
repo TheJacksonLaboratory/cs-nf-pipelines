@@ -4,7 +4,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   cpus 12
   memory { 60.GB * task.attempt }
   time { 24.h * task.attempt }
-  errorStrategy 'retry'
+  errorStrategy 'finish'
   maxRetries 1
 
     container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
@@ -15,18 +15,19 @@ process RSEM_ALIGNMENT_EXPRESSION {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.bam", mode:'copy'
 
   input:
-  tuple val(sampleID), file(reads)
-  file(rsem_ref_files)
+  tuple val(sampleID), path(reads)
+  path(rsem_ref_files)
+  val(rsem_ref_prefix)
 
   output:
-  file "*stats"
-  file "*results*"
-  tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
-  tuple val(sampleID), file("*.stat/*.cnt"), emit: rsem_cnt
-  tuple val(sampleID), file("*genes.results"), emit: rsem_genes
-  tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
-  tuple val(sampleID), file("*.genome.bam"), emit: bam
-  tuple val(sampleID), file("*.transcript.bam"), emit: transcript_bam
+  path "*stats"
+  path "*results*"
+  tuple val(sampleID), path("rsem_aln_*.stats"), emit: rsem_stats
+  tuple val(sampleID), path("*.stat/*.cnt"), emit: rsem_cnt
+  tuple val(sampleID), path("*genes.results"), emit: rsem_genes
+  tuple val(sampleID), path("*isoforms.results"), emit: rsem_isoforms
+  tuple val(sampleID), path("*.genome.bam"), emit: bam
+  tuple val(sampleID), path("*.transcript.bam"), emit: transcript_bam
 
   script:
 
@@ -71,7 +72,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${seed_length} \
   ${outbam} \
   ${trimmedfq} \
-  ${params.rsem_ref_prefix} \
+  ${rsem_ref_prefix} \
   ${sampleID} \
   2> rsem_aln_${sampleID}.stats
   """

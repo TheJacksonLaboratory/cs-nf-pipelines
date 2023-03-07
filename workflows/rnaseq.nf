@@ -10,20 +10,17 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
-include {FASTQ_SORT as FASTQ_SORT_HUMAN;
-         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
-include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
-include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
-include {BAMTOOLS_STATS} from "${projectDir}/modules/bamtools/bamtools_stats"
-include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
+include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
 include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
-include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
+include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -126,61 +123,53 @@ workflow RNASEQ {
   
   // ** MAIN workflow starts: 
 
-  // Step 1: Qual_Stat
-  QUALITY_STATISTICS(read_ch)
-  
-  FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+  // If samples are PDX, run the PDX RNAseq workflow. 
+  // Otherwise, run the standard workflow. 
 
-  FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
-
-  // Step 1a: Xenome if PDX data used.
-  ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
   if (params.pdx){
-    // Xenome Classification
-    XENOME_CLASSIFY(FASTQ_PAIR.out.paired_fastq)
-    ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
+    
+    PDX_RNASEQ(read_ch)
 
-    // Xenome Read Sort
-    FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
-    FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
-    rsem_input = FASTQ_SORT_HUMAN.out.sorted_fastq
+  } else {
 
-  } else { 
-    rsem_input = FASTQ_PAIR.out.paired_fastq
+    // Step 1: Qual_Stat
+    QUALITY_STATISTICS(read_ch)
+    
+    FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+
+    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+
+    // Step 2: RSEM
+    RSEM_ALIGNMENT_EXPRESSION(FASTQ_PAIR.out.paired_fastq, rsem_ref_files, params.rsem_ref_prefix)
+
+    //Step 3: Get Read Group Information
+    READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
+
+    // Step 4: Picard Alignment Metrics
+    add_replace_groups = READ_GROUPS.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION.out.bam)
+    PICARD_ADDORREPLACEREADGROUPS(add_replace_groups)
+
+    PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam, params.picard_dict)
+
+    // Step 5: Picard Alignment Metrics
+    PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
+    
+    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam, params.ref_flat, params.ribo_intervals)
+
+    // Step 6: Summary Stats
+
+    agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+
+    RNA_SUMMARY_STATS(agg_stats)
+
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
+
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
   }
-
-  // Step 2: RSEM
-  RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files)
-
-  //Step 3: Get Read Group Information
-  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
-
-  // Step 4: Picard Alignment Metrics
-  add_replace_groups = READ_GROUPS.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION.out.bam)
-  PICARD_ADDORREPLACEREADGROUPS(add_replace_groups)
-
-  PICARD_REORDERSAM(PICARD_ADDORREPLACEREADGROUPS.out.bam)
-
-  // Step 5: Picard Alignment Metrics
-  PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
-  // need to sort out ref_flat and ribo_intervals (may break mouse now)
-  PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam)
-
-  // Step 6: Summary Stats
-
-  agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
-
-  RNA_SUMMARY_STATS(agg_stats)
-
-  ch_multiqc_files = Channel.empty()
-  ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
-
-  MULTIQC (
-      ch_multiqc_files.collect()
-  )
-
 }

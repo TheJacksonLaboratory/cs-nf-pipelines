@@ -12,6 +12,9 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   input:
   tuple val(sampleID), file(bam)
+  val(ref_flat)
+  val(ribo_intervals)
+
 
   output:
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
@@ -34,8 +37,8 @@ process PICARD_COLLECTRNASEQMETRICS {
   picard CollectRnaSeqMetrics \
   I=${bam} \
   O=${sampleID}_picard_aln_metrics.txt \
-  REF_FLAT=${params.ref_flat} \
-  RIBOSOMAL_INTERVALS=${params.ribo_intervals} \
+  REF_FLAT=${ref_flat} \
+  RIBOSOMAL_INTERVALS=${ribo_intervals} \
   STRAND=${strand_setting} \
   CHART_OUTPUT=${sampleID}_coverage_vs_transcript_plot.pdf
   """
