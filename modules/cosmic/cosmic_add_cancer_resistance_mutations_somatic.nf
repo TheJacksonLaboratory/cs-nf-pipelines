@@ -1,4 +1,4 @@
-process COSMIC_CANCER_RESISTANCE_MUTATION {
+process COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC {
     tag "$sampleID"
 
     cpus 1
@@ -7,13 +7,13 @@ process COSMIC_CANCER_RESISTANCE_MUTATION {
     errorStrategy 'retry'
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/py3_perl_pylibs:v1'
+    container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
     input:
-    tuple val(sampleID), file(vcf)
+    tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name)
 
     output:
-    tuple val(sampleID), file("*.vcf"), emit: vcf
+    tuple val(sampleID), file("*_somatic_vep_cosmic_cancerResitMut_annotated.vcf"), val(meta), val(normal_name), val(tumor_name), emit: vcf
 
     script:
     """
@@ -21,7 +21,7 @@ process COSMIC_CANCER_RESISTANCE_MUTATION {
     ${projectDir}/bin/sv/add_cancer_resistance_mutations.py \
     ${params.cosmic_cancer_resistance_muts} \
     ${vcf} \
-    ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated.vcf
+    ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated.vcf
     """
 }
 

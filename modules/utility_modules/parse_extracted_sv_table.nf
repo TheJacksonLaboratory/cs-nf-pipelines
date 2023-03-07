@@ -10,7 +10,7 @@ process SNPSIFT_EXTRACT_AND_PARSE {
     memory = 6.GB
     time = '03:00:00'
 
-    container 'quay.io/jaxcompsci/py3_perl_pylibs:v1'
+    container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
 

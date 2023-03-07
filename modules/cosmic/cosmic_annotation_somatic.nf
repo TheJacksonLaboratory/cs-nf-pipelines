@@ -1,4 +1,4 @@
-process COSMIC_ANNOTATION {
+process COSMIC_ANNOTATION_SOMATIC {
   tag "$sampleID"
 
   cpus 1
@@ -10,19 +10,18 @@ process COSMIC_ANNOTATION {
   container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*_somatic_vep_cosmic_annotated.vcf"), val(meta), val(normal_name), val(tumor_name), emit: vcf
 
   script:
-  if (params.workflow == 'sv')
     """
     python \
     ${projectDir}/bin/sv/add_cancer_gene_census.py \
     ${params.cosmic} \
     ${vcf} \
-    ${sampleID}_germline_vep_cosmic_annotated.vcf
+    ${sampleID}_somatic_vep_cosmic_annotated.vcf
     """
 }
 
