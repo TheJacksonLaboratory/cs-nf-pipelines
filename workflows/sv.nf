@@ -51,7 +51,7 @@ include {GRIDSS_PREPROCESS} from "${projectDir}/modules/gridss/gridss_preprocess
 include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
 include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
 include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
-include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
+include {GRIPSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gripss_somatic_filter"
 include {SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_NORMAL;
          SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_TUMOR} from "${projectDir}/modules/samtools/samtools_stats_insertsize"
 include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNIQUE_NORMAL;
@@ -378,8 +378,8 @@ workflow SV {
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
-    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
-    // gridss somatic filter will need a higher coverage dataset for testing. 
+    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gripss_pon)
+    // NOTE: this filtering tool is hard coded for GRCh38 based on PON naming. 
     // additional NYGC steps not used: add commands to VCF 
 
     // BicSeq2
@@ -442,7 +442,7 @@ workflow SV {
     GATK_SORTVCF_LANCET.out.lancet_vcf
 
     Gridss
-    GRIDSS_SOMATIC_FILTER.out.gridss_filtered_bgz
+    GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz
 
     Bicseq2
     BICSEQ2_SEG.out.bicseq2_sv_calls
@@ -640,7 +640,7 @@ workflow SV {
     // tuple val(sampleID), val(meta), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(manta), file(gridss_bgz), val(no_idx), val(gridss)
     // Downstream, just including sampleID and meta to simplify a similar
     // join that is necessary
-    // merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIDSS_SOMATIC_FILTER.out.gridss_filtered_bgz, by : [0,3,4,5])
+    // merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz, by : [0,3,4,5])
     // MERGE_SV(merge_sv_input)
     
     // ANNOTATE_SV(MERGE_SV.out.merged, "main")
