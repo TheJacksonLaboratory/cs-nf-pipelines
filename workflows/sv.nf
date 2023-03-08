@@ -378,7 +378,7 @@ workflow SV {
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
-    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gripss_pon)
+    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf)
     // NOTE: this filtering tool is hard coded for GRCh38 based on PON naming. 
     // additional NYGC steps not used: add commands to VCF 
 
