@@ -26,7 +26,7 @@ process GRIPSS_SOMATIC_FILTER {
 
     script:
     """
-    singularity run hmftools-gripss_2.3.2--hdfd78af_0.sif gripss -Xmx5g \
+    gripss -Xmx5g \
         -sample ${tumor_name} \
         -reference ${normal_name} \
         -ref_genome_version 38 \
