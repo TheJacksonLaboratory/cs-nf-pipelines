@@ -49,7 +49,7 @@ process SOMATIC_VCF_FINALIZATION {
     ${projectDir}/bin/sv/make_maf.py \
     --vcf ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.vcf \
     --maf ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.maf \
-    --library ${sampleID} \
+    --library WGS \
     --vep-version GRCh38 \
     --tumor ${tumor_name} \
     --normal ${normal_name} \
