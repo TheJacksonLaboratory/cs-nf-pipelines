@@ -29,7 +29,7 @@ process MERGE_SV {
         --slop=300 \
         --allowed_chr=${listOfChroms} \
         --min_sv_length=500 \
-        --out_file= ${sampleID}.manta_gridss_sv.bed \
-        --out_file_supplemental = ${sampleID}.manta_gridss_sv_supplemental.bed
+        --out_file=${sampleID}.manta_gridss_sv.bed \
+        --out_file_supplemental=${sampleID}.manta_gridss_sv_supplemental.bed
     """
 }

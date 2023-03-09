@@ -21,19 +21,19 @@ process ANNOTATE_BICSEQ2_CNV {
 
     """
     Rscript ${projectDir}/bin/sv/annotate-cnv.r \
-        --cnv = ${bicseq2_calls} \
-        --caller = bicseq2 \
-        --tumor = ${tumor_name} \
-        --normal = ${normal_name} \
-        --cytoband = ${params.cytoband} \
-        --db_names=DGV,1000G,COSMIC \
-        --db_files = ${params.dgv},${params.thousandG},${params.cosmicUniqueBed} \
-        --cancer_census= = ${params.cancerCensusBed} \
-        --ensembl = ${params.ensemblUniqueBed} \
-        --allowed_chr = ${listOfChroms} \
+        --cnv=${bicseq2_calls} \
+        --caller="bicseq2" \
+        --tumor=${tumor_name} \
+        --normal=${normal_name} \
+        --cytoband=${params.cytoband} \
+        --db_names="DGV,1000G,COSMIC" \
+        --db_files=${params.dgv},${params.thousandG},${params.cosmicUniqueBed} \
+        --cancer_census=${params.cancerCensusBed} \
+        --ensembl=${params.ensemblUniqueBed} \
+        --allowed_chr=${listOfChroms} \
         --overlap_fraction=0.8 \
-        --out_file_main= ${sampleID}.bicseq2_annotated.bed \
-        --out_file_supplemental = ${sampleID}.bicseq2_annotated_supplemental.bed
+        --out_file_main=${sampleID}.bicseq2_annotated.bed \
+        --out_file_supplemental=${sampleID}.bicseq2_annotated_supplemental.bed
 
     """
 }
