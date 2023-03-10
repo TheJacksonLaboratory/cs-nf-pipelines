@@ -13,6 +13,7 @@ include {LUMPY_PREP} from "${projectDir}/modules/lumpy/lumpy_prep"
 include {PICARD_SORTSAM as LUMPY_SORTSAM,
          PICARD_SORTSAM as LUMPY_SORTSAM_DISCORDANT,
          PICARD_SORTSAM as LUMPY_SORTSAM_SPLIT} from "${projectDir}/modules/picard/picard_sortsam"
+include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -74,4 +75,7 @@ workflow ILLUMINA {
     // Sort prepped LUMPY bams
     LUMPY_SORTSAM(LUMPY_PREP.out.bam_bwa_lumpy)
     LUMPY_SORTSAM_DISCORDANT(LUMPY_PREP.out.dis_unsorted_bam)
+
+    // Extract split reads
+    LUMPY_EXTRACT_SPLITS(LUMPY_PREP.out.bam_bwa_lumpy)
 }
