@@ -35,10 +35,10 @@ pivot_transcripts = transcript_table_working.pivot(index='Transcript', columns='
     # Transcript x Haplotype. NAs in table are missing transcripts within that haplotype. 
 
 missing_transcripts = pivot_transcripts[pivot_transcripts.isna().any(axis=1)]
-    # subset pivot to only columns with NA data. 
+    # subset pivot to only columns with NA data (i.e., missing transcripts within that haplotype). 
 
 stacked = pd.melt(missing_transcripts.reset_index(), id_vars='Transcript',value_vars=haplotypes)
-    # convert wide to long on trascript. 
+    # convert wide to long on transcript. 
 
 transcripts_to_add = stacked[stacked['value'].isna()].copy()
 transcripts_to_add['transcript_id'] = transcripts_to_add[['Transcript', 'Haplotype']].agg('_'.join, axis=1)

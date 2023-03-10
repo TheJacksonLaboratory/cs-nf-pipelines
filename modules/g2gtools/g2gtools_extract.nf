@@ -2,7 +2,7 @@ process G2GTOOLS_EXTRACT {
 
     cpus 1
     memory 6.GB
-    time '01:30:00'
+    time '02:30:00'
 
 
     container 'quay.io/jaxcompsci/g2gtools:0.2.9'
