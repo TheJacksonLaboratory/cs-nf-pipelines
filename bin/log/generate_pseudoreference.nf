@@ -27,6 +27,9 @@ ______________________________________________________
 --keep_intermediate               ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 }

@@ -30,6 +30,9 @@ def param_log(){
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}
+
+    Command line call: 
+    ${workflow.commandLine}
     ______________________________________________________
     """
     else
@@ -62,6 +65,9 @@ def param_log(){
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}
+
+    Command line call: 
+    ${workflow.commandLine}
     ______________________________________________________
     """
 }

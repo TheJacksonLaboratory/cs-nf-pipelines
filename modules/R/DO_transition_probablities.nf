@@ -4,7 +4,7 @@ process DO_TRANSITION_PROBABILITIES {
     memory 40.GB
     time 48.hour
 
-    container 'TBD TBD TBD TBD'
+    container 'quay.io/jaxcompsci/r-qtl2-deseq-biomart-tidy:v1'
 
     // publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     // publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy'
