@@ -78,4 +78,5 @@ workflow ILLUMINA {
 
     // Extract split reads
     LUMPY_EXTRACT_SPLITS(LUMPY_PREP.out.bam_bwa_lumpy)
+    LUMPY_SORT_SPLIT(LUMPY_EXTRACT_SPLITS.out.bam_bwa_lumpy)
 }
