@@ -11,7 +11,7 @@ process LUMPY_CALL_SV {
         tuple val(sampleID), file(bam_bwa_lumpy_sort), file(split_sorted_bam), file(dis_sorted_bam)
     
     output:
-        tuple val(sampleID), file("${sampleID}_lumpySort.vcf") emit: lumpy_vcf
+        tuple val(sampleID), file("${sampleID}_lumpySort.vcf"), emit: lumpy_vcf
 
     shell:
         pairend_distro = "pairend_distro.py"
