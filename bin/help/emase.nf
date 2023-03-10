@@ -25,8 +25,8 @@ Examples:
 --bowtie_index | /<PATH> | Path to the bowtie index. Include the bowtie prefix in this path (e.g., `/path/to/bowtie.transcripts` where bowtie.transcripts.* are the full set of index files in the directory.  
 --transcripts_info | /<PATH> | A file containing all transcript IDs. NOTE: These IDs must not contain haplotype IDs. This file must also have a 'length' column. Note that 'length' is not used in this context. ONLY IDs are used from this file. Can be obtained from `prepare_emase` workflow (emase.fullTranscripts.info)
 --gbrs_strain_list | <comma,delim,list> | A list of haplotype names corresponding to genomes used in hybrid genome contrucution (e.g., 'A,B,C,D,E,F,G,H'). 
---gene2transcript_list | /<PATH> | A file containing all gene to transcript ID translations. NOTE: These IDs must not contain haplotype IDs. Can be obtained from `prepare_emase` workflow (emase.gene2transcripts.tsv)
---full_transcript_list | /<PATH> | A file containing all transcript IDs with transcript lengths. NOTE: These IDs must contain haplotype IDs. Can be obtained from `prepare_emase` workflow (emase.pooled.fullTranscripts.info)
+--gene2transcript_csv | /<PATH> | A file containing all gene to transcript ID translations. NOTE: These IDs must not contain haplotype IDs. Can be obtained from `prepare_emase` workflow (emase.gene2transcripts.tsv)
+--full_transcript_info | /<PATH> | A file containing all transcript IDs with transcript lengths. NOTE: These IDs must contain haplotype IDs. Can be obtained from `prepare_emase` workflow (emase.pooled.fullTranscripts.info)
 --emase_model | <numeric> | Options: 1, 2, 3, 4. 
   1: reads are apportioned among genes first,
       then between alleles, and then among isoforms.

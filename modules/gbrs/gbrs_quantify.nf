@@ -31,8 +31,8 @@ process GBRS_QUANTIFY {
     """
     gbrs quantify \
         -i ${h5} \
-        -g ${params.gene2transcript_list} \
-        -L ${params.full_transcript_list} \
+        -g ${params.gene2transcript_csv} \
+        -L ${params.full_transcript_info} \
         -M ${params.emase_model} \
         --report-alignment-counts \
         -o ${sampleID}
