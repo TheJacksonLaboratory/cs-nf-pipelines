@@ -15,6 +15,7 @@ include {PICARD_SORTSAM as LUMPY_SORTSAM,
          PICARD_SORTSAM as LUMPY_SORTSAM_SPLIT} from "${projectDir}/modules/picard/picard_sortsam"
 include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
 include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
+include {REHEADER_VCF as REHEADER_LUMPY} from "${projectDir}/modules/utility_modules/reheader_vcf"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -84,5 +85,6 @@ workflow ILLUMINA {
     // Call SV with Lumpy
     lumpy_input = LUMPY_SORTSAM.out.sorted_bam.join(LUMPY_SORTSAM_SPLIT.out.sorted_bam).join(LUMPY_SORTSAM_DISCORDANT.out.sorted_bam)
     LUMPY_CALL_SV(lumpy_input)
+    REHEADER_LUMPY(LUMPY_CALL_SV.out.lumpy)
 
 }
