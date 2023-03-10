@@ -13,8 +13,8 @@ process LUMPY_PREP {
         tuple val(sampleID), file(bam), file(bai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_alignBWA_lumpy.bam") emit: bam_bwa_lumpy
-        tuple val(sampleID), file("${sampleID}_discordants.unsorted.bam") emit: dis_unsorted_bam
+        tuple val(sampleID), file("${sampleID}_alignBWA_lumpy.bam"), emit: bam_bwa_lumpy
+        tuple val(sampleID), file("${sampleID}_discordants.unsorted.bam"), emit: dis_unsorted_bam
 
     script:
     """

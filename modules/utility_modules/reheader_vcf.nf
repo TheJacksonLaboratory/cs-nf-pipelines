@@ -1,4 +1,4 @@
-process REHEADER_VCR {
+process REHEADER_VCF {
     tag "$sampleID"
 
     cpus = 1

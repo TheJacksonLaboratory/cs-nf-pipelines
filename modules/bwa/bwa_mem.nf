@@ -9,13 +9,9 @@ process BWA_MEM {
 
     input:
         tuple val(sampleID), file(fq_reads), file(read_group)
-        file(bwa_reference)
-
     output:
-        tuple val(sampleID), file(${sampleID}.sam), emit: sam
-
+        tuple val(sampleID), file("${sampleID}.sam"), emit: sam
     script:
-    
         if (!params.fastq2)  {
             inputfq="${fq_reads[0]}"
         }
@@ -23,6 +19,6 @@ process BWA_MEM {
             inputfq="${fq_reads[0]} ${fq_reads[1]}"
         }
         """
-        bwa mem -K 100000000 -R \$(cat $read_group) -t ${task.cpus} -M ${bwa_referece} ${inputfq} > ${sample_name}.sam
-
+        bwa mem -K 100000000 -R \$(cat $read_group) -t ${task.cpus} -M ${params.bwa_index} ${inputfq} > ${sampleID}.sam
         """
+}

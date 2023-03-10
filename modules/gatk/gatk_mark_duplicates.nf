@@ -12,8 +12,8 @@ process GATK_MARK_DUPLICATES {
         tuple val(sampleID), file(bam)
 
     output:
-        tuple val(sampleID), file("${sampleID}.md.bam"), file("${sampleID}.md.bai") emit: bam_and_index
-        tuple val(sampleID), file("${sampleID}.md.metrics") emit: dedup_metrics
+        tuple val(sampleID), file("${sampleID}.md.bam"), file("${sampleID}.md.bai"), emit: bam_and_index
+        tuple val(sampleID), file("${sampleID}.md.metrics"), emit: dedup_metrics
 
     script:
         markdup_java_options = task.memory.toGiga() > 8 ? params.markdup_java_options : "\"-Xms" +  (task.memory.toGiga() / 2).trunc() + "g -Xmx" + (task.memory.toGiga() - 1) + "g\""

@@ -13,7 +13,7 @@ process LUMPY_EXTRACT_SPLITS {
         tuple val(sampleID), file(bam), file(bai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_splitreads.bam") emit: bam_bwa_lumpy
+        tuple val(sampleID), file("${sampleID}_splitreads.bam"), emit: bam_bwa_lumpy
 
     script:
     """

@@ -1,5 +1,5 @@
 process READ_GROUPS {
-    tag "$sampleID"
+    tag "${sampleID}"
 
     cpus 1
     memory 5.GB
@@ -11,7 +11,7 @@ process READ_GROUPS {
         tuple val(sampleID), file(fq_reads)
 
     output:
-        tuple val(sampleID), file(${sampleID}_read_group.txt), emit: read_groups
+        tuple val(sampleID), file("${sampleID}_read_group.txt"), emit: read_groups
 
     script:
         """

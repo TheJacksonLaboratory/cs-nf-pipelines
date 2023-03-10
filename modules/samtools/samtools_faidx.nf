@@ -1,5 +1,5 @@
 process SAMTOOLS_FAIDX {
-    tag "${sampleID}"
+    tag "${fasta}"
 
     cpus 1
     memory 4.GB
