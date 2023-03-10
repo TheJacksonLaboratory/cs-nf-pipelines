@@ -46,6 +46,9 @@ ______________________________________________________
 --pdx                               ${params.pdx}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

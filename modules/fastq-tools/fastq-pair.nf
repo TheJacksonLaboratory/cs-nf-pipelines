@@ -3,7 +3,7 @@ process FASTQ_PAIR {
 
     cpus 1
     memory { 50.GB * task.attempt }
-    time { 2.h * task.attempt }
+    time { 10.h * task.attempt }
     errorStrategy 'retry'
     maxRetries 1
 

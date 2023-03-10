@@ -42,6 +42,9 @@ ______________________________________________________
 
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 
