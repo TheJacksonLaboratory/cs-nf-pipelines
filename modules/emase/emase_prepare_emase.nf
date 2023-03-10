@@ -19,7 +19,7 @@ process EMASE_PREPARE_EMASE {
     container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
 
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
-    publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy'
+    publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy', enabled: params.keep_intermediate
     publishDir "${params.pubdir}/emase", pattern: '*.tsv', mode:'copy'
     publishDir "${params.pubdir}/emase/bowtie", pattern: "*.ebwt", mode:'copy'
 
