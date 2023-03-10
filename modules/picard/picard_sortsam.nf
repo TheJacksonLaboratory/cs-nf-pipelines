@@ -11,7 +11,7 @@ process PICARD_SORTSAM {
         tuple val(sampleID), file(bam)
 
     output:
-        tuple val(sampleID), file("${sampleID}.sorted.bam"), file("${sampleID}.sorted.bai")
+        tuple val(sampleID), file("${sampleID}.sorted.bam"), file("${sampleID}.sorted.bai"), emit: sorted_bam
 
 
     script:
