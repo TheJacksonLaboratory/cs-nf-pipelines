@@ -25,7 +25,7 @@ include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
 include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration_mutect2"
 include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
 include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 include {GATK_SELECTVARIANTS;
@@ -147,11 +147,11 @@ workflow PDX_WES {
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
 
-    if params.read_type == 'PE' {
+    if (params.read_type == 'PE') {
       FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
       xenome_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      xenome_input = read_ch
+      xenome_input = QUALITY_STATISTICS.out.trimmed_fastq
     }
 
     FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)

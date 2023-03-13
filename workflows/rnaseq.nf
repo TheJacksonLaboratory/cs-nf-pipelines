@@ -135,11 +135,11 @@ workflow RNASEQ {
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
     
-    if params.read_type == 'PE' {
+    if (params.read_type == 'PE') {
       FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
       rsem_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      rsem_input = read_ch
+      rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
     }
     
     FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)

@@ -166,7 +166,6 @@ workflow WES {
       collecths_metric = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
       PICARD_COLLECTHSMETRICS(collecths_metric)
                               
-
     // Step 7: Variant Calling
       haplotype_caller = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
       GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')

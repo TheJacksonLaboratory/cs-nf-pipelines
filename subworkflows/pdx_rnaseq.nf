@@ -32,11 +32,11 @@ workflow PDX_RNASEQ {
     // Step 1: Qual_Stat, Get read group information, Run Xenome
     QUALITY_STATISTICS(read_ch)
 
-    if params.read_type == 'PE' {
+    if (params.read_type == 'PE') {
       FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
       xenome_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      xenome_input = read_ch
+      xenome_input = QUALITY_STATISTICS.out.trimmed_fastq
     }
 
     // QC is assess on all reads. Mouse/human is irrelevant here. 
