@@ -135,12 +135,17 @@ workflow RNASEQ {
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
     
-    FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
-
+    if params.read_type == 'PE' {
+      FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+      rsem_input = FASTQ_PAIR.out.paired_fastq
+    } else {
+      rsem_input = read_ch
+    }
+    
     FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
     // Step 2: RSEM
-    RSEM_ALIGNMENT_EXPRESSION(FASTQ_PAIR.out.paired_fastq, rsem_ref_files, params.rsem_ref_prefix)
+    RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files, params.rsem_ref_prefix)
 
     //Step 3: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")

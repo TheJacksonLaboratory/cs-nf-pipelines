@@ -114,8 +114,6 @@ if (params.csv_input) {
 
 }
 
-
-
 workflow PDX_WES {
 
     // Step 0: Download data and concat Fastq files if needed. 
@@ -149,12 +147,17 @@ workflow PDX_WES {
     // Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
 
-    FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+    if params.read_type == 'PE' {
+      FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+      xenome_input = FASTQ_PAIR.out.paired_fastq
+    } else {
+      xenome_input = read_ch
+    }
 
     FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
     // Step 2: Xenome classify and sort. 
-    XENOME_CLASSIFY(FASTQ_PAIR.out.paired_fastq)
+    XENOME_CLASSIFY(xenome_input)
 
     // Xenome Read Sort
     FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
