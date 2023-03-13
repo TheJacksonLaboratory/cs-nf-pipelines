@@ -11,13 +11,13 @@ process FILTER_BEDPE {
 
   input:
     // ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe
-    tuple val(sampleID), file(sv_genes_cnv_bedpe), val(meta)
+    tuple val(sampleID), file(sv_genes_cnv_bedpe), val(normal_name), val(tumor_name)
     val(suppl_switch)
   output:
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.final.bedpe"), val(meta), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.supplemental.bedpe"), val(meta), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.final.bedpe"), val(meta), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.supplemental.bedpe"), val(meta), optional: true
+    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.final.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.final.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
  
   script:
     if(suppl_switch == "main")
