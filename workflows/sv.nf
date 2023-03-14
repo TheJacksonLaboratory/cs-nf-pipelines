@@ -113,7 +113,6 @@ include {ANNOTATE_SV_WITH_CNV;
          ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
 include {FILTER_BEDPE;
          FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
-include {DECONSTRUCT_SIG} from "${projectDir}/modules/r/deconstruct_sig"
 
 
 // help if needed
@@ -662,11 +661,6 @@ workflow SV {
     
     FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
     FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
-
-    // ** Deconstruct COSMIC Sigs from merged VCF (not sure what this is)
-    // Note: my reading of the WDL is that this should be the merged VCF that
-    // is also the input to the VEP_SOMATIC process
-    // DECONSTRUCT_SIG(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
 
     // ** Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
