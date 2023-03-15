@@ -9,14 +9,15 @@ process PICARD_SORTSAM {
 
     input:
         tuple val(sampleID), file(bam)
+        val(suffix_string)
 
     output:
-        tuple val(sampleID), file("${sampleID}.sorted.bam"), file("${sampleID}.sorted.bai"), emit: sorted_bam
+        tuple val(sampleID), file("${sampleID}_${suffix_string}.bam"), file("${sampleID}_${suffix_string}.bai"), emit: sorted_bam
 
 
     script:
         """
-        picard SortSam I=${bam} O=${sampleID}.sorted.bam \
+        picard SortSam I=${bam} O=${sampleID}_${suffix_string}.bam \
             SORT_ORDER=coordinate VALIDATION_STRINGENCY=SILENT CREATE_INDEX=true
         """
 }
