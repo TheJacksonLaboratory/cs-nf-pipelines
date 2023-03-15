@@ -19,6 +19,7 @@ include {REHEADER_VCF as REHEADER_LUMPY;
          REHEADER_VCF as REHEADER_BREAKDANCER} from "${projectDir}/modules/utility_modules/reheader_vcf"
 include {BREAKDANCER_CALL} from "${projectDir}/modules/breakdancer/breakdancer_call"
 include {BREAKDANCER_SV_TO_VCF} from "${projectDir}/modules/breakdancer/breakdancer_sv_to_vcf"
+include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -109,4 +110,9 @@ workflow ILLUMINA {
     breakdancer_vcf_input = GATK_MARK_DUPLICATES.out.bam_and_index.join(BREAKDANCER_CALL.out.breakdancer_sv)
     BREAKDANCER_SV_TO_VCF(breakdancer_vcf_input)
     REHEADER_BREAKDANCER(BREAKDANCER_SV_TO_VCF.out.breakdancer_vcf, "breakdancer")
+
+    // * Manta
+
+    // Call SV with Manta
+    MANTA_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
 }
