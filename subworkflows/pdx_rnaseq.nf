@@ -49,7 +49,7 @@ workflow PDX_RNASEQ {
     FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
     FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
 
-    human_read = FASTQ_SORT_HUMAN.out.sorted_fastq
+    human_reads = FASTQ_SORT_HUMAN.out.sorted_fastq
     .map{it -> tuple(it[0]+'_human', it[1])}
 
     mouse_reads = FASTQ_SORT_MOUSE.out.sorted_fastq
@@ -65,10 +65,10 @@ workflow PDX_RNASEQ {
     }
     else error "${params.rsem_aligner_human} is not valid, use 'bowtie2' or 'star'"
 
-    RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_read, rsem_ref_files, params.rsem_ref_prefix_human)
+    RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, rsem_ref_files, params.rsem_ref_prefix_human)
     
     // Picard Alignment Metrics
-    READ_GROUPS_HUMAN(human_read, "picard")
+    READ_GROUPS_HUMAN(human_reads, "picard")
 
     add_replace_groups_human = READ_GROUPS_HUMAN.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.bam)
     PICARD_ADDORREPLACEREADGROUPS_HUMAN(add_replace_groups_human)

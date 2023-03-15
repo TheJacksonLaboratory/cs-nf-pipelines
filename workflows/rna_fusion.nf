@@ -128,9 +128,9 @@ workflow RNA_FUSION {
     // Step 3: Callers:
     // arriba
     STAR_ARRIBA(fusion_tool_input, params.arriba_star_args)
-    SORT_ARRIBA(STAR_ARRIBA.out.bam, '')
-    INDEX_ARRIBA(SORT_ARRIBA.out.sorted_bam)
-    arriba_input = SORT_ARRIBA.out.sorted_bam.join(INDEX_ARRIBA.out.bai)
+    SORT_ARRIBA(STAR_ARRIBA.out.bam, '-O bam', 'bam')
+    INDEX_ARRIBA(SORT_ARRIBA.out.sorted_file)
+    arriba_input = SORT_ARRIBA.out.sorted_file.join(INDEX_ARRIBA.out.bai)
     ARRIBA(arriba_input)
 
     // fusioncatcher
@@ -148,8 +148,8 @@ workflow RNA_FUSION {
     // squid
     STAR_SQUID(fusion_tool_input, params.squid_star_args)
     SAMTOOLS_VIEW_SQUID(STAR_SQUID.out.sam, '-Sb', '_chimeric') // NOTE: The sam file from STAR_SQUID contains chimeric reads. Per STAR passed arguments. 
-    SORT_SQUID(SAMTOOLS_VIEW_SQUID.out.bam, '')
-    squid_input = STAR_SQUID.out.bam_sorted.join(SORT_SQUID.out.sorted_bam )
+    SORT_SQUID(SAMTOOLS_VIEW_SQUID.out.bam, '-O bam', 'bam')
+    squid_input = STAR_SQUID.out.bam_sorted.join(SORT_SQUID.out.sorted_file )
     SQUID(squid_input)
     SQUID_ANNOTATE(SQUID.out.squid_fusions)
     

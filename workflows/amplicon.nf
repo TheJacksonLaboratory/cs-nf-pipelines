@@ -9,14 +9,18 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {TRIM_FASTQ as CUTADAPT} from "${projectDir}/modules/cutadapt/cutadapt_trim_fastq"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
-include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
+include {SAMTOOLS_SORT as SAMTOOLS_SORT_PRIMERCLIP;
+         SAMTOOLS_SORT as SAMTOOLS_SORT_CALLING} from "${projectDir}/modules/samtools/samtools_sort_only"
 include {PRIMERCLIP} from "${projectDir}/modules/primerclip/primerclip"
-include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
+include {TARGET_COVERAGE_METRICS} from "${projectDir}/modules/bedtools/bedtools_amplicon_metrics"
+include {SNPSIFT_ANNOTATE} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+include {PICARD_COLLECTTARGETPCRMETRICS} from "${projectDir}/modules/picard/picard_collecttargetpcrmetrics"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
-
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -26,7 +30,6 @@ if (params.help){
 
 // log params
 param_log()
-
 
 // prepare reads channel
 if (params.concat_lanes){
@@ -77,15 +80,16 @@ workflow AMPLICON {
     bwa_mem_mapping = CUTADAPT.out.paired_trimmed_fastq.join(READ_GROUPS.out.read_groups)
     BWA_MEM(bwa_mem_mapping)
 
-    PRIMERCLIP(BWA_MEM.out.sam)
+    SAMTOOLS_SORT_PRIMERCLIP(BWA_MEM.out.sam, '-O sam -n', 'sam')
 
-    PRIMERCLIP.out.sam.join(READ_GROUPS.out.read_groups)
+    PRIMERCLIP(SAMTOOLS_SORT_PRIMERCLIP.out.sorted_file)
 
-    PICARD_ADDORREPLACEREADGROUPS(PRIMERCLIP.out.sam) // is this step needed as read group is used in BWA? 
+    SAMTOOLS_SORT_CALLING(PRIMERCLIP.out.sam, '-O bam', 'bam')
 
-    // Picard CollectTargetedPcrMetrics : this module needs to be made and figured out https://gatk.broadinstitute.org/hc/en-us/articles/360037438131-CollectTargetedPcrMetrics-Picard-
+    PICARD_COLLECTTARGETPCRMETRICS(SAMTOOLS_SORT_CALLING.out.sorted_file)
 
-    // Bedtools coverageBed : this module needs to be made, and figured out what to do with the output. 
+    TARGET_COVERAGE_METRICS(SAMTOOLS_SORT_CALLING.out.sorted_file)
+
     /*
     Important: While the use of the Picard tool, MarkDuplicates, is a common quality control step to identify
     low-complexity libraries, MarkDuplicates cannot be used on data derived from PCR-based target enrichment
@@ -95,17 +99,24 @@ workflow AMPLICON {
     https://sfvideo.blob.core.windows.net/sitefinity/docs/default-source/application-note/primerclip-a-tool-for-trimming-primer-sequences-application-note.pdf?sfvrsn=cf83e107_14
     */
 
-    GATK_BASERECALIBRATOR(PICARD_ADDORREPLACEREADGROUPS.out.bam.join(PICARD_ADDORREPLACEREADGROUPS.out.bai))
+    GATK_BASERECALIBRATOR(SAMTOOLS_SORT_CALLING.out.sorted_file)
     
-    GATK_APPLYBQSR(PICARD_ADDORREPLACEREADGROUPS.out.bam.join(GATK_BASERECALIBRATOR.out.table))
+    GATK_APPLYBQSR(SAMTOOLS_SORT_CALLING.out.sorted_file.join(GATK_BASERECALIBRATOR.out.table))
 
-    GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai))
+    GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai), '')
 
-    // multiqc input
-    // FASTQC.out.quality_stats
-    // CUTADAPT.out.cutadapt_log
-    // CollectTargetedPcrMetrics
+    SNPSIFT_ANNOTATE(GATK_HAPLOTYPECALLER.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+
+    // MultiQC
     // coverage metrics? 
-    // primer clip likely has an output log. Once we can run, this can be collected. However, primerclip is not in multiQC.
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTTARGETPCRMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PRIMERCLIP.out.log.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(TARGET_COVERAGE_METRICS.out.qc_metrics.collect{it[1]}.ifEmpty([]))
 
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 }
