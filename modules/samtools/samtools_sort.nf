@@ -16,6 +16,6 @@ process SAMTOOLS_SORT {
 
     script:
         """
-        samtools sort --threads ${task.cpus} -m ${task.memory} ${sam}> ${sampleID}.bam
+        samtools sort --threads ${task.cpus} ${sam} -o ${sampleID}.bam
         """
 }
