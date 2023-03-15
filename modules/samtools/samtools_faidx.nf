@@ -10,7 +10,7 @@ process SAMTOOLS_FAIDX {
         file(fasta)
 
     output:
-        tuple file("${fasta}"), file("${fasta}.fai"), emit: bam
+        tuple file("${fasta}"), file("${fasta}.fai"), emit: fasta_fai
 
     script:
         """
