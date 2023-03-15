@@ -1,5 +1,5 @@
 process LUMPY_PREP {
-    tag "$sample_name"
+    tag "$sampleID"
     
     cpus = 8
     memory = 40.GB
@@ -19,13 +19,13 @@ process LUMPY_PREP {
     script:
     """
         # Clipped_rc reads mapping to Genome
-        samtools sort -n ${bam} -o ${sampleID}_alignBWA_ReadNameSort.bam -@ ${params.threads}
+        samtools sort -n ${bam} -o ${sampleID}_alignBWA_ReadNameSort.bam -@ ${task.cpus}
         # manual read group info
         samtools view -h ${sampleID}_alignBWA_ReadNameSort.bam \
         | samblaster --acceptDupMarks --excludeDups --addMateTags \
                     --ignoreUnmated --maxSplitCount 2 --minNonOverlap 20 \
-        | samtools view -@ ${params.threads} -S -b - > ${sampleID}_alignBWA_lumpy.bam
+        | samtools view -@ ${task.cpus} -S -b - > ${sampleID}_alignBWA_lumpy.bam
         # Extract the discordant pairedend alignments
-        samtools view -@ ${params.threads} -b -F 1294 ${sampleID}_alignBWA_lumpy.bam > ${sampleID}_discordants.unsorted.bam
+        samtools view -@ ${task.cpus} -b -F 1294 ${sampleID}_alignBWA_lumpy.bam > ${sampleID}_discordants.unsorted.bam
     """
 }
