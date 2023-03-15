@@ -16,9 +16,10 @@ process GATK_MARK_DUPLICATES {
         tuple val(sampleID), file("${sampleID}.md.metrics"), emit: dedup_metrics
 
     script:
-        markdup_java_options = task.memory.toGiga() > 8 ? params.markdup_java_options : "\"-Xms" +  (task.memory.toGiga() / 2).trunc() + "g -Xmx" + (task.memory.toGiga() - 1) + "g\""
+        String my_mem = (task.memory-1.GB).toString()
+        my_mem =  my_mem[0..-4]
         """
-        gatk --java-options ${markdup_java_options} \
+        gatk --java-options -Xmx${my_mem}G \
             MarkDuplicates \
             --MAX_RECORDS_IN_RAM 50000 \
             --INPUT ${bam} \
