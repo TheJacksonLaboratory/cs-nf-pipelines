@@ -12,7 +12,7 @@ process REHEADER_VCF {
         val(caller)
 
     output:
-        file("${sampleID}_${caller}Sort.vcf"), emit: vcf_rehead
+        tuple val(sampleID), file("${sampleID}_${caller}Sort.vcf"), emit: vcf_rehead
 
     script:
         """
