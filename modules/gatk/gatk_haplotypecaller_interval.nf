@@ -4,7 +4,7 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
 
   cpus = 1
   memory = 15.GB
-  time = '05:30:00'
+  time = '11:00:00'
 
   container 'broadinstitute/gatk:4.2.4.1'
 
