@@ -16,10 +16,13 @@ include {PICARD_SORTSAM as LUMPY_SORTSAM;
 include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
 include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
 include {REHEADER_VCF as REHEADER_LUMPY;
-         REHEADER_VCF as REHEADER_BREAKDANCER} from "${projectDir}/modules/utility_modules/reheader_vcf"
+         REHEADER_VCF as REHEADER_BREAKDANCER;
+         REHEADER_VCF as REHEADER_DELLY} from "${projectDir}/modules/utility_modules/reheader_vcf"
 include {BREAKDANCER_CALL} from "${projectDir}/modules/breakdancer/breakdancer_call"
 include {BREAKDANCER_SV_TO_VCF} from "${projectDir}/modules/breakdancer/breakdancer_sv_to_vcf"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
+include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
+include {DELLY_POST_PROCESS} from "${projectDir}/modules/delly/delly_post_process"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -115,4 +118,21 @@ workflow ILLUMINA {
 
     // Call SV with Manta
     MANTA_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
+
+    // * Delly
+
+    // Call SV with Delly
+    DELLY_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
+    
+    // Convert Delly BCF to VCF and reheader with sample name
+    DELLY_POST_PROCESS(DELLY_CALL.out.delly_bcf)
+    REHEADER_DELLY(DELLY_POST_PROCESS.out.delly_vcf, "delly")
+
+    // MERGE CALLERS
+
+    // BDLM
+
+    // survivor_input = REHEADER_BREAKDANCER.out.vcf_rehead.join(REHEADER_DELLY.out.vcf_rehead).join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
+    //                  .map { it -> tuple(it[0], tuple(it[1], it[2], it[3], it[4]))}
+    //survivor_input.view()
 }
