@@ -2,7 +2,7 @@ process GBRS_BAM2EMASE {
     tag "$sampleID"
 
     cpus 1
-    memory {15.GB * task.attempt}
+    memory {35.GB * task.attempt}
     time {5.hour * task.attempt}
     errorStrategy 'retry' 
     maxRetries 1

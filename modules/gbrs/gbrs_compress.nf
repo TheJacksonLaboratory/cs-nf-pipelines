@@ -2,7 +2,8 @@ process GBRS_COMPRESS {
     tag "$sampleID"
 
     cpus 1
-    memory {25.GB * task.attempt}
+    memory { suffix == 'merged' ? 6.GB * task.attempt : 40.GB * task.attempt}
+
     time {10.hour * task.attempt}
     errorStrategy 'retry' 
     maxRetries 1
