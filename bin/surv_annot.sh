@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+
 set -e
 
 name_string=${1}
@@ -20,6 +21,11 @@ then
 elif [[ ${seqmode} == "illumina" ]]
 then
     printf "chr\tpos\tSV\tbreakdancer\tdelly\tlumpy\tmanta\n" > ${name_string}.merged.overlap.annotated.txt && \
+        paste ${name_string}.merged.SVs.txt ${name_string}.merged.overlap.txt | \
+        sed -e 's/ /\t/g' >> ${name_string}.merged.overlap.annotated.txt
+elif [[ ${seqmode} == "ont" ]]
+then
+    printf "chr\tpos\tSV\tnanosv\tsniffles\n" > ${name_string}.merged.overlap.annotated.txt && \
         paste ${name_string}.merged.SVs.txt ${name_string}.merged.overlap.txt | \
         sed -e 's/ /\t/g' >> ${name_string}.merged.overlap.annotated.txt
 else

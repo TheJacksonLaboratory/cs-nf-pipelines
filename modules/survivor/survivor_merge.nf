@@ -11,7 +11,7 @@ process SURVIVOR_MERGE {
     input:
         tuple val(sampleID), file(vcf_tuple)
     output:
-        tuple val(sampleID), file("${sampleID}_mergedCall.*.vcf"), emit: survivor_vcf
+        tuple val(sampleID), file("${sampleID}_mergedCall.*.vcf"), emit: vcf
     script:
         if (params.workflow == "pacbio_ccs")
             """
