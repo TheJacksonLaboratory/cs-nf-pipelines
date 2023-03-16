@@ -5,7 +5,7 @@ process REHEADER_VCF {
     memory = 1.GB
     container "quay.io/biocontainers/bcftools:1.10.2--h4f4756c_3"
 
-    publishDir "${params.outdir}/unmerged_calls", pattern: "${sampleID}_${caller}Sort.vcf", mode: 'copy'
+    publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}_${caller}Sort.vcf", mode: 'copy'
 
     input:
         tuple val(sampleID), file(vcf)
