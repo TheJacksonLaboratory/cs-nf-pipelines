@@ -24,6 +24,12 @@ include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
 include {DELLY_POST_PROCESS} from "${projectDir}/modules/delly/delly_post_process"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
+include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
+include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
+include {SURVIVOR_TO_BED} from "${projectDir}/modules/survivor/survivor_to_bed"
+include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_bed_intersect"
+include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
+include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
 workflow ILLUMINA {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
@@ -136,4 +142,14 @@ workflow ILLUMINA {
     survivor_input = REHEADER_BREAKDANCER.out.vcf_rehead.join(REHEADER_DELLY.out.vcf_rehead).join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
                      .map { it -> tuple(it[0], tuple(it[1], it[2], it[3], it[4]))}
     SURVIVOR_MERGE(survivor_input)
+    SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
+    SURVIVOR_SUMMARY(SURVIVOR_MERGE.out.vcf)
+
+    bed_prep_input = SURVIVOR_VCF_TO_TABLE.out.annotation.join(SURVIVOR_SUMMARY.out.csv)
+    SURVIVOR_TO_BED(bed_prep_input)
+    SURVIVOR_BED_INTERSECT(SURVIVOR_TO_BED.out.sv_beds)
+    surv_annot_input = SURVIVOR_TO_BED.out.sv_beds.join(SURVIVOR_BED_INTERSECT.out.intersected_beds).join(SURVIVOR_SUMMARY.out.csv).join(SURVIVOR_VCF_TO_TABLE.out.annotation)
+    SURVIVOR_ANNOTATION(surv_annot_input)
+    surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
+    SURVIVOR_INEXON(surv_inexon_input)
 }
