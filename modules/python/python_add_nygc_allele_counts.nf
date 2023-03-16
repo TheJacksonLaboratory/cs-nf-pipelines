@@ -2,8 +2,8 @@ process ADD_NYGC_ALLELE_COUNTS {
   tag "$sampleID"
 
   cpus 1
-  memory 4.GB
-  time '04:00:00'
+  memory 120.GB
+  time '24:00:00'
 
   container 'quay.io/jaxcompsci/bedtools-python3:2.26.0'
 

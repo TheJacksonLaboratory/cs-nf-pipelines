@@ -28,10 +28,10 @@ include {GATK_FILTER_VARIANT_TRANCHES} from "${projectDir}/modules/gatk/gatk_fil
 include {GATK_VARIANTFILTRATION_AF} from "${projectDir}/modules/gatk/gatk_variantfiltration_af"
 include {BCFTOOLS_GERMLINE_FILTER} from "${projectDir}/modules/bcftools/bcftools_germline_filter"
 include {BCFTOOLS_SPLITMULTIALLELIC_REGIONS} from "${projectDir}/modules/bcftools/bcftools_split_multiallelic_regions"
-include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor"
+include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline"
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
-include {COSMIC_CANCER_RESISTANCE_MUTATION} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations"
+include {COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_germline"
 include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {SNPSIFT_EXTRACT_AND_PARSE} from "${projectDir}/modules/utility_modules/parse_extracted_sv_table"
@@ -51,7 +51,7 @@ include {GRIDSS_PREPROCESS} from "${projectDir}/modules/gridss/gridss_preprocess
 include {GRIDSS_ASSEMBLE} from "${projectDir}/modules/gridss/gridss_assemble"
 include {GRIDSS_CALLING} from "${projectDir}/modules/gridss/gridss_calling"
 include {GRIDSS_CHROM_FILTER} from "${projectDir}/modules/gridss/gridss_chrom_filter"
-include {GRIDSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gridss_somatic_filter"
+include {GRIPSS_SOMATIC_FILTER} from "${projectDir}/modules/gridss/gripss_somatic_filter"
 include {SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_NORMAL;
          SAMTOOLS_STATS_INSERTSIZE as SAMTOOLS_STATS_INSERTSIZE_TUMOR} from "${projectDir}/modules/samtools/samtools_stats_insertsize"
 include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNIQUE_NORMAL;
@@ -98,6 +98,22 @@ include {SNV_TO_MNV_FINAL_FILTER} from "${projectDir}/modules/python/python_snv_
 
 include {GATK_SORTVCF_SOMATIC} from "${projectDir}/modules/gatk/gatk_sortvcf_somatic_merge"
 include {REORDER_VCF_COLUMNS} from "${projectDir}/modules/python/python_reorder_vcf_columns"
+include {COMPRESS_INDEX_MERGED_VCF} from "${projectDir}/modules/tabix/compress_merged_vcf"
+include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
+include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
+include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
+include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
+include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
+include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
+include {ANNOTATE_SV;
+         ANNOTATE_SV as ANNOTATE_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv"
+include {ANNOTATE_GENES_SV;
+         ANNOTATE_GENES_SV as ANNOTATE_GENES_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_genes_sv"
+include {ANNOTATE_SV_WITH_CNV;
+         ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
+include {FILTER_BEDPE;
+         FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
+
 
 // help if needed
 if (params.help){
@@ -278,9 +294,9 @@ workflow SV {
     // 4. AddCosmic
     COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
     // 5. AddCancerResistanceMutations
-    COSMIC_CANCER_RESISTANCE_MUTATION(COSMIC_ANNOTATION.out.vcf)
+    COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
-    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION.out.vcf, 'filtered')
+    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
 
     SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
     SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
@@ -361,8 +377,8 @@ workflow SV {
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
-    GRIDSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gridss_pon)
-    // gridss somatic filter will need a higher coverage dataset for testing. 
+    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf)
+    // NOTE: this filtering tool is hard coded for GRCh38 based on PON naming. 
     // additional NYGC steps not used: add commands to VCF 
 
     // BicSeq2
@@ -425,7 +441,7 @@ workflow SV {
     GATK_SORTVCF_LANCET.out.lancet_vcf
 
     Gridss
-    GRIDSS_SOMATIC_FILTER.out.gridss_filtered_bgz
+    GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz
 
     Bicseq2
     BICSEQ2_SEG.out.bicseq2_sv_calls
@@ -604,7 +620,49 @@ workflow SV {
     // meta = [patient:test, normal_id:test, tumor_id:test2, sex:XX, id:test2_vs_test] 
     //         This named list can be accessed in the script section prior to """ via calls like: meta.patient
 
-    // Step NN: Get alignment and WGS metrics
+    // Compress and index the merged vcf
+    COMPRESS_INDEX_MERGED_VCF(REORDER_VCF_COLUMNS.out.vcf)
+
+    // ** Annotation of somatic indels and snps
+
+    VEP_SOMATIC(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
+    COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
+    COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
+    SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf, 'filtered')
+
+    // ** Annotation of somatic CNV and SV
+
+    ANNOTATE_BICSEQ2_CNV(BICSEQ2_SEG.out.bicseq2_sv_calls, chrom_list_noY)
+    
+    // note: joining on the sampleID, metadata, tumor_name, and normal_name for
+    // safety. This re-arranges the values in the channel to:
+    // tuple val(sampleID), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(meta_manta), val(manta), file(gridss_bgz), val(no_idx), val(meta_gripss), val(gridss)
+    // Downstream, just including sampleID, normal_name, and tumor_name to simplify a similar
+    // join that is necessary
+
+    merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz, by : [0,4,5])
+    MERGE_SV(merge_sv_input, chrom_list)
+    
+    ANNOTATE_SV(MERGE_SV.out.merged, "main")
+    ANNOTATE_SV_SUPPLEMENTAL(MERGE_SV.out.merged_suppl, "supplemental")
+    ANNOTATE_GENES_SV(ANNOTATE_SV.out.annot_sv_bedpe, "main")
+    ANNOTATE_GENES_SV_SUPPLEMENTAL(ANNOTATE_SV_SUPPLEMENTAL.out.annot_sv_bedpe, "supplemental")
+    
+    // note: joining on the sampleID, normal_name, and tumor_namefor
+    // safety. This re-arranges the values in the channel to:
+    // tuple val(sampleID), val(normal_name), val(tumor_name), file(bicseq_annot), file(annot_sv_genes_bedpe)
+
+    annot_sv_cnv_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV.out.annot_sv_genes_bedpe, by: [0,2,3])
+    ANNOTATE_SV_WITH_CNV(annot_sv_cnv_input, "main")
+    
+    // See notes on previous step
+    annot_sv_cnv_suppl_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV_SUPPLEMENTAL.out.annot_sv_genes_bedpe, by: [0,2,3])
+    ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL(annot_sv_cnv_suppl_input, "supplemental")
+    
+    FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
+    FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
+
+    // ** Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 

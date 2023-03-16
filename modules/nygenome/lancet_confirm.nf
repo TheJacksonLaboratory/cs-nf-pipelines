@@ -3,7 +3,7 @@ process LANCET_CONFIRM {
 
   cpus = 8
   memory = 15.GB
-  time = '10:00:00'
+  time = '20:00:00'
 
   container 'quay.io/jaxcompsci/lancet:v1.1.0'
   // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lancet' }", pattern:".vcf", mode:'copy'

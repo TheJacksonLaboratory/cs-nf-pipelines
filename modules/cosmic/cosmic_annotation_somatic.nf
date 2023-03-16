@@ -1,34 +1,27 @@
-process COSMIC_ANNOTATION {
+process COSMIC_ANNOTATION_SOMATIC {
   tag "$sampleID"
 
   cpus 1
-  memory { 1.GB * task.attempt }
-  time {5.hour * task.attempt}
+  memory { 40.GB * task.attempt }
+  time {20.hour * task.attempt}
   errorStrategy 'retry'
   maxRetries 1
 
   container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
   input:
-  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*.vcf"), emit: vcf
+  tuple val(sampleID), file("*_somatic_vep_cosmic_annotated.vcf"), val(meta), val(normal_name), val(tumor_name), emit: vcf
 
   script:
-  if (params.workflow == 'sv')
     """
     python \
     ${projectDir}/bin/sv/add_cancer_gene_census.py \
     ${params.cosmic} \
     ${vcf} \
-    ${sampleID}_germline_vep_cosmic_annotated.vcf
-    """
-  else
-    """
-    ${projectDir}/bin/shared/Cosmic_Annotation_hg38.pl \
-    -i1 ${params.cosmic} \
-    -i2 ${vcf} > ${sampleID}_cosmic_annotation.vcf
+    ${sampleID}_somatic_vep_cosmic_annotated.vcf
     """
 }
 
