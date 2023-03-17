@@ -2,8 +2,8 @@ process PICARD_MARKDUPLICATES {
   tag "$sampleID"
 
   cpus 1
-  memory 16.GB
-  time '12:00:00'
+  memory { bam.size() < 60.GB ? 16.GB : 32.GB }
+  time { bam.size() < 60.GB ? '12:00:00' : '24:00:00' }
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
