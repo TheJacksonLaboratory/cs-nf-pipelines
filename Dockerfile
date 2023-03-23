@@ -18,10 +18,10 @@ RUN pip install markupsafe
 RUN pip install Flask
 RUN	conda config --add channels r
 RUN	conda config --add channels bioconda
-RUN conda install -c bioconda bowtie=1.3.1 
-RUN conda install -c bioconda bowtie2=2.5.1
 RUN	conda install -c kbchoi emase
 RUN conda install -c kbchoi gbrs
+RUN conda install bowtie 
+RUN conda install bowtie2
 RUN cd / && git clone https://github.com/churchill-lab/alntools && cd alntools && python setup.py install
 RUN cd / && git clone https://github.com/churchill-lab/gbrs.git --branch release/0.1.6 && cd gbrs && python setup.py install
 RUN cd / && git clone https://github.com/MikeWLloyd/emase-zero.git && cd emase-zero/src && make 
