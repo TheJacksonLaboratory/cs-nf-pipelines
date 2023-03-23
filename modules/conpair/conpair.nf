@@ -22,9 +22,9 @@ process CONPAIR {
   //Verifying concordance between two samples (tumor and normal)
   //Estimating contamination level in both the tumor and the normal:
   """
-  python2 /Conpair-0.2/scripts/verify_concordance.py -T ${tumor_pileup} -N ${normal_pileup} --outfile ${meta.patient}_concordance.txt
+  python2 /Conpair-0.2/scripts/verify_concordance.py -T ${tumor_pileup} -N ${normal_pileup} --outfile ${meta.patient}_concordance.txt -M /Conpair-0.2/data/markers/GRCh38.autosomes.phase3_shapeit2_mvncall_integrated.20130502.SNV.genotype.sselect_v4_MAF_0.4_LD_0.8.liftover.txt
 
-  python2 /Conpair-0.2/scripts/estimate_tumor_normal_contamination.py -T ${tumor_pileup} -N ${normal_pileup} --outfile ${meta.patient}_contamination.txt
+  python2 /Conpair-0.2/scripts/estimate_tumor_normal_contamination.py -T ${tumor_pileup} -N ${normal_pileup} --outfile ${meta.patient}_contamination.txt -M /Conpair-0.2/data/markers/GRCh38.autosomes.phase3_shapeit2_mvncall_integrated.20130502.SNV.genotype.sselect_v4_MAF_0.4_LD_0.8.liftover.txt
   """
 
   stub:
