@@ -13,7 +13,7 @@ process SURVIVOR_VCF_TO_TABLE {
     output:
         tuple val(sampleID), file("${sampleID}.merged.overlap.annotated.txt"), emit: annotation
     script:
-        if (params.workflow == "pacbio_ccs")
+        if (params.workflow == "pacbio")
             """
             /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} pacbio
             """

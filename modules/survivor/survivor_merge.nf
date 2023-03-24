@@ -13,7 +13,7 @@ process SURVIVOR_MERGE {
     output:
         tuple val(sampleID), file("${sampleID}_mergedCall.*.vcf"), emit: vcf
     script:
-        if (params.workflow == "pacbio_ccs")
+        if (params.workflow == "pacbio")
             """
             ls ${vcf_tuple[0]} > vcf_list.txt
             ls ${vcf_tuple[1]} >> vcf_list.txt

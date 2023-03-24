@@ -49,11 +49,19 @@ if (params.workflow == "pacbio_ccs") {
 	include {PACBIO_CCS} from "./workflows/pacbio_ccs"
 }
 
+if (params.workflow == "pacbio") {
+	include {PACBIO} from "./workflows/pacbio"
+}
+
 if (params.workflow == "illumina") {
     include {ILLUMINA} from "./workflows/illumina"
 }
 
 workflow {
+    if (params.workflow == "pacbio") {
+        PACBIO()
+    }
+
 	if (params.workflow == "pacbio_ccs") {
 		PACBIO_CCS()
 	}
