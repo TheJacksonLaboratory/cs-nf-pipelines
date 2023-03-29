@@ -32,6 +32,7 @@ process GATK_MUTECT2 {
     --disable-read-filter MateOnSameContigOrNoMappedMateReadFilter \
     --genotype-germline-sites true \
     --dont-use-soft-clipped-bases false \
+    --sample-ploidy ${params.ploidy} \
     -L ${params.target_gatk} \
     --native-pair-hmm-threads 4 \
     --annotation QualByDepth \
