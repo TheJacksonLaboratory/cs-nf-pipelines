@@ -7,7 +7,7 @@ process BOWTIE {
     errorStrategy 'retry' 
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/biocontainers/bowtie:1.3.1--py310h4070885_4'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bowtie' }", pattern: "*.log", mode: 'copy'
 

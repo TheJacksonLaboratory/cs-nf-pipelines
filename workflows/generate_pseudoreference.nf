@@ -7,6 +7,8 @@ include {param_log} from "${projectDir}/bin/log/generate_pseudoreference.nf"
 include {G2GTOOLS_VCF2VCI} from "${projectDir}/modules/g2gtools/g2gtools_vcf2vci"
 include {G2GTOOLS_PATCH} from "${projectDir}/modules/g2gtools/g2gtools_patch"
 include {G2GTOOLS_TRANSFORM} from "${projectDir}/modules/g2gtools/g2gtools_transform"
+include {SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_G2GTOOLS;
+         SAMTOOLS_FAIDX as SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {G2GTOOLS_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_convert"
 include {G2GTOOLS_GTF2DB} from "${projectDir}/modules/g2gtools/g2gtools_gtf2db"
 include {G2GTOOLS_EXTRACT as G2GTOOLS_EXTRACT_GENES;
@@ -52,13 +54,14 @@ workflow GENERATE_PSEUDOREFERENCE  {
     G2GTOOLS_PATCH(G2GTOOLS_VCF2VCI.out.vci_tbi)
     transform_input = G2GTOOLS_PATCH.out.patched_fasta.join(G2GTOOLS_VCF2VCI.out.vci_tbi)
     G2GTOOLS_TRANSFORM(transform_input)
+    SAMTOOLS_FAIDX_G2GTOOLS(G2GTOOLS_TRANSFORM.out.final_fasta)
     G2GTOOLS_CONVERT(G2GTOOLS_VCF2VCI.out.vci_tbi, params.primary_reference_gtf, 'gtf', false)
     G2GTOOLS_GTF2DB(G2GTOOLS_CONVERT.out.coverted_file)
     extract_input = G2GTOOLS_TRANSFORM.out.final_fasta.join(G2GTOOLS_GTF2DB.out.db)
     G2GTOOLS_EXTRACT_GENES(extract_input, 'genes')
     G2GTOOLS_EXTRACT_TRANSCRIPTS(extract_input, 'transcripts')
     G2GTOOLS_EXTRACT_EXONS(extract_input, 'exons')
-    
+
     /*
     For each STRAIN the following steps were run: 
         1. Convert VCF to VCI (chain file equivalent)
@@ -71,5 +74,14 @@ workflow GENERATE_PSEUDOREFERENCE  {
             b. transcripts.
             c. exons.
     */
+    
+    faidx_input = ['primary_strain', params.primary_reference_fasta]
+
+    SAMTOOLS_FAIDX(faidx_input)
+    // GBRS requies 'ref.fa.idx' which is fasta index of the primary refernce. 
+    // The index of that file is easily done here. 
+    // SAMTOOLS_FAIDX requires an input tuple. It is dummied here to strain = 'primary_strain', fasta = primary_reference_fasta
+
+
 
 }

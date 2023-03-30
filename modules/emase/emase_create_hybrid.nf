@@ -32,7 +32,6 @@ process EMASE_CREATE_HYBRID {
     """
     touch emase.pooled.transcripts.fa
     touch emase.pooled.transcripts.info
-    touch emase.gene2transcripts.tsv
     touch bowtie.transcripts.4.ebwt
     touch bowtie.transcripts.3.ebwt
     touch bowtie.transcripts.2.ebwt

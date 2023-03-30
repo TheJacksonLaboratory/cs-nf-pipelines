@@ -1,4 +1,5 @@
 process G2GTOOLS_TRANSFORM {
+    tag "$strain"
 
     cpus 8
     memory 25.GB

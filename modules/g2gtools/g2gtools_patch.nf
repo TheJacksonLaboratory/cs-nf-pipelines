@@ -1,4 +1,5 @@
 process G2GTOOLS_PATCH {
+    tag "$strain"
 
     cpus 8
     memory 8.GB

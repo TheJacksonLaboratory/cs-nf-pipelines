@@ -167,6 +167,8 @@ if (!is.null(opt$metadata_csv)) {
 
   print(nrow(genotype_check %>% dplyr::filter(is.na(Sample_Strain))))
 
+  print(genotype_check %>% dplyr::filter(is.na(Sample_Strain)))
+
   pdf( paste0(opt$output_prefix,"_founders_expression_proportions.pdf"), width = 12, height = 8)
 
   p <- genotype_check %>%

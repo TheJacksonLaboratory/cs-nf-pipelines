@@ -41,18 +41,18 @@ opt = parse_args(opt_parser);
 
 ################################################################################
 
-## Obtain geneIDs, and positions rom biomaRt.
-
-ensembl = useMart(biomart="ensembl", dataset="mmusculus_gene_ensembl")
+## Obtain geneIDs, and positions from biomaRt.
 
 ensembl_mart <- useEnsembl(biomart = 'genes',
                         dataset = 'mmusculus_gene_ensembl',
-                        version = opt$ensembl_build)
+                        version = opt$ensembl_build,
+                        mirror = "useast") 
+                        ## note: I have seen issues with timeout: "Error in curl::curl_fetch_memory(url, handle = handle) : Timeout was reached: [www.ensembl.org:443] Operation timed out after 10001 milliseconds with 0 bytes received"
+                        ##       useast seems to be more stable. Other options are: useast, uswest, asia, and www. A try/except catch could be added to retry on a different mirror if this is a highly recurrent issue. 
 
 attributes <- searchAttributes(mart = ensembl_mart)
 
 genes.with.id=getBM(attributes=c("ensembl_gene_id", "chromosome_name", "start_position", "end_position", "strand", "external_gene_name", "gene_biotype"), mart = ensembl_mart)
-
 
 ## Convert bp to cM positions using mmconvert.
 
@@ -71,6 +71,14 @@ table(input_df$chr)
 
 converted_df <- mmconvert(input_df, input_type = 'bp')
 ## convert to cM from bp
+
+### ### 
+# Note from https://github.com/kbroman/CoxMapV3:
+# The original map was with build 37. Markers were shifted so that 0 cM == 0 Mbp. 
+# It was later moved to build 38, and at some point we changed it to have 0 cM == 3 Mbp. 
+# Shifting to build 39 required dealing with a couple of big inversions at centromeres of chromosome 10 and 14; 
+# it seems like the chr 10 one was introduced in build 38 and is now being corrected, while the chr 14 inversion is new.
+### ### 
 
 jittered_converted_df <- converted_df %>%
                           dplyr::mutate(cM = round(ifelse(is.na(cM_coxV3_ave), cM_coxV3_female, cM_coxV3_ave), digits = 4)) %>%
@@ -128,6 +136,7 @@ chrMT_false_cM <- genes.with.id %>% dplyr::filter(chromosome_name == 'MT') %>%
 
 joined_allChr_jittered <- rbind(valid_chr_jittered, chrY_false_cM, chrMT_false_cM )
 
+write.table(joined_allChr_jittered, file = paste0('gene_list_ensemblBuild_', opt$ensembl_build,".tsv"), sep="\t", row.names = FALSE, quote=FALSE)
 
 ## Convert to transition probability matrix using DOQTL function.
 states = get.do.states()
@@ -151,17 +160,20 @@ generate_female_transprobs <- function() {
     for (j in c(1:num_gens)) {
       h5write(tprobs[[j]], file=h5file, name=paste(chr, j, sex, sep=":"))
     }
+    
+    pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_Chrom_', i, '_F.genPlots.pdf'))
+      image(tprobs[[1]][,,1], main = "Transition Prob. Matrix Gen.: 1, Gene: 1")
+      ## show the matrix transition for the first gene of the first generation. 
+
+      plot(exp(sapply(tprobs, function(z) { z[1,1,1] })), xlab='Generation', ylab='exp(transition_prob)') 
+      ## plot the probability of the first column, first row, of the first gene: 'AA' for the first gene
+    dev.off()
   }
-  ## Loop over chromosomes, and run do.trans.prob chromosome filtered set of genes. Write out resulting matrices to h5 file.
+  ## The above loops over chromosomes, and runs do.trans.prob on the chromosome filtered set of genes. Write out resulting matrices to h5 file.
 
   ## NOTE: The function do.trans.probs throws a warning message: "NAs introduced by coercion" when chr == 'X'
   ##       This error message is due to LINE: https://github.com/dmgatti/DOQTL/blob/a1a4d170bf5923ca45689a83822febdb46ede215/R/transition.probs.R#L361
-  ##       `if(!is.na(as.numeric(chr)))` Will always throw the error when `chr` is a string, or other non-numeric.
-
-  pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_F.genPlots.pdf'))
-    image(tprobs[[1]][,,1])
-    plot(exp(sapply(tprobs, function(z) { z[1,1,1] })), xlab='Generation', ylab='exp(transition_prob)') 
-  dev.off()
+  ##       `if(!is.na(as.numeric(chr)))` This will always throw the error when `chr` is a string, or other non-numeric.
 
   #  KB_NOTE: MT (8 states)
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'MT')
@@ -188,12 +200,14 @@ generate_male_transprobs <- function() {
     for (j in c(1:num_gens)) {
       h5write(tprobs[[j]], file=h5file, name=paste(chr, j, sex, sep=":"))
     }
-  }
+    pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_Chrom_', i, '_M.genPlots.pdf'))
+      image(tprobs[[1]][,,1], main = "Transition Prob. Matrix Gen.: 1, Gene: 1")
+      ## show the matrix transition for the first gene of the first generation. 
 
-  pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_M.genPlots.pdf'))
-    image(tprobs[[1]][,,1])
-    plot(exp(sapply(tprobs, function(z) { z[1,1,1] })), xlab='Generation', ylab='exp(transition_prob)') 
-  dev.off()
+      plot(exp(sapply(tprobs, function(z) { z[1,1,1] })), xlab='Generation', ylab='exp(transition_prob)') 
+      ## plot the probability of the first column, first row, of the first gene: 'AA' for the first gene
+    dev.off()
+  }
 
   # KB_NOTE: For "X" chromosome (male only)
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'X')

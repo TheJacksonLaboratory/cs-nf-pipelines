@@ -1,9 +1,9 @@
 process G2GTOOLS_GTF2DB {
+    tag "$strain"
 
     cpus 1
     memory 1.GB
     time '02:30:00'
-
 
     container 'quay.io/jaxcompsci/g2gtools:0.2.9'
 

@@ -1,4 +1,5 @@
 process G2GTOOLS_VCF2VCI {
+    tag "$strain"
 
     cpus 8
     memory 5.GB

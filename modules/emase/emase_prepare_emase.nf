@@ -27,11 +27,11 @@ process EMASE_PREPARE_EMASE {
     path("*.fa"), emit: pooled_transcript_fasta
     path("*.info"), emit: pooled_transcript_info
     path("*.tsv"), emit: pooled_gene_to_transcripts
-    path("*.ebwt"), emit: pooled_bowtie_index
+    path("*.ebwt"), emit: pooled_bowtie_index, optional: true
 
     script:
     """
-    prepare-emase -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m
+    prepare-emase -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m --no-bowtie-index
     """
 
     stub:

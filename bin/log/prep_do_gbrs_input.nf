@@ -2,7 +2,7 @@ def param_log(){
 log.info """
 ______________________________________________________
 
-    GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+        GENERATE DO GBRS INPUT FILES
 
 Results Published to: ${params.pubdir}
 ______________________________________________________

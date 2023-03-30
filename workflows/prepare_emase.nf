@@ -5,7 +5,8 @@ nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/prepare_emase.nf"
 include {param_log} from "${projectDir}/bin/log/prepare_emase.nf"
 include {EMASE_PREPARE_EMASE} from "${projectDir}/modules/emase/emase_prepare_emase"
-include {CLEAN_TRANSCRIPT_LISTS} from "${projectDir}/modules/utility_modules/clean_prepEmase_transcriptList"
+include {BOWTIE_BUILD} from "${projectDir}/modules/bowtie/bowtie_build"
+include {CLEAN_TRANSCRIPT_LISTS} from "${projectDir}/modules/python/clean_prepEmase_transcriptList"
 
 
 // help if needed
@@ -21,6 +22,7 @@ param_log()
 workflow PREPARE_EMASE {
     // Prepare emase reference, given list of genomes and gtf files. 
     EMASE_PREPARE_EMASE()
-    // clean transcript lists to add transcripts absent from certain haplotypes. 
+    BOWTIE_BUILD(EMASE_PREPARE_EMASE.out.pooled_transcript_fasta, 'bowtie.transcripts')
+    // clean transcript lists to add transcripts absent from certain haplotypes.
     CLEAN_TRANSCRIPT_LISTS(EMASE_PREPARE_EMASE.out.pooled_transcript_info)
 }
