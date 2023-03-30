@@ -8,7 +8,7 @@ process GATK_FILTERMUECTCALLS {
   // errorStrategy 'retry' 
   // maxRetries 1
 
-  container 'broadinstitute/gatk:4.2.4.1'
+  container 'broadinstitute/gatk:4.4.0.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_mutect2_somatic.filtered.vcf.gz", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
