@@ -9,11 +9,11 @@ process ANNOTATE_SV {
 
   input:
     // MERGE_SV.out.merged
-    tuple val(sampleID), file(merged_sv_bed), val(meta)
+    tuple val(sampleID), file(merged_sv_bed), val(normal_name), val(tumor_name)
     val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated*.bed"), val(meta), emit: annot_sv_bedpe
+    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_annotated*.bed"), val(normal_name), val(tumor_name), emit: annot_sv_bedpe
 
   script:
 

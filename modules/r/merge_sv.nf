@@ -8,12 +8,12 @@ process MERGE_SV {
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
 
   input:
-    tuple val(sampleID), val(meta), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(manta), file(gridss_bgz), val(no_idx), val(gridss)
+    tuple val(sampleID), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(meta_manta), val(manta), file(gripss_vcf), val(gripss_idx), val(meta_gripss), val(gripss)
     val(chrom_list)
 
   output:
-    tuple val(sampleID), file("${sampleID}.manta_gridss_sv.bed"), val(meta), emit: merged
-    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_supplemental.bed"), val(meta), emit: merged_suppl
+    tuple val(sampleID), file("${sampleID}.manta_gridss_sv.bed"), val(normal_name), val(tumor_name), emit: merged
+    tuple val(sampleID), file("${sampleID}.manta_gridss_sv_supplemental.bed"), val(normal_name), val(tumor_name), emit: merged_suppl
     
 
   script:
@@ -21,7 +21,7 @@ process MERGE_SV {
 
     """
     Rscript ${projectDir}/bin/sv/merge-caller-vcfs.r \
-        --vcf=${manta_vcf},${gridss_bgz} \
+        --vcf=${manta_vcf},${gripss_vcf} \
         --caller=manta,gridss \
         --tumor=${tumor_name} \
         --normal=${normal_name} \
@@ -29,7 +29,7 @@ process MERGE_SV {
         --slop=300 \
         --allowed_chr=${listOfChroms} \
         --min_sv_length=500 \
-        --out_file= ${sampleID}.manta_gridss_sv.bed \
-        --out_file_supplemental = ${sampleID}.manta_gridss_sv_supplemental.bed
+        --out_file=${sampleID}.manta_gridss_sv.bed \
+        --out_file_supplemental=${sampleID}.manta_gridss_sv_supplemental.bed
     """
 }

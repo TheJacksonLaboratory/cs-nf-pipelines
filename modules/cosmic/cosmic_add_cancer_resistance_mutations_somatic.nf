@@ -2,8 +2,8 @@ process COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC {
     tag "$sampleID"
 
     cpus 1
-    memory { 5.GB * task.attempt }
-    time {1.hour * task.attempt}
+    memory { 40.GB * task.attempt }
+    time {20.hour * task.attempt}
     errorStrategy 'retry'
     maxRetries 1
 

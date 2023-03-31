@@ -103,17 +103,16 @@ include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
 include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
-//include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
-//include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
-//include {ANNOTATE_SV;
-//         ANNOTATE_SV as ANNOTATE_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv"
-//include {ANNOTATE_GENES_SV;
-//         ANNOTATE_GENES_SV as ANNOTATE_GENES_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_genes_sv"
-//include {ANNOTATE_SV_WITH_CNV;
-//         ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
-//include {FILTER_BEDPE;
-//         FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
-//include {DECONSTRUCT_SIG} from "${projectDir}/modules/r/deconstruct_sig"
+include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
+include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
+include {ANNOTATE_SV;
+         ANNOTATE_SV as ANNOTATE_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv"
+include {ANNOTATE_GENES_SV;
+         ANNOTATE_GENES_SV as ANNOTATE_GENES_SV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_genes_sv"
+include {ANNOTATE_SV_WITH_CNV;
+         ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
+include {FILTER_BEDPE;
+         FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
 
 
 // help if needed
@@ -378,7 +377,7 @@ workflow SV {
     gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
-    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf, params.gripss_pon)
+    GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf)
     // NOTE: this filtering tool is hard coded for GRCh38 based on PON naming. 
     // additional NYGC steps not used: add commands to VCF 
 
@@ -633,38 +632,35 @@ workflow SV {
 
     // ** Annotation of somatic CNV and SV
 
-    // ANNOTATE_BICSEQ2_CNV(BICSEQ2_SEG.out.bicseq2_sv_calls, chrom_list_noY)
+    ANNOTATE_BICSEQ2_CNV(BICSEQ2_SEG.out.bicseq2_sv_calls, chrom_list_noY)
     
     // note: joining on the sampleID, metadata, tumor_name, and normal_name for
     // safety. This re-arranges the values in the channel to:
-    // tuple val(sampleID), val(meta), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(manta), file(gridss_bgz), val(no_idx), val(gridss)
-    // Downstream, just including sampleID and meta to simplify a similar
+    // tuple val(sampleID), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(meta_manta), val(manta), file(gridss_bgz), val(no_idx), val(meta_gripss), val(gridss)
+    // Downstream, just including sampleID, normal_name, and tumor_name to simplify a similar
     // join that is necessary
-    // merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz, by : [0,3,4,5])
-    // MERGE_SV(merge_sv_input)
+
+    merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz, by : [0,4,5])
+    MERGE_SV(merge_sv_input, chrom_list)
     
-    // ANNOTATE_SV(MERGE_SV.out.merged, "main")
-    // ANNOTATE_SV_SUPPLEMENTAL(MERGE_SV.out.merged_suppl, "supplemental")
-    // ANNOTATE_GENES_SV(ANNOTATE_SV.out.annot_sv_bedpe, "main")
-    // ANNOTATE_GENES_SV_SUPPLEMENTAL(ANNOTATE_SV_SUPPLEMENTAL.out.annot_sv_bedpe, "supplemental")
+    ANNOTATE_SV(MERGE_SV.out.merged, "main")
+    ANNOTATE_SV_SUPPLEMENTAL(MERGE_SV.out.merged_suppl, "supplemental")
+    ANNOTATE_GENES_SV(ANNOTATE_SV.out.annot_sv_bedpe, "main")
+    ANNOTATE_GENES_SV_SUPPLEMENTAL(ANNOTATE_SV_SUPPLEMENTAL.out.annot_sv_bedpe, "supplemental")
     
-    // note: joining on the sampleID, metadata, tumor_name, and normal_name for
+    // note: joining on the sampleID, normal_name, and tumor_namefor
     // safety. This re-arranges the values in the channel to:
-    // tuple val(sampleID), val(meta), file(bicseq_annot), file(annot_sv_genes_bedpe)
-    // annot_sv_cnv_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV.out.annot_sv_genes_bedpe, by : [0, 2])
-    // ANNOTATE_SV_WITH_CNV(annot_sv_cnv_input, "main")
+    // tuple val(sampleID), val(normal_name), val(tumor_name), file(bicseq_annot), file(annot_sv_genes_bedpe)
+
+    annot_sv_cnv_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV.out.annot_sv_genes_bedpe, by: [0,2,3])
+    ANNOTATE_SV_WITH_CNV(annot_sv_cnv_input, "main")
     
     // See notes on previous step
-    // annot_sv_cnv_suppl_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV_SUPPLEMENT.out.annot_sv_genes_bedpe, by : [0, 2])
-    // ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL(annot_sv_cnv_suppl_input, "supplemental")
+    annot_sv_cnv_suppl_input = ANNOTATE_BICSEQ2_CNV.out.bicseq_annot.join(ANNOTATE_GENES_SV_SUPPLEMENTAL.out.annot_sv_genes_bedpe, by: [0,2,3])
+    ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL(annot_sv_cnv_suppl_input, "supplemental")
     
-    // FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
-    // FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
-
-    // ** Deconstruct COSMIC Sigs from merged VCF (not sure what this is)
-    // Note: my reading of the WDL is that this should be the merged VCF that
-    // is also the input to the VEP_SOMATIC process
-    // DECONSTRUCT_SIG(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
+    FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
+    FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
 
     // ** Step NN: Get alignment and WGS metrics
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
