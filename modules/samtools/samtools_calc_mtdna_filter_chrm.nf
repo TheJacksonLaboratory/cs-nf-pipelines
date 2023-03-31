@@ -9,8 +9,7 @@ process CALC_MTDNA_FILTER_CHRM {
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
-  tuple val(sampleID), file(rmdup_bam_file)
-  tuple val(sampleID), file(rmdup_bai_file)
+  tuple val(sampleID), file(rmdup_bam_file), file(rmdup_bai_file)
 
   output:
   tuple val(sampleID), file("*.sorted.rmDup.rmChrM.bam"), emit: rmChrM_bam

@@ -10,8 +10,7 @@ process GATK_SELECTVARIANTS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(vcf)
-  tuple val(sampleID), file(idx)
+  tuple val(sampleID), file(vcf), file(idx)
   val(indel_snp)
 
   output:

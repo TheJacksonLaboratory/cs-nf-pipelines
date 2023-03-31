@@ -1,10 +1,55 @@
 # RELEASE NOTES
 
+## Release 0.2.2
+
+* Change WES and WGS COMSIC annotation to use SNPsift. 
+* Added explicit dbSNP annotation. 
+
+### Pipelines Added:
+
+NONE
+
+### Modules Added:
+
+1. SNPSIFT_ANNOTATE 
+
+### Pipeline Changes:
+
+1. WES and WGS now use SNPSift to annotate COSMIC and dbSNP IDs onto variants. 
+
+### Module Changes:
+
+1. COSMIC_ANNOTATION and associated perl scripts removed. 
+
+
+## Release 0.2.1
+
+Added STAR support to RNA-seq pipeline.
+
+### Pipelines Added:
+
+NONE
+
+### Modules Added:
+
+NONE
+
+### Pipeline Changes:
+
+1. RNA-seq pipeline now supports STAR and bowtie2 (default) through the RSEM module.
+
+### Module Changes:
+
+1. RSEM: --rsem_aligner accepts "bowtie2" or "star." The default STAR indices for mouse and human are 100 bp, with alternates suggested in the RNA-seq config file.
+
 ## Release 0.2.0
+
+**NOTE:** This release contains a patch for multi-sample processing. We strongly recommend multi-sample processing done prior to this release should be re-run with v0.2.0+
 
 ### Pipelines Added:
 
 1. RRBS - Mouse & Human
+2. ATAC - Mouse & Human
 
 ### Modules Added: 
 
@@ -14,16 +59,26 @@
 4. Bismark Deduplicator
 5. Bismark Methylation Extractor 
 6. MultiQC
+7. Bedtools functions for ATAC QC summary
+8. Bowtie2
+9. Cutadapt
+10. Deeptools bamcoverage and alignmentSieve
+11. g2gTools chain convert
+12. Macs2 ATAC peak calling and ATAC peak coverage
+13. Subread feature counts
 
 ### Pipeline Changes:
 
-NONE
+1. Multiple pipeline changes related to multi-sample patch.
+2. Modified module load statements to invoke "${projectDir}" instead of relative "../" path.
+3. Removed CTP and Probe coverage calculations from human RNA-seq
 
 ### Module Changes:
 
-1. Trimmomatic Trim stub module removed. 
-2. RSEM - forward stranded option added. 
-3. Picard Collect RNAseqMetrics - forward strand option added. 
+1. Multiple module changes related to multi-sample patch. 
+2. Trimmomatic Trim stub module removed. 
+3. RSEM - forward stranded option added. 
+4. Picard Collect RNAseqMetrics - forward strand option added. 
 
 ## Release 0.1.2 
 
