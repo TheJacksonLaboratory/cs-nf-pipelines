@@ -8,7 +8,7 @@ process STAR_ALIGN {
     errorStrategy 'finish'
     maxRetries 1
 
-    container 'quay.io/biocontainers/star:2.7.9a--h9ee0642_0'
+    container 'quay.io/biocontainers/star:2.7.8a--h9ee0642_1'
 
     input:
         tuple val(sampleID), path(reads)

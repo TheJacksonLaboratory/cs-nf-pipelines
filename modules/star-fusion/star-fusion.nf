@@ -27,7 +27,7 @@ process STAR_FUSION {
 
     """
     STAR \\
-        --genomeDir ${params.star_fusion_star_index} \\
+        --genomeDir ${params.star_index} \\
         --readFilesIn ${reads} \\
         --twopassMode Basic \\
         --outReadsUnmapped None \\

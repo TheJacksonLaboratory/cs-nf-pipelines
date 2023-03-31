@@ -15,7 +15,8 @@ include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {STAR_ALIGN as STAR_ARRIBA;
-         STAR_ALIGN as STAR_SQUID} from "${projectDir}/modules/star/star_align"
+         STAR_ALIGN as STAR_SQUID;
+         STAR_ALIGN as STAR_STARFUSION} from "${projectDir}/modules/star/star_align"
 include {SAMTOOLS_SORT as SORT_ARRIBA;
          SAMTOOLS_SORT as SORT_SQUID} from "${projectDir}/modules/samtools/samtools_sort_only"
 include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"

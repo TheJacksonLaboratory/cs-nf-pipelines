@@ -51,4 +51,6 @@ Starting with v4.0.4.0, GATK recommends the default setting of --af-of-alleles-n
 tumor-only calling sets the default to 5e-8, tumor-normal calling sets it to 1e-6 and mitochondrial mode sets it to 4e-3. 
 For previous versions, the default was 0.001, the average heterozygosity of humans. 
 For other organisms, change --af-of-alleles-not-in-resource to 1/(ploidy*samples in resource).
+
+https://console.cloud.google.com/storage/browser/gatk-best-practices/somatic-hg38;tab=objects?prefix=&forceOnObjectsSortingFiltering=false
 */
