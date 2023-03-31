@@ -13,6 +13,7 @@ process STAR_ALIGN {
     input:
         tuple val(sampleID), path(reads)
         val(args)
+        path(gtf)
 
     output:
         tuple val(sampleID), path('*d.out.bam'), emit: bam
@@ -33,7 +34,7 @@ process STAR_ALIGN {
         --readFilesIn ${reads}  \\
         --runThreadN ${task.cpus} \\
         --outFileNamePrefix ${sampleID}_ \\
-        --sjdbGTFfile ${params.gtf} \\
+        --sjdbGTFfile ${gtf} \\
         ${args}
     """
 }

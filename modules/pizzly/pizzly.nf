@@ -14,6 +14,7 @@ process PIZZLY {
 
     input:
         tuple val(sampleID), path(kallisto_fusions), path(kallisto_insert_size)
+        path(gtf)
 
     output:
         tuple val(sampleID), path("*_pizzly_fusions.txt"), emit: pizzly_fusions
@@ -28,7 +29,7 @@ process PIZZLY {
     --align-score 2 \
     --insert-size "\${insert_size}" \
     --cache index.cache.txt \
-    --gtf ${params.gtf} \
+    --gtf ${gtf} \
     --fasta ${params.transcript_fasta} \
     --output ${sampleID}.pizzly ${kallisto_fusions}
 

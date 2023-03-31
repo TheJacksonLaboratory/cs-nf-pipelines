@@ -128,11 +128,11 @@ workflow RNA_FUSION {
 
     // Step 3: Callers:
     // arriba
-    STAR_ARRIBA(fusion_tool_input, params.arriba_star_args)
+    STAR_ARRIBA(fusion_tool_input, params.arriba_star_args, params.gencode_gtf)
     SORT_ARRIBA(STAR_ARRIBA.out.bam, '-O bam', 'bam')
     INDEX_ARRIBA(SORT_ARRIBA.out.sorted_file)
     arriba_input = SORT_ARRIBA.out.sorted_file.join(INDEX_ARRIBA.out.bai)
-    ARRIBA(arriba_input)
+    ARRIBA(arriba_input, params.gencode_gtf)
 
     // fusioncatcher
     FUSIONCATCHER(fusion_tool_input)
@@ -144,15 +144,15 @@ workflow RNA_FUSION {
     KALLISTO_QUANT(fusion_tool_input)
     KALLISTO_INSERT_SIZE(KALLISTO_QUANT.out.kallisto_abundance)
     pizzly_input = KALLISTO_QUANT.out.kallisto_fusions.join(KALLISTO_INSERT_SIZE.out.kallisto_insert_size)
-    PIZZLY(pizzly_input)
+    PIZZLY(pizzly_input, params.ensembl_gtf)
 
     // squid
-    STAR_SQUID(fusion_tool_input, params.squid_star_args)
+    STAR_SQUID(fusion_tool_input, params.squid_star_args, params.gencode_gtf)
     SAMTOOLS_VIEW_SQUID(STAR_SQUID.out.sam, '-Sb', '_chimeric') // NOTE: The sam file from STAR_SQUID contains chimeric reads. Per STAR passed arguments. 
     SORT_SQUID(SAMTOOLS_VIEW_SQUID.out.bam, '-O bam', 'bam')
     squid_input = STAR_SQUID.out.bam_sorted.join(SORT_SQUID.out.sorted_file )
     SQUID(squid_input)
-    SQUID_ANNOTATE(SQUID.out.squid_fusions)
+    SQUID_ANNOTATE(SQUID.out.squid_fusions, params.gencode_gtf)
     
     // star-fusion
     STAR_FUSION(fusion_tool_input)

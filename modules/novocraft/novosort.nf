@@ -15,7 +15,7 @@ process NOVOSORT_markDuplicates {
   tuple val(sampleID), file("*_fixed_mate_dup_marked.bam"), emit: fixed_mate_dup_marked_bam
 
   script:
-  log.info "----- Novosort Running on: ${sampleID} -----" 
+
   """
   novosort -markduplicates -t . -m 8G \
   ${fixed_mate_bam} > ${sampleID}_fixed_mate_dup_marked.bam

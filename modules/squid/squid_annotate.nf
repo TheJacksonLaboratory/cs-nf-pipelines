@@ -14,12 +14,13 @@ process SQUID_ANNOTATE {
 
     input:
         tuple val(sampleID), path(txt)
+        path(gtf)
 
     output:
         tuple val(sampleID), path("*annotated.txt"), emit: squid_fusions_annotated
 
     script:
     """
-    AnnotateSQUIDOutput.py ${params.gtf} ${txt} ${sampleID}_squid_fusions_annotated.txt
+    AnnotateSQUIDOutput.py ${gtf} ${txt} ${sampleID}_squid_fusions_annotated.txt
     """
 }

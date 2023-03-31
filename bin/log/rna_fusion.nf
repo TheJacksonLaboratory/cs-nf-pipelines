@@ -27,7 +27,8 @@ ______________________________________________________
 --read_length                       ${params.read_length}
 --star_index                        ${params.star_index}
 --star_fusion_star_index            ${params.star_fusion_star_index}
---gtf                               ${params.gtf}
+--gencode_gtf                       ${params.gencode_gtf}
+--ensembl_gtf                       ${params.ensembl_gtf}
 --fasta                             ${params.fasta}
 --arriba_star_args                  ${params.arriba_star_args}
 --arriba_blacklist                  ${params.arriba_blacklist}

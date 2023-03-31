@@ -68,6 +68,9 @@ process STAR_FUSION {
 //`--readFilesCommand zcat` this option is included in STAR if files are compressed. 
 
 /*
+
+To build a new reference set: 
+
     export TMPDIR=/fastscratch/lloydm/tmp
     
     wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam34.0/Pfam-A.hmm.gz --no-check-certificate
@@ -82,8 +85,8 @@ process STAR_FUSION {
     
     singularity exec /projects/omics_share/meta/containers/trinityctat-starfusion-1.12.0.img \
     /usr/local/src/STAR-Fusion/ctat-genome-lib-builder/prep_genome_lib.pl \
-        --genome_fa /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/gencode/v37/kallisto/references/ensembl/Homo_sapiens.GRCh38.102.all.fa \
-        --gtf /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/gencode/v37/kallisto/references/ensembl/Homo_sapiens.GRCh38.102.chr.gtf \
+        --genome_fa /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/Homo_sapiens.GRCh38.102.all.fa \
+        --gtf /projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/Homo_sapiens.GRCh38.102.chr.gtf \
         --annot_filter_rule AnnotFilterRule.pm \
         --fusion_annot_lib CTAT_HumanFusionLib_Mar2021.dat.gz \
         --pfam_db Pfam-A.hmm \
