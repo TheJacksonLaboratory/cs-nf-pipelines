@@ -2,8 +2,8 @@ process SVABA {
   tag "$meta.patient"
 
   cpus = 8
-  memory = 15.GB
-  time = '10:00:00'
+  memory { normal_bam.size() < 60.GB ? 15.GB : 48.GB }
+  time { normal_bam.size() < 60.GB ? '10:00:00' : '24:00:00' }
 
   container 'quay.io/jaxcompsci/svaba:v0.2.1'
 

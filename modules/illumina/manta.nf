@@ -2,8 +2,8 @@ process MANTA {
   tag "$meta.patient"
 
   cpus = 4
-  memory = 8.GB
-  time = '03:00:00'
+  memory { normal_bam.size() < 60.GB ? 12.GB : 24.GB }
+  time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/manta:v1.5.0'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
