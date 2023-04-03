@@ -18,7 +18,6 @@ process GATK_VARIANTANNOTATOR {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- GATK VariantAnnotator Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """

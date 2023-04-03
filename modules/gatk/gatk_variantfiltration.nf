@@ -6,7 +6,7 @@ process GATK_VARIANTFILTRATION {
   time = '03:00:00'
 
   container 'broadinstitute/gatk:4.2.4.1'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf), file(idx)
@@ -17,7 +17,6 @@ process GATK_VARIANTFILTRATION {
   tuple val(sampleID), file("*.idx"), emit: idx
 
   script:
-  log.info "----- GATK VariantFiltration Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   if (indel_snp == 'INDEL'){

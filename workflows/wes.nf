@@ -33,7 +33,7 @@ include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeatu
 include {GATK_VARIANTFILTRATION;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
-include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk_variantannotator"
+include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
 include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 include {GATK_SELECTVARIANTS;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;

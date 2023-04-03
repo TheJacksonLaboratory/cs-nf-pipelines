@@ -19,7 +19,6 @@ process CHAIN_CONVERT {
   when: params.chain != null
 
   script:
-  log.info "----- Converting Coordinates to Reference on ${sampleID} -----"
   """
   g2gtools convert \
   -r -f bam -c ${params.chain} \

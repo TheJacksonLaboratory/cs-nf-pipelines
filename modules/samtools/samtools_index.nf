@@ -16,7 +16,6 @@ process SAMTOOLS_INDEX {
   tuple val("sampleID"), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Samtools Index Running on: ${sampleID} -----"
 
     """
     samtools index ${bam}

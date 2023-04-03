@@ -24,7 +24,6 @@ process BISMARK_ALIGNMENT {
   tuple val(sampleID), file("*unmapped*"), emit: unmapped_reads
 
   script:
-  log.info "----- Bismark Alignment Running on: ${sampleID} -----"
 
   inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : "-1 ${fq_reads[0]}"
   directionality = params.non_directional ? '--non_directional': ''

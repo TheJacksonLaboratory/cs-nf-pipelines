@@ -2,8 +2,8 @@ process PICARD_MARKDUPLICATES {
   tag "$sampleID"
 
   cpus 1
-  memory 16.GB
-  time '12:00:00'
+  memory { bam.size() < 60.GB ? 16.GB : 32.GB }
+  time { bam.size() < 60.GB ? '12:00:00' : '24:00:00' }
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
@@ -20,7 +20,6 @@ process PICARD_MARKDUPLICATES {
   tuple val(sampleID), file("*.txt"), emit: dedup_metrics
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
@@ -43,7 +42,7 @@ process PICARD_MARKDUPLICATES {
   REMOVE_DUPLICATES=false \
   CREATE_INDEX=true \
   VALIDATION_STRINGENCY=LENIENT \
-  TMP_DIR=${params.tmpdir} \
+  TMP_DIR=${workDir}/temp \ \
   > ${sampleID}.picard.log 2>&1  
   """
 }

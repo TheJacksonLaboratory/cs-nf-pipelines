@@ -15,7 +15,6 @@ process FINAL_CALC_FRIP {
   tuple val(sampleID), file("*_Fraction_reads_in_peak.txt")
 
   shell:
-  log.info "----- Final Calculate (FRiP) on ${sampleID} -----"
   // Calculate fraction of reads in peak
   '''
   total_reads=$(samtools view -c !{processed_bams[0]})
