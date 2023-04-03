@@ -2,10 +2,12 @@ process ANNOTATE_BICSEQ2_CNV {
   tag "$sampleID"
 
   cpus 1
-  memory 36.GB
-  time '04:00:00'
+  memory 360.GB
+  time '08:00:00'
 
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'cnv'}", pattern: "*.bed", mode: 'copy'
 
   input:
     //BICSEQ2_SEG.out.bicseq2_sv_calls
@@ -13,8 +15,8 @@ process ANNOTATE_BICSEQ2_CNV {
     val(chrom_list)
 
   output:
-    tuple val(sampleID), file("${sampleID}.bicseq2_annotated.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot
-    tuple val(sampleID), file("${sampleID}.bicseq2_annotated_supplemental.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot_suppl
+    tuple val(sampleID), file("${sampleID}.cnv.annotated.v7.final.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot
+    tuple val(sampleID), file("${sampleID}.cnv.annotated.v7.supplemental.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot_suppl
 
   script:
     listOfChroms = chrom_list.collect { "$it" }.join(',')
@@ -32,8 +34,8 @@ process ANNOTATE_BICSEQ2_CNV {
         --ensembl=${params.ensemblUniqueBed} \
         --allowed_chr=${listOfChroms} \
         --overlap_fraction=0.8 \
-        --out_file_main=${sampleID}.bicseq2_annotated.bed \
-        --out_file_supplemental=${sampleID}.bicseq2_annotated_supplemental.bed
+        --out_file_main=${sampleID}.cnv.annotated.v7.final.bed \
+        --out_file_supplemental=${sampleID}.cnv.annotated.v7.supplemental.bed
 
     """
 }
