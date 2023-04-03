@@ -42,7 +42,7 @@ process PICARD_MARKDUPLICATES {
   REMOVE_DUPLICATES=false \
   CREATE_INDEX=true \
   VALIDATION_STRINGENCY=LENIENT \
-  TMP_DIR=${params.tmpdir} \
+  TMP_DIR=${workDir}/temp \ \
   > ${sampleID}.picard.log 2>&1  
   """
 }

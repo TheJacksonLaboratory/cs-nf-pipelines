@@ -22,6 +22,7 @@ process PICARD_CLEANSAM {
   """
   picard -Xmx${my_mem}G CleanSam \
   I=${bam} \
+  TMP_DIR=${workDir}/temp \
   O=${sampleID}_cleaned.bam
   """
 }

@@ -25,6 +25,7 @@ process PICARD_SORTSAM {
   SO=coordinate \
   INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
+  TMP_DIR=${workDir}/temp \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
   """
