@@ -2,8 +2,8 @@ process LUMPY_SV {
   tag "$sampleID"
   
   cpus = 1
-  memory = 8.GB
-  time = '03:00:00'
+  memory { normal_bam.size() < 60.GB ? 8.GB : 24.GB }
+  time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
   
   container 'quay.io/biocontainers/lumpy-sv:0.3.1--hdfd78af_3'
   

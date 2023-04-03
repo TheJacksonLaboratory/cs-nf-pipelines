@@ -9,7 +9,7 @@ process SOMATIC_VCF_FINALIZATION {
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.*", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name)
