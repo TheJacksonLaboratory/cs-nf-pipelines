@@ -57,6 +57,10 @@ if (params.workflow == "illumina") {
     include {ILLUMINA} from "./workflows/illumina"
 }
 
+if (params.workflow == "ont") {
+    include {ONT} from "./workflows/ont"
+}
+
 workflow {
     if (params.workflow == "pacbio") {
         PACBIO()
@@ -69,6 +73,10 @@ workflow {
     if (params.workflow == "illumina") {
         ILLUMINA()
     }
+
+    if (params.workflow == "ont") {
+        ONT()
+    }    
 }
 
 
