@@ -58,10 +58,14 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "bowtie2"){
     outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
+    sort_command=''
+    index_command=''
   }
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
+    sort_command="samtools sort -@ ${task.cpus} -m 1G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
   }
 
   """
@@ -77,5 +81,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${rsem_ref_prefix} \
   ${sampleID} \
   2> rsem_aln_${sampleID}.stats
+
+  ${sort_command}
+
+  ${index_command}
   """
 }
