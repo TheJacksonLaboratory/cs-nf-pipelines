@@ -12,13 +12,11 @@ process VCF_ANNOTATE {
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
-  // vcftools container needed
   container 'quay.io/biocontainers/perl-vcftools-vcf:0.1.16--pl5321hdfd78af_4'
 
   script:
 
   if (params.gen_org=='mouse'){
-    // make sure it does not break
     delta="CHROM,POS,ID,REF,ALT"
   }
   else if (params.gen_org=='human'){

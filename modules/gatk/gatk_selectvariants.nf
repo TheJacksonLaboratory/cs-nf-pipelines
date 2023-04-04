@@ -7,11 +7,13 @@ process GATK_SELECTVARIANTS {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*filtered_dbsnpID.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf), file(idx)
   val(indel_snp)
+  val(suffix)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
@@ -25,6 +27,6 @@ process GATK_SELECTVARIANTS {
   -R ${params.ref_fa} \
   -V ${vcf} \
   -select-type ${indel_snp} \
-  -O ${sampleID}_selectedvariants_${indel_snp}.vcf
+  -O ${sampleID}_${suffix}.vcf
   """
 }
