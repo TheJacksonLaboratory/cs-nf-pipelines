@@ -10,8 +10,6 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
-include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
