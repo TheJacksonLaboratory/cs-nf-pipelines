@@ -23,26 +23,14 @@ process PICARD_MARKDUPLICATES {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
-  if (params.workflow != "atac")
-  """
-  picard -Xmx${my_mem}G MarkDuplicates \
-  I=${bam} \
-  O=${sampleID}_dedup.bam \
-  M=${sampleID}_dup_metrics.txt \
-  REMOVE_DUPLICATES=true \
-  CREATE_INDEX=true \
-  VALIDATION_STRINGENCY=SILENT
-  """
-  else
   """
   picard -Xmx${my_mem}G MarkDuplicates \
   I=${bam[0]} \
-  O=${sampleID}.sorted.marked4_dedup.bam \
-  M=${sampleID}.sorted.metrics.txt \
+  O=${sampleID}_dedup.bam \
+  M=${sampleID}_dup_metrics.txt \
   REMOVE_DUPLICATES=false \
   CREATE_INDEX=true \
-  VALIDATION_STRINGENCY=LENIENT \
-  TMP_DIR=${workDir}/temp \ \
-  > ${sampleID}.picard.log 2>&1  
+  TMP_DIR=${workDir}/temp \
+  VALIDATION_STRINGENCY=SILENT
   """
 }
