@@ -8,7 +8,7 @@ process SNPSIFT_DBNSFP{
   // SNPEFF and SNPSIFT need updating
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf)

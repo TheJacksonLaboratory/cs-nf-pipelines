@@ -5,7 +5,8 @@ process SNPSIFT_ANNOTATE {
   memory = 6.GB
   time = '06:00:00'
 
-  // SNPEFF and SNPSIFT need updating
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpsift' }", pattern:"*dbsnpID.vcf", mode:'copy'
+
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   input:
