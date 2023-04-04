@@ -11,8 +11,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy', enabled: params.rsem_aligner == "bowtie2"
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*genome.bam", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*genome.sorted.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.sorted.ba*", mode:'copy'
 
   input:
   tuple val(sampleID), file(reads)
@@ -26,7 +26,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
   tuple val(sampleID), file("*.genome.bam"), emit: bam
   tuple val(sampleID), file("*.transcript.bam"), emit: transcript_bam
-
+  tuple val(sampleID), path("*.genome.sorted.bam"), path("*.genome.sorted.bam.bai"), emit: sorted_genomic_bam
+  tuple val(sampleID), path("*.transcript.sorted.bam"), path("*.transcript.sorted.bam.bai"), emit: sorted_transcript_bam
+ 
   script:
 
   if (params.read_prep == "reverse_stranded") {
@@ -52,12 +54,16 @@ process RSEM_ALIGNMENT_EXPRESSION {
     trimmedfq="${reads[0]}"
   }
   if (params.rsem_aligner == "bowtie2"){
-    outbam="--output-genome-bam"
+    outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
+    sort_command=''
+    index_command=''
   }
   if (params.rsem_aligner == "star") {
-    outbam="--star-output-genome-bam"
+    outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
+    sort_command="samtools sort -@ ${task.cpus} -m 1G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
   }
 
   """
@@ -73,5 +79,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${params.rsem_ref_prefix} \
   ${sampleID} \
   2> rsem_aln_${sampleID}.stats
+
+  ${sort_command}
+
+  ${index_command}
   """
 }
