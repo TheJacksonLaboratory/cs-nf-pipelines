@@ -19,7 +19,6 @@ process CHAIN_FILTER_READS {
   when: params.chain != null
 
   script:
-  log.info "----- Filtering list to unique name on ${sampleID} -----"
   """
   gatk FilterSamReads \
   -I ${bam_sort_mm10[0]} \

@@ -23,6 +23,6 @@ nextflow ../main.nf \
 --effective_genome_size 2652783500 \
 --bowtie2Index '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bowtie2/Mus_musculus.GRCm38.dna.primary_assembly.fa' \
 --chain '' \
---pubdir '/fastscratch/outputDir' \
--w '/fastscratch/outputDir/work' \
+--pubdir "/fastscratch/${USER}/outputDir" \
+-w "/fastscratch/${USER}/outputDir/work" \
 --comment "This script will run atac sequencing on mouse samples using default mm10"

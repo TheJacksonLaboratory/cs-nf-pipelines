@@ -9,7 +9,7 @@ process BISMARK_ALIGNMENT {
 
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bismark_align' }", pattern: "*report.txt", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*unmapped*", mode:'copy', enabled: params.keep_intermediate
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*ambiguous*", mode:'copy', enabled: params.keep_intermediate
@@ -24,7 +24,6 @@ process BISMARK_ALIGNMENT {
   tuple val(sampleID), file("*unmapped*"), emit: unmapped_reads
 
   script:
-  log.info "----- Bismark Alignment Running on: ${sampleID} -----"
 
   inputfq = params.read_type == 'PE' ?  "-1 ${fq_reads[0]} -2 ${fq_reads[1]}" : "-1 ${fq_reads[0]}"
   directionality = params.non_directional ? '--non_directional': ''

@@ -14,7 +14,6 @@ process FILTER_REMOVE_MULTI_SIEVE {
   tuple val(sampleID), file("*.shift.tmp.ba*")
 
   script:
-  log.info "----- Running deeptools alignmentSieve on ${sampleID} -----"
   """
   alignmentSieve \
   --numberOfProcessors $task.cpus \

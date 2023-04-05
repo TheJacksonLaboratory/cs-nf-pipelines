@@ -19,5 +19,5 @@ nextflow main.nf \
 --workflow rnaseq \
 --gen_org mouse \
 --sample_folder 'test/rna/mouse' \
---pubdir '/fastscratch/outputDir' \
--w '/fastscratch/outputDir/work'
+--pubdir "/fastscratch/${USER}/outputDir" \
+-w "/fastscratch/${USER}/outputDir/work"

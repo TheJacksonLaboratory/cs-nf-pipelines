@@ -15,7 +15,6 @@ process REMOVE_DUPLICATE_READS {
   tuple val(sampleID), file("*.sorted.rmDup.bam.bai"), emit: rmDup_bai
 
   script:
-  log.info "----- Samtools Removing PCR Duplicates on: ${sampleID} -----"
   // Exclude reads flagged as pcr or optical duplicates (0x400), marked with bit flag 1024 in the BAM.
   """
   samtools view -h -b -F 1024 ${marked_bam_file} > ${sampleID}.sorted.rmDup.bam

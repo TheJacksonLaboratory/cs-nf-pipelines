@@ -21,7 +21,6 @@ process BISMARK_METHYLATION_EXTRACTION {
   tuple val(sampleID), file("*.{png,gz}"), emit: extractor_png_gz
 
   script:
-  log.info "----- Bismark Methylation Extractor Running on: ${sampleID} -----"
   
   comprehensive = params.comprehensive ? '--comprehensive --merge_non_CpG' : ''
   cytosine_report = params.cytosine_report ? "--cytosine_report --genome_folder ${params.ref_fa_index}" : ''

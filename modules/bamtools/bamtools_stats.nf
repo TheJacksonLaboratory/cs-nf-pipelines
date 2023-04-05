@@ -17,7 +17,6 @@ process BAMTOOLS_STATS {
   tuple val(sampleID), file("*metrics.txt"), emit: picard_metrics
 
   script:
-  log.info "----- Bamtools Stats Running on: ${sampleID} -----"
   if (params.read_type == "PE")
 
     """

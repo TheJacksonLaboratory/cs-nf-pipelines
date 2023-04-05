@@ -20,7 +20,6 @@ process BISMARK_DEDUPLICATION {
   tuple val(sampleID), file("*report.txt"), emit: dedup_report
 
   script:
-  log.info "----- Bismark Deduplication Running on: ${sampleID} -----"
 
   fq_type = params.read_type == 'PE' ? '-p' : '-s'
   

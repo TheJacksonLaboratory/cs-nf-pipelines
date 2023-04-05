@@ -14,7 +14,6 @@ process TRIM_FASTQ {
   tuple val(sampleID), file("*.log"), emit: cutadapt_log
 
   script:
-  log.info "----- Cutadapt Running on: ${sampleID} -----"
 
   paired_end = params.read_type == 'PE' ?  "-p ${sampleID}_R2_paired_trimmed.fq" : ''
 
