@@ -39,7 +39,7 @@ process GATK_SORTVCF {
         ${inputs} \
         -O ${sampleID}_${tool_name}_merged.vcf
         
-    bgzip ${sampleID}_${tool_name}_merged.vcf
+    bgzip -f -c ${sampleID}_${tool_name}_merged.vcf > ${sampleID}_${tool_name}_merged.vcf.gz
     tabix ${sampleID}_${tool_name}_merged.vcf.gz  
     
     """

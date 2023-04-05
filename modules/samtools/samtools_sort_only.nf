@@ -5,6 +5,8 @@ process SAMTOOLS_SORT {
   memory 20.GB
   time '20:00:00'
 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.bam", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
+  
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
