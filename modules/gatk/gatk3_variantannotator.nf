@@ -9,7 +9,7 @@ process GATK_VARIANTANNOTATOR {
   // Flag --snpEffFile was removed in GATK4
   container 'broadinstitute/gatk3:3.6-0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID), file(sample_vcf), file(snpeff_vcf)
@@ -18,7 +18,6 @@ process GATK_VARIANTANNOTATOR {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- GATK VariantAnnotator Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """

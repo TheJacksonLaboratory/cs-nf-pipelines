@@ -17,7 +17,6 @@ process FASTQC {
 
 
   script:
-  log.info "----- FASTQC Running on: ${sampleID} -----"
 
   """
     fastqc --quiet -t ${task.cpus} ${fq_reads}

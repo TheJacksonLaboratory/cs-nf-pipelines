@@ -16,7 +16,6 @@ process FILTER_REMOVE_MULTI_SHIFT {
   tuple val(sampleID), file("*.sorted.rmDup.rmChrM.rmMulti.filtered.ba*"), emit: srf_bam
 
   script:
-  log.info "----- Filter Non-Unique and Include Only 'properly mapped reads' Alignments on ${sampleID} -----"
   // Filter reads unmapped, mate unmapped, not primary alignment, reads failing platform, pcr duplicates (-F 1804) and reatin properly paired reads (-f 2) in bam file
   """
   # filter low quality reads

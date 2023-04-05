@@ -11,12 +11,12 @@ process GATK_MERGEVCF {
 
   input:
   tuple val(sampleID), file(snp_vcf), file(indel_vcf)
+  val(suffix)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- GATK MergeVcfs Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
@@ -24,6 +24,6 @@ process GATK_MERGEVCF {
   -R ${params.ref_fa} \
   -I ${snp_vcf} \
   -I ${indel_vcf} \
-  -O ${sampleID}_GATKcombined.vcf
+  -O ${sampleID}_${suffix}.vcf
   """
 }

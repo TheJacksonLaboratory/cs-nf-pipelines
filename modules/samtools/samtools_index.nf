@@ -7,7 +7,7 @@ process SAMTOOLS_INDEX {
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern:"*.ba*", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern:"*.ba*", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
 
   input:
   tuple val("sampleID"), file(bam)
@@ -16,7 +16,6 @@ process SAMTOOLS_INDEX {
   tuple val("sampleID"), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Samtools Index Running on: ${sampleID} -----"
 
     """
     samtools index ${bam}
