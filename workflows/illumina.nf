@@ -84,7 +84,7 @@ workflow ILLUMINA {
         FILTER_TRIM(fq_reads)
         
         // Get read groups ID from FASTQ file
-        READ_GROUPS(FILTER_TRIM.out.trimmed_fastq)
+        READ_GROUPS(fq_reads)
 
         // Map reads to reference
         bwa_mem_input = FILTER_TRIM.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
