@@ -2,8 +2,8 @@ process STRELKA2 {
   tag "$meta.patient"
 
   cpus = 4
-  memory = 8.GB
-  time = '03:00:00'
+  memory { normal_bam.size() < 60.GB ? 8.GB : 24.GB }
+  time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/strelka2:v2.9.3'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'strelka' }", pattern:"*.vcf.gz", mode:'copy'

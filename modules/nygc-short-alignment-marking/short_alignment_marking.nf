@@ -2,8 +2,8 @@ process SHORT_ALIGNMENT_MARKING {
   tag "$sampleID"
 
   cpus 1
-  memory 4.GB
-  time '10:00:00'
+  memory 24.GB
+  time '24:00:00'
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 

@@ -83,6 +83,7 @@ ______________________________________________________
 -c                     ${params.config}
 --read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
+--hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -124,6 +125,7 @@ ______________________________________________________
 -c                     ${params.config}
 --read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
+--hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -164,6 +166,7 @@ ______________________________________________________
 -c                              ${params.config}
 --read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
@@ -201,6 +204,7 @@ ______________________________________________________
 -c                              ${params.config}
 --read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}

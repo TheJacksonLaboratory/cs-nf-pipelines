@@ -2,10 +2,8 @@ process GATK_BASERECALIBRATOR {
   tag "$sampleID"
 
   cpus = 1
-  memory = {40.GB * task.attempt}
-  time = '12:00:00'
-  errorStrategy 'retry' 
-  maxRetries 1
+  memory { bam.size() < 60.GB ? 40.GB : 80.GB }
+  time { bam.size() < 60.GB ? '12:00:00' : '24:00:00' }
 
   container 'broadinstitute/gatk:4.2.4.1'
 

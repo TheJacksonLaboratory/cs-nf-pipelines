@@ -64,7 +64,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
-    sort_command="samtools sort -@ ${task.cpus} -m 1G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    sort_command="samtools sort -@ ${task.cpus} -m ${task.memory.giga}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
   }
 
