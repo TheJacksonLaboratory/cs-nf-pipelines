@@ -11,23 +11,21 @@ process EMASE_PREPARE_EMASE {
     //       Helper script `clean_transcript_info.py` can be used to add missing transcripts. 
 
     cpus 1
-    memory {15.GB * task.attempt}
-    time {24.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 15.GB
+    time 24.hour
 
     container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
 
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy', enabled: params.keep_intermediate
     publishDir "${params.pubdir}/emase", pattern: '*.tsv', mode:'copy'
-    publishDir "${params.pubdir}/emase/bowtie", pattern: "*.ebwt", mode:'copy'
+    // publishDir "${params.pubdir}/bowtie", pattern: "*.ebwt", mode:'copy' // TURN ON IF BOWTIE INDEX BUILT HERE.
 
     output:
     path("*.fa"), emit: pooled_transcript_fasta
     path("*.info"), emit: pooled_transcript_info
     path("*.tsv"), emit: pooled_gene_to_transcripts
-    path("*.ebwt"), emit: pooled_bowtie_index, optional: true
+    // path("*.ebwt"), emit: pooled_bowtie_index, optional: true // TURN ON IF BOWTIE INDEX BUILT HERE.
 
     script:
     """

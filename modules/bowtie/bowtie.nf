@@ -2,10 +2,8 @@ process BOWTIE {
     tag "$sampleID"
 
     cpus 8
-    memory {30.GB * task.attempt}
-    time {15.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 30.GB
+    time 15.hour
 
     container 'quay.io/biocontainers/bowtie:1.3.1--py310h4070885_4'
 
