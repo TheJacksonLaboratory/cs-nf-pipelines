@@ -36,7 +36,7 @@ process GATK_VARIANTFILTRATION {
   gatk --java-options "-Xmx${my_mem}G" VariantFiltration \
   -R ${params.ref_fa} \
   -V ${vcf} \
-  -O ${sampleID}_variantfiltration_${output_suffix} \
+  -O ${sampleID}_${output_suffix} \
   --cluster-window-size 10 \
   --filter-name "LowCoverage" --filter-expression "DP < 25" \
   --filter-name "StrandBias" --filter-expression "FS > ${fs}"

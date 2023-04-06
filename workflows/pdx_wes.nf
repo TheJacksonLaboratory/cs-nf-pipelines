@@ -23,26 +23,22 @@ include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markdu
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
-include {GATK_VARIANTFILTRATION;
-         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
+include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration_mutect2"
-include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk3_variantannotator"
-include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
-include {GATK_SELECTVARIANTS;
-         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
+include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2_tumorOnly"
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_tumorOnly"
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2_tumorOnly"
-include {COSMIC_ANNOTATION;
-         COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
+include {GATK_MERGEVCF as GATK_MERGEVCF_UNANNOTATED;
+         GATK_MERGEVCF as GATK_MERGEVCF_ANNOTATED} from "${projectDir}/modules/gatk/gatk_mergevcf"
+include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
-include {SNPEFF;
-         SNPEFF as SNPEFF_SNP;
+include {SNPEFF as SNPEFF_SNP;
          SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
 include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
          SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_oneperline"
@@ -200,13 +196,13 @@ workflow PDX_WES {
 
     // Step 8: Variant Filtration
     // SNP
-    GATK_SELECTVARIANTS_SNP(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'SNP')
+    GATK_SELECTVARIANTS_SNP(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'SNP', 'selected_SNP')
 
     var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
     GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
     // INDEL
-    GATK_SELECTVARIANTS_INDEL(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'INDEL')
+    GATK_SELECTVARIANTS_INDEL(GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 'INDEL', 'selected_INDEL')
 
     var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
     GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
@@ -227,10 +223,13 @@ workflow PDX_WES {
     SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
 
     // Step 10: Post Variant Calling Processing - Part 2
-    vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
-    GATK_MERGEVCF(vcf_files)
+    vcf_files_unannotated = SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf)
+    GATK_MERGEVCF_UNANNOTATED (vcf_files_unannotated, 'SNP_INDEL_filtered_unannotated_final')
 
-    SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
+    vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+    GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
+    
+    SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
 
     agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
 
