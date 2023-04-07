@@ -23,7 +23,8 @@ Parameter | Default | Description
                  | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta.64'
                  | Pre-compiled BWA index files, points to human reference when --gen_org human. JAX users should not change this parameter.
 
---min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files.
+--min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
+--hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
 
 --target_gatk | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/capture_kit_files/agilent/v2/S32371113_mouse_exon_V2.bare.bed' 
               | Human: '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.bed'

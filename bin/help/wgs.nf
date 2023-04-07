@@ -27,7 +27,9 @@ Parameter | Default | Description
                 | Human: '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.primaryChr.contig_list'
                 | A list of all chromosomes, unplaced, and unlocalized contigs present in the reference file, points to human reference when --gen_org human. Used to scatter variant calling by chromosome. JAX users should not change this parameter.
 
---min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files.
+--min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
+--hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
+
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
 --ploidy_val | '-ploidy 2' | Sample ploidy
