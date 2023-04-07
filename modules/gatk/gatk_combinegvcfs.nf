@@ -21,7 +21,7 @@ process GATK_COMBINEGVCFS {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
-  inputs = list.collect { "--variant $it" }.join(' ')
+  inputs = gvcf.collect { "--variant $it" }.join(' ')
 
   """
   gatk --java-options "-Xmx${my_mem}G" CombineGVCFs \
