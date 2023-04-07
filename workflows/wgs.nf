@@ -17,9 +17,11 @@ include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecali
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
-include {GATK_HAPLOTYPECALLER_INTERVAL} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
+include {GATK_HAPLOTYPECALLER_INTERVAL;
+        GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
+include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
@@ -141,6 +143,10 @@ workflow WGS {
     // common stream for output
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(),chroms.toList())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+    // Use the Channel in HaplotypeCaller_GVCF
+    GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel)
+    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
+    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.gvcf)
   }
 
   // If Mouse
@@ -168,6 +174,10 @@ workflow WGS {
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+    // Use the Channel in HaplotypeCaller_GVCF
+    GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel)
+    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
+    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.gvcf)
   }
 
   // SNP
