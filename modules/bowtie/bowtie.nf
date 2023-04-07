@@ -18,7 +18,7 @@ process BOWTIE {
 
     script:
     """
-    zcat ${fq_read} | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -m 100 ${params.bowtie_index} - > ${sampleID}_mapped_${paired_read_num}.sam 2> ${sampleID}.bowtie_${paired_read_num}.log 
+    zcat ${fq_read} | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -m 100 -x ${params.bowtie_index} - > ${sampleID}_mapped_${paired_read_num}.sam 2> ${sampleID}.bowtie_${paired_read_num}.log 
     """
     // NOTE: This is hard coded to .gz input files. 
 
