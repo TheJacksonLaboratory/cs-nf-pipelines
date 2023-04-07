@@ -138,7 +138,7 @@ workflow WGS {
     chrom_channel = data.combine(chroms)
     
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(),chroms.toList())
@@ -167,7 +167,7 @@ workflow WGS {
     chrom_channel = data.combine(chroms)
 
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
