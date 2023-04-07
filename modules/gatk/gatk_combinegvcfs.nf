@@ -1,4 +1,4 @@
-process GATK_CombineGVCFs {
+process GATK_COMBINEGVCFS {
   tag "$sampleID"
 
   cpus 1
@@ -10,8 +10,7 @@ process GATK_CombineGVCFs {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
 
   input:
-  tuple val(sampleID), path(list)
-  val(gvcf)
+  tuple val(sampleID), path(gvcf)
 
   output:
   tuple val(sampleID), file("*.gvcf"), emit: gvcf
