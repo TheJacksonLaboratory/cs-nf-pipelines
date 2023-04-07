@@ -17,7 +17,6 @@ process GATK_COMBINEGVCFS {
   tuple val(sampleID), file("*.idx"), emit: idx
 
   script:
-  log.info "----- GATK CombineGVCFs Running on: ${sampleID} -----"
   // memory needs to be set explicitly
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]

@@ -18,7 +18,7 @@ include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
 include {GATK_HAPLOTYPECALLER_INTERVAL;
-        GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
+         GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
 include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
@@ -145,8 +145,7 @@ workflow WGS {
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     // Use the Channel in HaplotypeCaller_GVCF
     GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel)
-    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
-    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.gvcf)
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
   }
 
   // If Mouse
@@ -176,8 +175,7 @@ workflow WGS {
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     // Use the Channel in HaplotypeCaller_GVCF
     GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel)
-    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
-    GATK_MERGE_GVCF(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.gvcf)
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
   }
 
   // SNP
