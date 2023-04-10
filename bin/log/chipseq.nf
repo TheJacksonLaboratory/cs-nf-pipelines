@@ -27,9 +27,9 @@ ______________________________________________________
 --ref_fa_indices                ${params.ref_fa_indices}
 --macs_gsize                    ${params.macs_gsize}
 --blacklist                     ${params.blacklist}
---non_directional      		${params.non_directional}
---trimLength           		${params.trimLength}
---qualThreshold        		${params.qualThreshold}
+--non_directional      		      ${params.non_directional}
+--trimLength           		      ${params.trimLength}
+--qualThreshold        		      ${params.qualThreshold}
 --adapOverlap                   ${params.adapOverlap}
 --adaptorSeq                    ${params.adaptorSeq}
 --mismatch_penalty              ${params.mismatch_penalty}
