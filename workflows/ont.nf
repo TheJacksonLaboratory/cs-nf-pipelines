@@ -12,6 +12,9 @@ include {NANOFILT} from "${projectDir}/modules/nanofilt/nanofilt"
 include {MINIMAP2_INDEX} from "${projectDir}/modules/minimap/minimap2_index"
 include {MINIMAP2_MAP_ONT} from "${projectDir}/modules/minimap/minimap2_map_ont"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
+include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter"
+include {SNIFFLES} from "${projectDir}/modules/sniffles/sniffles"
+include {NANOSV} from "${projectDir}/modules/nanosv/nanosv"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -70,5 +73,11 @@ workflow ONT {
     else {
         ch_mm2_bam = pre_bam
     }
+
+    SAMTOOLS_FILTER(ch_mm2_bam)
+
+    SNIFFLES(SAMTOOLS_FILTER.out.bam_and_index)
+
+    NANOSV(SAMTOOLS_FILTER.out.bam_and_index)
 
 }
