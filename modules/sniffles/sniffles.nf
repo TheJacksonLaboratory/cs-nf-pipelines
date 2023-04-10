@@ -10,11 +10,16 @@ process SNIFFLES {
     publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}.sniffles_calls.vcf", mode: "copy"
 
     input:
-        tuple val(sampleID), file(pbmm2_bam), file(pbmm2_bai)
+        tuple val(sampleID), file(bam), file(index)
     output:
         tuple val(sampleID), file("${sampleID}.sniffles_calls.vcf"), emit: sniffles_vcf
     script:
-        """
-        sniffles --input ${pbmm2_bam} --vcf ${sampleID}.sniffles_calls.vcf
-        """
+        if(params.tandem_repeats)
+            """
+            sniffles --input ${bam} --vcf ${sampleID}.sniffles_calls.vcf --tandem-repeats ${params.tandem_repeats} --output-rnames -t ${task.cpus}
+            """
+        else
+            """
+            sniffles --input ${bam} --vcf ${sampleID}.sniffles_calls.vcf --output-rnames -t ${task.cpus}
+            """
 }

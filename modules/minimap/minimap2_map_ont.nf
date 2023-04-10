@@ -17,5 +17,4 @@ process MINIMAP2_MAP_ONT {
         """
         minimap2 --secondary=no -t ${task.cpus} --MD -ax map-ont ${minimap2_index} ${fastq}  > ${sampleID}_aln.sam
         """
-29
 }
