@@ -81,13 +81,14 @@ workflow ILLUMINA {
         }
 
         // Filter and trim reads
-        FILTER_TRIM(fq_reads)
+        //FILTER_TRIM(fq_reads)
         
         // Get read groups ID from FASTQ file
         READ_GROUPS(fq_reads)
 
         // Map reads to reference
-        bwa_mem_input = FILTER_TRIM.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+        //bwa_mem_input = FILTER_TRIM.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+        bwa_mem_input = fq_reads.join(READ_GROUPS.out.read_groups)
         BWA_MEM(bwa_mem_input, SAMTOOLS_FAIDX.out.fasta_fai, ch_bwa_index)
 
         // Sort and compress to BAM
