@@ -19,9 +19,9 @@ Parameter | Default | Description
 --gtf      | The full path to GTF file for annotating peaks and the GTF file should resemble the Ensembl format
 --gene_bed | The full path to BED file for genome-wide gene intervals                                                        
 
---ref_fa         | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' 
+--ref_fa         | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.primary_assembly.fa' 
                  | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta'
---ref_fa_indices | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bwa/Mus_musculus.GRCm38.dna.toplevel.fa' | The default value for mm10. 
+--ref_fa_indices | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bwa/Mus_musculus.GRCm38.dna.primary_assembly.fa' | The default value for mm10. 
                  | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta'
                  | Pre-compiled BWA index files, points to human reference when --gen_org human.
 
