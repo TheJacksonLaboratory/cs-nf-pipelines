@@ -26,6 +26,6 @@ process COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC {
 }
 
 // cosmic for 'sv' pipeline comes from: 
-// curl -H "Authorization: Basic bWlrZS5sbG95ZEBqYXgub3JnOnlSYlU4OUJ0VUotS0RjZAo=" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/CosmicResistanceMutations.tsv.gz
+// curl -H "Authorization: Basic ADD AUTHORIZATION" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/CosmicResistanceMutations.tsv.gz
 // the above command provides a URL for curl download
 // curl "https://cog.sanger.ac.uk/cosmic/GRCh38/cosmic/v97/CosmicResistanceMutations.tsv.gz?AWSAccessKeyId=KRV7P7QR9DL41J9EWGA2&Expires=1672933745&Signature=nQ9AFGONT4rDKfM4UZ1cmN4J%2F%2BM%3D" --output CosmicResistanceMutations.tsv.gz

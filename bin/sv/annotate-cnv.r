@@ -3,19 +3,15 @@
 ## It is reproduced below as it exists there without modification
 
 ## Annotate a merged bedpe with arbitrary databases
-libs = c('optparse', 'gUtils')
+libs = c('optparse', 'gUtils', 'GenomicRanges', 'rtracklayer')
 invisible(suppressPackageStartupMessages(sapply(libs, require, character.only=T, quietly=T)))
 options(width=200, scipen=999)
-
-
 
 ## TODO: Move to config? 
 CLOSEST_MAX_DISTANCE = 2e4     ## For intergenic CNVs, ignore nearest() hits farther than this
 LARGESCALE_MIN = 3e6           ## Any events smaller than this are considered focal 
 DUP_LOG2 = 0.2                 ## log2 ratio cutoff for considering an event a duplication
 DEL_LOG2 = -0.235              ## log2 ratio cutoff for considering an event a deletion
-
-
 
 ## Read BIC-Seq2 output into a GRanges object
 ## Optionally subset to CNVs in chr
@@ -39,8 +35,6 @@ readCNV = function(f, chr=NULL) {
   
 }
 
-
-
 ## Read cytoband into a GRanges object
 readCytoband = function(f) {
   
@@ -59,30 +53,18 @@ readCytoband = function(f) {
   
 }
 
-
-
 readDB = function(f) {
-  
-  x = read.csv(f, h=F, stringsAsFactors=F, sep='\t')
-  colnames(x)[1:3] = c('chrom', 'start', 'end')
-  
-  x = GenomicRanges::makeGRangesFromDataFrame(x, 
-                                              keep.extra.columns=F, 
-                                              seqnames.field='chrom', 
-                                              start.field='start',
-                                              end.field='end')
-  
+
+  x <- import(f, format = 'BED')
+
   return(x)
   
 }
-
-
 
 readCancerCensus = function(f) {
   
   x = read.csv(f, h=T, stringsAsFactors=F, sep='\t')
   colnames(x) = c('chrom', 'start', 'end', 'cgc', 'locus')
-  
   
   # x$cgc = gsub('\\|.*$', '', x$cgc)
   x = x[, !colnames(x) %in% 'locus']
@@ -96,8 +78,6 @@ readCancerCensus = function(f) {
   return(x)
   
 }
-
-
 
 ## Read Ensembl 
 readEnsembl = function(f) {
@@ -120,8 +100,6 @@ readEnsembl = function(f) {
     
 }
 
-
-
 ## Simplify comma-delimited cytoband list to only the first and last cytobands
 .simplifyCytoband = function(x, delim=', ', collapse='-') {
   
@@ -134,8 +112,6 @@ readEnsembl = function(f) {
   return(x)
   
 }
-
-
 
 ## Annotate with cytoband
 annotateCytoband = function(cnv, cytoband) {
@@ -153,8 +129,6 @@ annotateCytoband = function(cnv, cytoband) {
   
 }
 
-
-
 ## Annotate with databases, subject to reciprocal overlap criteria
 annotateDB = function(x, db, name, overlap) {
   
@@ -170,7 +144,7 @@ annotateDB = function(x, db, name, overlap) {
   ## To match bedtools::intersect's implementation of reciprocal oerlap, 
   ## The fraction overlap should be at least the same in each direction 
   hits = hits[mcols(hits)$overlap_query >= overlap & mcols(hits)$overlap_subject >= overlap]
-  
+
   ## Annotate any hits we get 
   x$db[queryHits(hits)] = paste0(x$db[queryHits(hits)], ',', name)
   x$db = gsub('^,', '', x$db)
@@ -178,8 +152,6 @@ annotateDB = function(x, db, name, overlap) {
   return(x)
   
 }
-
-
 
 ## Compare GRanges x to GRanges gene mcols intron_start, intron_end
 .isIntronic = function(x, gene) {
@@ -201,8 +173,6 @@ annotateDB = function(x, db, name, overlap) {
   return(is.intronic)
   
 }
-
-
 
 ## Annotate with ensembl genes 
 annotateEnsembl = function(x, ens, closest.max.distance=CLOSEST_MAX_DISTANCE) {
@@ -233,8 +203,7 @@ annotateEnsembl = function(x, ens, closest.max.distance=CLOSEST_MAX_DISTANCE) {
     intronic[i] = .isIntronic(x=x[queryHits(hits[i])], gene=ens[subjectHits(hits[i])])
 
   }
-  
-  
+    
   ## Concatenate genes and store
   ## The tapply() aggregates genes by query index (i.e. x index), which we use to map back to x
   contains = tapply(ens[subjectHits(hits)]$name[contains], queryHits(hits)[contains], paste, collapse=',')
@@ -262,8 +231,6 @@ annotateEnsembl = function(x, ens, closest.max.distance=CLOSEST_MAX_DISTANCE) {
   return(x)
   
 }
-
-
 
 ## Collect arguments
 option_list = list(
@@ -295,10 +262,8 @@ cyto = readCytoband(opt$cytoband)
 cgc = readCancerCensus(opt$cancer_census)
 ensembl = readEnsembl(opt$ensembl)
 
-
 ## Add cytoband annotation
 cnv = annotateCytoband(cnv=cnv, cytoband=cyto)
-
 
 ## Add tumor-normal id, caller info
 cnv$`tumor--normal` = paste0(opt$tumor,'--',opt$normal)
@@ -318,15 +283,16 @@ cnv$type[cnv$log2 < DEL_LOG2] = 'DEL'
 ## Annotate with databases
 cnv$db = ''
 for (i in 1:length(opt$db_names)) {
-  
+
   db.name = opt$db_names[i]
   db.file = opt$db_files[i]
-  
+
+  print(db.name)
+
   db = readDB(db.file)
   cnv = annotateDB(x=cnv, db=db, name=db.name, overlap=opt$overlap_fraction)
-  
-}
 
+}
 
 ## Annotate with CGC genes
 cnv = cnv %$% cgc
@@ -342,13 +308,10 @@ start(cnv) = start(cnv) - 1
 cnv = as.data.frame(cnv)
 cnv$`#chr` = cnv$seqnames
 
-
 ## Build info field 
 cnv$info = paste0('known=',cnv$db, ';Cancer_census=',cnv$cgc, ';DisruptL=',cnv$disrupt.l, ';DisruptR=', cnv$disrupt.r)
 cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Intergenic')
 cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Closest=', cnv$closest[cnv$intergenic == 'yes'])
-
-
 
 ## Fields included in main/supplemental are slightly different 
 for (i in c('main', 'supplemental')) { 
