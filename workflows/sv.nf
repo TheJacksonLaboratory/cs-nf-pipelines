@@ -33,8 +33,6 @@ include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_germline"
 include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
-include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
-include {SNPSIFT_EXTRACT_AND_PARSE} from "${projectDir}/modules/utility_modules/parse_extracted_sv_table"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
@@ -297,10 +295,7 @@ workflow SV {
     COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
     GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
-
-    SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
-    SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
-    
+  
     // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
     //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
 
