@@ -3,7 +3,7 @@
 ## It is reproduced below as it exists there without modification
 
 ## Annotate a merged bedpe with arbitrary databases
-libs = c('optparse', 'gUtils')
+libs = c('optparse', 'gUtils', 'GenomicRanges', 'rtracklayer')
 invisible(suppressPackageStartupMessages(sapply(libs, require, character.only=T, quietly=T)))
 options(width=200, scipen=999)
 
@@ -14,8 +14,6 @@ CLOSEST_MAX_DISTANCE = 2e4     ## For intergenic CNVs, ignore nearest() hits far
 LARGESCALE_MIN = 3e6           ## Any events smaller than this are considered focal 
 DUP_LOG2 = 0.2                 ## log2 ratio cutoff for considering an event a duplication
 DEL_LOG2 = -0.235              ## log2 ratio cutoff for considering an event a deletion
-
-
 
 ## Read BIC-Seq2 output into a GRanges object
 ## Optionally subset to CNVs in chr
@@ -62,16 +60,9 @@ readCytoband = function(f) {
 
 
 readDB = function(f) {
-  
-  x = read.csv(f, h=F, stringsAsFactors=F, sep='\t')
-  colnames(x)[1:3] = c('chrom', 'start', 'end')
-  
-  x = GenomicRanges::makeGRangesFromDataFrame(x, 
-                                              keep.extra.columns=F, 
-                                              seqnames.field='chrom', 
-                                              start.field='start',
-                                              end.field='end')
-  
+
+  x <- import(f, format = 'BED')
+
   return(x)
   
 }
@@ -82,7 +73,6 @@ readCancerCensus = function(f) {
   
   x = read.csv(f, h=T, stringsAsFactors=F, sep='\t')
   colnames(x) = c('chrom', 'start', 'end', 'cgc', 'locus')
-  
   
   # x$cgc = gsub('\\|.*$', '', x$cgc)
   x = x[, !colnames(x) %in% 'locus']
@@ -170,7 +160,7 @@ annotateDB = function(x, db, name, overlap) {
   ## To match bedtools::intersect's implementation of reciprocal oerlap, 
   ## The fraction overlap should be at least the same in each direction 
   hits = hits[mcols(hits)$overlap_query >= overlap & mcols(hits)$overlap_subject >= overlap]
-  
+
   ## Annotate any hits we get 
   x$db[queryHits(hits)] = paste0(x$db[queryHits(hits)], ',', name)
   x$db = gsub('^,', '', x$db)
@@ -265,104 +255,101 @@ annotateEnsembl = function(x, ens, closest.max.distance=CLOSEST_MAX_DISTANCE) {
 
 
 
-## Collect arguments
-option_list = list(
-  make_option(c("-c", "--cnv"),                   type='character', help="Input CNV calles"),
-  make_option(c("-a", "--caller"),                type='character', help="Name of tool used to call CNVs in --cnv (only bicseq2 is currently supported)"),
-  make_option(c("-t", "--tumor"),                 type='character', help="Comma-delimited list of database names corresponding to the order in --db_files"),
-  make_option(c("-n", "--normal"),                type='character', help="Comma-delimited list of database files corresponding to the order in --db_names"),
-  make_option(c("-b", "--cytoband"),              type='character', help="Cytoband file: headerless tab-delimited files with chr, start, end, cytoband, stain"),
-  make_option(c("-d", "--db_names"),              type='character', help="Comma-delimited list of database names corresponding to the order in --db_files"),
-  make_option(c("-s", "--db_files"),              type='character', help="Comma-delimited list of database files corresponding to the order in --db_names"),
-  make_option(c("-e", "--ensembl"),               type='character', help="Ensembl gene list"),
-  make_option(c("-l", "--allowed_chr"),           type='character', help="Comma-delimited list of chromosomes to keep"),
-  make_option(c("-g", "--cancer_census"),         type='character', help="Cancer census gene list"),
-  make_option(c("-f", "--overlap_fraction"),      type='numeric',   help="Fraction that database hits must overlap query interval"),
-  make_option(c("-o", "--out_file_main"),         type='character', help="Main output BED"),
-  make_option(c("-p", "--out_file_supplemental"), type='character', help="Supplemental output BED"))
-opt = parse_args(OptionParser(option_list=option_list))
+  ## Collect arguments
+  option_list = list(
+    make_option(c("-c", "--cnv"),                   type='character', help="Input CNV calles"),
+    make_option(c("-a", "--caller"),                type='character', help="Name of tool used to call CNVs in --cnv (only bicseq2 is currently supported)"),
+    make_option(c("-t", "--tumor"),                 type='character', help="Comma-delimited list of database names corresponding to the order in --db_files"),
+    make_option(c("-n", "--normal"),                type='character', help="Comma-delimited list of database files corresponding to the order in --db_names"),
+    make_option(c("-b", "--cytoband"),              type='character', help="Cytoband file: headerless tab-delimited files with chr, start, end, cytoband, stain"),
+    make_option(c("-d", "--db_names"),              type='character', help="Comma-delimited list of database names corresponding to the order in --db_files"),
+    make_option(c("-s", "--db_files"),              type='character', help="Comma-delimited list of database files corresponding to the order in --db_names"),
+    make_option(c("-e", "--ensembl"),               type='character', help="Ensembl gene list"),
+    make_option(c("-l", "--allowed_chr"),           type='character', help="Comma-delimited list of chromosomes to keep"),
+    make_option(c("-g", "--cancer_census"),         type='character', help="Cancer census gene list"),
+    make_option(c("-f", "--overlap_fraction"),      type='numeric',   help="Fraction that database hits must overlap query interval"),
+    make_option(c("-o", "--out_file_main"),         type='character', help="Main output BED"),
+    make_option(c("-p", "--out_file_supplemental"), type='character', help="Supplemental output BED"))
+  opt = parse_args(OptionParser(option_list=option_list))
 
 
-## Unpack arguments
-opt$db_names = unlist(strsplit(opt$db_names, ',', fixed=T))
-opt$db_files = unlist(strsplit(opt$db_files, ',', fixed=T))
-opt$allowed_chr = unlist(strsplit(opt$allowed_chr, ',', fixed=T))
+  ## Unpack arguments
+  opt$db_names = unlist(strsplit(opt$db_names, ',', fixed=T))
+  opt$db_files = unlist(strsplit(opt$db_files, ',', fixed=T))
+  opt$allowed_chr = unlist(strsplit(opt$allowed_chr, ',', fixed=T))
 
 
-## Read files
-cnv = readCNV(opt$cnv, chr=opt$allowed_chr)
-cyto = readCytoband(opt$cytoband)
-cgc = readCancerCensus(opt$cancer_census)
-ensembl = readEnsembl(opt$ensembl)
+  ## Read files
+  cnv = readCNV(opt$cnv, chr=opt$allowed_chr)
+  cyto = readCytoband(opt$cytoband)
+  cgc = readCancerCensus(opt$cancer_census)
+  ensembl = readEnsembl(opt$ensembl)
+
+  ## Add cytoband annotation
+  cnv = annotateCytoband(cnv=cnv, cytoband=cyto)
+
+  ## Add tumor-normal id, caller info
+  cnv$`tumor--normal` = paste0(opt$tumor,'--',opt$normal)
+  cnv$tool = opt$caller
 
 
-## Add cytoband annotation
-cnv = annotateCytoband(cnv=cnv, cytoband=cyto)
+  ## Annotate focal/large-scale
+  cnv$focal = ifelse(width(cnv) < LARGESCALE_MIN, 'yes', 'no')
 
 
-## Add tumor-normal id, caller info
-cnv$`tumor--normal` = paste0(opt$tumor,'--',opt$normal)
-cnv$tool = opt$caller
+  ## Annotate dup/del/neu
+  cnv$type = 'NEU'
+  cnv$type[cnv$log2 > DUP_LOG2] = 'DUP'
+  cnv$type[cnv$log2 < DEL_LOG2] = 'DEL'
 
 
-## Annotate focal/large-scale
-cnv$focal = ifelse(width(cnv) < LARGESCALE_MIN, 'yes', 'no')
+  ## Annotate with databases
+  cnv$db = ''
+  for (i in 1:length(opt$db_names)) {
+
+    db.name = opt$db_names[i]
+    db.file = opt$db_files[i]
+
+    print(db.name)
+
+    db = readDB(db.file)
+    cnv = annotateDB(x=cnv, db=db, name=db.name, overlap=opt$overlap_fraction)
+
+  }
 
 
-## Annotate dup/del/neu
-cnv$type = 'NEU'
-cnv$type[cnv$log2 > DUP_LOG2] = 'DUP'
-cnv$type[cnv$log2 < DEL_LOG2] = 'DEL'
+  ## Annotate with CGC genes
+  cnv = cnv %$% cgc
+  cnv$cgc = gsub(' ', '', cnv$cgc)
 
+  ## Annotate with Ensembl genes
+  cnv = annotateEnsembl(x=cnv, ens=ensembl)
 
-## Annotate with databases
-cnv$db = ''
-for (i in 1:length(opt$db_names)) {
-  
-  db.name = opt$db_names[i]
-  db.file = opt$db_files[i]
-  
-  db = readDB(db.file)
-  cnv = annotateDB(x=cnv, db=db, name=db.name, overlap=opt$overlap_fraction)
-  
-}
+  ## Subtract 1 from the output start to adhere to BED standard 
+  start(cnv) = start(cnv) - 1
 
+  ## Rename chr, convert to data frame
+  cnv = as.data.frame(cnv)
+  cnv$`#chr` = cnv$seqnames
 
-## Annotate with CGC genes
-cnv = cnv %$% cgc
-cnv$cgc = gsub(' ', '', cnv$cgc)
+  ## Build info field 
+  cnv$info = paste0('known=',cnv$db, ';Cancer_census=',cnv$cgc, ';DisruptL=',cnv$disrupt.l, ';DisruptR=', cnv$disrupt.r)
+  cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Intergenic')
+  cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Closest=', cnv$closest[cnv$intergenic == 'yes'])
 
-## Annotate with Ensembl genes
-cnv = annotateEnsembl(x=cnv, ens=ensembl)
-
-## Subtract 1 from the output start to adhere to BED standard 
-start(cnv) = start(cnv) - 1
-
-## Rename chr, convert to data frame
-cnv = as.data.frame(cnv)
-cnv$`#chr` = cnv$seqnames
-
-
-## Build info field 
-cnv$info = paste0('known=',cnv$db, ';Cancer_census=',cnv$cgc, ';DisruptL=',cnv$disrupt.l, ';DisruptR=', cnv$disrupt.r)
-cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Intergenic')
-cnv$info[cnv$intergenic == 'yes'] = paste0(cnv$info[cnv$intergenic == 'yes'], ';Closest=', cnv$closest[cnv$intergenic == 'yes'])
-
-
-
-## Fields included in main/supplemental are slightly different 
-for (i in c('main', 'supplemental')) { 
-  
-  cnv.i = cnv[, c('#chr', 'start', 'end', 'type', 'log2', 'tool', 'tumor..normal', 'info', 'focal', 'cytoband')]
-  colnames(cnv.i) = gsub('..', '--', colnames(cnv.i), fixed=T)
-  outfile = ifelse(i == 'main', opt$out_file_main, opt$out_file_supplemental)
-  
-  if (i=='supplemental') {
+  ## Fields included in main/supplemental are slightly different 
+  for (i in c('main', 'supplemental')) { 
     
-    cnv.i$info = paste0(cnv$info,';Contained=',cnv$contains)
+    cnv.i = cnv[, c('#chr', 'start', 'end', 'type', 'log2', 'tool', 'tumor..normal', 'info', 'focal', 'cytoband')]
+    colnames(cnv.i) = gsub('..', '--', colnames(cnv.i), fixed=T)
+    outfile = ifelse(i == 'main', opt$out_file_main, opt$out_file_supplemental)
+    
+    if (i=='supplemental') {
+      
+      cnv.i$info = paste0(cnv$info,';Contained=',cnv$contains)
+      
+    }
+    
+    write.table(cnv.i, outfile, row.names=F, col.names=T, sep='\t', quote=F)
     
   }
-  
-  write.table(cnv.i, outfile, row.names=F, col.names=T, sep='\t', quote=F)
-  
-}
