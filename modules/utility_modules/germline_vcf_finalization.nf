@@ -31,6 +31,11 @@ process GERMLINE_VCF_FINALIZATION {
     python \
     ${projectDir}/bin/sv/rename_csq_vcf.py \
     ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated_id.vcf \
+    ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated_${output_suffix}_csq.vcf
+
+    python \
+    ${projectDir}/bin/sv/make_main_vcf.py \
+    ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated_${output_suffix}_csq.vcf \
     ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated_${output_suffix}_final.vcf
     """
 }
