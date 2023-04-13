@@ -103,7 +103,7 @@ for st in strains:
     dmat_strain = np.zeros((num_genes, num_strains))
     for d in dlist[st]:
         dmat_sample = np.zeros((num_genes, num_strains))
-        tpmfile = glob.glob(d + "gbrs/*.multiway.genes.tpm")
+        tpmfile = glob.glob(d + "emase/*.multiway.genes.tpm")
         if not os.path.isfile(tpmfile[0]):
             print("File %s does not exist." % tpmfile)
             continue        
