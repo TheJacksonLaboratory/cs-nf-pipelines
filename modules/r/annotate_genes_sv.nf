@@ -19,7 +19,7 @@ process ANNOTATE_GENES_SV {
     
   if (suppl_switch == "main")
     """
-    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-genes.r \
+    Rscript ${projectDir}/bin/pta/annotate-bedpe-with-genes.r \
         --ensembl=${params.ensemblUniqueBed} \
         --cancer_census=${params.cancerCensusBed} \
         --bedpe=${annot_sv_bedpe} \
@@ -27,7 +27,7 @@ process ANNOTATE_GENES_SV {
     """
   else if (suppl_switch == "supplemental")
     """
-    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-genes.r \
+    Rscript ${projectDir}/bin/pta/annotate-bedpe-with-genes.r \
         --ensembl=${params.ensemblUniqueBed} \
         --cancer_census=${params.cancerCensusBed} \
         --bedpe=${annot_sv_bedpe} \

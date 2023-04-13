@@ -16,7 +16,7 @@ process ADD_NYGC_ALLELE_COUNTS {
   script:
   """
    python \
-  ${projectDir}/bin/sv/add_nygc_allele_counts_to_vcf.py \
+  ${projectDir}/bin/pta/add_nygc_allele_counts_to_vcf.py \
   -t ${tumor_bam} \
   -n ${normal_bam} \
   -v ${vcf} \

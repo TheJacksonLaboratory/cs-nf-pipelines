@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/sv.nf"
-include {param_log} from "${projectDir}/bin/log/sv.nf"
+include {help} from "${projectDir}/bin/help/pta.nf"
+include {param_log} from "${projectDir}/bin/log/pta.nf"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -123,7 +123,7 @@ if (params.help){
 param_log()
 
 // main workflow
-workflow SV {
+workflow PTA {
 
     if (params.csv_input) {
         ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
@@ -662,9 +662,6 @@ workflow SV {
     PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
 }
-
-
-// nextflow /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/main.nf -profile sumner --workflow sv --gen_org human --pubdir /projects/omics_share/meta/benchmarking/testing/sv -w /projects/omics_share/meta/benchmarking/testing/work --csv_input /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/sv_input.csv -resume -stub
 
 // Function to extract information (meta data + file(s)) from csv file(s)
 // https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084

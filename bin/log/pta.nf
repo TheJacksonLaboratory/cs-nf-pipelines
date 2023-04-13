@@ -3,7 +3,7 @@ if (params.gen_org=='human')
   log.info """
 ______________________________________________________
 
-                SV PARAMETER LOG
+                PTA PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -29,7 +29,7 @@ else
 log.info """
 ______________________________________________________
 
-                SV PARAMETER LOG
+                PTA PARAMETER LOG
 
 --comment: ${params.comment}
 

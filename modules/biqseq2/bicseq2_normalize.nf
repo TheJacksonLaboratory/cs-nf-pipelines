@@ -52,7 +52,7 @@ process BICSEQ2_NORMALIZE {
     mappability_file_list=`echo ${mappability_path}`
 
     python3 \
-    ${projectDir}/bin/sv/bicseq2_config_writer.py \
+    ${projectDir}/bin/pta/bicseq2_config_writer.py \
     --fa-files ${fasta_files} \
     --mappability-directory ${mappability_path} \
     --temp-seqs ${seq_file_list} \
