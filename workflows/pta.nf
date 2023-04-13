@@ -6,6 +6,8 @@ include {help} from "${projectDir}/bin/help/pta.nf"
 include {param_log} from "${projectDir}/bin/log/pta.nf"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {SHORT_ALIGNMENT_MARKING} from "${projectDir}/modules/nygc-short-alignment-marking/short_alignment_marking"
@@ -14,11 +16,14 @@ include {PICARD_FIX_MATE_INFORMATION} from "${projectDir}/modules/picard/picard_
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
+
 include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor_pileup"
 include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
+
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
 include {GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GERMLINE;
          GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf_germline"
@@ -35,6 +40,7 @@ include {COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE} from "${projectDir}/modules
 include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/python/python_germline_vcf_finalization"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
+
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
 include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutectstats"
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
@@ -138,8 +144,22 @@ workflow PTA {
     // Step 2: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
+    // Step 2a: Xenome if PDX data used.
+    ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+    if (params.pdx){
+        // Xenome Classification
+        XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+        ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
+
+        // Xenome Read Sort
+        FASTQ_SORT(XENOME_CLASSIFY.out.xenome_fastq, 'human')
+        bwa_mem_mapping = FASTQ_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+
+    } else { 
+        bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+    }
+
     // Step 3: BWA-MEM Alignment
-    bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
     BWA_MEM(bwa_mem_mapping)
     
     // Step 4: Sort mapped reads
