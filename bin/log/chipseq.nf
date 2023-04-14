@@ -50,6 +50,7 @@ ______________________________________________________
 --macs_pvalue                   ${params.macs_pvalue}
 --min_reps_consensus            ${params.min_reps_consensus}
 --save_macs_pileup              ${params.save_macs_pileup}
+--multiqc_config              	${params.multiqc_config}
 --tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
@@ -106,6 +107,7 @@ ______________________________________________________
 --macs_pvalue                   ${params.macs_pvalue}
 --min_reps_consensus            ${params.min_reps_consensus}
 --save_macs_pileup              ${params.save_macs_pileup}
+--multiqc_config                ${params.multiqc_config}
 
 Project Directory: ${projectDir}
 ______________________________________________________

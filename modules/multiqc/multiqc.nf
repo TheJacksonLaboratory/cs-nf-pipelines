@@ -14,9 +14,10 @@ process MULTIQC {
     path "*_plots" , optional:true, emit: plots
 
     script:
+    custom_config_file = params.multiqc_config ? "-f ${params.multiqc_config}" : ''
 
     """
-    multiqc .
+    multiqc . $custom_config_file
     """
 
 }

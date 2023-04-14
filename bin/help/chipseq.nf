@@ -57,6 +57,9 @@ Parameter | Default | Description
 --min_reps_consensus | 1 | Number of biological replicates required from a given condition for a peak to contribute to a consensus peak (Default: 1)
 --save_macs_pileup | false | Instruct MACS2 to create bedGraph files using the -B --SPMR parameters (Default: false).
 
+--multiqc_config | /<PATH> | The path to chipseq.yaml
+                 | The configuration file used while running MultiQC
+
 --tmpdir  | /<PATH> | Temporary directory to store temp files.  
 '''
 }
