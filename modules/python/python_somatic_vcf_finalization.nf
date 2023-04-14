@@ -2,11 +2,9 @@ process SOMATIC_VCF_FINALIZATION {
     tag "$sampleID"
 
     cpus 1
-    memory { 5.GB * task.attempt }
-    time {1.hour * task.attempt}
-    errorStrategy 'retry'
-    maxRetries 1
-
+    memory 50.GB
+    time 1.hour
+    
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.*", mode:'copy'

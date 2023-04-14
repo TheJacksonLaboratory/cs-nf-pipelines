@@ -34,7 +34,7 @@ process GRIDSS_CALLING {
     gridss \
     --jvmheap "${my_mem}" \
     --steps call \
-    --reference "${params.ref_fa_indices}" \
+    --reference "${params.combined_reference_set}" \
     --jar /opt/gridss/gridss-2.13.2-gridss-jar-with-dependencies.jar \
     --threads ${task.cpus} \
     --workingdir "${output_dir}/work/" \

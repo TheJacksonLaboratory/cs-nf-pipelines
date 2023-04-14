@@ -2,7 +2,7 @@ process FILTER_PON {
   tag "$sampleID"
 
   cpus 1
-  memory 4.GB
+  memory 15.GB
   time '04:00:00'
 
   container 'quay.io/jaxcompsci/bedtools-python3:2.26.0'
