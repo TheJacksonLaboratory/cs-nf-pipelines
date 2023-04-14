@@ -21,7 +21,7 @@ process GRIDSS_PREPROCESS {
     gridss \
     --jvmheap "${my_mem}" \
     --steps preprocess \
-    --reference "${params.ref_fa_indices}" \
+    --reference "${params.combined_reference_set}" \
     --jar /opt/gridss/gridss-2.13.2-gridss-jar-with-dependencies.jar \
     --threads ${task.cpus} \
     --workingdir gridss_preprocess/ \
