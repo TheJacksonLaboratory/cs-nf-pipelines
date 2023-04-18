@@ -32,9 +32,7 @@ include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredicto
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_germline"
-include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
-include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
-include {SNPSIFT_EXTRACT_AND_PARSE} from "${projectDir}/modules/utility_modules/parse_extracted_sv_table"
+include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/python/python_germline_vcf_finalization"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
@@ -102,7 +100,7 @@ include {COMPRESS_INDEX_MERGED_VCF} from "${projectDir}/modules/tabix/compress_m
 include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
-include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
+include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/python/python_somatic_vcf_finalization"
 include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
 include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
 include {ANNOTATE_SV;
@@ -297,10 +295,7 @@ workflow SV {
     COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
     GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
-
-    SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
-    SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
-    
+  
     // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
     //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
 
