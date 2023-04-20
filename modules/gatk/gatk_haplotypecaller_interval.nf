@@ -4,9 +4,8 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
 
   cpus = 1
   memory = 15.GB
-  time {6.hour * task.attempt}
-  errorStrategy 'retry' 
-  maxRetries 1
+  time 12.hour
+  errorStrategy 'finish' 
 
   container 'broadinstitute/gatk:4.2.4.1'
 
