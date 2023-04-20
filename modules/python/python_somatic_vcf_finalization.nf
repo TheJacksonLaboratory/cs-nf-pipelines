@@ -33,11 +33,11 @@ process SOMATIC_VCF_FINALIZATION {
     python \
     ${projectDir}/bin/pta/rename_csq_vcf.py \
     ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_id.vcf \
-    ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_supplemental.vcf
+    ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_supplemental.vcf
 
     python \
     ${projectDir}/bin/pta/make_main_vcf.py \
-    ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated_${output_suffix}_supplemental.vcf \
+    ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_supplemental.vcf \
     ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_final.vcf
 
     python \
