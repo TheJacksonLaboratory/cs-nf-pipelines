@@ -510,6 +510,7 @@ workflow PTA {
     BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
     // note: this can not be split by chrom, even though bicseq2 norm acts on chroms in turn, 
     // it needs all chroms to parameterize the normalization. 
+    // reported error will be in these cases: "Error in bin_read: bin file is in incorrect format."
 
     bicseq_normal = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output
         .map{it -> [it[2].patient, it[1], it[2], it[3]]}
