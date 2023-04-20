@@ -3,7 +3,7 @@ process GATK_CNNSCORE_VARIANTS {
 
     cpus = 1
     memory = 15.GB
-    time = '01:30:00'
+    time = '04:00:00'
 
     container 'broadinstitute/gatk:4.2.4.1'
 

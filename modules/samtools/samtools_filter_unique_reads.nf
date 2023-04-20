@@ -5,14 +5,14 @@ process SAMTOOLS_FILTER_UNIQUE {
     memory 4.GB
     time '04:00:00'
 
-    container 'quay.io/jaxcompsci/bicseq2:latest'
+    container 'quay.io/jaxcompsci/bicseq2:v2'
 
     input:
-    tuple val(sampleID), val(meta), file(bam), file(bai), val(read_ID)
+    tuple val(sampleID), val(meta), path(bam), path(bai), val(read_ID)
     val(chroms)
 
     output:
-    tuple val(sampleID), file("seq_out/*.seq"), val(meta), val(read_ID), emit: uniq_seq
+    tuple val(sampleID), path("seq_out/*.seq"), val(meta), val(read_ID), emit: uniq_seq
 
     script:
     chrom_list = chroms.collect { "$it" }.join(' ')

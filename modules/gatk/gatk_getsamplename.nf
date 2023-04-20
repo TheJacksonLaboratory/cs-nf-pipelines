@@ -1,5 +1,5 @@
 process GATK_GETSAMPLENAME {
-  tag "$meta.sample"
+  tag "$sampleID"
 
   cpus = 1
   memory = 1.GB

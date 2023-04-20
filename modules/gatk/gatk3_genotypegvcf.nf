@@ -7,7 +7,7 @@ process GATKv3_5_GENOTYPEGVCF {
   
   container 'broadinstitute/gatk3:3.5-0'
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "sampleID" : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(normal_germline_gvcf)

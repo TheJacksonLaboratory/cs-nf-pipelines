@@ -1,5 +1,5 @@
 process GRIDSS_PREPROCESS {
-    tag "$meta.patient"
+    tag "$sampleID"
 
     cpus = 4
     memory = 15.GB
@@ -8,7 +8,7 @@ process GRIDSS_PREPROCESS {
     container 'quay.io/jaxcompsci/gridss:2.13.2-2_ln'
 
     input:
-    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
+    tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
     output:
     tuple val(sampleID), path('gridss_preprocess/'), emit: gridss_preproc

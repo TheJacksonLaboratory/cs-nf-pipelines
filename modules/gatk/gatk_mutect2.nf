@@ -12,12 +12,12 @@ process GATK_MUTECT2 {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), path(interval), val(interval_index)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), path(interval), val(interval_index)
 
   output:
-  tuple val(sampleID), file("*_somatic.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('mutect2'), emit: vcf
-  tuple val(sampleID), file("*_somatic.vcf.gz.tbi"), emit: tbi
-  tuple val(sampleID), file("*.stats"), emit: stats
+  tuple val(sampleID), path("*_somatic.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('mutect2'), emit: vcf
+  tuple val(sampleID), path("*_somatic.vcf.gz.tbi"), emit: tbi
+  tuple val(sampleID), path("*.stats"), emit: stats
 
   script:
   //Estimate somatic variants using Mutect2
@@ -33,6 +33,6 @@ process GATK_MUTECT2 {
     -normal ${normal_name} \
     -L ${interval} \
     --native-pair-hmm-threads 4 \
-    -O ${meta.patient}_${interval_index}_somatic.vcf.gz
+    -O ${sampleID}_${interval_index}_somatic.vcf.gz
   """
 }

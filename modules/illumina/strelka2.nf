@@ -1,19 +1,19 @@
 process STRELKA2 {
-  tag "$meta.patient"
+  tag "$sampleID"
 
   cpus = 4
   memory { normal_bam.size() < 60.GB ? 8.GB : 24.GB }
   time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/strelka2:v2.9.3'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'strelka' }", pattern:"*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'strelka' }", pattern:"*.vcf.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), file(candidateSmallIndels), file(candidateSmallIndels_tbi)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), path(candidateSmallIndels), path(candidateSmallIndels_tbi)
 
   output:
-  tuple val(sampleID), file("*indels.vcf.gz"), file("*indels.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka2_indel'), emit: strelka_indel_vcf_tbi
-  tuple val(sampleID), file("*snvs.vcf.gz"), file("*snvs.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka2_sv'), emit: strelka_snv_vcf_tbi
+  tuple val(sampleID), path("*indels.vcf.gz"), path("*indels.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka2_indel'), emit: strelka_indel_vcf_tbi
+  tuple val(sampleID), path("*snvs.vcf.gz"), path("*snvs.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('strelka2_sv'), emit: strelka_snv_vcf_tbi
 
   script:
 

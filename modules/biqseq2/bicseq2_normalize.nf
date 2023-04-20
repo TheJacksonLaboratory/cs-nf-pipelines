@@ -6,15 +6,15 @@ process BICSEQ2_NORMALIZE {
     time = '05:00:00'
     errorStrategy 'finish'
 
-    container 'quay.io/jaxcompsci/bicseq2:latest'
+    container 'quay.io/jaxcompsci/bicseq2:v3'
     // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'biqseq2' }", pattern:".txt", mode:'copy'
 
     input:
-    tuple val(sampleID), file(individual_chr_seq_files), val(meta), val(read_ID), val(read_length), val(insert_size)
+    tuple val(sampleID), path(individual_chr_seq_files), val(meta), val(read_ID), val(read_length), val(insert_size)
     val(fasta_file_list)
 
     output:
-    tuple val(sampleID), file("*.norm.bin.txt"), val(meta), val(read_ID), emit: normalized_output
+    tuple val(sampleID), path("*.norm.bin.txt"), val(meta), val(read_ID), emit: normalized_output
 
     script:
 

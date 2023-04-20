@@ -1,21 +1,21 @@
 process MANTA {
-  tag "$meta.patient"
+  tag "$sampleID"
 
   cpus = 4
   memory { normal_bam.size() < 60.GB ? 12.GB : 24.GB }
   time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/manta:v1.5.0'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*candidateSmallIndels.vcf.gz"), file("*candidateSmallIndels.vcf.gz.tbi"), emit: manta_smallindel_vcf_tbi
-  tuple val(sampleID), file("*diploidSV.vcf.gz"), file("*diploidSV.vcf.gz.tbi"), emit: manta_diploidsv_tbi
-  tuple val(sampleID), file("*somaticSV.vcf.gz"), file("*somaticSV.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('manta'), emit: manta_somaticsv_tbi
-  tuple val(sampleID), file("*candidateSV.vcf.gz"), file("*candidateSV.vcf.gz.tbi"), emit: manta_candidatesv_tbi
+  tuple val(sampleID), path("*candidateSmallIndels.vcf.gz"), path("*candidateSmallIndels.vcf.gz.tbi"), emit: manta_smallindel_vcf_tbi
+  tuple val(sampleID), path("*diploidSV.vcf.gz"), path("*diploidSV.vcf.gz.tbi"), emit: manta_diploidsv_tbi
+  tuple val(sampleID), path("*somaticSV.vcf.gz"), path("*somaticSV.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('manta'), emit: manta_somaticsv_tbi
+  tuple val(sampleID), path("*candidateSV.vcf.gz"), path("*candidateSV.vcf.gz.tbi"), emit: manta_candidatesv_tbi
 
 
   script:

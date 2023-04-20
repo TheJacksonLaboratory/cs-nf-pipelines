@@ -41,6 +41,7 @@ process GRIPSS_SOMATIC_FILTER {
 
     stub:
     """
-    touch ${sampleID}_gripss_sv_somaticFiltered.vcf.bgz
+    touch ${sampleID}_gripss.filtered.vcf.gz
+    touch ${sampleID}_gripss.filtered.vcf.gz.tbi
     """
 }

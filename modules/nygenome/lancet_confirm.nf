@@ -9,10 +9,10 @@ process LANCET_CONFIRM {
   // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lancet' }", pattern:".vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bed), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(chrom)
+  tuple val(sampleID), path(bed), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), val(chrom)
 
   output:
-  tuple val(sampleID), file("*.vcf"), val(meta), val(normal_name), val(tumor_name), val(chrom), emit: vcf
+  tuple val(sampleID), path("*.vcf"), val(meta), val(normal_name), val(tumor_name), val(chrom), emit: vcf
 
   script:
   """
