@@ -7,7 +7,7 @@ process VEP_SOMATIC {
 
   container 'ensemblorg/ensembl-vep:release_109.3'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf), file(idx), val(meta), val(normal_name), val(tumor_name)

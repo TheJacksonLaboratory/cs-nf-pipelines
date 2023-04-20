@@ -6,8 +6,8 @@ process BICSEQ2_SEG {
   time = '03:00:00'
   errorStrategy 'finish'
 
-  container 'quay.io/jaxcompsci/bicseq2:v3'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'biqseq2' }", pattern:"{*.txt,*.png}", mode:'copy'
+  container 'quay.io/jaxcompsci/bicseq2:latest'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'biqseq2' }", pattern:"{*.txt,*.png}", mode:'copy'
 
   input:
   tuple val(sampleID), file(individual_normal_norm_bin_files), file(individual_tumor_norm_bin_files), val(meta), val(normal_name), val(tumor_name)

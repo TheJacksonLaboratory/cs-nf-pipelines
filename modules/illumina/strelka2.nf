@@ -6,7 +6,7 @@ process STRELKA2 {
   time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/strelka2:v2.9.3'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'strelka' }", pattern:"*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" + '/callers' : 'strelka' }", pattern:"*.vcf.gz", mode:'copy'
 
   input:
   tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), path(candidateSmallIndels), path(candidateSmallIndels_tbi)

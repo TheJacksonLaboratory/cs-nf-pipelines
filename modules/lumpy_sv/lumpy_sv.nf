@@ -7,7 +7,7 @@ process LUMPY_SV {
   
   container 'quay.io/biocontainers/lumpy-sv:0.3.1--hdfd78af_3'
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lumpy-sv' }", pattern:"*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'lumpy-sv' }", pattern:"*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)

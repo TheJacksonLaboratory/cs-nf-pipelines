@@ -6,7 +6,7 @@ process MANTA {
   time { normal_bam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/jaxcompsci/manta:v1.5.0'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" + '/callers' : 'manta' }", pattern:"*.vcf.gz", mode:'copy'
 
   input:
   tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)

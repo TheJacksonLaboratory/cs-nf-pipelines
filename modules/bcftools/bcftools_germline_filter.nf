@@ -10,13 +10,13 @@ process BCFTOOLS_GERMLINE_FILTER {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*haplotypecaller.gatk.final.filtered.vcf.gz", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*haplotypecaller.gatk.filtered.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)
 
     output:
-    tuple val(sampleID), file("*haplotypecaller.gatk.final.filtered.vcf.gz"), file("*haplotypecaller.gatk.final.filtered.vcf.gz.tbi"), emit: vcf_idx
+    tuple val(sampleID), file("*haplotypecaller.gatk.filtered.vcf.gz"), file("*haplotypecaller.gatk.filtered.vcf.gz.tbi"), emit: vcf_idx
 
 
     // NOTE: These are hard coded to resources provided at: https://bitbucket.nygenome.org/projects/WDL/repos/somatic_dna_wdl/browse/config/fasta_references.json
@@ -128,9 +128,9 @@ process BCFTOOLS_GERMLINE_FILTER {
     | \
     bcftools sort \
     -Oz \
-    > ${sampleID}_haplotypecaller.gatk.final.filtered.vcf.gz
+    > ${sampleID}_haplotypecaller.gatk.filtered.vcf.gz
 
-    tabix -p vcf ${sampleID}_haplotypecaller.gatk.final.filtered.vcf.gz
+    tabix -p vcf ${sampleID}_haplotypecaller.gatk.filtered.vcf.gz
 
     """
 }
