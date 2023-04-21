@@ -15,6 +15,8 @@ process SOMATIC_VCF_FINALIZATION {
 
     output:
     tuple val(sampleID), file("*final.vcf"), emit: vcf
+    tuple val(sampleID), file("*final.txt"), emit: txt
+    tuple val(sampleID), file("*final.maf"), emit: maf
 
     script:
 

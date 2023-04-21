@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from "${projectDir}/bin/help/pta.nf"
 include {param_log} from "${projectDir}/bin/log/pta.nf"
+include {CONCATENATE_PTA_FASTQ} from "${projectDir}/subworkflows/concatenate_pta_fastq"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
@@ -132,9 +133,10 @@ workflow PTA {
 
     if (params.csv_input) {
         ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
-
-        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
-        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        // Concat local Fastq files from CSV input if required.
+            CONCATENATE_PTA_FASTQ(ch_input_sample)
+            CONCATENATE_PTA_FASTQ.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+            CONCATENATE_PTA_FASTQ.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
     }
 
     // ** Step 1: Qual_Stat
@@ -231,8 +233,8 @@ workflow PTA {
         .map { normal, tumor ->
             def meta = [:]
             meta.patient    = normal[0]
-            meta.normal_id  = normal[1].sample
-            meta.tumor_id   = tumor[1].sample
+            meta.normal_id  = normal[1].sampleID
+            meta.tumor_id   = tumor[1].sampleID
             meta.sex        = normal[1].sex
             meta.id         = "${meta.patient}--${meta.tumor_id}--${meta.normal_id}".toString()
 
@@ -254,7 +256,7 @@ workflow PTA {
         def meta = [:]
             meta.patient    = tumor[1][0].patient
             meta.normal_id  = 'NA12878'
-            meta.tumor_id   = tumor[1][0].sample
+            meta.tumor_id   = tumor[1][0].sampleID
             meta.sex        = tumor[1][0].sex
             meta.id         = "${meta.patient}--${meta.tumor_id}--${meta.normal_id}".toString()
         
@@ -508,6 +510,7 @@ workflow PTA {
     BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
     // note: this can not be split by chrom, even though bicseq2 norm acts on chroms in turn, 
     // it needs all chroms to parameterize the normalization. 
+    // reported error will be in these cases: "Error in bin_read: bin file is in incorrect format."
 
     bicseq_normal = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output
         .map{it -> [it[2].patient, it[1], it[2], it[3]]}
@@ -519,8 +522,8 @@ workflow PTA {
                             .map{normal, tumor -> 
                                     def meta = [:]
                                     meta.patient    = normal[2].patient
-                                    meta.normal_id  = normal[2].sample
-                                    meta.tumor_id   = tumor[2].sample
+                                    meta.normal_id  = normal[2].sampleID
+                                    meta.tumor_id   = tumor[2].sampleID
                                     meta.sex        = normal[2].sex
                                     meta.id         = "${tumor[2].patient}--${tumor[2].tumor_id}--${tumor[2].normal_id}".toString()
 
@@ -806,10 +809,10 @@ def extract_csv(csv_file) {
 
     Channel.from(csv_file).splitCsv(header: true)
         .map{ row ->
-            if (!sample2patient.containsKey(row.sample.toString())) {
-                sample2patient[row.sample.toString()] = row.patient.toString()
-            } else if (sample2patient[row.sample.toString()] != row.patient.toString()) {
-                log.error('The sample "' + row.sample.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sample.toString()] + '" in the sample sheet.')
+            if (!sample2patient.containsKey(row.sampleID.toString())) {
+                sample2patient[row.sampleID.toString()] = row.patient.toString()
+            } else if (sample2patient[row.sampleID.toString()] != row.patient.toString()) {
+                log.error('The sample "' + row.sampleID.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sampleID.toString()] + '" in the sample sheet.')
                 System.exit(1)
             }
         }
@@ -822,11 +825,11 @@ def extract_csv(csv_file) {
         //Retrieves number of lanes by grouping together by patient and sample and counting how many entries there are for this combination
         .map{ row ->
             sample_count_all++
-            if (!(row.patient && row.sample)){
+            if (!(row.patient && row.sampleID)){
                 log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sample'."
                 System.exit(1)
             }
-            [[row.patient.toString(), row.sample.toString()], row]
+            [[row.patient.toString(), row.sampleID.toString()], row]
         }.groupTuple()
         .map{ meta, rows ->
             size = rows.size()
@@ -841,7 +844,7 @@ def extract_csv(csv_file) {
         // Several sample can belong to the same patient
         // Sample should be unique for the patient
         if (row.patient) meta.patient = row.patient.toString()
-        if (row.sample)  meta.sample  = row.sample.toString()
+        if (row.sampleID)  meta.sampleID  = row.sampleID.toString()
 
         // If no sex specified, sex is not considered
         // sex is only mandatory for somatic CNV
@@ -857,7 +860,7 @@ def extract_csv(csv_file) {
 
         // join meta to fastq
         if (row.fastq_2) {
-            meta.id         = "${row.patient}--${row.sample}".toString()
+            meta.id         = "${row.patient}--${row.sampleID}".toString()
             def fastq_1     = file(row.fastq_1, checkIfExists: true)
             def fastq_2     = file(row.fastq_2, checkIfExists: true)
 
