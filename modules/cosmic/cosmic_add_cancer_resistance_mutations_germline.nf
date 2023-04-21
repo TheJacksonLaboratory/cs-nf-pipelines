@@ -21,7 +21,7 @@ process COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE {
     ${projectDir}/bin/pta/add_cancer_resistance_mutations.py \
     ${params.cosmic_cancer_resistance_muts} \
     ${vcf} \
-    ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated.vcf
+    ${sampleID}_germline_snv_indel_annotated_supplemental.vcf
     """
 }
 

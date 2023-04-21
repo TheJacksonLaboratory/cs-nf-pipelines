@@ -15,8 +15,8 @@ process ANNOTATE_BICSEQ2_CNV {
     val(chrom_list)
 
   output:
-    tuple val(sampleID), file("${sampleID}.cnv.annotated.v7.final.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot
-    tuple val(sampleID), file("${sampleID}.cnv.annotated.v7.supplemental.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot_suppl
+    tuple val(sampleID), file("${sampleID}_cnv_annotated_final.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot
+    tuple val(sampleID), file("${sampleID}_cnv_annotated_supplemental.bed"), val(normal_name), val(tumor_name), emit: bicseq_annot_suppl
 
   script:
     listOfChroms = chrom_list.collect { "$it" }.join(',')
@@ -34,8 +34,8 @@ process ANNOTATE_BICSEQ2_CNV {
         --ensembl=${params.ensemblUniqueBed} \
         --allowed_chr=${listOfChroms} \
         --overlap_fraction=0.8 \
-        --out_file_main=${sampleID}.cnv.annotated.v7.final.bed \
-        --out_file_supplemental=${sampleID}.cnv.annotated.v7.supplemental.bed
+        --out_file_main=${sampleID}_cnv_annotated_final.bed \
+        --out_file_supplemental=${sampleID}_cnv_annotated_supplemental.bed
 
     """
 }
