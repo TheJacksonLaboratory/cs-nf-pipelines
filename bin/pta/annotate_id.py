@@ -103,8 +103,12 @@ def modify_record(record, csq_columns):
         gt = record.samples[1][key]
         record.samples[1][key] = fix_gt(gt)
     ids = get_ID(record, csq_columns)
+
     if ids != '':
-        record.id = ids
+        if record.id != '':
+            record.id = record.id + ';' + ids
+        else:
+            record.id = ids
     return record
 
 

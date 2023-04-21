@@ -6,6 +6,7 @@ include {help} from "${projectDir}/bin/help/pta.nf"
 include {param_log} from "${projectDir}/bin/log/pta.nf"
 include {CONCATENATE_PTA_FASTQ} from "${projectDir}/subworkflows/concatenate_pta_fastq"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
@@ -107,6 +108,7 @@ include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
 include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/python/python_somatic_vcf_finalization"
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
 include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
 include {ANNOTATE_SV;
@@ -117,6 +119,8 @@ include {ANNOTATE_SV_WITH_CNV;
          ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
 include {FILTER_BEDPE;
          FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
+
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 
 // help if needed
@@ -141,6 +145,8 @@ workflow PTA {
 
     // ** Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
+    
+    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
     // ** Step 2: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
@@ -751,7 +757,14 @@ workflow PTA {
     VEP_SOMATIC(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
     COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
     COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
-    SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf, 'filtered')
+
+    SNPSIFT_ANNOTATE_DBSNP(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf.map{it -> [it[0], it[1]]}, params.dbSNP, params.dbSNP_index, 'intermediate')
+    // note: existing module requires only sampleID and VCF. input remapped to required tuple.
+
+    somatic_finalization_input = SNPSIFT_ANNOTATE_DBSNP.out.vcf.join(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf).map{it -> [it[0], it[1], it[3], it[4], it[5]]}
+    // re-join dbSNP ID annotated VCF output with [meta], normalID, tumorID. 
+
+    SOMATIC_VCF_FINALIZATION(somatic_finalization_input, 'filtered')
 
     // ** Annotation of somatic CNV and SV
 
@@ -784,6 +797,19 @@ workflow PTA {
     
     FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
     FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
+
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.concordance.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.contamination.collect{it[1]}.ifEmpty([]))
+  
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 
 }
 

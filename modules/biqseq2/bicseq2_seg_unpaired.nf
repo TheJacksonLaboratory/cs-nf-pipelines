@@ -19,6 +19,8 @@ process BICSEQ2_SEG_UNPAIRED {
 
   tumor_norm_list = individual_tumor_norm_bin_files.collect { "$it" }.join(' ')
 
+  scale = params.bicseq2_no_scaling ? "--noscale" : ""
+
   """
 
   python3 \
@@ -33,6 +35,7 @@ process BICSEQ2_SEG_UNPAIRED {
   --fig ${sampleID}.bicseq2.png \
   --title ${sampleID} \
   --lambda 4 \
+  ${scale} \
   configuration_file.txt \
   ${sampleID}.bicseq2.txt
   
