@@ -10,7 +10,7 @@ process SAMTOOLS_STATS_INSERTSIZE {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'samtools' }", pattern: "*insert_size.txt", mode:'copy'
 
     input:
-        tuple val(sampleID), val(meta), file(bam), file(bai), val(read_ID)
+        tuple val(sampleID), val(meta), path(bam), path(bai), val(read_ID)
 
     output:
         tuple val(sampleID), env(read_length), env(insert_size), emit: read_length_insert_size

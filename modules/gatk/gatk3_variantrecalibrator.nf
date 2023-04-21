@@ -8,7 +8,7 @@ process GATKv3_5_VARIANTRECALIBRATOR {
   container 'broadinstitute/gatk3:3.5-0'
   
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'gatk' }", pattern: "*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'gatk' }", pattern: "*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(normal_germline_vcf)

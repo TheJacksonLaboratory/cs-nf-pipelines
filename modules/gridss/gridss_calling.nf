@@ -10,7 +10,7 @@ process GRIDSS_CALLING {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gridss' }", pattern: "*_gridss_sv.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(gridss_assembled)
+    tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), val(gridss_assembled)
 
     output:
     tuple val(sampleID), path('*_gridss_sv.vcf.gz'), val(meta), val(normal_name), val(tumor_name), emit: gridss_vcf

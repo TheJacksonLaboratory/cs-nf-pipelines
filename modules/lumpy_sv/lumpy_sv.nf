@@ -10,10 +10,10 @@ process LUMPY_SV {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lumpy-sv' }", pattern:"*.vcf", mode:'copy'
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*_lumpy_sv.vcf"), val(meta), val(normal_name), val(tumor_name), val('lumpy'), emit: lumpy_sv_vcf
+  tuple val(sampleID), path("*_lumpy_sv.vcf"), val(meta), val(normal_name), val(tumor_name), val('lumpy'), emit: lumpy_sv_vcf
 
   script:
   """
