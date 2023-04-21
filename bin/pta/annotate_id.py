@@ -109,7 +109,6 @@ def modify_record(record, csq_columns):
             record.id = record.id + ';' + ids
         else:
             record.id = ids
-    print(record.id)
     return record
 
 
