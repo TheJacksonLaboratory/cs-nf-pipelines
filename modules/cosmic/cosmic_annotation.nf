@@ -19,7 +19,7 @@ process COSMIC_ANNOTATION {
     """
     python \
     ${projectDir}/bin/pta/add_cancer_gene_census.py \
-    ${params.cosmic} \
+    ${params.cosmic_cgc} \
     ${vcf} \
     ${sampleID}_germline_vep_cosmic_annotated.vcf
     """

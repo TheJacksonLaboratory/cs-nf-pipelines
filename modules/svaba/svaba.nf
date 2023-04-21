@@ -31,9 +31,9 @@ process SVABA {
     -n ${normal_bam} \
     -p ${task.cpus} \
     -a ${meta.patient}_svaba \
-    -G ${params.ref_fa} \
+    -G ${params.combined_reference_set} \
     --region ${params.callRegions} \
-    -D ${params.dbsnpIndels} \
+    -D ${params.dbSNP} \
     -z on
   """
 }
