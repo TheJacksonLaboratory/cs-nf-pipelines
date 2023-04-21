@@ -6,6 +6,7 @@ include {help} from "${projectDir}/bin/help/pta.nf"
 include {param_log} from "${projectDir}/bin/log/pta.nf"
 include {CONCATENATE_PTA_FASTQ} from "${projectDir}/subworkflows/concatenate_pta_fastq"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
@@ -119,6 +120,8 @@ include {ANNOTATE_SV_WITH_CNV;
 include {FILTER_BEDPE;
          FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
 
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
+
 
 // help if needed
 if (params.help){
@@ -142,6 +145,8 @@ workflow PTA {
 
     // ** Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
+    
+    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
     // ** Step 2: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
@@ -792,6 +797,19 @@ workflow PTA {
     
     FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
     FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
+
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.concordance.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.contamination.collect{it[1]}.ifEmpty([]))
+  
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 
 }
 
