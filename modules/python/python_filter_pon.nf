@@ -16,7 +16,7 @@ process FILTER_PON {
   script:
   """
    python \
-  ${projectDir}/bin/sv/filter_pon.py \
+  ${projectDir}/bin/pta/filter_pon.py \
         --bed ${params.pon_bed} \
         --chrom ${chrom} \
         --vcf ${vcf} \

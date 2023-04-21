@@ -22,7 +22,7 @@ process GRIDSS_CHROM_FILTER {
     chrom_list = chroms.collect { "$it" }.join(' ')
 
     """
-    python ${projectDir}/bin/sv/filter_vcf.py \
+    python ${projectDir}/bin/pta/filter_vcf.py \
     --vcf-file ${vcf} \
     --output ${sampleID}_gridss_sv_unfiltered_chroms.vcf \
     --chroms ${chrom_list}

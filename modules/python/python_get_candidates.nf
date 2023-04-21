@@ -16,7 +16,7 @@ process GET_CANDIDATES {
   script:
   """
    python \
-  ${projectDir}/bin/sv/get_candidates.py \
+  ${projectDir}/bin/pta/get_candidates.py \
   ${vcf} \
   ${sampleID}_candidate_merged_${chrom}.vcf
   """

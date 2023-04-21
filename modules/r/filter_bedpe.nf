@@ -22,7 +22,7 @@ process FILTER_BEDPE {
   script:
     if(suppl_switch == "main")
     """
-    Rscript ${projectDir}/bin/sv/filter-bedpe.r \
+    Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
         --filter_databases=DGV,1000G,PON \
         --bedpe=${sv_genes_cnv_bedpe} \
@@ -32,7 +32,7 @@ process FILTER_BEDPE {
 
     else if (suppl_switch == "supplemental")
     """
-    Rscript ${projectDir}/bin/sv/filter-bedpe.r \
+    Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
         --filter_databases=DGV,1000G,PON \
         --bedpe=${sv_genes_cnv_bedpe} \

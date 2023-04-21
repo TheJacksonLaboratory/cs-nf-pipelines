@@ -16,7 +16,7 @@ process REMOVE_CONTIG {
   script:
   """
   python \
-  ${projectDir}/bin/sv/remove_contig.py \
+  ${projectDir}/bin/pta/remove_contig.py \
   ${vcf} \
   ${vcf.baseName}_removeContig.vcf
   """

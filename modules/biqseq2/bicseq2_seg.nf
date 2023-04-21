@@ -24,7 +24,7 @@ process BICSEQ2_SEG {
   """
 
   python3 \
-  ${projectDir}/bin/sv/bicseq2_seg_config_writer.py \
+  ${projectDir}/bin/pta/bicseq2_seg_config_writer.py \
   --normal-norms ${normal_norm_list} \
   --tumor-norms ${tumor_norm_list} \
   --seg-bicseq2-config ${params.bicseq2_chromList} \

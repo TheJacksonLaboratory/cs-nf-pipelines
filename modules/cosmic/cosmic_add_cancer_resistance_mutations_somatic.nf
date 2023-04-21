@@ -18,14 +18,14 @@ process COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC {
     script:
     """
     python \
-    ${projectDir}/bin/sv/add_cancer_resistance_mutations.py \
+    ${projectDir}/bin/pta/add_cancer_resistance_mutations.py \
     ${params.cosmic_cancer_resistance_muts} \
     ${vcf} \
     ${sampleID}_somatic_vep_cosmic_cancerResitMut_annotated.vcf
     """
 }
 
-// cosmic for 'sv' pipeline comes from: 
+// cosmic for 'pta' pipeline comes from: 
 // curl -H "Authorization: Basic ADD AUTHORIZATION" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/CosmicResistanceMutations.tsv.gz
 // the above command provides a URL for curl download
 // curl "https://cog.sanger.ac.uk/cosmic/GRCh38/cosmic/v97/CosmicResistanceMutations.tsv.gz?AWSAccessKeyId=KRV7P7QR9DL41J9EWGA2&Expires=1672933745&Signature=nQ9AFGONT4rDKfM4UZ1cmN4J%2F%2BM%3D" --output CosmicResistanceMutations.tsv.gz

@@ -5,7 +5,6 @@ process SNPSIFT_EXTRACTFIELDS {
   memory = 6.GB
   time = '01:00:00'
 
-  // SNPEFF and SNPSIFT need updating
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
@@ -32,11 +31,6 @@ process SNPSIFT_EXTRACTFIELDS {
     fields = 'CHROM POS ID REF ALT QUAL FILTER AF "ANN[*].ALLELE" "ANN[*].EFFECT" "ANN[*].IMPACT" "ANN[*].GENE" "ANN[*].GENEID" "ANN[*].FEATURE" "ANN[*].FEATUREID" "ANN[*].BIOTYPE" "ANN[*].RANK" "ANN[*].HGVS_C" "ANN[*].HGVS_P" "ANN[*].CDNA_POS" "ANN[*].CDNA_LEN" "ANN[*].CDS_POS" "ANN[*].CDS_LEN" "ANN[*].AA_POS" "ANN[*].AA_LEN" "ANN[*].DISTANCE"'
 
     suffix = 'txt'
-  }
-
-  if (params.workflow=='sv'){
-    fields = 'CHROM POS REF ALT ID FILTER QUAL FILTER AF CSQ CancerGeneCensus CosmicResistanceMutation'
-    suffix = 'temp'
   }
 
   """

@@ -18,7 +18,7 @@ process ANNOTATE_SV_WITH_CNV {
 
     if (suppl_switch == "main")
     """
-    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-cnv.r \
+    Rscript ${projectDir}/bin/pta/annotate-bedpe-with-cnv.r \
         --cnv=${bicseq_annot} \
         --bedpe=${annot_sv_genes_bedpe} \
         --out_file=${sampleID}.manta_gridss_sv_annotated_genes_cnv.bed
@@ -26,7 +26,7 @@ process ANNOTATE_SV_WITH_CNV {
 
     else if (suppl_switch == "supplemental")
     """
-    Rscript ${projectDir}/bin/sv/annotate-bedpe-with-cnv.r \
+    Rscript ${projectDir}/bin/pta/annotate-bedpe-with-cnv.r \
         --cnv=${bicseq_annot} \
         --bedpe=${annot_sv_genes_bedpe} \
         --out_file=${sampleID}.manta_gridss_sv_annotated_genes_cnv_supplemental.bed
