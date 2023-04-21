@@ -4,7 +4,8 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
 
   cpus = 1
   memory = 15.GB
-  time = '11:00:00'
+  time 12.hour
+  errorStrategy 'finish' 
 
   container 'broadinstitute/gatk:4.2.4.1'
 
@@ -17,7 +18,6 @@ process GATK_HAPLOTYPECALLER_INTERVAL {
 
   script:
 
-  log.info "----- GATK Haplotype Caller Running on Chromosome ${chrom} for sample: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """

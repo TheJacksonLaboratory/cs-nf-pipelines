@@ -17,7 +17,6 @@ process CALC_MTDNA_FILTER_CHRM {
   tuple val(sampleID), file("*_mtDNA_Content.txt"), emit: mtdna_log
 
   shell:
-  log.info "----- Calculate %mtDNA and Filter Mitochondrial Reads on ${sampleID} -----"
   // Get Mitochondrial and total read counts, calculate %mtDNA and filter Mitochondrial Reads from bam file 
 
   mt_name = params.gen_org == 'mouse' ?  'MT' : 'chrM'

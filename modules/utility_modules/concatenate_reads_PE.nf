@@ -6,19 +6,20 @@ process CONCATENATE_READS_PE {
   memory 15.GB
   time '03:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*fastq.gz", mode:'copy'
+  container 'ubuntu:20.04'
+
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*", mode:'copy'
 
   input:
   tuple val(sampleID), file(R1), file(R2)
 
   output:
-  tuple val(sampleID), file("*fastq.gz"), emit: concat_fastq
+  tuple val(sampleID), file("*"), emit: concat_fastq
 
   script:
-  log.info "----- Concatenate Reads Running on: ${sampleID} -----"
 
   """
-  cat $R1 > ${sampleID}_R1.fastq.gz
-  cat $R2 > ${sampleID}_R2.fastq.gz
+  cat $R1 > ${sampleID}_R1${params.extension}
+  cat $R2 > ${sampleID}_R2${params.extension}
   """
 }

@@ -1,4 +1,4 @@
-process BCF_SORT {
+process BCFTOOLS_SORT {
   tag "$sampleID"
 
   cpus = 1
@@ -14,7 +14,6 @@ process BCF_SORT {
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- BCFTools Sort Running on: ${sampleID} -----"
 
   """
   bcftools sort -o ${sampleID}_only_${indel_snp}.vcf ${vcf}

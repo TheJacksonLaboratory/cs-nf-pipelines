@@ -7,6 +7,7 @@ process SNPSIFT_ANNOTATE {
 
   // SNPEFF and SNPSIFT need updating
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpsift' }", pattern:"*dbsnpID.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(vcf)

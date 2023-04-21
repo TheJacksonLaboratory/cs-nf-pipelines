@@ -16,7 +16,6 @@ process ALIGN_TRIMMED_FASTQ {
   tuple val(sampleID), file("*_bowtie2.log"), emit: bowtie_log
 
   script:
-  log.info "----- Bowtie2 Running on: ${sampleID} -----"
   String options = params.bowtieVSensitive  == 'true' ? '--very-sensitive' : ''
   """
   bowtie2 \

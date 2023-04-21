@@ -14,7 +14,6 @@ process FRIP_READS_IN_PEAKS {
   tuple val(sampleID), file("reads_in_peaks.tmp.ba*")
 
   script:
-  log.info "----- Fraction of reads in peaks (FRiP) on ${sampleID} -----"
   """
   bedtools sort \
   -i ${narrow_peaks} \

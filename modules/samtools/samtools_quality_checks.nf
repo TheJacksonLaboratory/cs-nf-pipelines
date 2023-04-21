@@ -15,8 +15,6 @@ process QUALITY_CHECKS {
   tuple val(sampleID), file("*.fragment_length_count.txt")
 
   script:
-  log.info "----- Quality checks on ${sampleID} -----"
-  log.info "----- Fragment/Insert size on ${sampleID} -----"
   // Get the fragment length count from bam file for Quality Checks.
   """
   samtools view \

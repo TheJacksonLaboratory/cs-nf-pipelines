@@ -6,18 +6,26 @@ nextflow.enable.dsl=2
 if (params.workflow == "rnaseq"){
   include {RNASEQ} from './workflows/rnaseq'
 }
-if (params.workflow == "wes"){
+else if (params.workflow == "wes"){
   include {WES} from './workflows/wes'
 }
-if (params.workflow == "wgs"){
+else if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
 }
-if (params.workflow == "rrbs"){
+else if (params.workflow == "rrbs"){
   include {RRBS} from './workflows/rrbs'
 }
-if (params.workflow == "atac"){
+else if (params.workflow == "atac"){
   include {ATAC} from './workflows/atac'
 }
+else if (params.workflow == "pta"){
+  include {PTA} from './workflows/pta'
+} 
+else {
+  // if workflow name is not supported: 
+  exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
+}
+
 // conditional to kick off appropriate workflow
 workflow{
   if (params.workflow == "rnaseq"){
@@ -34,5 +42,8 @@ workflow{
     }
   if (params.workflow == "atac"){
     ATAC()
-    } 
+    }
+  if (params.workflow == "pta"){
+    PTA()
+  } 
 }
