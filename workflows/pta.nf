@@ -2,10 +2,14 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/sv.nf"
-include {param_log} from "${projectDir}/bin/log/sv.nf"
+include {help} from "${projectDir}/bin/help/pta.nf"
+include {param_log} from "${projectDir}/bin/log/pta.nf"
+include {CONCATENATE_PTA_FASTQ} from "${projectDir}/subworkflows/concatenate_pta_fastq"
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {SHORT_ALIGNMENT_MARKING} from "${projectDir}/modules/nygc-short-alignment-marking/short_alignment_marking"
@@ -14,11 +18,14 @@ include {PICARD_FIX_MATE_INFORMATION} from "${projectDir}/modules/picard/picard_
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
-include {CONPAIR_TUMOR_PILEUP} from "${projectDir}/modules/conpair/conpair_tumor_pileup"
-include {CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_normal_pileup"
+
+include {CONPAIR_PILEUP as CONPAIR_TUMOR_PILEUP;
+         CONPAIR_PILEUP as CONPAIR_NORMAL_PILEUP} from "${projectDir}/modules/conpair/conpair_pileup"
 include {CONPAIR} from "${projectDir}/modules/conpair/conpair"
+
 include {GATK_HAPLOTYPECALLER_SV_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline"
 include {GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GERMLINE;
          GATK_SORTVCF_GERMLINE as GATK_SORTVCF_GENOTYPE} from "${projectDir}/modules/gatk/gatk_sortvcf_germline"
@@ -32,11 +39,10 @@ include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredicto
 include {BCFTOOLS_REMOVESPANNING} from "${projectDir}/modules/bcftools/bcftools_remove_spanning"
 include {COSMIC_ANNOTATION} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_germline"
-include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/germline_vcf_finalization"
-include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
-include {SNPSIFT_EXTRACT_AND_PARSE} from "${projectDir}/modules/utility_modules/parse_extracted_sv_table"
+include {GERMLINE_VCF_FINALIZATION} from "${projectDir}/modules/python/python_germline_vcf_finalization"
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
+
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2"
 include {GATK_MERGEMUTECTSTATS} from "${projectDir}/modules/gatk/gatk_mergemutectstats"
 include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls"
@@ -59,8 +65,7 @@ include {SAMTOOLS_FILTER_UNIQUE as SAMTOOLS_FILTER_UNIQUE_NORMAL;
 include {BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_NORMAL;
          BICSEQ2_NORMALIZE as BICSEQ2_NORMALIZE_TUMOR} from "${projectDir}/modules/biqseq2/bicseq2_normalize"
 include {BICSEQ2_SEG} from "${projectDir}/modules/biqseq2/bicseq2_seg"
-include {SVABA} from "${projectDir}/modules/svaba/svaba"
-include {LUMPY_SV} from "${projectDir}/modules/lumpy_sv/lumpy_sv"
+include {BICSEQ2_SEG_UNPAIRED} from "${projectDir}/modules/biqseq2/bicseq2_seg_unpaired"
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
 include {RENAME_METADATA;
@@ -102,7 +107,8 @@ include {COMPRESS_INDEX_MERGED_VCF} from "${projectDir}/modules/tabix/compress_m
 include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor_somatic"
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
-include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/utility_modules/somatic_vcf_finalization"
+include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/python/python_somatic_vcf_finalization"
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
 include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
 include {ANNOTATE_SV;
@@ -113,6 +119,8 @@ include {ANNOTATE_SV_WITH_CNV;
          ANNOTATE_SV_WITH_CNV as ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL} from "${projectDir}/modules/r/annotate_sv_with_cnv"
 include {FILTER_BEDPE;
          FILTER_BEDPE as FILTER_BEDPE_SUPPLEMENTAL} from "${projectDir}/modules/r/filter_bedpe"
+
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 
 // help if needed
@@ -125,44 +133,64 @@ if (params.help){
 param_log()
 
 // main workflow
-workflow SV {
+workflow PTA {
 
     if (params.csv_input) {
         ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
-
-        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
-        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        // Concat local Fastq files from CSV input if required.
+            CONCATENATE_PTA_FASTQ(ch_input_sample)
+            CONCATENATE_PTA_FASTQ.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+            CONCATENATE_PTA_FASTQ.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
     }
 
-    // Step 1: Qual_Stat
+    // ** Step 1: Qual_Stat
     QUALITY_STATISTICS(read_ch)
+    
+    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
 
-    // Step 2: Get Read Group Information
+    // ** Step 2: Get Read Group Information
     READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
-    // Step 3: BWA-MEM Alignment
-    bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+    // PDX CASES TO ADD AND VALIDATE: 
+    // Normal samples should PASS the PDX step. 
+
+    // ** Step 2a: Xenome if PDX data used.
+    ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+    if (params.pdx){
+        // Xenome Classification
+        XENOME_CLASSIFY(QUALITY_STATISTICS.out.trimmed_fastq)
+        ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats // set log file for multiqc
+
+        // Xenome Read Sort
+        FASTQ_SORT(XENOME_CLASSIFY.out.xenome_fastq, 'human')
+        bwa_mem_mapping = FASTQ_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+
+    } else { 
+        bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+    }
+
+    // ** Step 3: BWA-MEM Alignment
     BWA_MEM(bwa_mem_mapping)
     
-    // Step 4: Sort mapped reads
+    // ** Step 4: Sort mapped reads
     PICARD_SORTSAM(BWA_MEM.out.sam)
 
-    // Step 5: Remove short mapping 'artifacts': https://github.com/nygenome/nygc-short-alignment-marking
+    // ** Step 5: Remove short mapping 'artifacts': https://github.com/nygenome/nygc-short-alignment-marking
     SHORT_ALIGNMENT_MARKING(PICARD_SORTSAM.out.bam)
 
-    // Step 6: Clean BAM to set MAPQ = 0 when read is unmapped (issue introduced in step 5)
+    // ** Step 6: Clean BAM to set MAPQ = 0 when read is unmapped (issue introduced in step 5)
     PICARD_CLEANSAM(PICARD_SORTSAM.out.bam)
 
-    // Step 7: Fix mate information (fix pair flags due to mapping adjustment in step 5)
+    // ** Step 7: Fix mate information (fix pair flags due to mapping adjustment in step 5)
     PICARD_FIX_MATE_INFORMATION(PICARD_CLEANSAM.out.cleaned_bam)
 
-    // Step 8: Markduplicates
+    // ** Step 8: Markduplicates
     PICARD_MARKDUPLICATES(PICARD_FIX_MATE_INFORMATION.out.fixed_mate_bam)
 
-    // Step 9: Calculate BQSR
+    // ** Step 9: Calculate BQSR
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
 
-    // Step 10: Apply BQSR
+    // ** Step 10: Apply BQSR
     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
     GATK_APPLYBQSR(apply_bqsr)
 
@@ -172,65 +200,154 @@ workflow SV {
     GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai).join(meta_ch).branch{
         normal: it[3].status == 0
         tumor:  it[3].status == 1
-    }.set{chr_bam_status}
+    }.set{ch_final_bam}
     // re-join the sampleID to metadata information. Split normal and tumor samples into 2 different paths. 
-    // Process tumor and normal BAMs seperately for conpair. For calling, use mapped/joined data. 
+    // Process tumor and normal BAMs seperately for conpair. For calling, use mapped and crossed data. 
 
-    // Adjust channels to all normal, all tumor organized by patient IDs. 
-    ch_bam_normal_to_cross = chr_bam_status.normal.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
-    ch_bam_tumor_to_cross = chr_bam_status.tumor.map{ id, bam, bai, meta -> [meta.patient, meta, bam, bai] }
+    // ** Get alignment and WGS metrics
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
+    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
 
-    GATK_GETSAMPLENAME_NORMAL(ch_bam_normal_to_cross)
-    GATK_GETSAMPLENAME_TUMOR(ch_bam_tumor_to_cross)
+    // ** NEXTFLOW OPERATORS::: Establish channels with sample pairs and individual input objects for downstream calling
 
-    ch_bam_normal_to_cross = ch_bam_normal_to_cross.join(GATK_GETSAMPLENAME_NORMAL.out.sample_name)
-    ch_bam_tumor_to_cross = ch_bam_tumor_to_cross.join(GATK_GETSAMPLENAME_TUMOR.out.sample_name)
+    // get sample names, and join to bams. 
+    GATK_GETSAMPLENAME_NORMAL(ch_final_bam.normal.map{ id, bam, bai, meta -> [id, meta, bam, bai] })
+    GATK_GETSAMPLENAME_TUMOR(ch_final_bam.tumor.map{ id, bam, bai, meta -> [id, meta, bam, bai] })
 
-    // Cross all normal and tumor by patient ID. 
-    ch_cram_variant_calling_pair = ch_bam_normal_to_cross.cross(ch_bam_tumor_to_cross)
+    ch_normal_to_cross = ch_final_bam.normal.join(GATK_GETSAMPLENAME_NORMAL.out.sample_name).map{ id, bam, bai, meta, readID -> [meta.patient, meta, bam, bai, readID] }
+    ch_tumor_to_cross  = ch_final_bam.tumor.join(GATK_GETSAMPLENAME_TUMOR.out.sample_name).map{ id, bam, bai, meta, readID -> [meta.patient, meta, bam, bai, readID] }
+    
+    /* 
+    The above map statements adjusts channels for normal, tumor samples to organize them by patient IDs. 
+    A common key ID is needed to cross tumor by normal samples when multiples of each patient are run together.
+
+    NOTE!!!! that if a common patient key is then used as 'sampleID' across samples, 
+    downstream results will have name collisions and results will be overwritten in muliple tumor to normal mappings. 
+
+    e.g., patient: foo; tumor1 = bar, tumor2 = baz; normal = fizz. 
+    
+    Common key: sampleID == patient, results = foo.calls.vcf for both bar--fizz and baz--fizz, and results are mangled. 
+    
+    Unique key: sampleID == patient--tumor--normal, results == foo--bar--fizz.calls.vcf & foo--baz--fizz.calls.vcf. Results OK. 
+
+    Therefore, the above ch_*_to_cross should ONLY be used in crossing samples. 
+    A different channel is made below for cases when needed in callers. 
+    */ 
+
+    // Cross all normal and tumor by common patient ID. 
+    ch_paired_samples = ch_normal_to_cross.cross(ch_tumor_to_cross)
         .map { normal, tumor ->
             def meta = [:]
             meta.patient    = normal[0]
-            meta.normal_id  = normal[1].sample
-            meta.tumor_id   = tumor[1].sample
+            meta.normal_id  = normal[1].sampleID
+            meta.tumor_id   = tumor[1].sampleID
             meta.sex        = normal[1].sex
-            meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
+            meta.id         = "${meta.patient}--${meta.tumor_id}--${meta.normal_id}".toString()
 
-            [normal[0], meta, normal[2], normal[3], normal[4], tumor[2], tumor[3], tumor[4]]
+            [meta.id, meta, normal[2], normal[3], normal[4], tumor[2], tumor[3], tumor[4]]
         }
-        // normal[0] is patient ID, 
-        // normal[1] and tumor[1] are meta info
-        // normal[2] is normal bam, normal[3] is bai, normal[4] is read group ID. 
-        // tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
+        /*
+            normal[0] is patient ID, 
+            normal[1] and tumor[1] are meta info
+            normal[2] is normal bam, normal[3] is bai, normal[4] is read group ID. 
+            tumor[2] is bam, tumor[3] is bai, tumor[4] is read group ID.
+        */
 
-    // Step 13: Conpair pileup for T/N
-    CONPAIR_NORMAL_PILEUP(chr_bam_status.normal)
-    CONPAIR_TUMOR_PILEUP(chr_bam_status.tumor)
-
-    // output channel manipulation and cross/join
-    conpair_normal_to_cross = CONPAIR_NORMAL_PILEUP.out.normal_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
-    conpair_tumor_to_cross = CONPAIR_TUMOR_PILEUP.out.tumor_pileup.map{ id, pileup, meta -> [meta.patient, meta, pileup] }
-
-    conpair_input = conpair_normal_to_cross.cross(conpair_tumor_to_cross)
-        .map { normal, tumor ->
-            def meta = [:]
-            meta.patient    = normal[0]
-            meta.normal_id  = normal[1].sample
-            meta.tumor_id   = tumor[1].sample
-            meta.sex        = normal[1].sex
-            meta.id         = "${meta.tumor_id}_vs_${meta.normal_id}".toString()
-
-            [meta, normal[2], tumor[2]]
+    // Restore un-paired tumor samples, and add NA12878 as pairing in those cases
+    ch_paired_samples = ch_tumor_to_cross
+        .mix(ch_paired_samples)
+        .map{it -> [it[1].patient, it[1], it[2], it[3], it[4]]}.groupTuple().filter{it[2].size() == 1} 
+                    // it[0] = sampleID, it[1] = meta, it[2] = bam, it[3] = bai, it[4] = sampleReadID. 
+        .map{tumor -> 
+        def meta = [:]
+            meta.patient    = tumor[1][0].patient
+            meta.normal_id  = 'NA12878'
+            meta.tumor_id   = tumor[1][0].sampleID
+            meta.sex        = tumor[1][0].sex
+            meta.id         = "${meta.patient}--${meta.tumor_id}--${meta.normal_id}".toString()
+        
+            [meta.id, meta, params.na12878_bam, params.na12878_bai, params.na12878_sampleName, tumor[2][0], tumor[3][0], tumor[4][0]]
         }
-        // normal[2] is normal pileup, tumor[2] is tumor pileup. 
+        .mix(ch_paired_samples)
+        
+    /* SAMPLE PAIRING CASES AND NOTES:
+        1. Paired only for all samples: Managed by the intial cross statement. 
+        2. Tumor only provide for all samples: Managed by the intial cross and subsequent remapping of non-crossed samples. 
+        3. Some samples have a pair and others do not: Managed by the intial cross, and subsequent remapping of non-crossed samples.
+        4. Multiple tumors per normal, or multiple normals per tumor, or a mixture of this: See note below. 
 
-    // the above channel manipulations will require a test in multiple sample mode. 
+        Notes: 
+        The cross statement manages one normal to many tumors, many normals to one tumor, and many normals to many tumors. 
+        E.g.,:  
+            [foo, [patient:foo, normal_id:n_baz, tumor_id:t_bar, sex:XX, id:t_bar_vs_n_baz], ....bam, ....bai, <RG1>, ....bam, ....bai, <RG2>]
+            [foo, [patient:foo, normal_id:n_baz, tumor_id:t_qux, sex:XX, id:t_qux_vs_n_baz], ....bam, ....bai, <RG1>, ....bam, ....bai, <RG2>]
+            ...
+ 
+        When samples are provided without a pair, they will not be paired in the cross statment and dropped from the first: 'ch_paired_samples' instantiation. 
+        To recover un-paired tumors, pair them with NA12878 and pass them with paired samples downstream,
+        the group of all tumor samples: 'ch_tumor_to_cross' is mixed with the paired sample: 'ch_paired_samples'.
+        Cases where tumor samples were paired are then filtered. Tumors that were paired in the cross will appear > 2 times in the mix results, and are removed via the 'filter it[2].size()==1' statement. 
+        The resulting tumor-only samples are mapped into the format seen in the cross statement, with NA12878 being added via parameters as the 'normal' sample. 
+    */
 
-    // Step 12: Conpair for T/N concordance: https://github.com/nygenome/conpair
+
+    ch_ind_samples = ch_paired_samples
+        .filter{it[4] != params.na12878_sampleName}
+        .multiMap{it -> 
+                normal: ["${it[1].patient}--${it[1].normal_id}".toString(), it[1], it[2], it[3], it[4]]
+                tumor:  ["${it[1].patient}--${it[1].tumor_id}".toString(), it[1], it[5], it[6], it[7]]
+                }
+        ch_normal_samples = ch_ind_samples.normal.unique{it[0]}
+        ch_tumor_samples  = ch_ind_samples.tumor.unique{it[0]}
+
+    ch_tumor_only = ch_paired_samples
+        .filter{it[4] == params.na12878_sampleName}
+        .map{it -> ["${it[1].patient}--${it[1].tumor_id}".toString(), it[1], it[5], it[6], it[7]]}
+        .unique{it[0]}
+
+    ch_msisensor2_input = ch_paired_samples
+        .map{["${it[1].patient}--${it[1].tumor_id}".toString(), it[1], it[5], it[6], it[7]]}
+        .unique{it[0]}
+
+    /*
+        The above establishes channels needed for germline calling, bicseq2 and MSIsensor2. 
+        Those steps require BAM, index and readID. 
+        Here sampleID is reset to the original ID from the CSV parser which is: 'patient--sample'
+        Note that NA12878 is filtered for germline and can be filtered for bicseq2 / conpair,
+        CNA and sample comparision analysis may not make sense for that pairing. 
+        All tumor samples are passed to MSIsensor2 as it runs in tumor-only mode. 
+    */
+
+
+
+    // ** Step 13: Conpair pileup for T/N true pairs. 
+    //    Step not run on tumor-only samples. As contamination analysis is not biologcally relavent. 
+
+    conpair_input = ch_paired_samples
+        .filter{it[4] != params.na12878_sampleName}
+        .multiMap{it -> 
+                normal: [it[1].patient, "${it[1].normal_id}".toString(), it[2], it[3]]
+                tumor:  [it[1].patient, "${it[1].tumor_id}".toString(), it[5], it[6]]
+                }
+    /* 
+        Remap the paired samples to required normal/tumor inputs for conpair, and filter NA12878 paired samples. 
+        it[1] = metadata, it[2] = normal BAM, it[3] = normal BAI. 
+        it[5] = tumor BAM, it[6] = tumor BAI.
+        Patient ID is used here because samples must be re-crossed after the pileup to match all tumors and normals. 
+    */ 
+
+    CONPAIR_NORMAL_PILEUP(conpair_input.normal.unique{it[2]}, 'normal')
+    CONPAIR_TUMOR_PILEUP(conpair_input.tumor.unique{it[2]}, 'tumor') 
+
+    conpair_input = CONPAIR_NORMAL_PILEUP.out.pileup.cross(CONPAIR_TUMOR_PILEUP.out.pileup)
+        .map { normal, tumor -> [normal[0], "${normal[0]}--${tumor[1]}--${normal[1]}".toString(), normal[2], tumor[2]]
+        }
+        // normal[0] is patientID or 'sampleID', normal[2] is normal pileup, tumor[2] is tumor pileup. 
+
     CONPAIR(conpair_input)
-    // NOTE: NEED HIGH COVERAGE TO TEST. 
 
-    // Step 13: Germline Calling and annotation
+
+    // ** Step 14: Germline Calling and Annotation
     
     // Find the paths of all `scattered.interval_list` files, and make tuples with an index value. 
     // This is used for for HaplotypeCaller variant regions and GenotypeGVCF
@@ -249,7 +366,7 @@ workflow SV {
     // https://stackoverflow.com/a/67084467/18557826
 
     // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
-    chrom_channel = ch_bam_normal_to_cross.combine(intervals)
+    chrom_channel = ch_normal_samples.combine(intervals).filter{it[4] != params.na12878_sampleName}
 
     // Read a list of chromosome names from a parameter. These are provided to several tools. 
     chroms = Channel
@@ -297,27 +414,25 @@ workflow SV {
     COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
     // 6. AnnotateId & RenameCsqVcf
     GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
-
-    SNPSIFT_EXTRACTFIELDS(GERMLINE_VCF_FINALIZATION.out.vcf)
-    SNPSIFT_EXTRACT_AND_PARSE(SNPSIFT_EXTRACTFIELDS.out.temp)
-    
+  
     // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
     //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
 
-    // Step 14: Somatic Calling
+    // ** Step 15: Somatic Calling
 
     // Applies scatter intervals from above to the BQSR bam file
-    somatic_calling_channel = ch_cram_variant_calling_pair.combine(intervals)
+    somatic_calling_channel = ch_paired_samples.combine(intervals)
 
-    // // Applies scatter intervals from above to the BQSR bam file
-    // somatic_calling_channel = ch_cram_variant_calling_pair.combine(chroms)
-    // // NOTE: The above code line will split by Mutect2 calling by indivdiaul chromosomes 'chroms'. 
-    // //       Entire chromosomes are scattered. For WGS, this is computationally intensive. 
-    // //       We changed to calling to be done based on the same intervals passed to the germline caller. 
-    // //       These intervals are based on the 'noN' file make by BROAD/GATK. 
-    // //       If complete chromosomes are requried, the above line of code can be uncommented. 
+    /* Applies scatter intervals from above to the BQSR bam file
+        somatic_calling_channel = ch_paired_samples.combine(chroms)
+        NOTE: The above code line will split by Mutect2 calling by individual 'chroms'. 
+            Entire chromosomes are scattered. For WGS, this is computationally intensive. 
+            We changed to calling to be done based on the same intervals passed to the germline caller. 
+            These intervals are based on the 'NoN' file made by BROAD/GATK. 
+            If complete chromosomes are requried, the above line of code can be uncommented. 
+       */
 
-    // Mutect2
+    // ** Mutect2 - SNP/InDEL Calling
     // STEPS: Call on each chromosome / interval. 
     //        Prior to 'filtermutectcalls' vcfs must be merged (GATK best practice). 
     //             NOTE: The group and map statement ensures that VCFs are organzied by sampleID, and carry  and toolID is maintained through the process. 
@@ -336,19 +451,8 @@ workflow SV {
     filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_tbi.join(GATK_MERGEMUTECTSTATS.out.stats)
 
     GATK_FILTERMUECTCALLS(filter_mutect_input)
-    // additional NYGC steps not used: add commands to VCF
 
-    // Manta
-    MANTA(ch_cram_variant_calling_pair)
-    // additional NYGC steps not used: add commands to VCF
-    // FilterNonpass is used in NYGC with `SelectVariants` and `--exclude-filtered`. Do we want hard filtering? 
-
-    // Strelka2
-    strekla2_input = ch_cram_variant_calling_pair.join(MANTA.out.manta_smallindel_vcf_tbi)
-    STRELKA2(strekla2_input)
-    // additional NYGC steps not used: add commands to VCF
-
-    // Lancet
+    // ** Lancet - SNP/InDEL Calling
     // Generate a list of chromosome beds. This is generated in the same manner as the calling `intervals` variable above. 
     lancet_beds = Channel.fromPath( params.lancet_beds_directory+'/*.bed' )
                     .collect()
@@ -360,9 +464,8 @@ workflow SV {
     // https://stackoverflow.com/a/67084467/18557826
 
     // Applies scatter intervals from above to the BQSR bam file
-    lancet_calling_channel = ch_cram_variant_calling_pair.combine(lancet_beds)
+    lancet_calling_channel = ch_paired_samples.combine(lancet_beds)
     LANCET(lancet_calling_channel)
-    // additional NYGC steps not used: add commands to VCF
 
     sort_merge_input_lancetVCF = LANCET.out.vcf
                                 .groupTuple()
@@ -370,23 +473,34 @@ workflow SV {
     
     GATK_SORTVCF_LANCET(sort_merge_input_lancetVCF)
 
-    // Gridss
-    GRIDSS_PREPROCESS(ch_cram_variant_calling_pair)
-    gridss_assemble_input = ch_cram_variant_calling_pair.join(GRIDSS_PREPROCESS.out.gridss_preproc)
+    // ** Manta - SV Calling
+    MANTA(ch_paired_samples)
+    // FilterNonpass can be used with `SelectVariants` and `--exclude-filtered`. However, hard filtering excluded for now. 
+
+    // ** Strelka2 - SNP/InDEL Calling
+    strekla2_input = ch_paired_samples.join(MANTA.out.manta_smallindel_vcf_tbi)
+    STRELKA2(strekla2_input)
+
+    // ** Gridss - SV Calling
+    GRIDSS_PREPROCESS(ch_paired_samples)
+    gridss_assemble_input = ch_paired_samples.join(GRIDSS_PREPROCESS.out.gridss_preproc)
     GRIDSS_ASSEMBLE(gridss_assemble_input)
-    gridss_call_input = ch_cram_variant_calling_pair.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
+    gridss_call_input = ch_paired_samples.join(GRIDSS_ASSEMBLE.out.gridss_assembly)
     GRIDSS_CALLING(gridss_call_input)
     GRIDSS_CHROM_FILTER(GRIDSS_CALLING.out.gridss_vcf, chrom_list)
     GRIPSS_SOMATIC_FILTER(GRIDSS_CHROM_FILTER.out.gridss_chrom_vcf)
     // NOTE: this filtering tool is hard coded for GRCh38 based on PON naming. 
-    // additional NYGC steps not used: add commands to VCF 
 
-    // BicSeq2
-    SAMTOOLS_STATS_INSERTSIZE_NORMAL(ch_bam_normal_to_cross)
-    SAMTOOLS_STATS_INSERTSIZE_TUMOR(ch_bam_tumor_to_cross)
+    // ** BicSeq2 - CNV Calling
+    /* This step does not run on unpaired samples. 
+      CNV of tumor samples against an unrelated normal will produce spurious results. 
+      NA12878 paired samples can be filtered from ch_normal_samples and ch_tumor_samples channels at their creation. 
+    */
+    SAMTOOLS_STATS_INSERTSIZE_NORMAL(ch_normal_samples)
+    SAMTOOLS_STATS_INSERTSIZE_TUMOR(ch_tumor_samples.mix(ch_tumor_only))
 
-    SAMTOOLS_FILTER_UNIQUE_NORMAL(ch_bam_normal_to_cross, chrom_list)
-    SAMTOOLS_FILTER_UNIQUE_TUMOR(ch_bam_tumor_to_cross, chrom_list)
+    SAMTOOLS_FILTER_UNIQUE_NORMAL(ch_normal_samples, chrom_list)
+    SAMTOOLS_FILTER_UNIQUE_TUMOR(ch_tumor_samples.mix(ch_tumor_only), chrom_list)
 
     biqseq_norm_input_normal = SAMTOOLS_FILTER_UNIQUE_NORMAL.out.uniq_seq.join(SAMTOOLS_STATS_INSERTSIZE_NORMAL.out.read_length_insert_size)
     // sampleID, individual_chr_seq_files, meta, read_ID, read_length, insert_size. 
@@ -397,30 +511,48 @@ workflow SV {
             .collect()
     // collect individual chr fasta files. These are located in the same directory as the main reference. 
     // if the extension of `name_chr#.fa` changes this match will break. 
-    // Can this be made more flexible without requiring another input parameter?
 
     BICSEQ2_NORMALIZE_NORMAL(biqseq_norm_input_normal, fasta_files)
     BICSEQ2_NORMALIZE_TUMOR(biqseq_norm_input_tumor, fasta_files)
-    // bicseq2 normalize will need a higher coverage dataset for testing. 
+    // note: this can not be split by chrom, even though bicseq2 norm acts on chroms in turn, 
+    // it needs all chroms to parameterize the normalization. 
+    // reported error will be in these cases: "Error in bin_read: bin file is in incorrect format."
 
-    bicseq2_seg_input = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output
-                            .join(BICSEQ2_NORMALIZE_TUMOR.out.normalized_output)
-                            // .groupTuple()
-                            .map{sampleID, norm_files, meta_1, norm_readID, tumor_files, meta_2, tumor_readID -> tuple(sampleID, norm_files, tumor_files, meta_1, norm_readID, tumor_readID)}
-    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files, metadata, norm_readID, tumor_readID. 
+    bicseq_normal = BICSEQ2_NORMALIZE_NORMAL.out.normalized_output
+        .map{it -> [it[2].patient, it[1], it[2], it[3]]}
+
+    bicseq_tumor = BICSEQ2_NORMALIZE_TUMOR.out.normalized_output
+        .map{it -> [it[2].patient, it[1], it[2], it[3]]}
+
+    bicseq2_seg_input = bicseq_normal.cross(bicseq_tumor)
+                            .map{normal, tumor -> 
+                                    def meta = [:]
+                                    meta.patient    = normal[2].patient
+                                    meta.normal_id  = normal[2].sampleID
+                                    meta.tumor_id   = tumor[2].sampleID
+                                    meta.sex        = normal[2].sex
+                                    meta.id         = "${tumor[2].patient}--${tumor[2].tumor_id}--${tumor[2].normal_id}".toString()
+
+                                    ["${tumor[2].patient}--${tumor[2].tumor_id}--${tumor[2].normal_id}".toString(), normal[1], tumor[1], normal[2], normal[3], tumor[3]]}
+                                    // sampleID, individual_normal_norm_bin_files, individual_tumor_norm_bin_files, metadata, norm_readID, tumor_readID. 
+                                    // The metadata object here is reset following the cross. So that ID matches up again. 
+                                    // It is possible that in many to many or one to many crosses, the ID field will not reflect the crossed samples. 
 
     BICSEQ2_SEG(bicseq2_seg_input)
-    
-    // Svaba
-    SVABA(ch_cram_variant_calling_pair)
-    // NOTE: SVABA is not in calling_wkf.wdl or used in the 'merge' steps. If included an additonal step: RemoveContig must be run on SVABA vcfs. 
+    // NOTE: with insufficent coverage, the segmentation will fail because the 'lamda' factor can not be properly optimized. 
 
-    // Lumpy
-    LUMPY_SV(ch_cram_variant_calling_pair)
-    // NOTE: LUMPY is not in calling_wkf.wdl or used in the 'merge' steps. 
+    bicseq2_tumoronly_input = BICSEQ2_NORMALIZE_TUMOR.out.normalized_output
+        .filter{it[2].normal_id == 'NA12878'}
+
+    BICSEQ2_SEG_UNPAIRED(bicseq2_tumoronly_input)
+    
+    bicseq2_calls = BICSEQ2_SEG_UNPAIRED.out.bicseq2_sv_calls
+                    .map{it -> [it[3].id, it[1], it[2], it[3], it[4], it[5], it[6]]}
+                    .mix(BICSEQ2_SEG.out.bicseq2_sv_calls)
+    // remap output from unpaired bicseq2 to standard format for bicseq2 paired. And mix both channel outputs. This is passed to annotation. 
 
     // Step 15: MSI
-    MSISENSOR2_MSI(ch_bam_tumor_to_cross)
+    MSISENSOR2_MSI(ch_msisensor2_input)
     
     /*
     The follow are the harmonized output channels for each tool: 
@@ -447,16 +579,15 @@ workflow SV {
     BICSEQ2_SEG.out.bicseq2_sv_calls
     */
 
-
-
     /*
         NOTE: 
-        The next section of this workflow becomes highly complex. Files from each caller are passed through  
-        a set of 'merge prep' steps. These steps apply various functions to manipulate the VCF header, 
-        and also calls within the VCFs. Once the VCFs are prepared, a merge occurs. 
-        Following the merge, non-exonic regions are parsed out, and calls in those regions are passed
-        to Lancet for confirmation. Following this, confirmed calls are used as 'support' and merged back
-        to the full caller call set. Additional manipulations are done on the VCF, and then the 'final' VCF
+        The call merging and annotatoins sections of this workflow becomes highly complex. 
+        Files from each caller are passed through a set of 'merge prep' steps. 
+        These steps apply various functions to manipulate the VCF header, and also calls within the VCFs. 
+        Once the VCFs are prepared, a merge occurs. Following the merge, non-exonic regions are parsed out, 
+        and calls in those regions are passed to Lancet for confirmation/rescue. 
+        Following this, confirmed calls are used as 'support' and merged back to the full caller call set. 
+        Additional manipulations are done on the VCF, and then the 'final' VCF
         is passed through to the annotation steps. Additional and different annotations are done on SV and CNV 
         calls. The steps are commented to faciliate understanding of what is being done. 
     */
@@ -496,7 +627,6 @@ workflow SV {
     // The above collects all callers on sampleID, then maps to avoid duplication of data and to drop the tool list, which is not needed anymore. 
     // Note that this could be done using the very 'by' in the groupTuple statement. However, the map is still required to remove the tool list. 
 
-
     // Merge Callers, Extract non-exonic calls and try to confirm those with Lancet, 
         // then prep confirmed calls for merged back to full merge set: 
     
@@ -519,10 +649,10 @@ workflow SV {
     // 4. Confirm extracted calls with Lancet: 
     //    Compress and index the resulting VCF.
     lancet_confirm_input = VCF_TO_BED.out.bed                         
-                           .combine(ch_cram_variant_calling_pair, by: 0)
+                           .combine(ch_paired_samples, by: 0)
                            .map{sampleID, bed, meta, chrom, meta2, normal_bam, normal_bai, normal_name, tumor_bam, tumor_bai, tumor_name -> tuple( sampleID, bed, meta, normal_bam, normal_bai, normal_name, tumor_bam, tumor_bai, tumor_name, chrom )  }
     // The above combines output by sampleID with BAM files. Then maps to avoid duplication of data, and set input tuples for the steps that follow.  
-    // Note that "combine" here, combines each output stream from VCF_TO_BED with ch_cram_variant_calling_pair, keeping the scattered chrom seperate. 
+    // Note that "combine" here, combines each output stream from VCF_TO_BED with ch_paired_samples, keeping the scattered chrom seperate. 
 
     LANCET_CONFIRM(lancet_confirm_input)
     COMPRESS_INDEX_VCF_REGION_LANCET(LANCET_CONFIRM.out.vcf)
@@ -588,7 +718,7 @@ workflow SV {
     // 2. Add Allele Count to VCF.
     //    "Runs pileup on tumor and normal bam files to compute allele counts for bi-allelic SNV and Indel variants in VCF file and adds pileup format columns to the VCF file.""
     addAlleleCounts_confirm_input = MERGE_COLUMNS.out.mergeColumn_vcf                         
-                           .combine(ch_cram_variant_calling_pair, by: 0)
+                           .combine(ch_paired_samples, by: 0)
                            .map{sampleID, vcf, meta, chrom, meta2, normal_bam, normal_bai, normal_name, tumor_bam, tumor_bai, tumor_name -> tuple( sampleID, vcf, meta, normal_bam, normal_bai, tumor_bam, tumor_bai, chrom )  }
     ADD_NYGC_ALLELE_COUNTS(addAlleleCounts_confirm_input)
 
@@ -605,7 +735,6 @@ workflow SV {
     // 6. "SnvstomnvsCountsbasedfilterAnnotatehighconf" 
     //    Parses file and converts adjacent SNVs to MNVs if they have they match the MNV_ID and called_by fields.
     SNV_TO_MNV_FINAL_FILTER(FILTER_VCF.out.vcf)
-
 
     // ** Collect and Merge Chroms. 
 
@@ -628,11 +757,18 @@ workflow SV {
     VEP_SOMATIC(COMPRESS_INDEX_MERGED_VCF.out.compressed_vcf_tbi)
     COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
     COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
-    SOMATIC_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf, 'filtered')
+
+    SNPSIFT_ANNOTATE_DBSNP(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf.map{it -> [it[0], it[1]]}, params.dbSNP, params.dbSNP_index, 'intermediate')
+    // note: existing module requires only sampleID and VCF. input remapped to required tuple.
+
+    somatic_finalization_input = SNPSIFT_ANNOTATE_DBSNP.out.vcf.join(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf).map{it -> [it[0], it[1], it[3], it[4], it[5]]}
+    // re-join dbSNP ID annotated VCF output with [meta], normalID, tumorID. 
+
+    SOMATIC_VCF_FINALIZATION(somatic_finalization_input, 'filtered')
 
     // ** Annotation of somatic CNV and SV
 
-    ANNOTATE_BICSEQ2_CNV(BICSEQ2_SEG.out.bicseq2_sv_calls, chrom_list_noY)
+    ANNOTATE_BICSEQ2_CNV(bicseq2_calls, chrom_list_noY)
     
     // note: joining on the sampleID, metadata, tumor_name, and normal_name for
     // safety. This re-arranges the values in the channel to:
@@ -648,7 +784,7 @@ workflow SV {
     ANNOTATE_GENES_SV(ANNOTATE_SV.out.annot_sv_bedpe, "main")
     ANNOTATE_GENES_SV_SUPPLEMENTAL(ANNOTATE_SV_SUPPLEMENTAL.out.annot_sv_bedpe, "supplemental")
     
-    // note: joining on the sampleID, normal_name, and tumor_namefor
+    // note: joining on the sampleID, normal_name, and tumor_name for
     // safety. This re-arranges the values in the channel to:
     // tuple val(sampleID), val(normal_name), val(tumor_name), file(bicseq_annot), file(annot_sv_genes_bedpe)
 
@@ -662,14 +798,20 @@ workflow SV {
     FILTER_BEDPE(ANNOTATE_SV_WITH_CNV.out.sv_genes_cnv_bedpe, "main")
     FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
 
-    // ** Step NN: Get alignment and WGS metrics
-    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
-    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+    ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.concordance.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(CONPAIR.out.contamination.collect{it[1]}.ifEmpty([]))
+  
+    MULTIQC (
+        ch_multiqc_files.collect()
+    )
 
 }
-
-
-// nextflow /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/main.nf -profile sumner --workflow sv --gen_org human --pubdir /projects/omics_share/meta/benchmarking/testing/sv -w /projects/omics_share/meta/benchmarking/testing/work --csv_input /projects/omics_share/meta/benchmarking/ngs-ops-nf-pipelines/sv_input.csv -resume -stub
 
 // Function to extract information (meta data + file(s)) from csv file(s)
 // https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084
@@ -693,10 +835,10 @@ def extract_csv(csv_file) {
 
     Channel.from(csv_file).splitCsv(header: true)
         .map{ row ->
-            if (!sample2patient.containsKey(row.sample.toString())) {
-                sample2patient[row.sample.toString()] = row.patient.toString()
-            } else if (sample2patient[row.sample.toString()] != row.patient.toString()) {
-                log.error('The sample "' + row.sample.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sample.toString()] + '" in the sample sheet.')
+            if (!sample2patient.containsKey(row.sampleID.toString())) {
+                sample2patient[row.sampleID.toString()] = row.patient.toString()
+            } else if (sample2patient[row.sampleID.toString()] != row.patient.toString()) {
+                log.error('The sample "' + row.sampleID.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sampleID.toString()] + '" in the sample sheet.')
                 System.exit(1)
             }
         }
@@ -709,11 +851,11 @@ def extract_csv(csv_file) {
         //Retrieves number of lanes by grouping together by patient and sample and counting how many entries there are for this combination
         .map{ row ->
             sample_count_all++
-            if (!(row.patient && row.sample)){
+            if (!(row.patient && row.sampleID)){
                 log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sample'."
                 System.exit(1)
             }
-            [[row.patient.toString(), row.sample.toString()], row]
+            [[row.patient.toString(), row.sampleID.toString()], row]
         }.groupTuple()
         .map{ meta, rows ->
             size = rows.size()
@@ -728,7 +870,7 @@ def extract_csv(csv_file) {
         // Several sample can belong to the same patient
         // Sample should be unique for the patient
         if (row.patient) meta.patient = row.patient.toString()
-        if (row.sample)  meta.sample  = row.sample.toString()
+        if (row.sampleID)  meta.sampleID  = row.sampleID.toString()
 
         // If no sex specified, sex is not considered
         // sex is only mandatory for somatic CNV
@@ -744,11 +886,9 @@ def extract_csv(csv_file) {
 
         // join meta to fastq
         if (row.fastq_2) {
-            meta.id         = "${row.patient}-${row.sample}".toString()
+            meta.id         = "${row.patient}--${row.sampleID}".toString()
             def fastq_1     = file(row.fastq_1, checkIfExists: true)
             def fastq_2     = file(row.fastq_2, checkIfExists: true)
-
-            meta.data_type  = 'fastq'
 
             meta.size       = 1 // default number of splitted fastq
 

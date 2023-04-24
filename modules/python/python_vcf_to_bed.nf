@@ -16,7 +16,7 @@ process VCF_TO_BED {
   script:
   """
    python \
-  ${projectDir}/bin/sv/vcf_to_bed.py \
+  ${projectDir}/bin/pta/vcf_to_bed.py \
   ${vcf} \
   | bedtools \
   merge \

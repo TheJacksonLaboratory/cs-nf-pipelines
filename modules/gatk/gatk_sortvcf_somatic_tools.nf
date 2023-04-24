@@ -8,7 +8,7 @@ process GATK_SORTVCF {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'lancet' }", pattern:"*_lancet_merged.vcf.gz", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'lancet' }", pattern:"*_lancet_merged.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), path(list), val(meta), val(normal_name), val(tumor_name), val(tool)

@@ -18,7 +18,7 @@ process SHORT_ALIGNMENT_MARKING {
   script:
   // parses the bam file and marks as unmapped a read with alignment length below a user-defined threshold. Reads are not filtered from the bam file but kept as unmapped.
   """
-  ${projectDir}/bin/sv/filter_bam -I ${aligned_bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools view -b -o ${sampleID}.marked.bam
+  ${projectDir}/bin/pta/filter_bam -I ${aligned_bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools view -b -o ${sampleID}.marked.bam
   """
 }
 

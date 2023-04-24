@@ -2,7 +2,7 @@ process FILTER_PON {
   tag "$sampleID"
 
   cpus 1
-  memory 4.GB
+  memory 15.GB
   time '04:00:00'
 
   container 'quay.io/jaxcompsci/bedtools-python3:2.26.0'
@@ -16,7 +16,7 @@ process FILTER_PON {
   script:
   """
    python \
-  ${projectDir}/bin/sv/filter_pon.py \
+  ${projectDir}/bin/pta/filter_pon.py \
         --bed ${params.pon_bed} \
         --chrom ${chrom} \
         --vcf ${vcf} \

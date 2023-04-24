@@ -5,9 +5,9 @@ process VEP_GERMLINE {
   memory = 15.GB
   time = '10:00:00'
 
-  container 'ensemblorg/ensembl-vep:release_97.4'
+  container 'ensemblorg/ensembl-vep:release_109.3'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf), file(idx)
@@ -43,9 +43,9 @@ process VEP_GERMLINE {
   --vcf \
   --pick_allele_gene \
   --dir_plugins ${params.vep_cache_directory}/Plugins \
-  --plugin dbscSNV,${params.vep_cache_directory}/Plugins/dbscSNV1.1_GRCh38.txt.gz \
+  --plugin dbscSNV,${params.vep_cache_directory}/Plugins/dbscSNV1.1/dbscSNV1.1_GRCh38.txt.gz \
   --plugin MaxEntScan,${params.vep_cache_directory}/Plugins/maxentscan \
-  --plugin dbNSFP,${params.vep_cache_directory}/Plugins/dbNSFP4.0a/dbNSFP4.0a.gz,${params.vep_cache_directory}/Plugins/dbNSFP_replacement_logic,REVEL_score,SIFT_pred,SIFT4G_pred,LRT_pred,MutationTaster_pred,MutationAssessor_pred,FATHMM_pred,PROVEAN_pred,MetaSVM_pred,PrimateAI_pred,fathmm-MKL_coding_pred,GERP++_RS,phyloP100way_vertebrate,CADD_phred,Polyphen2_HVAR_pred \
+  --plugin dbNSFP,${params.vep_cache_directory}/Plugins/dbNSFP/dbNSFP4.3a_grch38.gz,${params.vep_cache_directory}/Plugins/dbNSFP_replacement_logic,REVEL_score,SIFT_pred,SIFT4G_pred,LRT_pred,MutationTaster_pred,MutationAssessor_pred,FATHMM_pred,PROVEAN_pred,MetaSVM_pred,PrimateAI_pred,fathmm-MKL_coding_pred,GERP++_RS,phyloP100way_vertebrate,CADD_phred,Polyphen2_HVAR_pred \
   --custom ${params.vep_cache_directory}/annotations/COSMIC_v97/CosmicCodingMuts.vcf.gz,CosmicCoding,vcf,exact,0,GENOMIC_ID,LEGACY_ID,CNT,CDS,AA \
   --custom ${params.vep_cache_directory}/annotations/COSMIC_v97/CosmicNonCodingVariants.normal.vcf.gz,CosmicNonCoding,vcf,exact,0,GENOMIC_ID,LEGACY_ID,CNT,CDS,AA \
   --custom ${params.vep_cache_directory}/annotations/04142020_NYGC_samples.vcf.gz,NYGC,vcf,exact,0,AF,Samples,AC_Het,AC_Hom \
@@ -82,7 +82,7 @@ process VEP_GERMLINE {
 // VEP Cache setup: 
 
 // singularity pull --name vep.sif docker://ensemblorg/ensembl-vep:release_108.2
-// singularity exec vep.sif INSTALL.pl -c /PATH_TO_VEP/vep -a cfp -s homo_sapiens -y GRCh38 -g dbNSFP,dbscSNV,MaxEntScan
+// singularity exec vep.sif INSTALL.pl -c /PATH_TO_VEP/vep -a cfp -s homo_sapiens_refseq -y GRCh38 -g dbNSFP,dbscSNV,MaxEntScan
 // ln -sf homo_sapiens homo_sapiens_refseq
 
 // In the plugin directory: 
@@ -117,11 +117,11 @@ process VEP_GERMLINE {
 // mkdir COSMIC_v97
 // echo "<EMAIL>@jax.org:<PASSWORD>" | base64
 // <base64 string>
-// curl -H "Authorization: Basic bWlrZS5sbG95ZEBqYXgub3JnOnlSYlU4OUJ0VUotS0RjZAo=" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz
+// curl -H "Authorization: Basic ADD AUTHORIZATION" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz
 // the above command provides a URL for curl download
 // curl "https://cog.sanger.ac.uk/cosmic/GRCh38/cosmic/v97/VCF/CosmicCodingMuts.vcf.gz?AWSAccessKeyId=KRV7P7QR9DL41J9EWGA2&Expires=1672843877&Signature=TSsIiQodqoKS5skE1ziS49zEWSU%3D" --output CosmicCodingMuts.vcf.gz
 
-// curl -H "Authorization: Basic bWlrZS5sbG95ZEBqYXgub3JnOnlSYlU4OUJ0VUotS0RjZAo=" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicNonCodingVariants.normal.vcf.gz
+// curl -H "Authorization: Basic ADD AUTHORIZATION" https://cancer.sanger.ac.uk/cosmic/file_download/GRCh38/cosmic/v97/VCF/CosmicNonCodingVariants.normal.vcf.gz
 // the above command provides a URL for curl download
 // curl "https://cog.sanger.ac.uk/cosmic/GRCh38/cosmic/v97/VCF/CosmicNonCodingVariants.normal.vcf.gz?AWSAccessKeyId=KRV7P7QR9DL41J9EWGA2&Expires=1672844121&Signature=4JkeRizNMg0pv%2FChw4QAl268dVw%3D" --output CosmicNonCodingVariants.normal.vcf.gz
 

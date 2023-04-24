@@ -7,10 +7,10 @@ process GRIDSS_CALLING {
 
     container 'quay.io/jaxcompsci/gridss:2.13.2-2_ln'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gridss' }", pattern: "*_gridss_sv.vcf.gz", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gridss' }", pattern: "*_gridss_sv.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name), val(gridss_assembled)
+    tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), val(gridss_assembled)
 
     output:
     tuple val(sampleID), path('*_gridss_sv.vcf.gz'), val(meta), val(normal_name), val(tumor_name), emit: gridss_vcf
@@ -34,7 +34,7 @@ process GRIDSS_CALLING {
     gridss \
     --jvmheap "${my_mem}" \
     --steps call \
-    --reference "${params.ref_fa_indices}" \
+    --reference "${params.combined_reference_set}" \
     --jar /opt/gridss/gridss-2.13.2-gridss-jar-with-dependencies.jar \
     --threads ${task.cpus} \
     --workingdir "${output_dir}/work/" \

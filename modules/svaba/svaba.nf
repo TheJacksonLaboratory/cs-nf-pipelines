@@ -1,5 +1,5 @@
 process SVABA {
-  tag "$meta.patient"
+  tag "$sampleID"
 
   cpus = 8
   memory { normal_bam.size() < 60.GB ? 15.GB : 48.GB }
@@ -7,22 +7,21 @@ process SVABA {
 
   container 'quay.io/jaxcompsci/svaba:v0.2.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'svaba' }", pattern: "*.log", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$meta.patient" : 'svaba' }", pattern: "*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" + '/callers'  : 'svaba' }", pattern: "*.vcf.gz", mode:'copy'
 
   input:
-  tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(normal_name), file(tumor_bam), file(tumor_bai), val(tumor_name)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), file("*svaba.germline.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_indel_vcf
-  tuple val(sampleID), file("*svaba.germline.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_sv_vcf
-  tuple val(sampleID), file("*svaba.somatic.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_indel_vcf
-  tuple val(sampleID), file("*svaba.somatic.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_sv_vcf
-  tuple val(sampleID), file("*svaba.bps.txt.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_unfiltered_variants
-  tuple val(sampleID), file("*svaba.contigs.bam"), emit: svaba_contigs_bam
-  tuple val(sampleID), file("*svaba.discordant.txt.gz"), emit: svaba_discordants
-  tuple val(sampleID), file("*svaba.log"), emit: svaba_log
-  tuple val(sampleID), file("*svaba.alignments.txt.gz"), emit: svaba_alignments
+  tuple val(sampleID), path("*svaba.germline.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_indel_vcf
+  tuple val(sampleID), path("*svaba.germline.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_sv_vcf
+  tuple val(sampleID), path("*svaba.somatic.indel.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_indel_vcf
+  tuple val(sampleID), path("*svaba.somatic.sv.vcf.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_sv_vcf
+  tuple val(sampleID), path("*svaba.bps.txt.gz"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_unfiltered_variants
+  tuple val(sampleID), path("*svaba.contigs.bam"), emit: svaba_contigs_bam
+  tuple val(sampleID), path("*svaba.discordant.txt.gz"), emit: svaba_discordants
+  tuple val(sampleID), path("*svaba.log"), emit: svaba_log
+  tuple val(sampleID), path("*svaba.alignments.txt.gz"), emit: svaba_alignments
 
   script:
   """
@@ -30,10 +29,10 @@ process SVABA {
     -t ${tumor_bam} \
     -n ${normal_bam} \
     -p ${task.cpus} \
-    -a ${meta.patient}_svaba \
-    -G ${params.ref_fa} \
+    -a ${sampleID}_svaba \
+    -G ${params.combined_reference_set} \
     --region ${params.callRegions} \
-    -D ${params.dbsnpIndels} \
+    -D ${params.dbSNP} \
     -z on
   """
 }

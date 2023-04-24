@@ -9,7 +9,7 @@ process GRIDSS_CHROM_FILTER {
 
     stageInMode = 'copy'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gridss' }", pattern: "*_gridss_sv_unfiltered_chroms.vcf", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gridss' }", pattern: "*_gridss_sv_unfiltered_chroms.vcf", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name)
@@ -22,7 +22,7 @@ process GRIDSS_CHROM_FILTER {
     chrom_list = chroms.collect { "$it" }.join(' ')
 
     """
-    python ${projectDir}/bin/sv/filter_vcf.py \
+    python ${projectDir}/bin/pta/filter_vcf.py \
     --vcf-file ${vcf} \
     --output ${sampleID}_gridss_sv_unfiltered_chroms.vcf \
     --chroms ${chrom_list}

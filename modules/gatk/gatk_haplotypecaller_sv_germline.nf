@@ -7,14 +7,14 @@ process GATK_HAPLOTYPECALLER_SV_GERMLINE {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gatk' }", pattern: "*.*vcf", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), val(meta), file(normal_bam), file(normal_bai), val(read_name), path(interval), val(index)
+    tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(read_name), path(interval), val(index)
     
     output:
-    tuple val(sampleID), file("*.*vcf"), emit: vcf
-    tuple val(sampleID), file("*.idx"), emit: idx
+    tuple val(sampleID), path("*.*vcf"), emit: vcf
+    tuple val(sampleID), path("*.idx"), emit: idx
 
     script:
     String my_mem = (task.memory-1.GB).toString()

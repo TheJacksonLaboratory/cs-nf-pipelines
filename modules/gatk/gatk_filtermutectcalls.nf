@@ -10,8 +10,8 @@ process GATK_FILTERMUECTCALLS {
 
   container 'broadinstitute/gatk:4.2.4.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_mutect2_somatic.filtered.vcf.gz", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gatk' }", pattern: "*_mutect2_somatic.filtered.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
 
   input:
   tuple val(sampleID), path(vcf), path(tbi), val(meta), val(normal_name), val(tumor_name), val(tool), path(stats)

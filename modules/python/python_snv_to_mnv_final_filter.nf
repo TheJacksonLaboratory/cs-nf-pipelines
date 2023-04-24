@@ -16,7 +16,7 @@ process SNV_TO_MNV_FINAL_FILTER {
     script:
     """
     python \
-    ${projectDir}/bin/sv/SNVsToMNVs_CountsBasedFilter_AnnotateHighConf.py \
+    ${projectDir}/bin/pta/SNVsToMNVs_CountsBasedFilter_AnnotateHighConf.py \
     -i ${vcf} \
     -o ${sampleID}_mnv_final_filtered_${chrom}.vcf
     """

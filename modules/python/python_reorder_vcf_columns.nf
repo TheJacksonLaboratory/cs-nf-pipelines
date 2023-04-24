@@ -20,7 +20,7 @@ process REORDER_VCF_COLUMNS {
   
   """
   python \
-  ${projectDir}/bin/sv/reorder_vcf.py \
+  ${projectDir}/bin/pta/reorder_vcf.py \
   ${vcf} \
   ${vcf.baseName}_mnv_final_filtered_merged_reordered.vcf \
   ${normal} ${tumor}

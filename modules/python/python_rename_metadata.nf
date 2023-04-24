@@ -18,7 +18,7 @@ process RENAME_METADATA {
   """
   gunzip -c ${vcf} > temp.vcf
   python \
-  ${projectDir}/bin/sv/rename_metadata.py \
+  ${projectDir}/bin/pta/rename_metadata.py \
   temp.vcf \
   ${output_name}_headerAdjust.vcf \
   ${tool} 

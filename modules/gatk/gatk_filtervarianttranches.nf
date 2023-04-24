@@ -31,8 +31,8 @@ process GATK_FILTER_VARIANT_TRANCHES {
     --indel-tranche 99.0 --indel-tranche 99.4 \
     --resource ${params.hapmap} \
     --resource ${params.omni} \
-    --resource ${params.onekG} \
-    --resource ${params.dbsnp} \
+    --resource ${params.phase1_1000G} \
+    --resource ${params.dbSNP} \
     --info-key CNN_1D \
     --create-output-variant-index true
     """

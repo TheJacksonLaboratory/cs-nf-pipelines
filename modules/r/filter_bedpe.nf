@@ -14,29 +14,29 @@ process FILTER_BEDPE {
     tuple val(sampleID), file(sv_genes_cnv_bedpe), val(normal_name), val(tumor_name)
     val(suppl_switch)
   output:
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.final.bedpe"), val(normal_name), val(tumor_name), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.final.bedpe"), val(normal_name), val(tumor_name), optional: true
-    tuple val(sampleID), file("${sampleID}.sv.annotated.v7.somatic.high_confidence.supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}_sv_annotated_somatic_final.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}_sv_annotated_somatic_supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}_sv_annotated_somatic_high_confidence_final.bedpe"), val(normal_name), val(tumor_name), optional: true
+    tuple val(sampleID), file("${sampleID}_sv_annotated_somatic_high_confidence_supplemental.bedpe"), val(normal_name), val(tumor_name), optional: true
  
   script:
     if(suppl_switch == "main")
     """
-    Rscript ${projectDir}/bin/sv/filter-bedpe.r \
+    Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
         --filter_databases=DGV,1000G,PON \
         --bedpe=${sv_genes_cnv_bedpe} \
-        --out_file_somatic=${sampleID}.sv.annotated.v7.somatic.final.bedpe \
-        --out_file_highconf=${sampleID}.sv.annotated.v7.somatic.high_confidence.final.bedpe
+        --out_file_somatic=${sampleID}.sv.annotated.somatic.final.bedpe \
+        --out_file_highconf=${sampleID}.sv.annotated.somatic.high_confidence.final.bedpe
     """
 
     else if (suppl_switch == "supplemental")
     """
-    Rscript ${projectDir}/bin/sv/filter-bedpe.r \
+    Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
         --filter_databases=DGV,1000G,PON \
         --bedpe=${sv_genes_cnv_bedpe} \
-        --out_file_somatic=${sampleID}.sv.annotated.v7.somatic.supplemental.bedpe \
-        --out_file_highconf=${sampleID}.sv.annotated.v7.somatic.high_confidence.supplemental.bedpe
+        --out_file_somatic=${sampleID}_sv_annotated_somatic_supplemental.bedpe \
+        --out_file_highconf=${sampleID}_sv_annotated_somatic_high_confidence_supplemental.bedpe
     """
 }
