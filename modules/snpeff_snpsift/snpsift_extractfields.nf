@@ -5,7 +5,8 @@ process SNPSIFT_EXTRACTFIELDS {
   memory = 6.GB
   time = '01:00:00'
 
-  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
+  // SNPEFF and SNPSIFT need updating
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
 
