@@ -23,6 +23,9 @@ ______________________________________________________
 LOG TO BE ADDED
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
@@ -50,6 +53,9 @@ ______________________________________________________
 LOG TO BE ADDED
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

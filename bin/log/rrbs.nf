@@ -37,6 +37,9 @@ ______________________________________________________
 --comprehensive        ${params.comprehensive}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
@@ -77,6 +80,9 @@ ______________________________________________________
 --comprehensive        ${params.comprehensive}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

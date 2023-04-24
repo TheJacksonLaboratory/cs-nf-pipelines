@@ -80,6 +80,7 @@ if (params.csv_input) {
   }
     // if channel is empty give error message and exit
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+}
 
 // if channel is empty give error message and exit
 read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}

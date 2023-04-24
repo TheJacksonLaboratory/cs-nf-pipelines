@@ -10,6 +10,7 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
@@ -42,6 +43,7 @@ include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wgs"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -98,7 +100,13 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
 
-  bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  if (params.read_type == 'PE') {
+    FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+    xenome_input = 
+    bwa_mem_mapping = FASTQ_PAIR.out.paired_fastq.join(READ_GROUPS.out.read_groups)
+  } else {
+    bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  }
 
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
@@ -114,9 +122,11 @@ workflow WGS {
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // If Human
+  ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-    
+    ch_GATK_BASERECALIBRATOR_multiqc = GATK_BASERECALIBRATOR.out.table // set log file for multiqc
+
     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
 
     GATK_APPLYBQSR(apply_bqsr)
@@ -229,5 +239,18 @@ workflow WGS {
   agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt).join(PICARD_COLLECTWGSMETRICS.out.txt)
 
   AGGREGATE_STATS(agg_stats)
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
+
 
 }

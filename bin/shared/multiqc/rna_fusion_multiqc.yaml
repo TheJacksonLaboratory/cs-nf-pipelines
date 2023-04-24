@@ -9,6 +9,12 @@ module_order:
   - fastqc
   - xenome
   - custom_content
-  
+
+table_columns_visible:
+  FastQC:
+    percent_duplicates: False
+    percent_gc: False
+    total_sequences: False
+
 extra_fn_clean_exts:
   - "_sortsam"

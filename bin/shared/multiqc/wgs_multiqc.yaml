@@ -6,6 +6,20 @@ report_comment: >
 export_plots: true
 
 module_order:
+  - jax_trimmer
   - fastqc
-  - cutadapt
-  - bismark
+  - gatk
+  - picard
+
+table_columns_visible:
+  FastQC:
+    percent_duplicates: False
+    percent_gc: False
+    total_sequences: False
+
+extra_fn_clean_exts:
+  - "_sortsam"
+  - "_realigned_BQSR"
+  - "_FilterTrim"
+  - type: "truncate"
+    pattern: ".fastq"

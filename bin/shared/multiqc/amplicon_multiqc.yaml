@@ -6,10 +6,11 @@ report_comment: >
 export_plots: true
 
 module_order:
-  - jax_trimmer
+  - cutadapt
   - fastqc
-  - xenome
+  - primerclip
   - gatk
+  - coverage_metrics
   - picard
 
 table_columns_visible:
@@ -21,6 +22,5 @@ table_columns_visible:
 extra_fn_clean_exts:
   - "_sortsam"
   - "_realigned_BQSR"
-  - "_FilterTrim"
-  - type: "truncate"
-    pattern: ".fastq"
+  - "_paired"
+  - "_001"

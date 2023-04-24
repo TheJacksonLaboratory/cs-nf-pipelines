@@ -5,15 +5,13 @@ report_comment: >
 
 export_plots: true
 
-module_order:
-  - cutadapt
-  - fastqc
-  - primerclip
-  - coverage_metrics
-  - picard
+table_columns_visible:
+  FastQC:
+    percent_duplicates: False
+    percent_gc: False
+    total_sequences: False
 
-extra_fn_clean_exts:
-  - "_sortsam"
-  - "_realigned_BQSR"
-  - "_paired"
-  - "_001"
+module_order:
+  - fastqc
+  - cutadapt
+  - bismark

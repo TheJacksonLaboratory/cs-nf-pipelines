@@ -12,6 +12,9 @@ ______________________________________________________
 LOG IS TBD
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

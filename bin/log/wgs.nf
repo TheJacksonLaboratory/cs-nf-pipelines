@@ -38,6 +38,9 @@ ______________________________________________________
 
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
@@ -73,6 +76,9 @@ ______________________________________________________
 --ploidy_val                    ${params.ploidy_val}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

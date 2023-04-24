@@ -30,6 +30,9 @@ ______________________________________________________
 --tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
@@ -65,6 +68,9 @@ ______________________________________________________
 --tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

@@ -6,9 +6,9 @@ report_comment: >
 export_plots: true
 
 module_order:
+  - jax_trimmer
   - fastqc
-  - xenome
-  - conpair
+  - gatk
   - picard
 
 table_columns_visible:
@@ -21,7 +21,5 @@ extra_fn_clean_exts:
   - "_sortsam"
   - "_realigned_BQSR"
   - "_FilterTrim"
-  - "_concordance"
-  - "_contamination"
   - type: "truncate"
     pattern: ".fastq"
