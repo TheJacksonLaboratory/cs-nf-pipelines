@@ -21,5 +21,10 @@ extra_fn_clean_exts:
   - "_sortsam"
   - "_realigned_BQSR"
   - "_FilterTrim"
+  - "_dedup"
   - type: "truncate"
     pattern: ".fastq"
+
+custom_logo: "./JAX_logo_rgb_transparentback.png"
+custom_logo_url: "https://github.com/TheJacksonLaboratory/cs-nf-pipelines"
+custom_logo_title: "The Jackson Laboratory - NGS Operations Nextflow DSL2 Pipelines"

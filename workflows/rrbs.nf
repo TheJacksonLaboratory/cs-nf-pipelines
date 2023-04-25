@@ -65,6 +65,7 @@ workflow RRBS {
   }
 
   FASTQC(read_ch)
+  // Note: fastqc is run prior to trimming, as trim galor outputs fastqc level data.
 
   TRIM_GALORE(read_ch)
 

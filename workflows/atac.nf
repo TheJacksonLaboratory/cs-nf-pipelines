@@ -33,9 +33,10 @@ include {PEAK_COVERAGE} from "${projectDir}/modules/macs2/macs2_peak_coverage"
 include {FEATURE_COUNTS} from "${projectDir}/modules/subread/subread_feature_counts"
 include {FEATURE_COUNT2BED} from "${projectDir}/modules/bedtools/bedtools_feature_count2bed"
 include {QUALITY_CHECKS} from "${projectDir}/modules/samtools/samtools_quality_checks"
-include {FRAG_LEN_PLOT} from "${projectDir}/modules/rstudio/rstudio_frag_len_plot"
+include {FRAG_LEN_PLOT} from "${projectDir}/modules/r/frag_len_plot"
 include {CALC_PBC_METRICS} from "${projectDir}/modules/bedtools/bedtools_calc_pbc_metrics"
 include {LOG_PARSER} from "${projectDir}/modules/python/python_log_parser"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -204,7 +205,20 @@ workflow ATAC {
 
   // Step 30: Log Parser
   log_agg = TRIM_FASTQ.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
-  LOG_PARSER(log_agg)
+  // LOG_PARSER(log_agg) // FIX THIS SCRIPT! 
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(TRIM_FASTQ.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ALIGN_TRIMMED_FASTQ.out.bowtie_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(CALC_MTDNA_FILTER_CHRM.out.mtdna_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(CALC_PBC_METRICS.out.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FINAL_CALC_FRIP.out.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FRAG_LEN_PLOT.out.spline_table.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()  // FIX UP THE FINAL REPORT. ADD THE PDF PLOT...OR USE MULTIQC TO MAKE TEH PLOT 
+  )
 
 }
-

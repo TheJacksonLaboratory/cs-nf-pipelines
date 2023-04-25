@@ -13,10 +13,11 @@ process FRAG_LEN_PLOT {
 
   output:
   tuple val(sampleID), file("*fraglen_plot.pdf")
+  tuple val(sampleID), file("*_spline_table.txt"), emit: spline_table
 
   script:
   """
-  Rscript ${projectDir}/bin/atac/fragment_length_plot.R ${frag_len_count}
+  Rscript ${projectDir}/bin/atac/fragment_length_plot.R ${frag_len_count} ${sampleID}_spline_table.txt
   mv fraglen_plot.pdf ${sampleID}_fraglen_plot.pdf
   """
 }

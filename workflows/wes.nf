@@ -198,11 +198,11 @@ workflow WES {
       GATK_VARIANTFILTRATION(var_filter, 'BOTH')
 
     // SNP for final save
-      select_var_snp = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      select_var_snp = GATK_VARIANTFILTRATION.out.vcf.join(GATK_VARIANTFILTRATION.out.idx)
       GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'SNP_filtered_dbsnpID')
 
     // INDEL for final save
-      select_var_indel = GATK_HAPLOTYPECALLER.out.vcf.join(GATK_HAPLOTYPECALLER.out.idx)
+      select_var_indel = GATK_VARIANTFILTRATION.out.vcf.join(GATK_VARIANTFILTRATION.out.idx)
       GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'INDEL_filtered_dbsnpID')
 
     // Step 9: Post Variant Calling Processing
