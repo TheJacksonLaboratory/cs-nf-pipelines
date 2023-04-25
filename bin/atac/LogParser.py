@@ -63,7 +63,7 @@ print("----NRF and PBC Log----")
 for file in glob.glob("*pbc.qc"):
     with open(file) as f:
         lines = f.readlines()[1:]
-    for line in f:
+    for line in lines:
         line = line.rstrip('\n')
         input_reads = line.split(sep='\t')
         print("Non-Redundant Fraction (NRF): " + str(input_reads[5]))

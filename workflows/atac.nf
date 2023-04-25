@@ -206,7 +206,7 @@ workflow ATAC {
 
   // Step 30: Log Parser
   log_agg = TRIM_FASTQ.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
-  // LOG_PARSER(log_agg) // FIX THIS SCRIPT! 
+  LOG_PARSER(log_agg) 
 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
@@ -219,7 +219,7 @@ workflow ATAC {
   ch_multiqc_files = ch_multiqc_files.mix(FRAG_LEN_PLOT.out.spline_table.collect{it[1]}.ifEmpty([]))
 
   MULTIQC (
-      ch_multiqc_files.collect()  // FIX UP THE FINAL REPORT. ADD THE PDF PLOT...OR USE MULTIQC TO MAKE TEH PLOT 
+      ch_multiqc_files.collect()
   )
 
 }
