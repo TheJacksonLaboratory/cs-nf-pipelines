@@ -18,7 +18,7 @@ include {STAR_ALIGN as STAR_ARRIBA;
          STAR_ALIGN as STAR_SQUID;
          STAR_ALIGN as STAR_STARFUSION} from "${projectDir}/modules/star/star_align"
 include {SAMTOOLS_SORT as SORT_ARRIBA;
-         SAMTOOLS_SORT as SORT_SQUID} from "${projectDir}/modules/samtools/samtools_sort_only"
+         SAMTOOLS_SORT as SORT_SQUID} from "${projectDir}/modules/samtools/samtools_sort"
 include {SAMTOOLS_INDEX as INDEX_ARRIBA} from "${projectDir}/modules/samtools/samtools_index"
 include {ARRIBA} from "${projectDir}/modules/arriba/arriba"
 include {FUSIONCATCHER} from "${projectDir}/modules/fusioncatcher/fusioncatcher"
