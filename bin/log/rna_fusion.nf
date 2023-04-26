@@ -1,8 +1,12 @@
-def param_log(){
-  log.info """
-______________________________________________________
+import Logos
 
-                AMPLICON PARAMETER LOG
+logo = new Logo()
+println '\n'
+println logo.show()
+
+def param_log(){
+log.info """
+RNA FUSION PARAMETER LOG
 
 --comment: ${params.comment}
 

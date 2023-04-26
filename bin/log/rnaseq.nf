@@ -1,10 +1,14 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 
 if (params.pdx)
-  log.info """
-______________________________________________________
-
-                RNASEQ PARAMETER LOG
+log.info """
+RNASEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -55,13 +59,9 @@ ______________________________________________________
 
 """
 
-
-
 else if (params.gen_org=='human' && params.rsem_aligner=='bowtie2')
-  log.info """
-______________________________________________________
-
-                RNASEQ PARAMETER LOG
+log.info """
+RNASEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -100,10 +100,8 @@ ______________________________________________________
 """
 
 else if (params.gen_org=='human' && params.rsem_aligner=='star')
-  log.info """
-______________________________________________________
-
-                RNASEQ PARAMETER LOG
+log.info """
+RNASEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -143,10 +141,8 @@ ______________________________________________________
 """
 
 else if (params.gen_org=='mouse' && params.rsem_aligner=='bowtie2')
-  log.info """
-______________________________________________________
-
-                RNASEQ PARAMETER LOG
+log.info """
+RNASEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -181,10 +177,8 @@ ______________________________________________________
 """
 
 else if (params.gen_org=='mouse' && params.rsem_aligner=='star')
-  log.info """
-______________________________________________________
-
-                RNASEQ PARAMETER LOG
+log.info """
+RNASEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
