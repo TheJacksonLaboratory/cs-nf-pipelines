@@ -108,7 +108,8 @@ include {VEP_SOMATIC} from "${projectDir}/modules/ensembl/varianteffectpredictor
 include {COSMIC_ANNOTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_annotation_somatic"
 include {COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC} from "${projectDir}/modules/cosmic/cosmic_add_cancer_resistance_mutations_somatic"
 include {SOMATIC_VCF_FINALIZATION} from "${projectDir}/modules/python/python_somatic_vcf_finalization"
-include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_DBSNP_GERMLINE;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_DBSNP_SOMATIC} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {ANNOTATE_BICSEQ2_CNV} from "${projectDir}/modules/r/annotate_bicseq2_cnv"
 include {MERGE_SV} from "${projectDir}/modules/r/merge_sv"
 include {ANNOTATE_SV;
@@ -410,13 +411,13 @@ workflow PTA {
     BCFTOOLS_REMOVESPANNING(VEP_GERMLINE.out.vcf)
     // 4. AddCosmic
     COSMIC_ANNOTATION(BCFTOOLS_REMOVESPANNING.out.vcf)
-    // 5. AddCancerResistanceMutations
+    // 5. AddCancerResistanceMutations and dbsnpIDs
     COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE(COSMIC_ANNOTATION.out.vcf)
+    SNPSIFT_ANNOTATE_DBSNP_GERMLINE(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, params.dbSNP, params.dbSNP_index, 'intermediate')
     // 6. AnnotateId & RenameCsqVcf
-    GERMLINE_VCF_FINALIZATION(COSMIC_CANCER_RESISTANCE_MUTATION_GERMLINE.out.vcf, 'filtered')
+    GERMLINE_VCF_FINALIZATION(SNPSIFT_ANNOTATE_DBSNP_GERMLINE.out.vcf, 'filtered')
   
-    // NOTE: Annotation can be done on the GATK_VARIANTFILTRATION_AF.out.vcf_idx file
-    //       The steps would need to be split with 'as' statements in the 'include' step, and then added here.
+
 
     // ** Step 15: Somatic Calling
 
@@ -758,10 +759,10 @@ workflow PTA {
     COSMIC_ANNOTATION_SOMATIC(VEP_SOMATIC.out.vcf)
     COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC(COSMIC_ANNOTATION_SOMATIC.out.vcf)
 
-    SNPSIFT_ANNOTATE_DBSNP(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf.map{it -> [it[0], it[1]]}, params.dbSNP, params.dbSNP_index, 'intermediate')
+    SNPSIFT_ANNOTATE_DBSNP_SOMATIC(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf.map{it -> [it[0], it[1]]}, params.dbSNP, params.dbSNP_index, 'intermediate')
     // note: existing module requires only sampleID and VCF. input remapped to required tuple.
 
-    somatic_finalization_input = SNPSIFT_ANNOTATE_DBSNP.out.vcf.join(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf).map{it -> [it[0], it[1], it[3], it[4], it[5]]}
+    somatic_finalization_input = SNPSIFT_ANNOTATE_DBSNP_SOMATIC.out.vcf.join(COSMIC_CANCER_RESISTANCE_MUTATION_SOMATIC.out.vcf).map{it -> [it[0], it[1], it[3], it[4], it[5]]}
     // re-join dbSNP ID annotated VCF output with [meta], normalID, tumorID. 
 
     SOMATIC_VCF_FINALIZATION(somatic_finalization_input, 'filtered')
