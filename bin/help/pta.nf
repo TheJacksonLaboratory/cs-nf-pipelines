@@ -54,7 +54,7 @@ Parameter | Default | Description
 
 --strelka_config | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/configs/configureStrelkaSomaticWorkflow.py.ini' | Strelka input configuration. Provided by the tool developer resource pack.
 
---msisensor_model='/projects/compsci/omics_share/human/GRCh38/supporting_files/msisensor2/models_hg38' | Model files for MSI calling via MSIsensor2. Provided by the tool developer resource pack.
+--msisensor_model | '/projects/compsci/omics_share/human/GRCh38/supporting_files/msisensor2/models_hg38' | Model files for MSI calling via MSIsensor2. Provided by the tool developer resource pack.
 
 --vep_cache_directory | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/vep_data' | VEP annotation cache. Cache provided is for Ensembl v109.  
 --vep_fasta | '/projects/compsci/omics_share/human/GRCh38/genome/sequence/ensembl/GRCh38.p13/Homo_sapiens.GRCh38.dna.primary_assembly.fa' | VEP requires an ensembl based fasta. GRCh38.p13 is used for v97-v109.  
