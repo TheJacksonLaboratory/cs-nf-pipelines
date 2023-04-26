@@ -25,6 +25,7 @@ include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary
 include {SURVIVOR_TO_BED} from "${projectDir}/modules/survivor/survivor_to_bed"
 include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_bed_intersect"
 include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
+include {R_MERGE_DEPTHS} from "${projectDir}/modules/r/r_merge_depths"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
 // log paramater info
@@ -101,6 +102,10 @@ workflow ONT {
     SURVIVOR_BED_INTERSECT(SURVIVOR_TO_BED.out.sv_beds)
     surv_annot_input = SURVIVOR_TO_BED.out.sv_beds.join(SURVIVOR_BED_INTERSECT.out.intersected_beds).join(SURVIVOR_SUMMARY.out.csv).join(SURVIVOR_VCF_TO_TABLE.out.annotation)
     SURVIVOR_ANNOTATION(surv_annot_input)
+    
+    surv_depths_input = PARSE_NANOSV_DEPTHS.out.csv.join(PARSE_SNIFFLES_DEPTHS.out.csv).join(PYTHON_PARSE_SURVIVOR_IDS.out.csv).join(SURVIVOR_ANNOTATION.out.csv)
+    R_MERGE_DEPTHS(surv_depths_input)
+
     surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
     SURVIVOR_INEXON(surv_inexon_input)    
 
