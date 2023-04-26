@@ -15,7 +15,7 @@ Parameter | Default | Description
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
 --hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
 
---ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta' The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
+--ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta' | The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
 --ref_fa_indices | '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta' | Pre-compiled BWA index files. JAX users should not change this parameter.
 
 --ref_fa_dict | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.dict' | FASTA dictonary file. JAX users should not change this parameter. 
@@ -24,7 +24,7 @@ Parameter | Default | Description
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
 
 --gold_std_indels | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz’ | Used in GATK BaseRecalibrator and variant tranche recalibration derived from the GATK resource bundle. JAX users should not change this parameter.
---phase1_1000G | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/1000G_phase1.snps.high_confidence.hg38.vcf.gz' | Human Only - Used in GATK BaseRecalibrator derived from the GATK resource bundle. JAX users should not change this parameter.
+--phase1_1000G | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/1000G_phase1.snps.high_confidence.hg38.vcf.gz' | Used in GATK BaseRecalibrator derived from the GATK resource bundle. JAX users should not change this parameter.
 --dbSNP | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz' | Used in variant annotation, GATK BaseRecalibrator, variant tranche recalibration, and by SVABA. JAX users should not change this parameter.
 --dbSNP_index | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz.tbi' | Index associated with the dbsnp file. 
 
@@ -54,7 +54,7 @@ Parameter | Default | Description
 
 --strelka_config | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/configs/configureStrelkaSomaticWorkflow.py.ini' | Strelka input configuration. Provided by the tool developer resource pack.
 
---msisensor_model='/projects/compsci/omics_share/human/GRCh38/supporting_files/msisensor2/models_hg38' | Model files for MSI calling via MSIsensor2. Provided by the tool developer resource pack.
+--msisensor_model | '/projects/compsci/omics_share/human/GRCh38/supporting_files/msisensor2/models_hg38' | Model files for MSI calling via MSIsensor2. Provided by the tool developer resource pack.
 
 --vep_cache_directory | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/vep_data' | VEP annotation cache. Cache provided is for Ensembl v109.  
 --vep_fasta | '/projects/compsci/omics_share/human/GRCh38/genome/sequence/ensembl/GRCh38.p13/Homo_sapiens.GRCh38.dna.primary_assembly.fa' | VEP requires an ensembl based fasta. GRCh38.p13 is used for v97-v109.  
@@ -62,7 +62,7 @@ Parameter | Default | Description
 --cosmic_cgc | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/function/cancer_gene_census_v97.csv' | COSMIC Cancer Gene Census annotation file. Index for file required within same location. 
 --cosmic_cancer_resistance_muts | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/function/CosmicResistanceMutations.tsv.gz' | COSMIC Resistance Mutations file. Index for file required within same location. 
 
---ensembl_entrez='/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh39.p13_ensemblv109_entrez_id_map.csv' | Ensembl to Entrez gene ID to HGNC symbol mapping file. used in somatic vcf finalization.
+--ensembl_entrez | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh39.p13_ensemblv109_entrez_id_map.csv' | Ensembl to Entrez gene ID to HGNC symbol mapping file. used in somatic vcf finalization.
 
 --cytoband | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh38.cytoBand.UCSC.chr.sorted.txt' | File used in bicseq2 annotations
 --dgv | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/DGV.GRCh38_hg38_variants_2020-02-25.bed' | File used in bicseq2 annotations
