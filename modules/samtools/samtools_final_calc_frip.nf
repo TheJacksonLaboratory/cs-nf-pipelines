@@ -20,7 +20,7 @@ process FINAL_CALC_FRIP {
   total_reads=$(samtools view -c !{processed_bams[0]})
   reads_in_peaks=$(samtools view -c !{reads_peaks_bams[0]})
   FRiP=$(awk "BEGIN {print "${reads_in_peaks}"/"${total_reads}"}")
-  echo -e ${FRiP}"\\t"${total_reads} \
+  echo -e 'SAMPLEID\\tFRiP\\tFiltered Reads\\n'!{sampleID}"\\t"${FRiP}"\\t"${total_reads} \
   > !{sampleID}_Fraction_reads_in_peak.txt
   '''
 }

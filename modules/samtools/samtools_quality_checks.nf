@@ -20,6 +20,6 @@ process QUALITY_CHECKS {
   samtools view \
   -@ $task.cpus ${sort_rm_filter_bam[0]} \
   | awk '\$9>0' | cut -f 9 | sort | uniq -c | sort -b -k2,2n \
-  | sed -e 's/^[ \\t]*//' > ${sampleID}.fragment_length_count.txt
+  | sed -e 's/^[ \\t]*//' | awk -v sample="${sampleID}" -F' ' '{print sample,\$1,\$2}' OFS="\\t" > ${sampleID}.fragment_length_count.txt
   """
 }

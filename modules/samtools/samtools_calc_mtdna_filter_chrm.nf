@@ -36,7 +36,7 @@ process CALC_MTDNA_FILTER_CHRM {
   fi
 
   # Calculate %mtDNA
-  echo 'mtDNA Content:' $(bc <<< "scale=2;100*$mtReads/$totalReads")'%' >> !{sampleID}_mtDNA_Content.txt
+  echo -e 'sampleID\\tPerc mtDNA\\n'!{sampleID}'\\t'$(bc <<< "scale=2;100*$mtReads/$totalReads") >> !{sampleID}_mtDNA_Content.txt
 
   # Filter Mitochondrial Reads from bam file
   samtools view -@ !{task.cpus} -h !{rmdup_bam_file} \

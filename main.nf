@@ -9,6 +9,9 @@ if (params.workflow == "rnaseq"){
 else if (params.workflow == "wes"){
   include {WES} from './workflows/wes'
 }
+else if (params.workflow == "pdx_wes"){
+  include {PDX_WES} from './workflows/pdx_wes'
+}
 else if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
 }
@@ -21,12 +24,15 @@ else if (params.workflow == "atac"){
 else if (params.workflow == "pta"){
   include {PTA} from './workflows/pta'
 } 
+else if (params.workflow == "rna_fusion"){
+  include {RNA_FUSION} from './workflows/rna_fusion'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
 }
 
-// conditional to kick off appropriate workflow
+// conditional to launch appropriate workflow
 workflow{
   if (params.workflow == "rnaseq"){
     RNASEQ()
@@ -34,6 +40,9 @@ workflow{
   if (params.workflow == "wes"){
     WES()
     }
+  if (params.workflow == "pdx_wes"){
+    PDX_WES()
+  }
   if (params.workflow == "wgs"){
     WGS()
     }
@@ -46,4 +55,7 @@ workflow{
   if (params.workflow == "pta"){
     PTA()
   } 
+  if (params.workflow == "rna_fusion"){
+    RNA_FUSION()
+  }
 }
