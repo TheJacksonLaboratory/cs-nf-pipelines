@@ -15,7 +15,7 @@ Parameter | Default | Description
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
 --hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
 
---ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta' The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
+--ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta' | The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
 --ref_fa_indices | '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta' | Pre-compiled BWA index files. JAX users should not change this parameter.
 
 --ref_fa_dict | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.dict' | FASTA dictonary file. JAX users should not change this parameter. 
@@ -24,7 +24,7 @@ Parameter | Default | Description
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
 
 --gold_std_indels | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz’ | Used in GATK BaseRecalibrator and variant tranche recalibration derived from the GATK resource bundle. JAX users should not change this parameter.
---phase1_1000G | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/1000G_phase1.snps.high_confidence.hg38.vcf.gz' | Human Only - Used in GATK BaseRecalibrator derived from the GATK resource bundle. JAX users should not change this parameter.
+--phase1_1000G | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/1000G_phase1.snps.high_confidence.hg38.vcf.gz' | Used in GATK BaseRecalibrator derived from the GATK resource bundle. JAX users should not change this parameter.
 --dbSNP | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz' | Used in variant annotation, GATK BaseRecalibrator, variant tranche recalibration, and by SVABA. JAX users should not change this parameter.
 --dbSNP_index | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz.tbi' | Index associated with the dbsnp file. 
 
