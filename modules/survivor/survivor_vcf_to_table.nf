@@ -21,4 +21,8 @@ process SURVIVOR_VCF_TO_TABLE {
             """
             /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} illumina
             """
+        else if (params.workflow == "ont")
+            """
+            /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} ont
+            """            
 }
