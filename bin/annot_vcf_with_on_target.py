@@ -39,7 +39,7 @@ def annotate_vcf(input_vcf, chr, start, end, output_vcf) :
 
     myvcf = pysam.VariantFile(input_vcf,'r')
     myvcf.header.info.add('OnTarget','1','String',
-                          'Is SV call contained within a region targeted by sequencing: TRUE, FALSE')
+                          'Is SV call contained within a region targeted by sequencing: TRUE, FALSE, NA')
     with open(output_vcf, 'w') as annot_vcf:
         print(myvcf.header, end='', file=annot_vcf)
         for variant in myvcf:
@@ -49,6 +49,20 @@ def annotate_vcf(input_vcf, chr, start, end, output_vcf) :
             else:
                 variant.info['OnTarget'] = 'FALSE'
                 print(variant, end = '', file=annot_vcf)
+
+def annotate_na(input_vcf, output_vcf) :
+    """Iterate through VCF records and append a new INFO field OnTarget with
+    NA for all records in cases where target information is not provided
+    """
+
+    myvcf = pysam.VariantFile(input_vcf,'r')
+    myvcf.header.info.add('OnTarget','1','String',
+                          'Is SV call contained within a region targeted by sequencing: TRUE, FALSE, NA')
+    with open(output_vcf, 'w') as annot_vcf:
+        print(myvcf.header, end='', file=annot_vcf)
+        for variant in myvcf:
+            variant.info['OnTarget'] = 'NA'
+            print(variant, end = '', file=annot_vcf)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description=__doc__,
@@ -70,10 +84,14 @@ if __name__ == '__main__':
                                required=True)                               
     args = parser.parse_args()
 
-    validate_targets(input_vcf = args.vcf_file,
-                     chr = str(args.chr), start = int(args.start),
-                     end = int(args.end))
+    if args.chr == "NA":
+        annotate_na(input_vcf = args.vcf_file,
+                    output_vcf = args.out_vcf)
+    else:
+        validate_targets(input_vcf = args.vcf_file,
+                        chr = str(args.chr), start = int(args.start),
+                        end = int(args.end))
 
-    annotate_vcf(input_vcf = args.vcf_file,
-                     chr = str(args.chr), start = int(args.start),
-                     end = int(args.end), output_vcf = args.out_vcf)
+        annotate_vcf(input_vcf = args.vcf_file,
+                        chr = str(args.chr), start = int(args.start),
+                        end = int(args.end), output_vcf = args.out_vcf)
