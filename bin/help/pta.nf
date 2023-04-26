@@ -62,7 +62,7 @@ Parameter | Default | Description
 --cosmic_cgc | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/function/cancer_gene_census_v97.csv' | COSMIC Cancer Gene Census annotation file. Index for file required within same location. 
 --cosmic_cancer_resistance_muts | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/function/CosmicResistanceMutations.tsv.gz' | COSMIC Resistance Mutations file. Index for file required within same location. 
 
---ensembl_entrez='/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh39.p13_ensemblv109_entrez_id_map.csv' | Ensembl to Entrez gene ID to HGNC symbol mapping file. used in somatic vcf finalization.
+--ensembl_entrez | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh39.p13_ensemblv109_entrez_id_map.csv' | Ensembl to Entrez gene ID to HGNC symbol mapping file. used in somatic vcf finalization.
 
 --cytoband | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh38.cytoBand.UCSC.chr.sorted.txt' | File used in bicseq2 annotations
 --dgv | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/DGV.GRCh38_hg38_variants_2020-02-25.bed' | File used in bicseq2 annotations
