@@ -27,4 +27,10 @@ process SURVIVOR_MERGE {
             ls ${vcf_tuple[3]} >> vcf_list.txt
             SURVIVOR merge vcf_list.txt ${params.surv_dist} ${params.surv_supp} ${params.surv_type} ${params.surv_strand} 0 ${params.surv_min} ${sampleID}_mergedCall.BDLM.vcf
             """
+        else if (params.workflow == "ont")
+            """
+            ls ${vcf_tuple[0]} > vcf_list.txt
+            ls ${vcf_tuple[1]} >> vcf_list.txt
+            SURVIVOR merge vcf_list.txt ${params.surv_dist} ${params.surv_supp} ${params.surv_type} ${params.surv_strand} 0 ${params.surv_min} ${sampleID}_mergedCall.NS.vcf
+            """            
 }
