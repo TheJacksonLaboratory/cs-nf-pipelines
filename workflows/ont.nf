@@ -16,6 +16,7 @@ include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter"
 include {SNIFFLES} from "${projectDir}/modules/sniffles/sniffles"
 include {NANOSV} from "${projectDir}/modules/nanosv/nanosv"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
+include {VCFTOOLS_FILTER} from "${projectDir}/modules/vcftools/vcftools_filter"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
 include {SURVIVOR_TO_BED} from "${projectDir}/modules/survivor/survivor_to_bed"
@@ -79,5 +80,22 @@ workflow ONT {
     SNIFFLES(SAMTOOLS_FILTER.out.bam_and_index)
 
     NANOSV(SAMTOOLS_FILTER.out.bam_and_index)
+
+    // Join VCFs together by sampleID and run SURVIVOR merge
+
+    survivor_input = NANOSV.out.nanosv_vcf.join(SNIFFLES.out.sniffles_vcf)
+                     .map { it -> tuple(it[0], tuple(it[1], it[2]))}
+    SURVIVOR_MERGE(survivor_input)
+    VCFTOOLS_FILTER(SURVIVOR_MERGE.out.vcf)
+    SURVIVOR_VCF_TO_TABLE(VCFTOOLS_FILTER.out.vcf)
+    SURVIVOR_SUMMARY(VCFTOOLS_FILTER.out.vcf)
+
+    bed_prep_input = SURVIVOR_VCF_TO_TABLE.out.annotation.join(SURVIVOR_SUMMARY.out.csv)
+    SURVIVOR_TO_BED(bed_prep_input)
+    SURVIVOR_BED_INTERSECT(SURVIVOR_TO_BED.out.sv_beds)
+    surv_annot_input = SURVIVOR_TO_BED.out.sv_beds.join(SURVIVOR_BED_INTERSECT.out.intersected_beds).join(SURVIVOR_SUMMARY.out.csv).join(SURVIVOR_VCF_TO_TABLE.out.annotation)
+    SURVIVOR_ANNOTATION(surv_annot_input)
+    surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
+    SURVIVOR_INEXON(surv_inexon_input)    
 
 }
