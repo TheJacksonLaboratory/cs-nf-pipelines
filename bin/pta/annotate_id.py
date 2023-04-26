@@ -103,15 +103,12 @@ def modify_record(record, csq_columns):
         gt = record.samples[1][key]
         record.samples[1][key] = fix_gt(gt)
     ids = get_ID(record, csq_columns)
-
-    if ids != '':
-        if record.id != '':
+    if ids:
+        if record.id:
             record.id = record.id + ';' + ids
         else:
             record.id = ids
     return record
-
-
 
 def write_vcf(bcf_in, vcf_out_file, csq_columns):
     '''
