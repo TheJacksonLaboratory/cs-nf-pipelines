@@ -26,8 +26,8 @@ process FILTER_BEDPE {
         --max_changepoint_distance=1000 \
         --filter_databases=DGV,1000G,PON \
         --bedpe=${sv_genes_cnv_bedpe} \
-        --out_file_somatic=${sampleID}.sv.annotated.somatic.final.bedpe \
-        --out_file_highconf=${sampleID}.sv.annotated.somatic.high_confidence.final.bedpe
+        --out_file_somatic=${sampleID}_sv_annotated_somatic_final.bedpe \
+        --out_file_highconf=${sampleID}_sv_annotated_somatic_high_confidence_final.bedpe
     """
 
     else if (suppl_switch == "supplemental")
