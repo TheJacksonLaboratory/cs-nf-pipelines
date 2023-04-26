@@ -18,6 +18,7 @@ include {NANOSV} from "${projectDir}/modules/nanosv/nanosv"
 include {PYTHON_PARSE_DEPTHS as PARSE_NANOSV_DEPTHS;
          PYTHON_PARSE_DEPTHS as PARSE_SNIFFLES_DEPTHS} from "${projectDir}/modules/python/python_parse_depths"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
+include {PYTHON_PARSE_SURVIVOR_IDS} from "${projectDir}/modules/python/python_parse_survivor_ids"
 include {VCFTOOLS_FILTER} from "${projectDir}/modules/vcftools/vcftools_filter"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -90,6 +91,7 @@ workflow ONT {
     survivor_input = NANOSV.out.nanosv_vcf.join(SNIFFLES.out.sniffles_vcf)
                      .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     SURVIVOR_MERGE(survivor_input)
+    PYTHON_PARSE_SURVIVOR_IDS(SURVIVOR_MERGE.out.vcf)
     VCFTOOLS_FILTER(SURVIVOR_MERGE.out.vcf)
     SURVIVOR_VCF_TO_TABLE(VCFTOOLS_FILTER.out.vcf)
     SURVIVOR_SUMMARY(VCFTOOLS_FILTER.out.vcf)
