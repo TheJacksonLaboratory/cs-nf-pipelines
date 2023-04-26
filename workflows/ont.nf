@@ -27,6 +27,7 @@ include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_b
 include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
 include {R_MERGE_DEPTHS} from "${projectDir}/modules/r/r_merge_depths"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
+include {PYTHON_ANNOT_DEPTHS} from "${projectDir}/modules/python/python_annot_depths"
 
 // log paramater info
 //param_log()
@@ -107,6 +108,8 @@ workflow ONT {
     R_MERGE_DEPTHS(surv_depths_input)
 
     surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
-    SURVIVOR_INEXON(surv_inexon_input)    
+    SURVIVOR_INEXON(surv_inexon_input)
 
+    depths_input = SURVIVOR_INEXON.out.vcf.join(R_MERGE_DEPTHS.out.bed)
+    PYTHON_ANNOT_DEPTHS(depths_input)
 }

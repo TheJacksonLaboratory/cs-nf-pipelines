@@ -2,7 +2,9 @@
 
 """Annotate VCF file
 
-Apply 'InExon' to original VCF file.
+Usage: annot_vcf_with_depths.py -v original.vcf -d depths.bed
+
+Add info fields for depths from individual callers to original VCF file.
 Based on matching annotations from VCF and annotated bedpe.
 
 "How to add custom fields to the VCF files?" idea from: https://www.biostars.org/p/209188/
@@ -14,61 +16,71 @@ import os
 import argparse
 import pysam
 
-def parse_bed(exon_dict, bed_handle):
+def parse_bed(depths_dict, bed_handle):
     """Parse BED files containing intersections between structural variants
     and annotated exons, and return a dictionary of boolean values for each
     named SV
     """
     if os.path.exists(bed_handle) and os.stat(bed_handle).st_size == 0:
         print("No records in " + str(bed_handle))
-        return exon_dict
+        return depths_dict
 
     elif os.path.exists(bed_handle):
         with open(bed_handle, 'r') as ins_f:
             for line_handle in ins_f:
                 line = line_handle.rstrip().split('\t')
-                sv_name = line[3]
-                if sv_name in exon_dict:
+                sv_name = line[2]
+                if sv_name in depths_dict:
                     error_string = str(sv_name) + " on Chr" + str(line[0]) + \
                         " at " + str(line[1]) + " has multiple SV records"
                     #print(error_string)
                 else:
-                    exon_dict[sv_name] = "TRUE"
-        return exon_dict
+                    if line[3] == 'NA':
+                        NanoSV_DR = ['NA', 'NA']
+                        NanoSV_DV = ['NA', 'NA']
+                    else:
+                        NanoSV_DR = [str(y) for y in line[3].split(';')]
+                        NanoSV_DV = [str(y) for y in line[4].split(';')]
+                    sniffles_DR = [str(y) for y in line[5].split(';')]
+                    sniffles_DV = [str(y) for y in line[6].split(';')]
+                    depths_dict[sv_name] = [NanoSV_DR, NanoSV_DV, sniffles_DR, sniffles_DV]
+        return depths_dict
     else:
         raise FileExistsError
 
 
-def annotate_vcf(input_vcf, ins, dele, inv, dup, tra, output_vcf) :
+def annotate_vcf(input_vcf, depths, output_vcf) :
     """Iterate through VCF records and append a new INFO field InExon with
     a boolean value that represents whether the variant overlaps with
     annotated exons
     """
 
-    exon_dict = {}
+    depths_dict = {}
     
-    exon_dict = parse_bed(exon_dict, ins)
-    exon_dict = parse_bed(exon_dict, dele)
-    exon_dict = parse_bed(exon_dict, inv)
-    exon_dict = parse_bed(exon_dict, dup)
-    exon_dict = parse_bed(exon_dict, tra)
+    depths_dict = parse_bed(depths_dict, depths)
 
     myvcf = pysam.VariantFile(input_vcf,'r')
-    myvcf.header.info.add('InEXON','1','String',
-                        'Is SV call contained within an exonic region or regions: TRUE, FALSE')
-
+    myvcf.header.info.add('NanoSV_DR','2','String',
+                        'Number of reference reads from NanoSV')
+    myvcf.header.info.add('NanoSV_DV','2','String',
+                        'Number of variant reads from NanoSV')
+    myvcf.header.info.add('sniffles_DR','1','String',
+                        'Number of reference reads from sniffles')
+    myvcf.header.info.add('sniffles_DV','1','String',
+                        'Number of variant reads from sniffles')
     with open(output_vcf, 'w') as annot_vcf:
-        
         print(myvcf.header, end='', file=annot_vcf)
-
         for variant in myvcf:
             if variant.id:
-                if variant.id in exon_dict:
-                    variant.info['InEXON'] = 'TRUE'
+                if variant.id in depths_dict:
+                    variant.info['NanoSV_DR'] = depths_dict[variant.id][0]
+                    variant.info['NanoSV_DV'] = depths_dict[variant.id][1]
+                    variant.info['sniffles_DR'] = depths_dict[variant.id][2]
+                    variant.info['sniffles_DV'] = depths_dict[variant.id][3]
                     print(variant, end = '', file=annot_vcf)
                 else:
-                    variant.info['InEXON'] = 'FALSE'
-                    print(variant, end = '', file=annot_vcf)
+                    error_string = str(variant.id) + " has no depths\n"
+                    print(error_string)
             else:
                 print("Variant at " + str(variant.chrom) + ":" + \
                     str(variant.pos) + " has no ID")
@@ -80,20 +92,8 @@ if __name__ == '__main__':
     requiredNamed = parser.add_argument_group("required named arguments")
     requiredNamed.add_argument("-v", dest="vcf_file", metavar="input.vcf",
                                help="the input VCF file", required=True)
-    requiredNamed.add_argument("-i", dest="ins", metavar="ins.exons.bed",
-                               help="insertion exon intersections",
-                               required=True)
-    requiredNamed.add_argument("-d", dest="dele", metavar="del.exons.bed",
-                               help="deletion exon intersections",
-                               required=True)    
-    requiredNamed.add_argument("-n", dest="inv", metavar="inv.exons.bed",
-                               help="inversion exon intersections",
-                                required=True)
-    requiredNamed.add_argument("-t", dest="tra", metavar="tra.exons.bed",
-                               help="translocation exon intersections",
-                               required=True)
-    requiredNamed.add_argument("-u", dest="dup", metavar="dup.exons.bed",
-                               help="duplications exon intersections",
+    requiredNamed.add_argument("-d", dest="depths", metavar="depths.bed",
+                               help="bed file with depths from SV callers",
                                required=True)
     requiredNamed.add_argument("-o", dest="out_vcf", metavar="output.vcf",
                                help="path to output VCF file",
@@ -101,5 +101,4 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     annotate_vcf(input_vcf = args.vcf_file,
-                 ins = args.ins, dele = args.dele, inv = args.inv,
-                 tra = args.tra, dup = args.dup, output_vcf = args.out_vcf)       
+                 depths = args.depths, output_vcf = args.out_vcf)       
