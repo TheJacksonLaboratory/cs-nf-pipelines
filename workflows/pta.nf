@@ -852,7 +852,7 @@ def extract_csv(csv_file) {
         .map{ row ->
             sample_count_all++
             if (!(row.patient && row.sampleID)){
-                log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sample'."
+                log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sampleID'."
                 System.exit(1)
             }
             [[row.patient.toString(), row.sampleID.toString()], row]

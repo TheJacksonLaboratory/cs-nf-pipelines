@@ -22,7 +22,7 @@ process GRIPSS_SOMATIC_FILTER {
                                                                                                                                             //note: while this is "GRIPSS" filtering.  
                                                                                                                                             //      GRIDSS was the caller and downstream 
                                                                                                                                             //      scripts expect "gridss" as the tool name. 
-    tuple val(sampleID), path('*.gripss.vcf.gz'),path('*.gripss.vcf.gz'), val(meta), val(normal_name), val(tumor_name), val('gridss'), emit: gripss_all_bgz
+    tuple val(sampleID), path('*.gripss.vcf.gz'), path('*.gripss.vcf.gz.tbi'), val(meta), val(normal_name), val(tumor_name), val('gridss'), emit: gripss_all_bgz
 
     script:
     """
@@ -37,6 +37,12 @@ process GRIPSS_SOMATIC_FILTER {
         -repeat_mask_file ${params.gripss_pon}/repeat_mask_data.38.fa.gz \
         -vcf ${vcf} \
         -output_dir .
+
+        mv ${tumor_name}.gripss.filtered.vcf.gz ${sampleID}.gripss.filtered.vcf.gz
+        mv ${tumor_name}.gripss.filtered.vcf.gz.tbi ${sampleID}.gripss.filtered.vcf.gz.tbi
+        mv ${tumor_name}.gripss.vcf.gz ${sampleID}.gripss.vcf.gz
+        mv ${tumor_name}.gripss.vcf.gz.tbi ${sampleID}.gripss.vcf.gz.tbi
+
     """
 
     stub:
