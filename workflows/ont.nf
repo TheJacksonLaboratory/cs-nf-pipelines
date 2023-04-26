@@ -15,6 +15,8 @@ include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter"
 include {SNIFFLES} from "${projectDir}/modules/sniffles/sniffles"
 include {NANOSV} from "${projectDir}/modules/nanosv/nanosv"
+include {PYTHON_PARSE_DEPTHS as PARSE_NANOSV_DEPTHS;
+         PYTHON_PARSE_DEPTHS as PARSE_SNIFFLES_DEPTHS} from "${projectDir}/modules/python/python_parse_depths"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {VCFTOOLS_FILTER} from "${projectDir}/modules/vcftools/vcftools_filter"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
@@ -78,8 +80,10 @@ workflow ONT {
     SAMTOOLS_FILTER(ch_mm2_bam)
 
     SNIFFLES(SAMTOOLS_FILTER.out.bam_and_index)
+    PARSE_SNIFFLES_DEPTHS(SNIFFLES.out.sniffles_vcf, "sniffles")
 
     NANOSV(SAMTOOLS_FILTER.out.bam_and_index)
+    PARSE_NANOSV_DEPTHS(NANOSV.out.nanosv_vcf, "nanosv")
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
