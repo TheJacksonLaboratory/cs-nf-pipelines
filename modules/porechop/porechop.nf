@@ -5,7 +5,7 @@ process PORECHOP {
     memory 24.GB
     time "24:00:00"
 
-    publishDir "${params.pubdir}", pattern: "${sampleID}_porechop.fastq", mode:'copy'
+    publishDir "${params.pubdir}/fastq", pattern: "${sampleID}_porechop.fastq", mode:'copy', enabled: params.keep_intermediate ? true : false
 
     container 'quay.io/biocontainers/porechop:0.2.4--py39hc16433a_3'
 

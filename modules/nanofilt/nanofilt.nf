@@ -4,7 +4,7 @@ process NANOFILT{
     cpus 16
     memory 24.GB
     time "24:00:00"
-    publishDir "${params.pubdir}/", pattern: "*_porechop_NanoFilt.fastq", mode:'copy'
+    publishDir "${params.pubdir}/fastq", pattern: "*_porechop_NanoFilt.fastq", mode:'copy', enabled: params.keep_intermediate ? true : false
 
     container 'quay.io/biocontainers/nanofilt:2.8.0--py_0'
 
