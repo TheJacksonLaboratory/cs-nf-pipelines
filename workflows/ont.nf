@@ -28,6 +28,7 @@ include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_anno
 include {R_MERGE_DEPTHS} from "${projectDir}/modules/r/r_merge_depths"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 include {PYTHON_ANNOT_DEPTHS} from "${projectDir}/modules/python/python_annot_depths"
+include {PYTHON_ANNOT_ON_TARGET} from "${projectDir}/modules/python/python_annot_on_target"
 
 // log paramater info
 //param_log()
@@ -94,9 +95,8 @@ workflow ONT {
                      .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     SURVIVOR_MERGE(survivor_input)
     PYTHON_PARSE_SURVIVOR_IDS(SURVIVOR_MERGE.out.vcf)
-    VCFTOOLS_FILTER(SURVIVOR_MERGE.out.vcf)
-    SURVIVOR_VCF_TO_TABLE(VCFTOOLS_FILTER.out.vcf)
-    SURVIVOR_SUMMARY(VCFTOOLS_FILTER.out.vcf)
+    SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
+    SURVIVOR_SUMMARY(SURVIVOR_MERGE.out.vcf)
 
     bed_prep_input = SURVIVOR_VCF_TO_TABLE.out.annotation.join(SURVIVOR_SUMMARY.out.csv)
     SURVIVOR_TO_BED(bed_prep_input)
@@ -107,9 +107,12 @@ workflow ONT {
     surv_depths_input = PARSE_NANOSV_DEPTHS.out.csv.join(PARSE_SNIFFLES_DEPTHS.out.csv).join(PYTHON_PARSE_SURVIVOR_IDS.out.csv).join(SURVIVOR_ANNOTATION.out.csv)
     R_MERGE_DEPTHS(surv_depths_input)
 
-    surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
+    VCFTOOLS_FILTER(SURVIVOR_MERGE.out.vcf)
+    surv_inexon_input =  VCFTOOLS_FILTER.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
     SURVIVOR_INEXON(surv_inexon_input)
 
     depths_input = SURVIVOR_INEXON.out.vcf.join(R_MERGE_DEPTHS.out.bed)
     PYTHON_ANNOT_DEPTHS(depths_input)
+
+    PYTHON_ANNOT_ON_TARGET(PYTHON_ANNOT_DEPTHS.out.vcf)
 }
