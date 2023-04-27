@@ -9,7 +9,7 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {TRIM_GALORE} from "${projectDir}/modules/trim_galore/trim_galore"
 include {BISMARK_ALIGNMENT} from "${projectDir}/modules/bismark/bismark_alignment"
-include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort_only"
+include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {BISMARK_DEDUPLICATION} from "${projectDir}/modules/bismark/bismark_deduplication"
 include {BISMARK_METHYLATION_EXTRACTION} from "${projectDir}/modules/bismark/bismark_methylation_extraction"
