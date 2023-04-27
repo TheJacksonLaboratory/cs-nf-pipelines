@@ -10,7 +10,7 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
@@ -141,16 +141,16 @@ workflow PDX_WES {
     // ** MAIN workflow starts: 
 
     // Step 1: Qual_Stat
-    QUALITY_STATISTICS(read_ch)
+    JAX_TRIMMER(read_ch)
 
     if (params.read_type == 'PE') {
-      FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+      FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
       xenome_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      xenome_input = QUALITY_STATISTICS.out.trimmed_fastq
+      xenome_input = JAX_TRIMMER.out.trimmed_fastq
     }
 
-    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(xenome_input)
@@ -160,7 +160,7 @@ workflow PDX_WES {
     FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')
 
     // Step 3: Get Read Group Information
-    READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+    READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
     // Step 4: BWA-MEM Alignment
     bwa_mem_mapping = FASTQ_SORT_HUMAN.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
@@ -231,13 +231,13 @@ workflow PDX_WES {
     
     SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
 
-    agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
+    agg_stats = JAX_TRIMMER.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
 
     // Step 11: Aggregate Stats
     AGGREGATE_STATS(agg_stats)
 
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(GATK_BASERECALIBRATOR.out.table.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))

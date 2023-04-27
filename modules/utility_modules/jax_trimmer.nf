@@ -1,4 +1,4 @@
-process QUALITY_STATISTICS {
+process JAX_TRIMMER {
 
   tag "$sampleID"
 
