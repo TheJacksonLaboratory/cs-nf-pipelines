@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {READ_GROUPS as READ_GROUPS_HUMAN;
          READ_GROUPS as READ_GROUPS_MOUSE} from "${projectDir}/modules/utility_modules/read_groups"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
@@ -30,17 +30,17 @@ workflow PDX_RNASEQ {
 
     main:
     // Step 1: Qual_Stat, Get read group information, Run Xenome
-    QUALITY_STATISTICS(read_ch)
+    JAX_TRIMMER(read_ch)
 
     if (params.read_type == 'PE') {
-      FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+      FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
       xenome_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      xenome_input = QUALITY_STATISTICS.out.trimmed_fastq
+      xenome_input = JAX_TRIMMER.out.trimmed_fastq
     }
 
     // QC is assess on all reads. Mouse/human is irrelevant here. 
-    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
     // Xenome Classification
     XENOME_CLASSIFY(xenome_input)
@@ -104,7 +104,7 @@ workflow PDX_RNASEQ {
 
 
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_cnt.collect{it[1]}.ifEmpty([]))

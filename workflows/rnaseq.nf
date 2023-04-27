@@ -11,7 +11,7 @@ include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_l
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
+include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -135,22 +135,22 @@ workflow RNASEQ {
   } else {
 
     // Step 1: Qual_Stat
-    QUALITY_STATISTICS(read_ch)
+    JAX_TRIMMER(read_ch)
     
     if (params.read_type == 'PE') {
-      FASTQ_PAIR(QUALITY_STATISTICS.out.trimmed_fastq)
+      FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
       rsem_input = FASTQ_PAIR.out.paired_fastq
     } else {
-      rsem_input = QUALITY_STATISTICS.out.trimmed_fastq
+      rsem_input = JAX_TRIMMER.out.trimmed_fastq
     }
     
-    FASTQC(QUALITY_STATISTICS.out.trimmed_fastq)
+    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
     // Step 2: RSEM
     RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files, params.rsem_ref_prefix)
 
     //Step 3: Get Read Group Information
-    READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "picard")
+    READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "picard")
 
     // Step 4: Picard Alignment Metrics
     add_replace_groups = READ_GROUPS.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION.out.bam)
@@ -165,12 +165,12 @@ workflow RNASEQ {
 
     // Step 6: Summary Stats
 
-    agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(QUALITY_STATISTICS.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
+    agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(JAX_TRIMMER.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
 
     RNA_SUMMARY_STATS(agg_stats)
 
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(QUALITY_STATISTICS.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
