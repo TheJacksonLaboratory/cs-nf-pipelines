@@ -1,9 +1,13 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
-  log.info """
-______________________________________________________
-
-                ATAC PARAMETER LOG
+log.info """
+ATAC PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -37,9 +41,7 @@ ______________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                ATAC PARAMETER LOG
+ATAC PARAMETER LOG
 
 --comment: ${params.comment}
 

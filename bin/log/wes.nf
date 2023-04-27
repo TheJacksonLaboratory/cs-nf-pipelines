@@ -1,9 +1,13 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
-  log.info """
-______________________________________________________
-
-                WES PARAMETER LOG
+log.info """
+WES PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -49,9 +53,7 @@ ______________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                WES PARAMETER LOG
+WES PARAMETER LOG
 
 --comment: ${params.comment}
 

@@ -1,14 +1,18 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
-  log.info """
-______________________________________________________
-
-                WGS PARAMETER LOG
+log.info """
+WGS PARAMETER LOG
 
 --comment: ${params.comment}
 
 Results Published to: ${params.pubdir}
-______________________________________________________
+________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --gen_ver                       ${params.gen_ver}
@@ -41,18 +45,16 @@ Project Directory: ${projectDir}
 
 Command line call: 
 ${workflow.commandLine}
-______________________________________________________
+________________________________________________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                WGS PARAMETER LOG
+WGS PARAMETER LOG
 
 --comment: ${params.comment}
 
 Results Published to: ${params.pubdir}
-______________________________________________________
+________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --gen_ver                       ${params.gen_ver}
@@ -79,7 +81,7 @@ Project Directory: ${projectDir}
 
 Command line call: 
 ${workflow.commandLine}
-______________________________________________________
+________________________________________________________________________________________
 """
 
 }

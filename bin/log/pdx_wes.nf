@@ -1,8 +1,12 @@
-def param_log(){
-  log.info """
-______________________________________________________
+import Logos
 
-                WES PARAMETER LOG
+logo = new Logo()
+println '\n'
+println logo.show()
+
+def param_log(){
+log.info """
+WES PARAMETER LOG
 
 --comment: ${params.comment}
 

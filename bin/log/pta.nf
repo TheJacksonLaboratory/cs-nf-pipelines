@@ -1,8 +1,12 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 log.info """
-______________________________________________________
-
-                PTA PARAMETER LOG
+PTA PARAMETER LOG
 
 --comment: ${params.comment}
 
