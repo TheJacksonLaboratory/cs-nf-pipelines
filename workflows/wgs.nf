@@ -146,6 +146,9 @@ workflow WGS {
      .splitText()
      .map{it -> it.trim()}
     
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
+    // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
+
     // Applies scatter intervals from above to the BQSR bam file
     chrom_channel = data.combine(chroms)
     
@@ -153,11 +156,12 @@ workflow WGS {
     GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(),chroms.toList())
+
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(size: num_chroms),chroms.toList())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     // Use the Channel in HaplotypeCaller_GVCF
     GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
   }
 
   // If Mouse
@@ -175,6 +179,9 @@ workflow WGS {
      .splitText()
      .map{it -> it.trim()}
     
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
+    // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
+
     // Applies scatter intervals from above to the BQSR bam file
     chrom_channel = data.combine(chroms)
 
@@ -182,12 +189,14 @@ workflow WGS {
     GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
+  
+
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(size: num_chroms), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
     // Use the Channel in HaplotypeCaller_GVCF
     GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple())
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
   }
 
   // SNP

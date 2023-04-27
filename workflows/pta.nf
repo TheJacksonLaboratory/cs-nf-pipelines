@@ -259,6 +259,7 @@ workflow PTA {
         .mix(ch_paired_samples)
         .map{it -> [it[1].patient, it[1], it[2], it[3], it[4]]}.groupTuple().filter{it[2].size() == 1} 
                     // it[0] = sampleID, it[1] = meta, it[2] = bam, it[3] = bai, it[4] = sampleReadID. 
+                    // unknown group size, no 'size' statement can be used in groupTuple
         .map{tumor -> 
         def meta = [:]
             meta.patient    = tumor[1][0].patient
@@ -365,6 +366,8 @@ workflow PTA {
                 .collate(2)
                 .map { item, idx -> tuple( item, idx + 1 ) }
     // https://stackoverflow.com/a/67084467/18557826
+    interval_count = files( params.chrom_intervals+'/*/scattered.interval_list' ).size()
+    // interval count is used in groupTuple size statements. 
 
     // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
     chrom_channel = ch_normal_samples.combine(intervals).filter{it[4] != params.na12878_sampleName}
@@ -379,21 +382,22 @@ workflow PTA {
     chrom_list = chroms.collect().dropRight(1)
     chrom_list_noY = chrom_list.dropRight(1)
     
+
+
     // Variant calling. 
     GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
     // Applies gather to scattered haplotype calls.
-    GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(), 'gvcf')
+    GATK_SORTVCF_GERMLINE(GATK_HAPLOTYPECALLER_SV_GERMLINE.out.vcf.groupTuple(size: interval_count), 'gvcf')
 
     // Applies scatter intervals from above to the merged file, and genotype.
-    genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.groupTuple().combine(intervals)
-    // this will require a test in multiple sample mode. 
+    genotype_channel = GATK_SORTVCF_GERMLINE.out.vcf_idx.combine(intervals)
 
     GATK_GENOTYPE_GVCF(genotype_channel)
     GATK_CNNSCORE_VARIANTS(GATK_GENOTYPE_GVCF.out.vcf_idx)
 
     // Applies gather to genotyped/cnn called vcfs prior to tranche filtering. 
-    GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(), 'vcf')
+    GATK_SORTVCF_GENOTYPE(GATK_CNNSCORE_VARIANTS.out.vcf.groupTuple(size: interval_count), 'vcf')
 
     // Variant tranche filtering. 
     GATK_FILTER_VARIANT_TRANCHES(GATK_SORTVCF_GENOTYPE.out.vcf_idx)
@@ -443,12 +447,12 @@ workflow PTA {
     GATK_MUTECT2(somatic_calling_channel)
 
     sort_merge_input_mutect2VCF = GATK_MUTECT2.out.vcf
-                                  .groupTuple()
+                                  .groupTuple(size: interval_count)
                                   .map {  sampleID, vcf, meta, normal, tumor, tool -> tuple( sampleID, vcf, meta.unique()[0], normal.unique()[0], tumor.unique()[0], tool.unique()[0] )  }
     
     GATK_SORTVCF_MUTECT(sort_merge_input_mutect2VCF)
-    GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple())
-    
+    GATK_MERGEMUTECTSTATS(GATK_MUTECT2.out.stats.groupTuple(size: interval_count))
+ 
     filter_mutect_input = GATK_SORTVCF_MUTECT.out.vcf_tbi.join(GATK_MERGEMUTECTSTATS.out.stats)
 
     GATK_FILTERMUECTCALLS(filter_mutect_input)
@@ -463,15 +467,17 @@ workflow PTA {
                     .collate(2)
                     .map { item, idx -> tuple( item, idx + 1 ) }
     // https://stackoverflow.com/a/67084467/18557826
+    lancet_beds_count = files( params.lancet_beds_directory+'/*.bed' ).size()
+    // bed file count is used in groupTuple size statements. 
 
     // Applies scatter intervals from above to the BQSR bam file
     lancet_calling_channel = ch_paired_samples.combine(lancet_beds)
     LANCET(lancet_calling_channel)
 
     sort_merge_input_lancetVCF = LANCET.out.vcf
-                                .groupTuple()
+                                .groupTuple(size: lancet_beds_count)
                                 .map {  sampleID, vcf, meta, normal, tumor, tool -> tuple( sampleID, vcf, meta.unique()[0], normal.unique()[0], tumor.unique()[0], tool.unique()[0] )  }
-    
+
     GATK_SORTVCF_LANCET(sort_merge_input_lancetVCF)
 
     // ** Manta - SV Calling
@@ -622,14 +628,15 @@ workflow PTA {
     GATK_SORTVCF_TOOLS(SPLIT_MNV.out.split_mnv_vcf)
 
     callers_for_merge = GATK_SORTVCF_TOOLS.out.vcf_tbi
-                        .groupTuple()
+                        .groupTuple(size: 5)
                         .map{sampleID, vcf, idx, meta, normal_sample, tumor_sample, tool_list -> tuple( sampleID, vcf, idx, meta.unique()[0] )  }
                         .combine(chrom_list_noY.flatten())
     // The above collects all callers on sampleID, then maps to avoid duplication of data and to drop the tool list, which is not needed anymore. 
-    // Note that this could be done using the very 'by' in the groupTuple statement. However, the map is still required to remove the tool list. 
+    // Note that this could be done using 'by' in the groupTuple statement. However, the map is still required to remove the tool list. 
+    // 'size: 5' corresponds to the 5 callers used in the workflow. If additional callers are added, this must be changed. 
 
     // Merge Callers, Extract non-exonic calls and try to confirm those with Lancet, 
-        // then prep confirmed calls for merged back to full merge set: 
+    // then prep confirmed calls for merged back to full merge set: 
     
     // ** Make all caller merge set, and compress and index:
     BCFTOOLS_MERGECALLERS(callers_for_merge)
@@ -714,8 +721,7 @@ workflow PTA {
     // 1. Merge Columns. 
     //    See script merge_columns.py for the three features used in merge (script docs provided by original dev).
     MERGE_COLUMNS(COMPRESS_INDEX_VCF_MERGED.out.compressed_vcf_tbi)
-    //  NOTE: !! !! !! The merge and re-arrangment require sanity checks. 
-    
+
     // 2. Add Allele Count to VCF.
     //    "Runs pileup on tumor and normal bam files to compute allele counts for bi-allelic SNV and Indel variants in VCF file and adds pileup format columns to the VCF file.""
     addAlleleCounts_confirm_input = MERGE_COLUMNS.out.mergeColumn_vcf                         
@@ -725,7 +731,6 @@ workflow PTA {
 
     // 3. Add Final Allele Counts to VCF
     ADD_FINAL_ALLELE_COUNTS(ADD_NYGC_ALLELE_COUNTS.out.vcf)
-    // NOTE: !! !! !! Sanity check is needed. Based on the addition of '_indel' and '_sv' and '_support' to strelka2 and lancet call names. 
 
     // 4. Filter VCF based on PON
     FILTER_PON(ADD_FINAL_ALLELE_COUNTS.out.vcf)
@@ -738,9 +743,10 @@ workflow PTA {
     SNV_TO_MNV_FINAL_FILTER(FILTER_VCF.out.vcf)
 
     // ** Collect and Merge Chroms. 
-
+    num_intervals = file(params.chrom_contigs).countLines().toInteger() - 2
+    // number of chrom intervals split on during the above steps. A 'value' variable used in groupTuple size statement. MT and Y are removed, hence '- 2'
     chrom_merge_input = SNV_TO_MNV_FINAL_FILTER.out.vcf
-                        .groupTuple()
+                        .groupTuple(size: num_intervals)
                         .map{sampleID, vcf, meta, chrom -> tuple( sampleID, vcf, meta.unique()[0] )  }
                         // Collect scattered chroms, remap to tuple without chrom names. 
 
@@ -774,8 +780,7 @@ workflow PTA {
     // note: joining on the sampleID, metadata, tumor_name, and normal_name for
     // safety. This re-arranges the values in the channel to:
     // tuple val(sampleID), val(normal_name), val(tumor_name), file(manta_vcf), file(manta_vcf_tbi), val(meta_manta), val(manta), file(gridss_bgz), val(no_idx), val(meta_gripss), val(gridss)
-    // Downstream, just including sampleID, normal_name, and tumor_name to simplify a similar
-    // join that is necessary
+    // Downstream, just including sampleID, normal_name, and tumor_name to simplify a similar join that is necessary
 
     merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(GRIPSS_SOMATIC_FILTER.out.gripss_filtered_bgz, by : [0,4,5])
     MERGE_SV(merge_sv_input, chrom_list)
