@@ -9,7 +9,6 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
@@ -103,9 +102,7 @@ workflow WES {
 
   // Step 3: BWA-MEM Alignment
   if (params.read_type == 'PE') {
-    FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
-    xenome_input = 
-    bwa_mem_mapping = FASTQ_PAIR.out.paired_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
   } else {
     bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
   }

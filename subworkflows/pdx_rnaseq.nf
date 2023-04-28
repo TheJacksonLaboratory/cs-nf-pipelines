@@ -5,7 +5,6 @@ nextflow.enable.dsl=2
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {READ_GROUPS as READ_GROUPS_HUMAN;
          READ_GROUPS as READ_GROUPS_MOUSE} from "${projectDir}/modules/utility_modules/read_groups"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
@@ -33,8 +32,7 @@ workflow PDX_RNASEQ {
     JAX_TRIMMER(read_ch)
 
     if (params.read_type == 'PE') {
-      FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
-      xenome_input = FASTQ_PAIR.out.paired_fastq
+      xenome_input = JAX_TRIMMER.out.trimmed_fastq
     } else {
       xenome_input = JAX_TRIMMER.out.trimmed_fastq
     }

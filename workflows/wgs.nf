@@ -10,7 +10,6 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
@@ -103,9 +102,7 @@ workflow WGS {
   READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
   if (params.read_type == 'PE') {
-    FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
-    xenome_input = 
-    bwa_mem_mapping = FASTQ_PAIR.out.paired_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
   } else {
     bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
   }
