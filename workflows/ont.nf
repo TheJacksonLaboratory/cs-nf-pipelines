@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // import modules
 //include {help} from '../bin/help/rnaseq'
 
+include {PARAM_LOG} from "${projectDir}/bin/log/ont"
 include {NANOSTAT as NANOSTAT_PREFILT;
          NANOSTAT as NANOSTAT_POSTFILT} from "${projectDir}/modules/nanostat/nanostat"
 include {PORECHOP} from "${projectDir}/modules/porechop/porechop"
@@ -32,6 +33,8 @@ include {PYTHON_ANNOT_ON_TARGET} from "${projectDir}/modules/python/python_annot
 
 // log paramater info
 //param_log()
+
+PARAM_LOG()
 
 workflow ONT {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null

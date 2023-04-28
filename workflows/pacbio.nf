@@ -3,6 +3,7 @@ nextflow.enable.dsl=2
 
 // import modules
 //include {help} from '../bin/help/rnaseq'
+include {PARAM_LOG} from "${projectDir}/bin/log/pacbio"
 include {PBMM2_INDEX} from "${projectDir}/modules/pbmm2/pbmm2_index"
 include {PBMM2_CALL} from "${projectDir}/modules/pbmm2/pbmm2_call"
 include {PBSV_DISCOVER} from "${projectDir}/modules/pbsv/pbsv_discover"
@@ -17,7 +18,7 @@ include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_anno
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
 // log paramater info
-//param_log()
+PARAM_LOG()
 
 workflow PACBIO {
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null

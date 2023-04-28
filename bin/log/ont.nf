@@ -2,21 +2,28 @@ def PARAM_LOG(){
     log.info """
 ______________________________________________________
 
-              PACBIO SV PARAMETER LOG
+            OXFORD NANOPORE SV PARAMETER LOG
 
 --comment: ${params.comment}
 
 Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
---pbmode               ${params.pbmode}
 --fasta                ${params.fasta}
 --fastq1               ${params.fastq1}
+--bam                  ${params.bam}
 --names                ${params.names}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}
 -c                     ${params.config}
---pbsv_tandem          ${params.pbsv_tandem}
+--quality              ${params.quality}
+--length               ${params.length} 
+--headcrop             ${params.headcrop}
+--tailcrop             ${params.tailcrop}
+--tandem_repeats       ${params.tandem_repeats}
+--targ_chr             ${params.targ_chr}
+--targ_start           ${params.targ_start}
+--targ_end             ${params.targ_end}
 --surv_dist            ${params.surv_dist}
 --surv_supp            ${params.surv_supp}
 --surv_type            ${params.surv_type}
