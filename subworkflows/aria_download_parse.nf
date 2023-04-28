@@ -99,8 +99,6 @@ workflow FILE_DOWNLOAD {
 
             Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
             do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
-
-            The concatenation step for R1/R2 should be fairly quick. 
         */
     emit:
         read_meta_ch
