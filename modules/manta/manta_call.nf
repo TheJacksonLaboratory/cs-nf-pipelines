@@ -7,7 +7,7 @@ process MANTA_CALL {
 
     container 'quay.io/biocontainers/manta:1.6.0--py27_0'
 
-    publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}_mantaSort.vcf", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls' }", pattern: "${sampleID}_mantaSort.vcf", mode: 'copy'
     
     input:
         tuple val(sampleID), file(bam), file(bai)

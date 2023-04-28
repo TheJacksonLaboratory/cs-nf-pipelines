@@ -15,11 +15,10 @@ process DELLY_CALL {
         tuple val(sampleID), file("${sampleID}_Delly.bcf"), emit: delly_bcf
 
     script:
-        exclude_regions = "/ref_data/mouse.mm10.excl.tsv"
         """
         delly call \
             -q 40 \
-            -x ${exclude_regions} \
+            -x ${params.exclude_regions} \
             -s 500 \
             -o ${sampleID}_Delly.bcf \
             -g ${fasta} ${bam}

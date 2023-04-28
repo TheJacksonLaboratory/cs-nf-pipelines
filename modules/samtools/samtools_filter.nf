@@ -6,7 +6,7 @@ process SAMTOOLS_FILTER {
     time '10:00:00'
     container 'quay.io/biocontainers/samtools:1.10--h9402c20_2'
 
-    publishDir "${params.pubdir}/alignments", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments' : 'alignments' }", mode:'copy'
 
     input:
         tuple val(sampleID), file(bam)

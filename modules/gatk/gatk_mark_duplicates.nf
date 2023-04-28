@@ -6,7 +6,7 @@ process GATK_MARK_DUPLICATES {
     time '10:00:00'
     container 'quay.io/biocontainers/gatk4:4.1.8.1--py38_0'
 
-    publishDir "${params.pubdir}/alignments", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments' : 'alignments'}", mode:'copy'
 
     input:
         tuple val(sampleID), file(bam)

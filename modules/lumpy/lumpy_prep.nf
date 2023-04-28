@@ -7,7 +7,7 @@ process LUMPY_PREP {
 
     container 'quay.io/jaxcompsci/lumpy-ref_data:0.3.1--2'
 
-    publishDir "${params.pubdir}/alignments/mapped_lumpy", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments/mapped_lumpy' : 'alignments/mapped_lumpy'}", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
     
     input:
         tuple val(sampleID), file(bam), file(bai)
