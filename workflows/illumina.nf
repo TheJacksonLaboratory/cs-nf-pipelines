@@ -1,8 +1,8 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
 
-//include {param_log} from
-include {FILTER_TRIM} from "${projectDir}/modules/utility_modules/filter_trim"
+include {PARAM_LOG} from "${projectDir}/bin/log/illumina"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {BWA_INDEX} from "${projectDir}/modules/bwa/bwa_index"
 include {SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -63,7 +63,7 @@ workflow ILLUMINA {
                              .map { it -> tuple(it[0], it[1])}
     }
 
-    
+    PARAM_LOG()
 
     // Index reference fasta
     SAMTOOLS_FAIDX(ch_fasta)
@@ -81,14 +81,14 @@ workflow ILLUMINA {
         }
 
         // Filter and trim reads
-        //FILTER_TRIM(fq_reads)
+        FASTP(fq_reads)
         
         // Get read groups ID from FASTQ file
-        READ_GROUPS(fq_reads)
+        READ_GROUPS(FASTP.out.trimmed_fastq)
 
         // Map reads to reference
         //bwa_mem_input = FILTER_TRIM.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-        bwa_mem_input = fq_reads.join(READ_GROUPS.out.read_groups)
+        bwa_mem_input = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         BWA_MEM(bwa_mem_input, SAMTOOLS_FAIDX.out.fasta_fai, ch_bwa_index)
 
         // Sort and compress to BAM
