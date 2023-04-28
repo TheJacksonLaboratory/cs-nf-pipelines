@@ -8,7 +8,7 @@ process PBSV_CALL {
 
     container 'quay.io/jaxcompsci/pbsv-td_refs:2.8.0--h9ee0642_0'
 
-    publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}.pbsv_calls.vcf", mode: "copy"
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls'}", pattern: "${sampleID}.pbsv_calls.vcf", mode: "copy"
 
     input:
         tuple val(sampleID), file(pbsv_svsig)

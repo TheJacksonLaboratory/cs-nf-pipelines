@@ -8,13 +8,13 @@ process PYTHON_ANNOT_ON_TARGET {
 
     container 'quay.io/biocontainers/pysam:0.15.2--py36h02877da_7'
 
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : ''}", mode:'copy'
+
     input:
         tuple val(sampleID), path(vcf)
     output:
         tuple val(sampleID), path("${sampleID}_ONT_NS_struct_var.vcf"), emit: vcf
-    
-    publishDir "${params.pubdir}", mode:'copy'
-    
+     
     script:
 
     if (params.workflow == "ont" && params.targ_chr && params.targ_start && params.targ_end)

@@ -7,7 +7,7 @@ process SNIFFLES {
 
     container 'quay.io/biocontainers/sniffles:2.0.7--pyhdfd78af_0'
 
-    publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}.sniffles_sorted_prefix.vcf", mode: "copy"
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls'}", pattern: "${sampleID}.sniffles_sorted_prefix.vcf", mode: "copy"
 
     input:
         tuple val(sampleID), file(bam), file(index)

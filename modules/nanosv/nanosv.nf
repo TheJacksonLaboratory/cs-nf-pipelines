@@ -7,7 +7,7 @@ process NANOSV {
 
     container 'quay.io/jaxcompsci/nanosv:1.2.4'
 
-    publishDir "${params.pubdir}/unmerged_calls", pattern: "${sampleID}.nanosv_sorted_prefix.vcf", mode: "copy"
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls'}", pattern: "${sampleID}.nanosv_sorted_prefix.vcf", mode: "copy"
 
     input:
         tuple val(sampleID), file(bam), file(index)

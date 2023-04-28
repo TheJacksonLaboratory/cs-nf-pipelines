@@ -5,7 +5,7 @@ process NANOQC{
     memory 24.GB
     time "24:00:00"
 
-    publishDir "${params.pubdir}/stats", pattern: "*_porechop_1st_nanoQC", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "*_porechop_1st_nanoQC", mode:'copy'
 
     container 'quay.io/biocontainers/nanoqc:0.9.4--py_0'
 

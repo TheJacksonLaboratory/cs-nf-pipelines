@@ -5,7 +5,7 @@ process NANOSTAT{
     memory 24.GB
     time "24:00:00"
 
-    publishDir "${params.pubdir}/stats", pattern: "nanostat*", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "nanostat*", mode:'copy'
 
     container 'quay.io/biocontainers/nanostat:1.6.0--pyhdfd78af_0'
 
