@@ -28,7 +28,7 @@ workflow CONCATENATE_LOCAL_FILES {
                 concat: it[1] > 1
                 pass:  it[1] == 1
             }
-
+            group_size = 2
         } else {
 
             temp_map = ch_input_sample
@@ -45,7 +45,8 @@ workflow CONCATENATE_LOCAL_FILES {
             .branch {
                 concat: it[1] > 1
                 pass:  it[1] == 1
-            }        
+            }
+            group_size = 1 
         }
 
         no_concat_samples = concat_input.pass
@@ -60,7 +61,7 @@ workflow CONCATENATE_LOCAL_FILES {
 
         read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
         .mix(no_concat_samples)
-        .groupTuple(by: [0,2]) // sampleID, meta
+        .groupTuple(by: [0,2], size: group_size) // sampleID, meta
         .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> file(a).getName() <=> file(b).getName() } ) ) }
        
         /*

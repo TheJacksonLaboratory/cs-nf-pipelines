@@ -18,7 +18,7 @@ def extract_csv(csv_file) {
                 log.error "Missing field in csv file header. The csv file must have a field named 'sampleID'."
                 System.exit(1)
             }
-            [[row.patient.toString(), row.sample.toString()], row]
+            [row.sampleID.toString(), row]
         }.groupTuple()
         .map{ meta, rows ->
             size = rows.size()
@@ -40,10 +40,11 @@ def extract_csv(csv_file) {
         */
 
         meta.id = row.sampleID.toString()
-
         /* 
             NOTE: Additional ID parsing could be added here. For example a concatenation of patient and sample, if those fields were added to the csv sheet. 
         */
+        meta.size = size
+        // defines the number of lanes for each sample. 
 
         // join meta to fastq
 

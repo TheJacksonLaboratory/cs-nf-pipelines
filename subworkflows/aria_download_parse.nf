@@ -32,12 +32,14 @@ workflow FILE_DOWNLOAD {
                 R2: tuple(it[0], it[1], 'R2', it[3])
             }
             .mix()
+            group_size = 2
         } else {
             aria_download_input = ch_input_sample
             .multiMap { it ->
                 R1: tuple(it[0], it[1], 'R1', it[2])
             }
             .mix()
+            group_size = 1
         }
         /* 
             remap the data to individual R1 / R2 tuples. 
@@ -53,10 +55,11 @@ workflow FILE_DOWNLOAD {
                             .map { it ->
                                 def meta = [:]
                                 meta.sampleID   = it[1].sampleID
-                                [it[0], it[1].lane, meta, it[2], it[3]] // sampleID, laneID, meta, read_ID:[R1|R2], file
-                            }    
-                            .groupTuple(by: [0,2,3]) // sampleID, meta, read_ID
-                            .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4])} // sampleID, num_lanes, meta, read_ID:[R1|R2], file
+                                [it[0], it[1].lane, meta, it[2], it[3], it[1].size] // sampleID, laneID, meta, read_ID:[R1|R2], file, number_of_lanes
+                            }
+                            .map {  sampleID, laneID, meta, readID, file, size -> tuple( groupKey([sampleID, meta, readID], size), laneID, file )  }
+                            .groupTuple() // controlled by group key: [sampleID, meta, read_ID] 
+                            .map{ it -> tuple(it[0][0], it[1].size(), it[0][1], it[0][2], it[2])} // sampleID, num_lanes, meta, read_ID:[R1|R2], file
                             .branch{
                                 concat: it[1] > 1
                                 pass:  it[1] == 1
@@ -70,6 +73,10 @@ workflow FILE_DOWNLOAD {
             Metadata inclusion here is for future expansion. As implimented above, metadata is redundant to sampleID in `it[0]`. 
             However, if additional metadata are added to sample sheets, those metadata can be added and tracked above.
 
+            groupTuple size is dynamically defined by metadata field 'size' i.e., the number of lanes per sample. 
+
+            See: https://www.nextflow.io/docs/latest/operator.html#grouptuple and the note about dynamic group size. 
+    
         */
 
         no_concat_samples = concat_input.pass
@@ -83,7 +90,7 @@ workflow FILE_DOWNLOAD {
 
         read_meta_ch = CONCATENATE_READS_SAMPLESHEET.out.concat_fastq
         .mix(no_concat_samples)
-        .groupTuple(by: [0,2]) // sampleID, meta
+        .groupTuple(by: [0,2], size: group_size) // sampleID, meta
         .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
 
         /*
@@ -92,6 +99,8 @@ workflow FILE_DOWNLOAD {
 
             Reads are remapped to read_ch and meta is placed in meta_ch. Input tuples for existing modules 
             do not expect 'meta' in the tuple. Example expected input tuple: [sampleID, [reads]]
+
+            The concatenation step for R1/R2 should be fairly quick. 
         */
     emit:
         read_meta_ch
