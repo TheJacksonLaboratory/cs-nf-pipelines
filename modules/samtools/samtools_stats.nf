@@ -7,9 +7,21 @@ process SAMTOOLS_STATS {
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/samtools' : 'samtools' }", pattern:"*.flagstat", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/samtools' : 'samtools' }", pattern:"*.idxstats", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/samtools' : 'samtools' }", pattern:"*.stats", mode:'copy'
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+  }, pattern: "*.flagstat", mode: 'copy'
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+  }, pattern: "*.idxstats", mode: 'copy'
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+  }, pattern: "*.stat", mode: 'copy'
+
 
   input:
   tuple val(sampleID), file(bam)

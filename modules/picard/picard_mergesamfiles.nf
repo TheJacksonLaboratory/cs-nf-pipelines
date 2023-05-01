@@ -7,7 +7,11 @@ process PICARD_MERGESAMFILES {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
+  }, pattern: "*.bam", mode: 'copy', enabled: params.keep_intermediate
+
 
   input:
   tuple val(sampleID), file(bam)

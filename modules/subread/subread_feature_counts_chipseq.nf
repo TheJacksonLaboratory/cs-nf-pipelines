@@ -5,7 +5,7 @@ process SUBREAD_FEATURECOUNTS {
     memory 4.GB
     time '10:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? antibody+'/subread' : 'subread' }", pattern: "*.txt*", mode: 'copy'  
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'ip/'+antibody+'/subread' : 'subread' }", pattern: "*.txt*", mode: 'copy'  
   
     container 'quay.io/biocontainers/subread:2.0.1--hed695b0_0'
 
