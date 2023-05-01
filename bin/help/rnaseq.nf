@@ -20,8 +20,6 @@ Parameter | Default | Description
 --pdx | false | Options: true or false. If 'true' Xenome is run to remove mouse reads from samples. 
 --xenome_prefix | '/projects/compsci/omics_share/human/GRCh38/supporting_files/xenome/trans_human_GRCh38_84_NOD_based_on_mm10_k25' | Pre-compiled Xenome classification index files. Used if PDX analysis is specified. 
 
---read_prep | 'reverse_stranded' | Options: 'reverse_stranded', 'forward_stranded' or 'non_stranded'. This determines how RNA quantification is done, and statistics are calculated. It is based on the library strandedness. 
-
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
 --hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
 

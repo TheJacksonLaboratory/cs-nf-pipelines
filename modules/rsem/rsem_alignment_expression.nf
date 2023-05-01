@@ -2,12 +2,11 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tag "$sampleID"
 
   cpus 12
-  memory { 60.GB * task.attempt }
-  time { 24.h * task.attempt }
+  memory 60.GB
+  time 24.h
   errorStrategy 'finish'
-  maxRetries 1
 
-    container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
+  container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy', enabled: params.rsem_aligner == "bowtie2"
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
@@ -15,7 +14,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.sorted.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), path(reads)
+  tuple val(sampleID), path(reads), val(strand_setting)
   path(rsem_ref_files)
   val(rsem_ref_prefix)
 
@@ -33,15 +32,15 @@ process RSEM_ALIGNMENT_EXPRESSION {
  
   script:
 
-  if (params.read_prep == "reverse_stranded") {
+  if (strand_setting == "reverse_stranded") {
     prob="--forward-prob 0"
   }
 
-  if (params.read_prep == "forward_stranded") {
+  if (strand_setting == "forward_stranded") {
     prob="--forward-prob 1"
   }
 
-  if (params.read_prep == "non_stranded") {
+  if (strand_setting == "non_stranded") {
     prob="--forward-prob 0.5"
   }
 

@@ -14,6 +14,7 @@ include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
@@ -143,8 +144,11 @@ workflow RNASEQ {
     
     FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
+    // Check strand setting
+    CHECK_STRANDEDNESS(JAX_TRIMMER.out.trimmed_fastq)
+
     // Step 2: RSEM
-    RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files, params.rsem_ref_prefix)
+    RSEM_ALIGNMENT_EXPRESSION(rsem_input.join(CHECK_STRANDEDNESS.out.strand_setting), rsem_ref_files, params.rsem_ref_prefix)
 
     //Step 3: Get Read Group Information
     READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "picard")
@@ -158,7 +162,7 @@ workflow RNASEQ {
     // Step 5: Picard Alignment Metrics
     PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
     
-    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam, params.ref_flat, params.ribo_intervals)
+    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam.join(CHECK_STRANDEDNESS.out.strand_setting), params.ref_flat, params.ribo_intervals)
 
     // Step 6: Summary Stats
 

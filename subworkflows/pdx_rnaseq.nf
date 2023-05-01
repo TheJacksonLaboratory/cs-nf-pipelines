@@ -7,6 +7,7 @@ include {READ_GROUPS as READ_GROUPS_HUMAN;
          READ_GROUPS as READ_GROUPS_MOUSE} from "${projectDir}/modules/utility_modules/read_groups"
 include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
          FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
@@ -42,6 +43,8 @@ workflow PDX_RNASEQ {
     // QC is assess on all reads. Mouse/human is irrelevant here. 
     FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
+    CHECK_STRANDEDNESS(JAX_TRIMMER.out.trimmed_fastq)
+
     // Xenome Classification
     XENOME_CLASSIFY(xenome_input)
 
@@ -50,10 +53,12 @@ workflow PDX_RNASEQ {
     FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
 
     human_reads = FASTQ_SORT_HUMAN.out.sorted_fastq
-    .map{it -> tuple(it[0]+'_human', it[1])}
+    .join(CHECK_STRANDEDNESS.out.strand_setting)
+    .map{it -> tuple(it[0]+'_human', it[1], it[2])}
 
     mouse_reads = FASTQ_SORT_MOUSE.out.sorted_fastq
-    .map{it -> tuple(it[0]+'_mouse', it[1])}
+        .join(CHECK_STRANDEDNESS.out.strand_setting)
+    .map{it -> tuple(it[0]+'_mouse', it[1], it[2])}
 
     // Step 2: RSEM Human and Stats: 
 
@@ -68,7 +73,7 @@ workflow PDX_RNASEQ {
     RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, rsem_ref_files, params.rsem_ref_prefix_human)
     
     // Picard Alignment Metrics
-    READ_GROUPS_HUMAN(human_reads, "picard")
+    READ_GROUPS_HUMAN(human_reads.map{it -> tuple(it[0], it[1])}, "picard")
 
     add_replace_groups_human = READ_GROUPS_HUMAN.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.bam)
     PICARD_ADDORREPLACEREADGROUPS_HUMAN(add_replace_groups_human)
@@ -77,7 +82,11 @@ workflow PDX_RNASEQ {
 
     // Picard Alignment Metrics
     PICARD_SORTSAM_HUMAN(PICARD_REORDERSAM_HUMAN.out.bam)
-    PICARD_COLLECTRNASEQMETRICS_HUMAN(PICARD_SORTSAM_HUMAN.out.bam, params.ref_flat_human, params.ribo_intervals_human)
+
+    human_qc_input = PICARD_SORTSAM_HUMAN.out.bam.join(human_reads)
+                     .map{it -> [it[0], it[1], it[3]]}
+                     
+    PICARD_COLLECTRNASEQMETRICS_HUMAN(human_qc_input, params.ref_flat_human, params.ribo_intervals_human)
 
     // Step 3 RSEM Mouse and Stats:
     if (params.rsem_aligner == "bowtie2") {
@@ -91,7 +100,7 @@ workflow PDX_RNASEQ {
     RSEM_ALIGNMENT_EXPRESSION_MOUSE(mouse_reads, rsem_ref_files, params.rsem_ref_prefix_mouse)
     
     // Step 4: Picard Alignment Metrics
-    READ_GROUPS_MOUSE(mouse_reads, "picard")
+    READ_GROUPS_MOUSE(mouse_reads.map{it -> tuple(it[0], it[1])}, "picard")
 
     add_replace_groups_mouse = READ_GROUPS_MOUSE.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.bam)
     PICARD_ADDORREPLACEREADGROUPS_MOUSE(add_replace_groups_mouse)
@@ -100,7 +109,11 @@ workflow PDX_RNASEQ {
 
     // Step 5: Picard Alignment Metrics
     PICARD_SORTSAM_MOUSE(PICARD_REORDERSAM_MOUSE.out.bam)
-    PICARD_COLLECTRNASEQMETRICS_MOUSE(PICARD_SORTSAM_MOUSE.out.bam, params.ref_flat_mouse, params.ribo_intervals_mouse)
+
+    mouse_qc_input = PICARD_SORTSAM_MOUSE.out.bam.join(mouse_reads)
+                     .map{it -> [it[0], it[1], it[3]]}
+ 
+    PICARD_COLLECTRNASEQMETRICS_MOUSE(mouse_qc_input, params.ref_flat_mouse, params.ribo_intervals_mouse)
 
 
     ch_multiqc_files = Channel.empty()
