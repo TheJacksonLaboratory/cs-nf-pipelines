@@ -267,11 +267,11 @@ inv_exons <- read_delim(paste(sample_name, "inv.exons.bed", sep="."), delim = "\
 ins_full <- ins %>%
     mutate(., sv_type = "insertion") %>%
     {if(nrow(ins_s) != 0) 
-      mutate(., sanger = if_else(sv_name %in% ins_s$sv_name,  "N", "Y"))
+      mutate(., sanger = if_else(sv_name %in% ins_s$sv_name,  "Y", "N"))
      else(mutate(., sanger = "N")) } %>%
     {if(nrow(ins_e) != 0)
       mutate(., ensembl = if_else(sv_name %in% ins_e$sv_name, 
-                                  "N", "Y"))
+                                  "Y", "N"))
       else(mutate(., ensembl = "N")) } %>%
     {if(nrow(ins_genes) != 0)
       left_join(., select(ins_genes, sv_name, gene))
@@ -287,11 +287,11 @@ ins_full <- ins %>%
 del_full <- del %>%
     mutate(., sv_type = "deletion") %>%
     {if(nrow(del_s) != 0) 
-      mutate(., sanger = if_else(sv_name %in% del_s$sv_name,  "N", "Y"))
+      mutate(., sanger = if_else(sv_name %in% del_s$sv_name,  "Y", "N"))
      else(mutate(., sanger = "N")) } %>%
     {if(nrow(del_e) != 0)
       mutate(., ensembl = if_else(sv_name %in% del_e$sv_name, 
-                                  "N", "Y"))
+                                  "Y", "N"))
       else(mutate(., ensembl = "N")) } %>%
     {if(nrow(del_genes) != 0)
       left_join(., select(del_genes, sv_name, gene))
@@ -309,7 +309,7 @@ tra_full <- tra %>%
     mutate(., sanger = NA) %>%
     {if(nrow(tra_e) != 0)
       mutate(., ensembl = if_else(sv_name %in% tra_e$sv_name, 
-                                  "N", "Y"))
+                                  "Y", "N"))
       else(mutate(., ensembl = "N")) } %>%
     {if(nrow(tra_genes) != 0)
       left_join(., select(tra_genes, sv_name, gene))
@@ -327,7 +327,7 @@ inv_full <- inv %>%
     mutate(., sanger = NA) %>%
     {if(nrow(inv_e) != 0)
       mutate(., ensembl = if_else(sv_name %in% inv_e$sv_name, 
-                                  "N", "Y"))
+                                  "Y", "N"))
       else(mutate(., ensembl = "N")) } %>%
     {if(nrow(inv_genes) != 0)
       left_join(., select(inv_genes, sv_name, gene))
@@ -345,7 +345,7 @@ dup_full <- dup %>%
     mutate(., sanger = NA) %>%
     {if(nrow(dup_e) != 0)
       mutate(., ensembl = if_else(sv_name %in% dup_e$sv_name, 
-                                  "N", "Y"))
+                                  "Y", "N"))
       else(mutate(., ensembl = "N")) } %>%
     {if(nrow(dup_genes) != 0)
       left_join(., select(dup_genes, sv_name, gene))
