@@ -48,7 +48,6 @@ include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 
 include {SUBREAD_FEATURECOUNTS} from '../modules/subread/subread_feature_counts_chipseq'
 include {DESEQ2_QC} from '../modules/utility_modules/deseq2_qc'
-include {IGV} from '../modules/utility_modules/igv'
 include {MULTIQC} from '../modules/multiqc/multiqc'
 
 
@@ -285,10 +284,6 @@ workflow CHIPSEQ {
 
   // Step 39 : Differential analysis with DESeq2
   DESEQ2_QC(SUBREAD_FEATURECOUNTS.out.counts, ch_deseq2_pca_header, ch_deseq2_clustering_header)
-
-  // Step 40 : Create IGV session file
-  IGV(ch_fasta, UCSC_BEDGRAPHTOBIGWIG.out.igv_txt.collect(), FRIP_SCORE.out.txt.collect(), MACS2_CONSENSUS.out.igv_txt.collect())
-
 
   // Create channels for multi input files
   ch_multiqc_files = Channel.empty()

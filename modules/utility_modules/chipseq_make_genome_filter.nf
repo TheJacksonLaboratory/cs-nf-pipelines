@@ -1,6 +1,6 @@
 process MAKE_GENOME_FILTER {
     tag "$fai"
-    publishDir "${params.pubdir}/genome", mode: 'copy'
+    publishDir "${params.pubdir}/genome_info", mode: 'copy'
 
     input:
     file(fai)
@@ -18,4 +18,3 @@ process MAKE_GENOME_FILTER {
     $blacklist_filter > ${fasta}.include_regions.bed
     """
 }
-

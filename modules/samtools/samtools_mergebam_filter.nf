@@ -15,7 +15,6 @@ process SAMTOOLS_MERGEBAM_FILTER {
   tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-  log.info "----- Samtools Filtering Merge Bam on: ${sampleID} -----"
   // Setup for chipseq pipeline
 
   prefix = params.read_type == 'SE' ? "${sampleID}.mLb.clN" : "${sampleID}.mLb.flT"

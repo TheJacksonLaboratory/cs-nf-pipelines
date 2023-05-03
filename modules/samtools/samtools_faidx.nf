@@ -16,7 +16,6 @@ process SAMTOOLS_FAIDX {
   file("*.fai")
 
   script:
-  log.info "----- Samtools Faidx Running -----"
 
   """
     samtools faidx ${fasta}
