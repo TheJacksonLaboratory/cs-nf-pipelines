@@ -28,7 +28,6 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---read_prep                  ${params.read_prep}
 --min_pct_hq_reads           ${params.min_pct_hq_reads}
 --seed_length                ${params.seed_length}
 
@@ -80,7 +79,6 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---read_prep                  ${params.read_prep}
 --min_pct_hq_reads           ${params.min_pct_hq_reads}
 --seed_length                ${params.seed_length}
 
@@ -134,7 +132,6 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
@@ -174,7 +171,6 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
@@ -213,7 +209,6 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
@@ -249,7 +244,6 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
