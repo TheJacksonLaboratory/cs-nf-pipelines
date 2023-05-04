@@ -8,8 +8,16 @@ process PICARD_MARKDUPLICATES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   // save if mouse and wes or save if keep intermediate
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
+  }, pattern: "*.bam", mode: 'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'picard'}"
+  }, pattern: "*.txt", mode: 'copy'
+
 
   input:
   tuple val(sampleID), file(bam)
@@ -20,7 +28,6 @@ process PICARD_MARKDUPLICATES {
   tuple val(sampleID), file("*.txt"), emit: dedup_metrics
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

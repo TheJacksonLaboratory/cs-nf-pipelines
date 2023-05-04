@@ -7,7 +7,12 @@ process FASTQC {
   time '10:00:00'
 
   container 'quay.io/biocontainers/fastqc:0.11.9--hdfd78af_1'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
+  }, pattern: "*_fastqc.{zip,html}", mode: 'copy'
+
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -17,8 +22,6 @@ process FASTQC {
 
 
   script:
-  log.info "----- FASTQC Running on: ${sampleID} -----"
-
   if (params.workflow == "chipseq" && params.read_type == 'SE')
   """
     [ ! -f  ${sampleID}.fastq.gz ] && ln -s ${fq_reads} ${sampleID}.fastq.gz

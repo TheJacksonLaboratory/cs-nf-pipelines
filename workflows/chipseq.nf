@@ -48,7 +48,6 @@ include {ANNOTATE_BOOLEAN_PEAKS} from '../modules/homer/annotate_boolean_peaks'
 
 include {SUBREAD_FEATURECOUNTS} from '../modules/subread/subread_feature_counts_chipseq'
 include {DESEQ2_QC} from '../modules/utility_modules/deseq2_qc'
-include {IGV} from '../modules/utility_modules/igv'
 include {MULTIQC} from '../modules/multiqc/multiqc'
 
 
@@ -138,7 +137,6 @@ workflow CHIPSEQ {
   // Step 9: Samtools Stats
   SAMTOOLS_STATS(SORT.out[0])
 
-
   // Step 10: Merge BAM files
   ch_sort_bam_merge = SORT.out
 
@@ -151,7 +149,6 @@ workflow CHIPSEQ {
 
   // ch_sort_bam_merge = [sampleID, [bam, index]]
   PICARD_MERGESAMFILES(ch_sort_bam_merge)
-
 
   // Step 11: Mark Duplicates
   PICARD_MARKDUPLICATES(PICARD_MERGESAMFILES.out.bam)
@@ -285,10 +282,6 @@ workflow CHIPSEQ {
 
   // Step 39 : Differential analysis with DESeq2
   DESEQ2_QC(SUBREAD_FEATURECOUNTS.out.counts, ch_deseq2_pca_header, ch_deseq2_clustering_header)
-
-  // Step 40 : Create IGV session file
-  IGV(ch_fasta, UCSC_BEDGRAPHTOBIGWIG.out.igv_txt.collect(), FRIP_SCORE.out.txt.collect(), MACS2_CONSENSUS.out.igv_txt.collect())
-
 
   // Create channels for multi input files
   ch_multiqc_files = Channel.empty()

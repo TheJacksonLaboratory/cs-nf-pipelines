@@ -9,7 +9,11 @@ process BWA_MEM {
 
   container 'quay.io/biocontainers/bwakit:0.7.17.dev1--hdfd78af_1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy', enabled: params.keep_intermediate
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID : 'bwa_mem'}"
+  }, pattern: "*.sam", mode: 'copy', enabled: params.keep_intermediate
+
 
   input:
   tuple val(sampleID), file(fq_reads), file(read_groups)
@@ -18,8 +22,6 @@ process BWA_MEM {
   tuple val(sampleID), file("*.sam"), emit: sam
 
   script:
-  log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
-
   if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"
     }

@@ -5,7 +5,11 @@ process DEEPTOOLS_PLOTPROFILE {
     memory 10.GB
     time '04:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/deeptools' : 'deeptools' }", pattern: "*.pdf", mode: 'copy'
+    publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/deeptools' : 'deeptools'}"
+    }, pattern: "*.pdf", mode: 'copy'
+
 
     container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
 

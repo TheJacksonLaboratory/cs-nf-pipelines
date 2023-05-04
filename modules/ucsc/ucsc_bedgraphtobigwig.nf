@@ -5,7 +5,11 @@ process UCSC_BEDGRAPHTOBIGWIG {
     memory 10.GB
     time '04:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bigwig' : 'ucsc' }", pattern: "*.bigWig", mode: 'copy'
+    publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bigwig' : 'ucsc'}"
+    }, pattern: "*.bigWig", mode: 'copy'
+
     container 'quay.io/biocontainers/ucsc-bedgraphtobigwig:377--h446ed27_1'
 
     input:

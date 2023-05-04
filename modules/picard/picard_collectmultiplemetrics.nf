@@ -7,7 +7,11 @@ process PICARD_COLLECTMULTIPLEMETRICS {
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.CollectMultipleMetrics.*", mode:'copy'
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'picard'}"
+  }, pattern: "*.CollectMultipleMetrics.*", mode: 'copy'
+
 
   input:
   tuple val(sampleID), file(bam)

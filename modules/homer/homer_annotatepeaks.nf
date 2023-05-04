@@ -1,21 +1,11 @@
 process HOMER_ANNOTATEPEAKS {
-    tag "${ip} vs ${control}"
+    tag "${run_tag}"
     
     cpus 2
     memory 10.GB
     time '10:00:00'
 
-    //publishDir "${params.pubdir}/${ params.organize_by=='sample' ? ip+'_vs_'+control+'/macs2' : 'macs2' }", pattern: "*annotatePeaks.txt", mode: 'copy'
-
-    //def type = peak =~ /bed/ ? "antibody" : "ip+_vs_+control"
-    //"${params.pubdir}/${ params.organize_by=='sample' ? ${type}+'/macs2' : 'macs2'}"
-
-
-    publishDir {
-        def type = peak =~ /bed/ ? antibody : ip+'_vs_'+control
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+'/macs2' : 'macs2'}"
-    }, pattern: "*annotatePeaks.txt", mode: 'copy'
-
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/antibody_'+antibody+'/macs2' : 'macs2' }", pattern: "*annotatePeaks.txt", mode: 'copy'
 
     container 'quay.io/biocontainers/homer:4.11--pl526hc9558a2_3'
 
@@ -29,7 +19,9 @@ process HOMER_ANNOTATEPEAKS {
 
 
     script:
-    prefix = peak =~ /bed/ ?  "${antibody}.consensus_peaks" : "${ip}_peaks" 
+    prefix = peak =~ /bed/ ?  "${antibody}.consensus_peaks" : "${ip}_peaks"
+    run_tag = ip ? "${ip} vs ${control}" : "${antibody}"
+
     """
     annotatePeaks.pl \\
         $peak \\

@@ -5,7 +5,11 @@ process BEDTOOLS_GENOMECOV {
   memory 4.GB 
   time '04:00:00'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bigwig' : 'bedtools' }", pattern: "*.txt", mode: 'copy'
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples' : 'immuno_precip_samples') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+'/'+sampleID+'/bigwig' : 'bedtools'}"
+  }, pattern: "*.txt", mode: 'copy'
+
  
   container 'quay.io/jaxcompsci/bedtools-sv_refs:2.30.0--hc088bd4_0'
  
@@ -20,7 +24,6 @@ process BEDTOOLS_GENOMECOV {
 
 
   script:
-  log.info "----- Running bedtools genome coverage  on ${sampleID} -----"
   pe_fragment = params.read_type == 'SE' ? '' : '-pc'
   extend = (params.read_type == 'SE' && params.fragment_size > 0) ? "-fs ${params.fragment_size}" : ''
   """
