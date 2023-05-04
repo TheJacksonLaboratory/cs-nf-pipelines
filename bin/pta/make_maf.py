@@ -234,7 +234,8 @@ def get_variant_classification(consequences, type, ref, alt):
                                 'start_retained_variant' : 'Silent',
                                 'coding_sequence_variant' : 'Missense_Mutation',
                                 'splice_polypyrimidine_tract_variant' : 'Splice_Site',
-                                'splice_donor_5th_base_variant' : 'Splice_Site'
+                                'splice_donor_5th_base_variant' : 'Splice_Site',
+                                'splice_donor_region_variant' : 'Splice_Site'
                             } # https://useast.ensembl.org/info/genome/variation/prediction/predicted_data.html
     return consequences_to_class[consequences]
 

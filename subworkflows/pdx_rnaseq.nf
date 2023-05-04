@@ -6,6 +6,7 @@ include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {READ_GROUPS as READ_GROUPS_HUMAN;
          READ_GROUPS as READ_GROUPS_MOUSE} from "${projectDir}/modules/utility_modules/read_groups"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {FASTQ_SORT as FASTQ_SORT_HUMAN;
@@ -31,7 +32,9 @@ workflow PDX_RNASEQ {
     main:
     // Step 1: Qual_Stat, Get read group information, Run Xenome
     JAX_TRIMMER(read_ch)
-
+    
+    GET_READ_LENGTH(read_ch)
+    
     if (params.read_type == 'PE') {
       xenome_input = JAX_TRIMMER.out.trimmed_fastq
     } else {
@@ -51,24 +54,18 @@ workflow PDX_RNASEQ {
     FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
 
     human_reads = FASTQ_SORT_HUMAN.out.sorted_fastq
-    .join(CHECK_STRANDEDNESS.out.strand_setting)
-    .map{it -> tuple(it[0]+'_human', it[1], it[2])}
+                  .join(CHECK_STRANDEDNESS.out.strand_setting)
+                  .join(GET_READ_LENGTH.out.read_length)
+                  .map{it -> tuple(it[0]+'_human', it[1], it[2], it[3])}
 
     mouse_reads = FASTQ_SORT_MOUSE.out.sorted_fastq
-        .join(CHECK_STRANDEDNESS.out.strand_setting)
-    .map{it -> tuple(it[0]+'_mouse', it[1], it[2])}
+                  .join(CHECK_STRANDEDNESS.out.strand_setting)
+                  .join(GET_READ_LENGTH.out.read_length)
+                  .map{it -> tuple(it[0]+'_mouse', it[1], it[2], it[3])}
 
     // Step 2: RSEM Human and Stats: 
 
-    if (params.rsem_aligner == "bowtie2") {
-    rsem_ref_files = file("${params.rsem_ref_files_human}/bowtie2/*")
-    }
-    else if (params.rsem_aligner == "star") {
-    rsem_ref_files = file("${params.rsem_ref_files_human}/STAR/${params.rsem_star_prefix_human}/*")
-    }
-    else error "${params.rsem_aligner_human} is not valid, use 'bowtie2' or 'star'"
-
-    RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, rsem_ref_files, params.rsem_ref_prefix_human)
+    RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, params.rsem_ref_files_human, params.rsem_star_prefix_human, params.rsem_ref_prefix_human)
     
     // Picard Alignment Metrics
     READ_GROUPS_HUMAN(human_reads.map{it -> tuple(it[0], it[1])}, "picard")
@@ -87,15 +84,8 @@ workflow PDX_RNASEQ {
     PICARD_COLLECTRNASEQMETRICS_HUMAN(human_qc_input, params.ref_flat_human, params.ribo_intervals_human)
 
     // Step 3 RSEM Mouse and Stats:
-    if (params.rsem_aligner == "bowtie2") {
-    rsem_ref_files = file("${params.rsem_ref_files_mouse}/bowtie2/*")
-    }
-    else if (params.rsem_aligner == "star") {
-    rsem_ref_files = file("${params.rsem_ref_files_mouse}/STAR/${params.rsem_star_prefix_mouse}/*")
-    }
-    else error "${params.rsem_aligner_mouse} is not valid, use 'bowtie2' or 'star'"
 
-    RSEM_ALIGNMENT_EXPRESSION_MOUSE(mouse_reads, rsem_ref_files, params.rsem_ref_prefix_mouse)
+    RSEM_ALIGNMENT_EXPRESSION_MOUSE(mouse_reads, params.rsem_ref_files_mouse, params.rsem_star_prefix_mouse, params.rsem_ref_prefix_mouse)
     
     // Step 4: Picard Alignment Metrics
     READ_GROUPS_MOUSE(mouse_reads.map{it -> tuple(it[0], it[1])}, "picard")

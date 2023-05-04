@@ -6,6 +6,14 @@ println logo.show()
 
 def param_log(){
 
+if (params.rsem_aligner != "bowtie2" && params.rsem_aligner != "star") {
+  error "'--rsem_aligner': \"${params.rsem_aligner}\" is not valid, supported options are 'bowtie2' or 'star'" 
+}
+
+if (params.gen_org != "mouse" && params.gen_org != "human") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse' or 'human'" 
+}
+
 if (params.pdx && params.rsem_aligner=='bowtie2')
 log.info """
 RNASEQ PARAMETER LOG
@@ -260,6 +268,6 @@ ${workflow.commandLine}
 ______________________________________________________
 """
 
-else error "invalid parameters in ${params.gen_org} and/or ${params.rsem_aligner}"
+else error "Invalid parameters in '--gen_org': ${params.gen_org} and/or in '--rsem_aligner': ${params.rsem_aligner}. Supported options are 'mouse' or 'human' and 'bowtie2' or 'star'."
 
 }

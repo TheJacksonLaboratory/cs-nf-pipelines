@@ -14,8 +14,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.sorted.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), path(reads), val(strand_setting)
-  path(rsem_ref_files)
+  tuple val(sampleID), path(reads), val(strand_setting), val(read_length)
+  val(rsem_ref_path)
+  val(rsem_star_prefix)
   val(rsem_ref_prefix)
 
   output:
@@ -55,6 +56,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
     trimmedfq="${reads[0]}"
   }
   if (params.rsem_aligner == "bowtie2"){
+    
+    rsem_ref_files = file("${rsem_ref_path}/bowtie2/*").collect { "$it" }.join(' ')
+
     outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
     sort_command=''
@@ -65,9 +69,27 @@ process RSEM_ALIGNMENT_EXPRESSION {
     seed_length=""
     sort_command="samtools sort -@ ${task.cpus} -m ${task.memory.giga}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
+
+    if( read_length == '75') {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_75/*").collect { "$it" }.join(' ')
+    } else if( read_length == '100' || read_length == '101' ) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_100/*").collect { "$it" }.join(' ')
+    } else if( read_length == '125') {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_125/*").collect { "$it" }.join(' ')
+    } else if( read_length == '150' || read_length == '151' ) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_150/*").collect { "$it" }.join(' ')
+    } else {
+        log.info("\nUnsupported read length " + read_length + " in RSEM with STAR. RSEM will now fail gracefully.\n\n")
+        rsem_ref_files = 'error'
+    }
+
   }
 
   """
+  if [ "${rsem_ref_files}" = "error" ]; then exit 1; fi
+
+  ln -s ${rsem_ref_files} .
+
   rsem-calculate-expression -p $task.cpus \
   ${prob} \
   ${stype} \
