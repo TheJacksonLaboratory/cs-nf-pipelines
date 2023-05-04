@@ -12,7 +12,6 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
-include {FASTQ_PAIR} from "${projectDir}/modules/fastq-tools/fastq-pair"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -136,8 +135,7 @@ workflow RNASEQ {
     JAX_TRIMMER(read_ch)
     
     if (params.read_type == 'PE') {
-      FASTQ_PAIR(JAX_TRIMMER.out.trimmed_fastq)
-      rsem_input = FASTQ_PAIR.out.paired_fastq
+      rsem_input = JAX_TRIMMER.out.trimmed_fastq
     } else {
       rsem_input = JAX_TRIMMER.out.trimmed_fastq
     }
