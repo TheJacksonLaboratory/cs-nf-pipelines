@@ -9,12 +9,12 @@ process PICARD_MARKDUPLICATES {
 
   // save if mouse and wes or save if keep intermediate
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : '' 
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
   }, pattern: "*.bam", mode: 'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'picard'}"
   }, pattern: "*.txt", mode: 'copy'
 
@@ -28,7 +28,6 @@ process PICARD_MARKDUPLICATES {
   tuple val(sampleID), file("*.txt"), emit: dedup_metrics
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

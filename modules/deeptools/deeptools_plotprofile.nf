@@ -6,7 +6,7 @@ process DEEPTOOLS_PLOTPROFILE {
     time '04:00:00'
 
     publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : '' 
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/deeptools' : 'deeptools'}"
     }, pattern: "*.pdf", mode: 'copy'
 

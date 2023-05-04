@@ -1,5 +1,5 @@
 process SAMTOOLS_FAIDX {
-  tag "$sampleID"
+  tag "${fasta}"
 
   cpus 1
   memory 8.GB
@@ -7,7 +7,7 @@ process SAMTOOLS_FAIDX {
 
   container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-  publishDir "${params.pubdir}/genome", mode: 'copy'
+  publishDir "${params.pubdir}/genome_info", mode: 'copy'
 
   input:
   file(fasta)

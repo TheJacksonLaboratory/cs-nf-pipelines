@@ -137,7 +137,6 @@ workflow CHIPSEQ {
   // Step 9: Samtools Stats
   SAMTOOLS_STATS(SORT.out[0])
 
-
   // Step 10: Merge BAM files
   ch_sort_bam_merge = SORT.out
 
@@ -150,7 +149,6 @@ workflow CHIPSEQ {
 
   // ch_sort_bam_merge = [sampleID, [bam, index]]
   PICARD_MERGESAMFILES(ch_sort_bam_merge)
-
 
   // Step 11: Mark Duplicates
   PICARD_MARKDUPLICATES(PICARD_MERGESAMFILES.out.bam)

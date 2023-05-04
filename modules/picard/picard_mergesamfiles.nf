@@ -8,7 +8,7 @@ process PICARD_MERGESAMFILES {
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control/' : 'ip/') : ''
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
   }, pattern: "*.bam", mode: 'copy', enabled: params.keep_intermediate
 
@@ -20,7 +20,6 @@ process PICARD_MERGESAMFILES {
   tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-  log.info "----- Picard Merge Sam Files Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

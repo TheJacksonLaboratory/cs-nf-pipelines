@@ -6,7 +6,7 @@ process BEDTOOLS_GENOMECOV {
   time '04:00:00'
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control' : 'ip') : '' 
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples' : 'immuno_precip_samples') : '' 
       "${params.pubdir}/${ params.organize_by=='sample' ? type+'/'+sampleID+'/bigwig' : 'bedtools'}"
   }, pattern: "*.txt", mode: 'copy'
 
@@ -24,7 +24,6 @@ process BEDTOOLS_GENOMECOV {
 
 
   script:
-  log.info "----- Running bedtools genome coverage  on ${sampleID} -----"
   pe_fragment = params.read_type == 'SE' ? '' : '-pc'
   extend = (params.read_type == 'SE' && params.fragment_size > 0) ? "-fs ${params.fragment_size}" : ''
   """
