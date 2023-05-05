@@ -76,7 +76,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
         rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_75/*").collect { "$it" }.join(' ')
     } else if( read_length >= 90 && read_length <= 110 ) {
         rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_100/*").collect { "$it" }.join(' ')
-    } else if( read_length >= 115 && read_length <= '135' ) {
+    } else if( read_length >= 115 && read_length <= 135 ) {
         rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_125/*").collect { "$it" }.join(' ')
     } else if( read_length >= 140 && read_length <= 160 ) {
         rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_150/*").collect { "$it" }.join(' ')
