@@ -16,9 +16,7 @@ include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter"
 include {SAMTOOLS_SORT;
          SAMTOOLS_SORT as PAIR_SORT;
          SAMTOOLS_SORT as NAME_SORT} from "${projectDir}/modules/samtools/samtools_sort"
-
 include {SAMTOOLS_INDEX as PAIR_INDEX} from "${projectDir}/modules/samtools/samtools_index"
-
 include {SAMTOOLS_STATS;
          SAMTOOLS_STATS as SAMTOOLS_STATS_MD;
          SAMTOOLS_STATS as SAMTOOLS_STATS_PE;
@@ -40,20 +38,15 @@ include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/multiq
 include {DEEPTOOLS_PLOTFINGERPRINT} from "${projectDir}/modules/deeptools/deeptools_plotfingerprint"
 include {PEAK_CALLING_CHIPSEQ} from "${projectDir}/modules/macs2/macs2_peak_calling_chipseq"
 include {FRIP_SCORE} from "${projectDir}/modules/utility_modules/frip_score"
-
 include {HOMER_ANNOTATEPEAKS;
          HOMER_ANNOTATEPEAKS as CONSENSUS_PEAKS_ANNOTATE} from "${projectDir}/modules/homer/homer_annotatepeaks"
-
 include {PLOT_MACS2_QC} from "${projectDir}/modules/macs2/plot_macs2_qc"
 include {PLOT_HOMER_ANNOTATEPEAKS} from "${projectDir}/modules/homer/plot_homer_annotatepeaks"
 include {MACS2_CONSENSUS} from "${projectDir}/modules/macs2/macs2_consensus"
 include {ANNOTATE_BOOLEAN_PEAKS} from "${projectDir}/modules/homer/annotate_boolean_peaks"
-
 include {SUBREAD_FEATURECOUNTS} from "${projectDir}/modules/subread/subread_feature_counts_chipseq"
 include {DESEQ2_QC} from "${projectDir}/modules/utility_modules/deseq2_qc"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
-
-
 
 // help if needed
 if (params.help){
@@ -301,7 +294,6 @@ workflow CHIPSEQ {
 
   // Step 37 : Annotate boolean peaks
   ANNOTATE_BOOLEAN_PEAKS(MACS2_CONSENSUS.out.boolean_txt.join(CONSENSUS_PEAKS_ANNOTATE.out.txt))
-
   
   // Get BAM and SAF files for each antibody
 
