@@ -27,9 +27,9 @@ process SAMTOOLS_STATS {
     tuple val(sampleID), file(bam)
 
     output:
-    tuple val(sampleID), file("*.flagstat")
-    tuple val(sampleID), file("*.idxstats")
-    tuple val(sampleID), file("*.stats")
+    tuple val(sampleID), file("*.flagstat"), emit: flagstat
+    tuple val(sampleID), file("*.idxstats"), emit: idxstat
+    tuple val(sampleID), file("*.stats"), emit: stats
 
     script:
 

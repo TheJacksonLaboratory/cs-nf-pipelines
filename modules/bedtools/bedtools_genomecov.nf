@@ -15,12 +15,11 @@ process BEDTOOLS_GENOMECOV {
  
 
   input:
-  tuple val(sampleID), file(bam)
-  tuple val(sampleID), file(flagstat)
+  tuple val(sampleID), path(bam), path(flagstat)
 
   output:
-  tuple val(sampleID), file("*.bedGraph"), emit: bedgraph
-  tuple val(sampleID), file("*.txt"), emit: scale_factor
+  tuple val(sampleID), path("*.bedGraph"), emit: bedgraph
+  tuple val(sampleID), path("*.txt"), emit: scale_factor
 
 
   script:

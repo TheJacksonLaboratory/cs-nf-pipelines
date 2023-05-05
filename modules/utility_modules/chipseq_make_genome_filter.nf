@@ -7,8 +7,8 @@ process MAKE_GENOME_FILTER {
     file(blacklist)
 
     output:
-    file('*.bed')
-    file('*.sizes')
+    path('*.bed'), emit: bed
+    path('*.sizes'), emit: sizes
 
     script: 
     fasta="\$(echo ${fai} | sed 's/.fai//g')"

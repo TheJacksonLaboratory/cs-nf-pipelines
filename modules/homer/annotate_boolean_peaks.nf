@@ -8,8 +8,7 @@ process ANNOTATE_BOOLEAN_PEAKS {
     container 'ubuntu:20.04'
 
     input:
-    tuple val(antibody), file(boolean_txt)
-    tuple val(antibody), file(homer_peaks)
+    tuple val(antibody), path(boolean_txt), path(homer_peaks)
 
     output:
     path '*.boolean.annotatePeaks.txt', emit: annotate_peaks_txt

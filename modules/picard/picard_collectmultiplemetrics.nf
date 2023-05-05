@@ -22,7 +22,6 @@ process PICARD_COLLECTMULTIPLEMETRICS {
 
 
   script:
-  log.info "----- Picard CollectMultipleMetrics Running on: ${sampleID} -----"
   prefix = "${sampleID}.mLb.clN"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]

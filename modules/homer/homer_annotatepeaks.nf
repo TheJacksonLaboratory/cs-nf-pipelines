@@ -15,12 +15,13 @@ process HOMER_ANNOTATEPEAKS {
     file(gtf)
 
     output:
-    tuple val(ip), path("*annotatePeaks.txt"), emit: txt
+    tuple val(tuple_tag), path("*annotatePeaks.txt"), emit: txt
 
 
     script:
     prefix = peak =~ /bed/ ?  "${antibody}.consensus_peaks" : "${ip}_peaks"
     run_tag = ip ? "${ip} vs ${control}" : "${antibody}"
+    tuple_tag = ip ? ip : antibody
 
     """
     annotatePeaks.pl \\

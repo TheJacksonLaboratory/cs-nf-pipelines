@@ -12,10 +12,9 @@ process FRIP_SCORE {
     container 'quay.io/biocontainers/mulled-v2-8186960447c5cb2faa697666dc1e6d919ad23f3e:3127fcae6b6bdaf8181e21a26ae61231030a9fcb-0'
 
     input:
-    tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), file(ipbam), val(control), file(controlbam), file(ipflagstat)
-    tuple val(ip), file(peak)
-    file(peak_count_header)
-    file(frip_score_header)
+    tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), path(ipbam), val(control), path(controlbam), path(ipflagstat), path(peak)
+    path(peak_count_header)
+    path(frip_score_header)
 
     output:
     tuple val(ip), path("*.tsv"), emit : tsv

@@ -1,9 +1,13 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
   log.info """
-______________________________________________________
-
-                CHIPSEQ PARAMETER LOG
+CHIPSEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -54,13 +58,14 @@ ______________________________________________________
 --tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                CHIPSEQ PARAMETER LOG
+CHIPSEQ PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -110,6 +115,9 @@ ______________________________________________________
 --multiqc_config                ${params.multiqc_config}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

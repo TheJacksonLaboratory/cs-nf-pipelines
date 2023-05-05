@@ -17,7 +17,6 @@ process BAMTOOLS_FILTER {
   tuple val(sampleID), file("*.sorted.bam"), emit: bam
 
   script:
-  log.info "----- Bamtools filter Running on: ${sampleID} -----"
   prefix = params.read_type == 'SE' ? "${sampleID}.mLb.clN" : "${sampleID}.mLb.flT"
   """
   bamtools filter -in ${bam} -script ${bamtools_filter_config} -out ${prefix}.sorted.bam

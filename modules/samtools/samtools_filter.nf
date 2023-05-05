@@ -15,7 +15,6 @@ process SAMTOOLS_FILTER {
   tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-  log.info "----- Samtools Removing Unmapped on: ${sampleID} -----"
   // Exclude reads based on input bit flag.
 
   prefix = "${sampleID}.Lb"
