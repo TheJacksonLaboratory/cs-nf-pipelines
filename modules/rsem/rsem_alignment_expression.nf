@@ -67,7 +67,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
-    sort_command="samtools sort -@ ${task.cpus} -m ${task.memory.giga}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    samtools_mem = task.memory.giga / task.cpus
+    sort_command="samtools sort -@ ${task.cpus} -m ${samtools_mem}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
 
     read_length = read_length.toInteger()
@@ -90,7 +91,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   """
   if [ "${rsem_ref_files}" = "error" ]; then exit 1; fi
 
-  ln -s ${rsem_ref_files} .
+  ln -s -f ${rsem_ref_files} . 
 
   rsem-calculate-expression -p $task.cpus \
   ${prob} \
