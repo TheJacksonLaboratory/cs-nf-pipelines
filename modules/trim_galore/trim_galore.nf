@@ -32,6 +32,7 @@ process TRIM_GALORE {
   tuple val(sampleID), file("*trimming_report.txt"), emit: trim_stats
 
   script:
+
   paired_end = params.read_type == 'PE' ?  '--paired' : ''
   rrbs_flag = params.workflow == "rrbs" ? '--rrbs' : ''
   /*

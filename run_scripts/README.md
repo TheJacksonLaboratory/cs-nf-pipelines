@@ -44,4 +44,6 @@ There are several things a user must change before running these scripts:
 
 **NOTE:**  
 
-These scripts assume they are being run from within `cs-nf-pipelines/run_scripts`. If they are moved to other locations, specify the absolute path to `main.nf` (e.g., `/home/USERNAME/cs-nf-pipelines/main.nf`)
+1. These scripts assume they are being run from within `cs-nf-pipelines/run_scripts`. If they are moved to other locations, specify the absolute path to `main.nf` (e.g., `/home/USERNAME/cs-nf-pipelines/main.nf`)
+
+2. Sample data for each workflow and species are provided in cs-nf-pipelines/test/<DATA-TYPE>

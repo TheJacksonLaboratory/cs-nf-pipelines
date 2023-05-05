@@ -4,31 +4,34 @@ process RSEM_ALIGNMENT_EXPRESSION {
   cpus 12
   memory { 60.GB * task.attempt }
   time { 24.h * task.attempt }
-  errorStrategy 'retry'
+  errorStrategy 'finish'
   maxRetries 1
 
     container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy', enabled: params.rsem_aligner == "bowtie2"
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*genome.bam", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.bam", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*genome.sorted.ba*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.sorted.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), file(reads)
-  file(rsem_ref_files)
+  tuple val(sampleID), path(reads)
+  path(rsem_ref_files)
+  val(rsem_ref_prefix)
 
   output:
-  file "*stats"
-  file "*results*"
-  tuple val(sampleID), file("rsem_aln_*.stats"), emit: rsem_stats
-  tuple val(sampleID), file("*genes.results"), emit: rsem_genes
-  tuple val(sampleID), file("*isoforms.results"), emit: rsem_isoforms
-  tuple val(sampleID), file("*.genome.bam"), emit: bam
-  tuple val(sampleID), file("*.transcript.bam"), emit: transcript_bam
-
+  path "*stats"
+  path "*results*"
+  tuple val(sampleID), path("rsem_aln_*.stats"), emit: rsem_stats
+  tuple val(sampleID), path("*.stat/*.cnt"), emit: rsem_cnt
+  tuple val(sampleID), path("*genes.results"), emit: rsem_genes
+  tuple val(sampleID), path("*isoforms.results"), emit: rsem_isoforms
+  tuple val(sampleID), path("*.genome.bam"), emit: bam
+  tuple val(sampleID), path("*.transcript.bam"), emit: transcript_bam
+  tuple val(sampleID), path("*.genome.sorted.bam"), path("*.genome.sorted.bam.bai"), emit: sorted_genomic_bam
+  tuple val(sampleID), path("*.transcript.sorted.bam"), path("*.transcript.sorted.bam.bai"), emit: sorted_transcript_bam
+ 
   script:
-  log.info "----- Genome Alignment Running on: ${sampleID} -----"
 
   if (params.read_prep == "reverse_stranded") {
     prob="--forward-prob 0"
@@ -53,12 +56,16 @@ process RSEM_ALIGNMENT_EXPRESSION {
     trimmedfq="${reads[0]}"
   }
   if (params.rsem_aligner == "bowtie2"){
-    outbam="--output-genome-bam"
+    outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
+    sort_command=''
+    index_command=''
   }
   if (params.rsem_aligner == "star") {
-    outbam="--star-output-genome-bam"
+    outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
+    sort_command="samtools sort -@ ${task.cpus} -m ${task.memory.giga}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
   }
 
   """
@@ -71,8 +78,12 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${seed_length} \
   ${outbam} \
   ${trimmedfq} \
-  ${params.rsem_ref_prefix} \
+  ${rsem_ref_prefix} \
   ${sampleID} \
   2> rsem_aln_${sampleID}.stats
+
+  ${sort_command}
+
+  ${index_command}
   """
 }

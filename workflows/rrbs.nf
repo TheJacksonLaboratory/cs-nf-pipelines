@@ -9,6 +9,8 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {TRIM_GALORE} from "${projectDir}/modules/trim_galore/trim_galore"
 include {BISMARK_ALIGNMENT} from "${projectDir}/modules/bismark/bismark_alignment"
+include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {BISMARK_DEDUPLICATION} from "${projectDir}/modules/bismark/bismark_deduplication"
 include {BISMARK_METHYLATION_EXTRACTION} from "${projectDir}/modules/bismark/bismark_methylation_extraction"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
@@ -46,7 +48,7 @@ if (params.concat_lanes){
 }
 
 // if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 
 // main workflow
 workflow RRBS {
@@ -63,10 +65,14 @@ workflow RRBS {
   }
 
   FASTQC(read_ch)
+  // Note: fastqc is run prior to trimming, as trim galor outputs fastqc level data.
 
   TRIM_GALORE(read_ch)
 
   BISMARK_ALIGNMENT(TRIM_GALORE.out.trimmed_fastq)
+
+  SAMTOOLS_SORT(BISMARK_ALIGNMENT.out.bam, '-O bam', 'bam')
+  SAMTOOLS_INDEX(SAMTOOLS_SORT.out.sorted_file)
 
   ch_BISMARK_DEDUPLICATION_multiqc = Channel.empty()
 

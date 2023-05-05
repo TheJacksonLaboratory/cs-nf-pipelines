@@ -11,13 +11,13 @@ process PICARD_REORDERSAM {
 
   input:
   tuple val(sampleID), file(bam)
+  val(picard_dict)
 
   output:
   tuple val(sampleID), file("*.bam"), emit: bam
   tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Picard Alignment Metrics Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
@@ -25,7 +25,7 @@ process PICARD_REORDERSAM {
   picard -Xmx${my_mem}G ReorderSam \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
-  SEQUENCE_DICTIONARY=${params.picard_dict} \
+  SEQUENCE_DICTIONARY=${picard_dict} \
   CREATE_INDEX=true
   """
 }

@@ -22,6 +22,7 @@ process BWA_MEM {
   tuple val(sampleID), file("*.sam"), emit: sam
 
   script:
+
   if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"
     }

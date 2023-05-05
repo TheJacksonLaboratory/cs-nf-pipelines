@@ -1,14 +1,18 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
-  log.info """
-______________________________________________________
-
-                WGS PARAMETER LOG
+log.info """
+WGS PARAMETER LOG
 
 --comment: ${params.comment}
 
 Results Published to: ${params.pubdir}
-______________________________________________________
+________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --gen_ver                       ${params.gen_ver}
@@ -24,6 +28,7 @@ ______________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}
@@ -37,18 +42,19 @@ ______________________________________________________
 
 
 Project Directory: ${projectDir}
-______________________________________________________
+
+Command line call: 
+${workflow.commandLine}
+________________________________________________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                WGS PARAMETER LOG
+WGS PARAMETER LOG
 
 --comment: ${params.comment}
 
 Results Published to: ${params.pubdir}
-______________________________________________________
+________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --gen_ver                       ${params.gen_ver}
@@ -64,6 +70,7 @@ ______________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}
@@ -71,7 +78,10 @@ ______________________________________________________
 --ploidy_val                    ${params.ploidy_val}
 
 Project Directory: ${projectDir}
-______________________________________________________
+
+Command line call: 
+${workflow.commandLine}
+________________________________________________________________________________________
 """
 
 }

@@ -1,9 +1,13 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 if (params.gen_org=='human')
-  log.info """
-______________________________________________________
-
-                WES PARAMETER LOG
+log.info """
+WES PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -24,6 +28,7 @@ ______________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --dbSNP                         ${params.dbSNP}
 --target_gatk                   ${params.target_gatk}
 --target_picard                 ${params.target_picard}
@@ -41,13 +46,14 @@ ______________________________________________________
 
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 else
 log.info """
-______________________________________________________
-
-                WES PARAMETER LOG
+WES PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -68,6 +74,7 @@ ______________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
+--hq_pct                        ${params.hq_pct}
 --dbSNP                         ${params.dbSNP}
 --target_gatk                   ${params.target_gatk}
 --target_picard                 ${params.target_picard}
@@ -78,6 +85,9 @@ ______________________________________________________
 --ploidy_val                    ${params.ploidy_val}
 
 Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
 ______________________________________________________
 """
 

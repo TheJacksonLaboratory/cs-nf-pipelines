@@ -1,52 +1,28 @@
-process SORT {
+process SAMTOOLS_SORT {
   tag "$sampleID"
 
   cpus 4
   memory 20.GB
   time '20:00:00'
 
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.bam", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
+  
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
   tuple val(sampleID), file(sam_file)
   val(options)
+  val(suffix)
 
   output:
-  // cannot use emit here as -n (name sort) option is incompatible with samtools index. 
-  tuple val(sampleID), file("*.sorted.bam*")
+  tuple val(sampleID), file("*.sorted.*"), emit: sorted_file
 
   script:
-  log.info "----- Samtools sort Running on: ${sampleID} -----"
-
-  prefix = "${sampleID}.Lb"
-  if (params.workflow == "chipseq"){
-    output = "${prefix}.sorted.bam"
-  }
-  else{
-    output = "${sampleID}.sorted.bam"
-  }
-
-  // check if not sorting by name
-  if(options != "-n ")
   """
   samtools sort \
   ${options} \
-  -@ $task.cpus \
-  -O bam \
-  -o ${output} \
-  ${sam_file[0]}
-
-  samtools index \
-  ${output}
-  """
-  else
-  """
-  samtools sort \
-  ${options} \
-  -@ $task.cpus \
-  -O bam \
-  -o ${output} \
-  ${sam_file[0]}
-
+  -@ ${task.cpus} \
+  -o ${sam_file.baseName}.sorted.${suffix} \
+  ${sam_file}
   """
 }

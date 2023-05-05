@@ -17,7 +17,6 @@ process CALC_MTDNA_FILTER_CHRM {
   tuple val(sampleID), file("*_mtDNA_Content.txt"), emit: mtdna_log
 
   shell:
-  log.info "----- Calculate %mtDNA and Filter Mitochondrial Reads on ${sampleID} -----"
   // Get Mitochondrial and total read counts, calculate %mtDNA and filter Mitochondrial Reads from bam file 
 
   mt_name = params.gen_org == 'mouse' ?  'MT' : 'chrM'
@@ -37,7 +36,7 @@ process CALC_MTDNA_FILTER_CHRM {
   fi
 
   # Calculate %mtDNA
-  echo 'mtDNA Content:' $(bc <<< "scale=2;100*$mtReads/$totalReads")'%' >> !{sampleID}_mtDNA_Content.txt
+  echo -e 'sampleID\\tPerc mtDNA\\n'!{sampleID}'\\t'$(bc <<< "scale=2;100*$mtReads/$totalReads") >> !{sampleID}_mtDNA_Content.txt
 
   # Filter Mitochondrial Reads from bam file
   samtools view -@ !{task.cpus} -h !{rmdup_bam_file} \

@@ -9,7 +9,6 @@ process MAKE_VCF_LIST {
   tuple val(sampleID), file("*.list"), emit: list
 
   script:
-  log.info "----- Make VCF List from Chromosomes: ${sampleID} -------"
 
   // Puts Individual Chromosome Files In Order and Then Into List for MergeVCFs
   // convert paths to strings

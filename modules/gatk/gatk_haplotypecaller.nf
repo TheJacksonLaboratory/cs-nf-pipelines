@@ -18,7 +18,6 @@ process GATK_HAPLOTYPECALLER {
   tuple val(sampleID), file("*.idx"), emit: idx
 
   script:
-  log.info "----- GATK Haplotype Caller Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
@@ -27,7 +26,7 @@ process GATK_HAPLOTYPECALLER {
     output_suffix='gvcf'
   }
   else{
-    delta="--dbsnp ${params.dbSNP} "
+    delta="--dbsnp ${params.dbSNP} -stand-call-conf ${params.call_val}"
     output_suffix='vcf'
   }
 
@@ -38,7 +37,6 @@ process GATK_HAPLOTYPECALLER {
   -I ${bam} \
   -O ${sampleID}_variants_raw.${output_suffix} \
   -L ${params.target_gatk} \
-  -stand-call-conf ${params.call_val} \
   ${params.ploidy_val} \
   ${delta} \
   """

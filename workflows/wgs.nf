@@ -7,40 +7,44 @@ include {param_log} from "${projectDir}/bin/log/wgs.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
-include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
-         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
-         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
-         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
-include {VCF_ANNOTATE as VCF_ANNOTATE_SNP;
-         VCF_ANNOTATE as VCF_ANNOTATE_INDEL} from "${projectDir}/modules/vcftools/vcf_annotate"
-include {SNPEFF;
-         SNPEFF as SNPEFF_SNP;
-         SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
-include {SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
-         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_oneperline"
-include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
-include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
-         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
-include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wgs"
-include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
-include {QUALITY_STATISTICS} from "${projectDir}/modules/utility_modules/quality_stats"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
-include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
-include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
+include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
+include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
+include {GATK_HAPLOTYPECALLER_INTERVAL;
+         GATK_HAPLOTYPECALLER_INTERVAL as GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
+include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
-include {GATK_VARIANTANNOTATOR} from "${projectDir}/modules/gatk/gatk_variantannotator"
-include {GATK_HAPLOTYPECALLER_INTERVAL} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
+include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
-include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
+include {GATK_MERGEVCF;
+         GATK_MERGEVCF as GATK_MERGEVCF_UNANNOTATED;
+         GATK_MERGEVCF as GATK_MERGEVCF_ANNOTATED} from "${projectDir}/modules/gatk/gatk_mergevcf"
+include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
+         SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_DBSNP} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+include {SNPEFF;
+         SNPEFF as SNPEFF_SNP;
+         SNPEFF as SNPEFF_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_snpeff"
+include {SNPEFF_ONEPERLINE;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_SNP;
+         SNPEFF_ONEPERLINE as SNPEFF_ONEPERLINE_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpeff_oneperline"
+include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
+         SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
+include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
+include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wgs"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -75,7 +79,7 @@ if (params.concat_lanes){
 }
 
 // if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 
 // main workflow
 workflow WGS {
@@ -90,12 +94,18 @@ workflow WGS {
     }
   }
   // Step 1: Qual_Stat
-  QUALITY_STATISTICS(read_ch)
+  JAX_TRIMMER(read_ch)
+
+  FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
   // Step 2: Get Read Group Information
-  READ_GROUPS(QUALITY_STATISTICS.out.trimmed_fastq, "gatk")
+  READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
-  bwa_mem_mapping = QUALITY_STATISTICS.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  if (params.read_type == 'PE') {
+    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  } else {
+    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  }
 
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
@@ -111,9 +121,11 @@ workflow WGS {
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // If Human
+  ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
   if (params.gen_org=='human'){
     GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-    
+    ch_GATK_BASERECALIBRATOR_multiqc = GATK_BASERECALIBRATOR.out.table // set log file for multiqc
+
     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
 
     GATK_APPLYBQSR(apply_bqsr)
@@ -131,15 +143,22 @@ workflow WGS {
      .splitText()
      .map{it -> it.trim()}
     
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
+    // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
+
     // Applies scatter intervals from above to the BQSR bam file
     chrom_channel = data.combine(chroms)
     
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(),chroms.toList())
+
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(size: num_chroms),chroms.toList())
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+    // Use the Channel in HaplotypeCaller_GVCF
+    GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
   }
 
   // If Mouse
@@ -157,81 +176,95 @@ workflow WGS {
      .splitText()
      .map{it -> it.trim()}
     
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
+    // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
+
     // Applies scatter intervals from above to the BQSR bam file
     chrom_channel = data.combine(chroms)
 
     // Use the Channel in HaplotypeCaller
-    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel)
+    GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
-    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(), chroms.toList())
+  
+
+    MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(size: num_chroms), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+    // Use the Channel in HaplotypeCaller_GVCF
+    GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
+    GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
   }
-
 
   // SNP
     select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
-    GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP')
+    GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'selected_SNP')
     var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
     GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
   // INDEL
     select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
-    GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL')
+    GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'selected_INDEL')
     var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
     GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
-  // Cat Output to vcf-annotate* and add dbSNP annotations. 
-    VCF_ANNOTATE_SNP(GATK_VARIANTFILTRATION_SNP.out.vcf, 'SNP')
-    VCF_ANNOTATE_INDEL(GATK_VARIANTFILTRATION_INDEL.out.vcf, 'INDEL')
-  
-// Final Post-Processing Steps Differ for Human and Mouse
+    SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+    SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
 
   // If Human
   if (params.gen_org=='human'){
 
     // SNP
-      SNPSIFT_ANNOTATE_SNP_DBSNP(VCF_ANNOTATE_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
       SNPSIFT_ANNOTATE_SNP_COSMIC(SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
       SNPEFF_SNP(SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf, 'SNP', 'vcf')
       SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
       SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
     // INDEL
-      SNPSIFT_ANNOTATE_INDEL_DBSNP(VCF_ANNOTATE_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
       SNPSIFT_ANNOTATE_INDEL_COSMIC(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
       SNPEFF_INDEL(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf, 'INDEL', 'vcf')
       SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
       SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
       
     // Merge SNP and INDEL and Aggregate Stats
-      vcf_files = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
-      GATK_MERGEVCF(vcf_files)
+      vcf_files_unannotated = SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf)
+      GATK_MERGEVCF_UNANNOTATED(vcf_files_unannotated, 'SNP_INDEL_filtered_unannotated_final')
 
-      SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF.out.vcf)
+      vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
+      
+      SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
   }
 
   // If Mouse
   if (params.gen_org=='mouse'){
     // Merge SNP and INDEL
 
-    vcf_files = VCF_ANNOTATE_SNP.out.vcf.join(VCF_ANNOTATE_INDEL.out.vcf)
+    vcf_files = SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf)
 
-    GATK_MERGEVCF(vcf_files)
+    GATK_MERGEVCF(vcf_files, 'SNP_INDEL_filtered_unannotated_final')
 
-    SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'gatk')
+    SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'vcf')
 
-    merged_vcf_files = GATK_MERGEVCF.out.vcf.join(SNPEFF.out.vcf)
+    SNPEFF_ONEPERLINE(SNPEFF.out.vcf, 'BOTH')
 
-    GATK_VARIANTANNOTATOR(merged_vcf_files)
-
-    SNPSIFT_EXTRACTFIELDS(GATK_VARIANTANNOTATOR.out.vcf)
-
+    SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
   }
 
-  agg_stats = QUALITY_STATISTICS.out.quality_stats.join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt).join(PICARD_COLLECTWGSMETRICS.out.txt)
+  agg_stats = JAX_TRIMMER.out.quality_stats.join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt).join(PICARD_COLLECTWGSMETRICS.out.txt)
 
-  // may replace with multiqc
   AGGREGATE_STATS(agg_stats)
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
+
 
 }

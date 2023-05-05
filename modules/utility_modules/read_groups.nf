@@ -17,7 +17,6 @@ process READ_GROUPS {
   tuple val(sampleID), file("*.txt"), emit: read_groups
 
   script:
-  log.info "----- Read Group Information Determination Running on: ${sampleID} -----"
   if (picard=="picard"){
     p='-p'
   }

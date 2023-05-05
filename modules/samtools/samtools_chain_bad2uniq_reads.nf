@@ -16,7 +16,6 @@ process CHAIN_BAD2UNIQ_READS {
   when: params.chain != null
 
   shell:
-  log.info "----- Getting 'bad reads' from bam file on ${sampleID} -----"
   // Get unique 'bad read names' from bam file using gatk ValidateSamFile out results
   '''
   cat !{bad_reads} \

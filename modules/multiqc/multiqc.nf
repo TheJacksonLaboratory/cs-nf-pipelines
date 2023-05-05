@@ -1,7 +1,8 @@
 process MULTIQC {
 
-    container 'quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0'
-
+    container 'quay.io/jaxcompsci/multiqc:v1.15.dev0'
+    //quay.io/biocontainers/multiqc:1.12--pyhdfd78af_0
+    
     publishDir "${params.pubdir}/multiqc", pattern: "*multiqc_report.html", mode:'copy'
     publishDir "${params.pubdir}/multiqc", pattern: "*_data", mode:'copy'
 
@@ -14,10 +15,9 @@ process MULTIQC {
     path "*_plots" , optional:true, emit: plots
 
     script:
-    custom_config_file = params.multiqc_config ? "-f ${params.multiqc_config}" : ''
-
+    def custom_config = params.multiqc_config ? " --config $params.multiqc_config " : ''
     """
-    multiqc . $custom_config_file
+    multiqc . ${custom_config}
     """
 
 }

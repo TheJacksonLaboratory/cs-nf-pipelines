@@ -15,7 +15,6 @@ process BAM_COVERAGE_BIGWIG {
   tuple val(sampleID), file("*.bigwig")
 
   script:
-  log.info "----- Running deeptools bamCoverage bigwig on ${sampleID} -----"
   """
   bamCoverage \
   --numberOfProcessors $task.cpus \

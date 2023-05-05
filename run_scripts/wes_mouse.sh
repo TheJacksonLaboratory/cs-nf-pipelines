@@ -20,6 +20,6 @@ nextflow ../main.nf \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
---pubdir '/fastscratch/outputDir' \
--w '/fastscratch/outputDir/work' \
+--pubdir "/fastscratch/${USER}/outputDir" \
+-w "/fastscratch/${USER}/outputDir/work" \
 --comment "This script will run whole exome sequencing on mouse samples using default mm10"

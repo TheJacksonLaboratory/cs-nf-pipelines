@@ -2,8 +2,8 @@ process PICARD_SORTSAM {
   tag "$sampleID"
 
   cpus 1
-  memory 8.GB
-  time '06:00:00'
+  memory { sam.size() < 60.GB ? 6.GB : 24.GB }
+  time { sam.size() < 60.GB ? '03:00:00' : '12:00:00' }
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
@@ -17,7 +17,6 @@ process PICARD_SORTSAM {
   tuple val(sampleID), file("*_sortsam.bai"), emit: bai
 
   script:
-  log.info "----- Picard SortSam Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
@@ -26,6 +25,7 @@ process PICARD_SORTSAM {
   SO=coordinate \
   INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
+  TMP_DIR=${workDir}/temp \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
   """
