@@ -3,12 +3,10 @@ process GBRS_COMPRESS {
 
     cpus 1
     memory { suffix == 'merged' ? 6.GB * task.attempt : 40.GB * task.attempt}
+    time 10.hour
+    errorStrategy 'finish' 
 
-    time {10.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
-
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: "${ suffix == 'merged' || params.read_type == 'SE' ? true : false }"
 

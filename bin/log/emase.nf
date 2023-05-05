@@ -4,7 +4,7 @@ def param_log(){
     log.info """
     ______________________________________________________
 
-        GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+        EMASE RUN PARAMETER LOG
 
     --comment: ${params.comment}
 
@@ -39,7 +39,7 @@ def param_log(){
         log.info """
     ______________________________________________________
 
-        GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+        EMASE RUN PARAMETER LOG
 
     --comment: ${params.comment}
 

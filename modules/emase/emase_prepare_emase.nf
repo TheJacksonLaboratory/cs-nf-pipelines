@@ -14,7 +14,7 @@ process EMASE_PREPARE_EMASE {
     memory 15.GB
     time 24.hour
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy', enabled: params.keep_intermediate

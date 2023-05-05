@@ -22,6 +22,8 @@ workflow RUN_EMASE {
         // Apply `-bS` to convert SAM to BAM
         SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS')
 
+        // ADD INDEX STEP HERE....AND JOIN AND PASS THE INDEX WITH THE BAM TO THE BAM2EMASE STEP
+
         // Convert BAM to EMASE format. 
         GBRS_BAM2EMASE(SAMTOOLS_VIEW.out.bam)
 
@@ -57,6 +59,7 @@ workflow RUN_EMASE {
         emase_isoforms_expected_count = GBRS_QUANTIFY.out.isoforms_expected_count
         emase_genes_alignment_count =  GBRS_QUANTIFY.out.genes_alignment_count
         emase_isoforms_alignment_count = GBRS_QUANTIFY.out.isoforms_alignment_count
+        compressed_emase_h5 = gbrs_quantify_input
 
 }
 

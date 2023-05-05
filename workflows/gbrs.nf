@@ -9,6 +9,10 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {RUN_EMASE} from "${projectDir}/subworkflows/run-emase"
 include {GBRS_RECONSTRUCT} from "${projectDir}/modules/gbrs/gbrs_reconstruct"
+include {GBRS_QUANTIFY_GENOTYPES} from "${projectDir}/modules/gbrs/gbrs_quantify_genotype"
+include {GBRS_INTERPOLATE} from "${projectDir}/modules/gbrs/gbrs_interpolate"
+include {GBRS_PLOT} from "${projectDir}/modules/gbrs/gbrs_plot"
+include {GBRS_EXPORT_GENOPROBS} from "${projectDir}/modules/gbrs/gbrs_export_genoprob_file"
 
 // help if needed
 if (params.help){
@@ -71,61 +75,12 @@ workflow GBRS {
 
     GBRS_RECONSTRUCT(RUN_EMASE.out.emase_genes_tpm)
 
-    /*
-    NOTE: THIS PIPELINE WILL CONTAIN ALL STEPS IN EMASE, WITH THE ADDITON OF THE FOLLOWING COMMANDS
+    GBRS_QUANTIFY_GENOTYPES(RUN_EMASE.out.compressed_emase_h5.join(GBRS_RECONSTRUCT.out.genotypes_tsv))
 
-        gbrs reconstruct \
-            -e ${sampleID}.multiway.genes.tpm \
-            -t ${ref_tranprob}/tranprob.DO.${generation}.${sex}.npz \
-            -x ${ref_avecs} \
-            -g ${ref_GenePosOrdered} \
-            -o ${sampleID}
+    GBRS_INTERPOLATE(GBRS_RECONSTRUCT.out.genoprobs_npz)
 
-        gbrs quantify \
-            -i ${merged} \
-            -G ${sampleID}.genotypes.tsv \
-            -g ${ref_Gene2Transcripts} \
-            -L ${ref_GbrsHybridTargets} \
-            -M ${model} \
-            --report-alignment-counts \
-            -o ${sampleID}
+    GBRS_PLOT(GBRS_INTERPOLATE.out.interpolated_genoprobs)
 
-        gbrs interpolate \
-            -i ${sampleID}.genoprobs.npz \
-            -g ${ref_GenomeGrid} \
-            -p ${ref_GenePosOrdered_ver} \
-            -o ${sampleID}.gbrs.interpolated.genoprobs.npz
-
-        gbrs plot \
-            -i ${sampleID}.gbrs.interpolated.genoprobs.npz \
-            -o ${sampleID}.gbrs.plotted.genome.pdf \
-            -n ${sampleID}
-        """
-
-    }
-
-    process Export_Genoprob {
-        label 'export'
-        publishDir path:sample_outdir, mode:'copy', pattern:"*"
-
-        input:
-        path(ref_GenomeGrid)
-        path(genoprob) from ch_genoprobs
-
-        output:
-        path "*" into export_out
-
-        script:
-        """
-        export-genoprob-file \
-            -i ${genoprob} \
-            -s A,B,C,D,E,F,G,H \
-            -g ${ref_GenomeGrid}
-        """
-    }
-
-
-    */
+    GBRS_EXPORT_GENOPROBS(GBRS_INTERPOLATE.out.interpolated_genoprobs)
 
 }
-

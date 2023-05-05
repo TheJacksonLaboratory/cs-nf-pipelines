@@ -4,7 +4,7 @@ def param_log(){
     log.info """
     ______________________________________________________
 
-        GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+        GBRS RUN PARAMETER LOG
 
     --comment: ${params.comment}
 

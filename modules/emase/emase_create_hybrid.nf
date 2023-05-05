@@ -6,12 +6,11 @@ process EMASE_CREATE_HYBRID {
     // 3. generate bowtie index. 
 
     cpus 1
-    memory {15.GB * task.attempt}
-    time {24.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 15.GB
+    time 24.hour
+    errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
     publishDir "${params.pubdir}/emase", pattern: "*.fa", mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: "*.info", mode:'copy'

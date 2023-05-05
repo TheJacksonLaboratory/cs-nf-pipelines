@@ -2,12 +2,11 @@ process GBRS_BAM2EMASE {
     tag "$sampleID"
 
     cpus 1
-    memory {35.GB * task.attempt}
-    time {5.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 35.GB
+    time 5.hour
+    errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: params.keep_intermediate
 

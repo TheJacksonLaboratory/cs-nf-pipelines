@@ -5,19 +5,20 @@ process GBRS_RECONSTRUCT  {
     memory 2.GB
     time '01:00:00'
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*", mode: 'copy', enabled: "${ suffix == 'merged' || params.read_type == 'SE' ? true : false }"
-
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.tsv", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.npz", mode: 'copy', enabled: params.keep_intermediate
+    
     input:
     tuple val(sampleID), path(tpm)
 
     output:
-    tuple val(sampleID), file("*"), emit: compressed_emase_h5
+    tuple val(sampleID), file("*genoprobs.npz"), emit: genoprobs_npz
+    tuple val(sampleID), file("*genotypes.npz"), emit: genotypes_npz
+    tuple val(sampleID), file("*genotypes.tsv"), emit: genotypes_tsv
 
     script:
-
-    // output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${bam[0].baseName}.compressed.emase.h5"
 
     """
 
@@ -35,7 +36,9 @@ process GBRS_RECONSTRUCT  {
 
     stub:
     """
-    touch ${sampleID}
+    touch ${sampleID}.genoprobs.npz
+    touch ${sampleID}.genotypes.npz
+    touch ${sampleID}.genotypes.tsv
     """
 }
 

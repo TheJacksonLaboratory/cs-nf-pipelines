@@ -2,12 +2,11 @@ process GBRS_QUANTIFY {
     tag "$sampleID"
 
     cpus 1
-    memory {5.GB * task.attempt}
-    time {5.hour * task.attempt}
-    errorStrategy 'retry' 
-    maxRetries 1
+    memory 5.GB
+    time 5.hour
+    errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/emase_gbrs_alntools:3ac8573'
+    container 'quay.io/mikewlloyd/gbrs_test:latest'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.tpm", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.expected_read_counts", mode: 'copy'

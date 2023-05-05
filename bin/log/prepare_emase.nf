@@ -2,7 +2,7 @@ def param_log(){
 log.info """
 ______________________________________________________
 
-    GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+    PREPARE MULTIWAY TRANSCRIPTOME PARAMETER LOG
 
 --comment: ${params.comment}
 
