@@ -14,6 +14,6 @@ process GET_READ_LENGTH {
 
   script:
   """
-  READ_LENGTH=`zcat ${reads[0]}| head -n2 | tail -n1 | wc -c`
+  READ_LENGTH=`zcat ${reads[0]} | head -n 400 | awk 'NR%4==2{m=length($0)}{print m}' | sort -n | tail -1`
   """
 }
