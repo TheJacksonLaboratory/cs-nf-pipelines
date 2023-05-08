@@ -168,7 +168,7 @@ workflow ATAC {
     CHAIN_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
 
     // Step 12: Sort bam by coordinates
-    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out.coverted_bam, '-O bam', 'bam')
+    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out.converted_bam, '-O bam', 'bam')
 
     // Step 13: Extract a list of 'bad reads'
     CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out.sorted_file)
