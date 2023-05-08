@@ -13,8 +13,8 @@ process CHAIN_CONVERT {
   tuple val(sampleID), file(bam_shifted)
 
   output:
-  tuple val(sampleID), file("*.tmp.mm10.ba*")
-  tuple val(sampleID), file("*g2gconvert.log")
+  tuple val(sampleID), file("*.tmp.mm10.bam"), emit: coverted_bam
+  tuple val(sampleID), file("*g2gconvert.log"), emit: log
 
   when: params.chain != null
 
