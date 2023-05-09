@@ -16,6 +16,7 @@ RUN wget https://repo.continuum.io/miniconda/Miniconda2-4.3.14-Linux-x86_64.sh \
 
 RUN pip install markupsafe
 RUN pip install Flask
+RUN pip install future
 RUN	conda config --add channels r
 RUN	conda config --add channels bioconda
 RUN	conda install -c kbchoi emase
