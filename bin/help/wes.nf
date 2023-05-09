@@ -11,7 +11,8 @@ Parameter | Default | Description
 --extension | .fastq.gz | The expected extension for the input read files.
 --pattern | '*_R{1,2}*' | The expected R1 / R2 matching pattern. The default value will match reads with names like this READ_NAME_R1_MoreText.fastq.gz or READ_NAME_R1.fastq.gz
 --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
---concat_lanes | false | Options: false and true. Default: false. If this boolean is specific, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--concat_lanes | false | Options: false and true. Default: false. If this boolean is specified, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--run_gvcf | false | Options: false and true. Default: false. If this boolean is specified, GCVF output will be generated.
 
 --gen_org | mouse | Options: mouse and human.
 
