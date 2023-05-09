@@ -10,9 +10,11 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
@@ -67,7 +69,7 @@ if (params.csv_input) {
                 .map{t-> [t[0], t[1].flatten()]}
   }
     // if channel is empty give error message and exit
-    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 
 } else {
   
@@ -78,20 +80,8 @@ if (params.csv_input) {
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
   }
     // if channel is empty give error message and exit
-    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 }
-
-// if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
-
-// downstream resources (only load once so do it here)
-if (params.rsem_aligner == "bowtie2") {
-  rsem_ref_files = file("${params.rsem_ref_files}/bowtie2/*")
-}
-else if (params.rsem_aligner == "star") {
-  rsem_ref_files = file("${params.rsem_ref_files}/STAR/${params.rsem_star_prefix}/*")
-}
-else error "${params.rsem_aligner} is not valid, use 'bowtie2' or 'star'"
 
 // main workflow
 workflow RNASEQ {
@@ -136,16 +126,17 @@ workflow RNASEQ {
     // Step 1: Qual_Stat
     JAX_TRIMMER(read_ch)
     
-    if (params.read_type == 'PE') {
-      rsem_input = JAX_TRIMMER.out.trimmed_fastq
-    } else {
-      rsem_input = JAX_TRIMMER.out.trimmed_fastq
-    }
+    GET_READ_LENGTH(read_ch)
     
     FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
+    // Check strand setting
+    CHECK_STRANDEDNESS(JAX_TRIMMER.out.trimmed_fastq)
+
+    rsem_input = JAX_TRIMMER.out.trimmed_fastq.join(CHECK_STRANDEDNESS.out.strand_setting).join(GET_READ_LENGTH.out.read_length)
+
     // Step 2: RSEM
-    RSEM_ALIGNMENT_EXPRESSION(rsem_input, rsem_ref_files, params.rsem_ref_prefix)
+    RSEM_ALIGNMENT_EXPRESSION(rsem_input, params.rsem_ref_files, params.rsem_star_prefix, params.rsem_ref_prefix)
 
     //Step 3: Get Read Group Information
     READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "picard")
@@ -159,7 +150,7 @@ workflow RNASEQ {
     // Step 5: Picard Alignment Metrics
     PICARD_SORTSAM(PICARD_REORDERSAM.out.bam)
     
-    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam, params.ref_flat, params.ribo_intervals)
+    PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam.join(CHECK_STRANDEDNESS.out.strand_setting), params.ref_flat, params.ribo_intervals)
 
     // Step 6: Summary Stats
 

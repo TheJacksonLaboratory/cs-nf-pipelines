@@ -18,6 +18,6 @@ process ARIA_DOWNLOAD {
     script:
 
     """
-    aria2c ${link}
+    aria2c --connect-timeout=180 --retry-wait=60 --timeout=180 ${link}
     """
 }

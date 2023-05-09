@@ -6,7 +6,15 @@ println logo.show()
 
 def param_log(){
 
-if (params.pdx)
+if (params.rsem_aligner != "bowtie2" && params.rsem_aligner != "star") {
+  error "'--rsem_aligner': \"${params.rsem_aligner}\" is not valid, supported options are 'bowtie2' or 'star'" 
+}
+
+if (params.gen_org != "mouse" && params.gen_org != "human") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse' or 'human'" 
+}
+
+if (params.pdx && params.rsem_aligner=='bowtie2')
 log.info """
 RNASEQ PARAMETER LOG
 
@@ -28,7 +36,6 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---read_prep                  ${params.read_prep}
 --min_pct_hq_reads           ${params.min_pct_hq_reads}
 --seed_length                ${params.seed_length}
 
@@ -58,7 +65,59 @@ ${workflow.commandLine}
 ______________________________________________________
 
 """
+else if (params.pdx && params.rsem_aligner=='star')
+log.info """
+RNASEQ PARAMETER LOG
 
+--comment: ${params.comment}
+
+Results Published to: ${params.pubdir}
+______________________________________________________
+--workflow                   ${params.workflow}
+--gen_org                    ${params.gen_org}
+--read_type                  ${params.read_type}
+--sample_folder              ${params.sample_folder}
+--extension                  ${params.extension}
+--pattern                    ${params.pattern}
+--concat_lanes               ${params.concat_lanes}
+--csv_input                  ${params.csv_input}
+--download_data              ${params.download_data}
+--organize_by                ${params.organize_by}
+--pubdir                     ${params.pubdir}
+-w                           ${workDir}
+--keep_intermediate          ${params.keep_intermediate}
+-c                           ${params.config}
+--min_pct_hq_reads           ${params.min_pct_hq_reads}
+--seed_length                ${params.seed_length}
+
+--pdx                        ${params.pdx}
+--xenome_prefix              ${params.xenome_prefix}
+
+--rsem_aligner               ${params.rsem_aligner}
+
+Human specific files: 
+--rsem_ref_prefix_human      ${params.rsem_ref_prefix_human}
+--rsem_ref_files_human       ${params.rsem_ref_files_human}
+--rsem_star_prefix_human     ${params.rsem_star_prefix_human}
+--picard_dict_human          ${params.picard_dict_human}
+--ref_flat_human             ${params.ref_flat_human}
+--ribo_intervals_human       ${params.ribo_intervals_human}
+
+Mouse specific files: 
+--rsem_ref_prefix_mouse      ${params.rsem_ref_prefix_mouse}
+--rsem_ref_files_mouse       ${params.rsem_ref_files_mouse}
+--rsem_star_prefix_mouse     ${params.rsem_star_prefix_mouse}
+--picard_dict_mouse          ${params.picard_dict_mouse}
+--ref_flat_mouse             ${params.ref_flat_mouse}
+--ribo_intervals_mouse       ${params.ribo_intervals_mouse}
+
+Project Directory: ${projectDir}
+
+Command line call: 
+${workflow.commandLine}
+______________________________________________________
+
+"""
 else if (params.gen_org=='human' && params.rsem_aligner=='bowtie2')
 log.info """
 RNASEQ PARAMETER LOG
@@ -81,7 +140,6 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
@@ -121,7 +179,6 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---read_prep            ${params.read_prep}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
 --seed_length          ${params.seed_length}
@@ -160,7 +217,6 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
@@ -196,7 +252,6 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---read_prep    	                ${params.read_prep}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
 --seed_length                   ${params.seed_length}
@@ -213,6 +268,6 @@ ${workflow.commandLine}
 ______________________________________________________
 """
 
-else error "invalid parameters in ${params.gen_org} and/or ${params.rsem_aligner}"
+else error "Invalid parameters in '--gen_org': ${params.gen_org} and/or in '--rsem_aligner': ${params.rsem_aligner}. Supported options are 'mouse' or 'human' and 'bowtie2' or 'star'."
 
 }
