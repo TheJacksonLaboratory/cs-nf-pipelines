@@ -4,8 +4,10 @@ process TRIM_GALORE {
   cpus 8
   memory 16.GB
   time '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
+
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/trimmed_fastq' : 'trim_galore' }", pattern: "*.fq.gz", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'trim_report' }", pattern: "*trimming_report.txt", mode:'copy'
@@ -42,4 +44,3 @@ process TRIM_GALORE {
     trim_galore --basename ${sampleID} --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${fq_reads}
   """
 }
-

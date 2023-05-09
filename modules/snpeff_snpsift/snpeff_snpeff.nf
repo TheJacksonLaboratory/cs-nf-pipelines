@@ -4,8 +4,8 @@ process SNPEFF{
   cpus = 1
   memory = 8.GB
   time = '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  // SNPEFF and SNPSIFT need updating
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate

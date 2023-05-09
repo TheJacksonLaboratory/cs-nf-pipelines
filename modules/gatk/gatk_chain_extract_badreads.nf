@@ -4,11 +4,12 @@ process CHAIN_EXTRACT_BADREADS {
   cpus 2
   memory 4.GB
   time = '04:00:00'
+  errorStrategy { [0,3,4].contains(task.exitStatus) ? 'ignore' : 'terminate' } 
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'gatk' }", pattern: "*.log", mode: 'copy' 
+  
   container 'broadinstitute/gatk:4.2.4.1'
 
-  errorStrategy { [0,3,4].contains(task.exitStatus) ? 'ignore' : 'terminate' } 
 
   input:
   tuple val(sampleID), file(bam_sort_mm10)
