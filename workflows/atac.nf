@@ -168,25 +168,25 @@ workflow ATAC {
     CHAIN_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
 
     // Step 12: Sort bam by coordinates
-    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out[0], '-O bam', 'bam')
+    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out.converted_bam, '-O bam', 'bam')
 
     // Step 13: Extract a list of 'bad reads'
-    CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out[0])
+    CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out.sorted_file)
 
     // Step 14: Remove 'bad reads' from bam file
     CHAIN_BAD2UNIQ_READS(CHAIN_EXTRACT_BADREADS.out.bad_reads)
 
     // Step 15: Filter list to unique names
-    filter_chain_reads = SORT_LIFTOVER_BAM.out[0].join(CHAIN_BAD2UNIQ_READS.out.uniq_reads)
+    filter_chain_reads = SORT_LIFTOVER_BAM.out.sorted_file.join(CHAIN_BAD2UNIQ_READS.out.uniq_reads)
     CHAIN_FILTER_READS(filter_chain_reads)
 
     // Step 16: Sort fixmate bam and filter mitochondrial reads
-    CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out[0])
+    CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out.bam)
 
     // Step 17: Reference strain samples, filter mitochondrial, unplaced/unlocalized reads and reindex
     //          Step occurs when chain == null || chain == false
 
-      NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out.sorted_file)
+    NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out.sorted_file)
 
     // Step 18 : Mix chain and non-chain
 
