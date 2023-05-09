@@ -142,12 +142,8 @@ workflow PDX_WES {
     // Step 1: Qual_Stat
     JAX_TRIMMER(read_ch)
 
-    if (params.read_type == 'PE') {
-      xenome_input = JAX_TRIMMER.out.trimmed_fastq
-    } else {
-      xenome_input = JAX_TRIMMER.out.trimmed_fastq
-    }
-
+    xenome_input = JAX_TRIMMER.out.trimmed_fastq
+    
     FASTQC(JAX_TRIMMER.out.trimmed_fastq)
 
     // Step 2: Xenome classify and sort. 

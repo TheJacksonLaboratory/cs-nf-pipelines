@@ -11,7 +11,7 @@ process PICARD_COLLECTRNASEQMETRICS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.pdf", mode:'copy'
 
   input:
-  tuple val(sampleID), file(bam)
+  tuple val(sampleID), file(bam), val(strand_setting)
   val(ref_flat)
   val(ribo_intervals)
 
@@ -21,15 +21,15 @@ process PICARD_COLLECTRNASEQMETRICS {
 
   script:
 
-  if (params.read_prep == "reverse_stranded") {
+  if (strand_setting == "reverse_stranded") {
     strand_setting = "SECOND_READ_TRANSCRIPTION_STRAND"
   }
 
-  if (params.read_prep == "forward_stranded") {
+  if (strand_setting == "forward_stranded") {
     strand_setting = "FIRST_READ_TRANSCRIPTION_STRAND"
   }
 
-  if (params.read_prep == "non_stranded") {
+  if (strand_setting == "non_stranded") {
     strand_setting = "NONE"
   }
 

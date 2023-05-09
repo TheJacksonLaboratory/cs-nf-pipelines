@@ -140,11 +140,7 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
-  if (params.read_type == 'PE') {
-    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-  } else {
-    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-  }
+  bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
 
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){

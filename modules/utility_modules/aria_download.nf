@@ -4,7 +4,8 @@ process ARIA_DOWNLOAD {
 
     cpus 1
     memory 15.GB
-    time '03:00:00'
+    time '08:00:00'
+    errorStrategy{(task.exitStatus == 140) ? {println("\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"); return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/aria2:1.36.0'
 
@@ -17,6 +18,6 @@ process ARIA_DOWNLOAD {
     script:
 
     """
-    aria2c ${link}
+    aria2c --connect-timeout=180 --retry-wait=60 --timeout=180 ${link}
     """
 }

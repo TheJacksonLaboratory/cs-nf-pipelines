@@ -2,12 +2,11 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tag "$sampleID"
 
   cpus 12
-  memory { 60.GB * task.attempt }
-  time { 24.h * task.attempt }
+  memory 60.GB
+  time 24.h
   errorStrategy 'finish'
-  maxRetries 1
 
-    container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
+  container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'rsem' }", pattern: "*stats", mode:'copy', enabled: params.rsem_aligner == "bowtie2"
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'rsem' }", pattern: "*results*", mode:'copy'
@@ -15,8 +14,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'rsem' }", pattern: "*transcript.sorted.ba*", mode:'copy'
 
   input:
-  tuple val(sampleID), path(reads)
-  path(rsem_ref_files)
+  tuple val(sampleID), path(reads), val(strand_setting), val(read_length)
+  val(rsem_ref_path)
+  val(rsem_star_prefix)
   val(rsem_ref_prefix)
 
   output:
@@ -33,15 +33,15 @@ process RSEM_ALIGNMENT_EXPRESSION {
  
   script:
 
-  if (params.read_prep == "reverse_stranded") {
+  if (strand_setting == "reverse_stranded") {
     prob="--forward-prob 0"
   }
 
-  if (params.read_prep == "forward_stranded") {
+  if (strand_setting == "forward_stranded") {
     prob="--forward-prob 1"
   }
 
-  if (params.read_prep == "non_stranded") {
+  if (strand_setting == "non_stranded") {
     prob="--forward-prob 0.5"
   }
 
@@ -56,6 +56,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
     trimmedfq="${reads[0]}"
   }
   if (params.rsem_aligner == "bowtie2"){
+    
+    rsem_ref_files = file("${rsem_ref_path}/bowtie2/*").collect { "$it" }.join(' ')
+
     outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
     sort_command=''
@@ -64,11 +67,32 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
-    sort_command="samtools sort -@ ${task.cpus} -m ${task.memory.giga}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    samtools_mem = task.memory.giga / task.cpus
+    sort_command="samtools sort -@ ${task.cpus} -m ${samtools_mem}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
+
+    read_length = read_length.toInteger()
+
+    if( read_length >= 65 && read_length <= 85) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_75/*").collect { "$it" }.join(' ')
+    } else if( read_length >= 90 && read_length <= 110 ) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_100/*").collect { "$it" }.join(' ')
+    } else if( read_length >= 115 && read_length <= 135 ) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_125/*").collect { "$it" }.join(' ')
+    } else if( read_length >= 140 && read_length <= 160 ) {
+        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_150/*").collect { "$it" }.join(' ')
+    } else {
+        log.info("\nUnsupported read length " + read_length + " in RSEM with STAR. RSEM will now fail gracefully.\n\n")
+        rsem_ref_files = 'error'
+    }
+
   }
 
   """
+  if [ "${rsem_ref_files}" = "error" ]; then exit 1; fi
+
+  ln -s -f ${rsem_ref_files} . 
+
   rsem-calculate-expression -p $task.cpus \
   ${prob} \
   ${stype} \

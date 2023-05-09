@@ -139,11 +139,7 @@ workflow WES {
   READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
   // Step 3: BWA-MEM Alignment
-  if (params.read_type == 'PE') {
-    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-  } else {
-    bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-  }
+  bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
 
   BWA_MEM(bwa_mem_mapping)
 
