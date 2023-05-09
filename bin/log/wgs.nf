@@ -29,6 +29,7 @@ ________________________________________________________________________________
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}
@@ -71,6 +72,7 @@ ________________________________________________________________________________
 --ref_fa_indices                ${params.ref_fa_indices}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}

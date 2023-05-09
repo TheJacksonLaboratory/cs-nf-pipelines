@@ -166,8 +166,10 @@ workflow WES {
       haplotype_caller = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
       GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
 
-      haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-      GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
+      if (params.run_gvcf) {
+        haplotype_caller_gvcf = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
+        GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
+      }
 
     // Step 8: Variant Filtration
       // SNP
@@ -217,7 +219,12 @@ workflow WES {
     // Step 7: Variant Calling
       haplotype_caller = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
       GATK_HAPLOTYPECALLER(haplotype_caller, 'variant')
-
+    
+      if (params.run_gvcf) {
+        haplotype_caller_gvcf = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
+        GATK_HAPLOTYPECALLER_GVCF(haplotype_caller_gvcf, 'gvcf')
+      }
+    
     // Step 8: Variant Filtration
 
       SNPSIFT_ANNOTATE_DBSNP(GATK_HAPLOTYPECALLER.out.vcf, params.dbSNP, params.dbSNP_index, 'intermediate')
