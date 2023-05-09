@@ -4,6 +4,7 @@ process TRIM_GALORE {
   cpus 8
   memory 16.GB
   time '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
 
@@ -70,4 +71,3 @@ process TRIM_GALORE {
   """
 
 }
-

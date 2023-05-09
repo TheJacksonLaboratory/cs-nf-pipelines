@@ -3,11 +3,10 @@ process ARRIBA {
     tag "$sampleID"
 
     cpus 1
-    memory { 10.GB * task.attempt }
-    time { 2.h * task.attempt }
-    errorStrategy 'finish'
-    // maxRetries 1
-
+    memory 10.GB
+    time 2.h
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  
     container 'quay.io/biocontainers/arriba:2.4.0--ha04fe3b_0'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions' : 'arriba' }", pattern: "*.{tsv,txt}", mode:'copy'

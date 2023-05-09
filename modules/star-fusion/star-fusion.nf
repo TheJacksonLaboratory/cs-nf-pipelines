@@ -3,10 +3,9 @@ process STAR_FUSION {
     tag "$sampleID"
 
     cpus 12
-    memory { 42.GB * task.attempt }
-    time { 5.h * task.attempt }
-    errorStrategy 'finish'
-    maxRetries 1
+    memory 42.GB
+    time 5.h
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'trinityctat/starfusion:1.12.0'
 
