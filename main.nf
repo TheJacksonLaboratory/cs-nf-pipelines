@@ -21,6 +21,9 @@ else if (params.workflow == "rrbs"){
 else if (params.workflow == "atac"){
   include {ATAC} from './workflows/atac'
 }
+else if (params.workflow == "chipseq"){
+  include {CHIPSEQ} from './workflows/chipseq'
+}
 else if (params.workflow == "pta"){
   include {PTA} from './workflows/pta'
 } 
@@ -51,6 +54,9 @@ workflow{
     }
   if (params.workflow == "atac"){
     ATAC()
+    } 
+  if (params.workflow == "chipseq"){
+    CHIPSEQ()
     }
   if (params.workflow == "pta"){
     PTA()

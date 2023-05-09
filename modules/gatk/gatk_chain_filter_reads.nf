@@ -14,7 +14,7 @@ process CHAIN_FILTER_READS {
   
 
   output:
-  tuple val(sampleID), file("*.tmp2.mm10.ba*")
+  tuple val(sampleID), path("*.tmp2.mm10.bam"), emit: bam
   tuple val(sampleID), file("*_FilterSamReads.log"), emit: filterReads_log
 
   when: params.chain != null

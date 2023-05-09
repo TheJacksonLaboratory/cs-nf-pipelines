@@ -11,10 +11,10 @@ process CHAIN_SORT_FIXMATE_BAM {
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
-  tuple val(sampleID), file(bam_mm10)
+  tuple val(sampleID), file(bam)
 
   output:
-  tuple val(sampleID), file("*.filtered.shifted.*")
+  tuple val(sampleID), path("*.filtered.shifted.*")
 
   when: params.chain != null
 
@@ -26,7 +26,7 @@ process CHAIN_SORT_FIXMATE_BAM {
   samtools sort \
   -n \
   -@ $task.cpus -O bam \
-  -o ${sampleID}.tmp3.mm10.bam ${bam_mm10[0]}
+  -o ${sampleID}.tmp3.mm10.bam ${bam[0]}
 
   # fix the mate information. This is done to fix 'TLEN' which is required for MACS2
   samtools fixmate \

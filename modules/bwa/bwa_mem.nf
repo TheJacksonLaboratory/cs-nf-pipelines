@@ -8,7 +8,11 @@ process BWA_MEM {
 
   container 'quay.io/biocontainers/bwakit:0.7.17.dev1--hdfd78af_1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy', enabled: params.keep_intermediate
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID : 'bwa_mem'}"
+  }, pattern: "*.sam", mode: 'copy', enabled: params.keep_intermediate
+
 
   input:
   tuple val(sampleID), file(fq_reads), file(read_groups)
@@ -25,9 +29,11 @@ process BWA_MEM {
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
     }
 
+  score = params.bwa_min_score ? "-T ${params.bwa_min_score}" : ''
+  split_hits = params.workflow == "chipseq" ? "-M" : ''
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus ${params.mismatch_penalty} ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
   """
 }

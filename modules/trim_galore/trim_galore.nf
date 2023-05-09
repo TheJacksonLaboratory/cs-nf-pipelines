@@ -8,9 +8,21 @@ process TRIM_GALORE {
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/trimmed_fastq' : 'trim_galore' }", pattern: "*.fq.gz", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'trim_report' }", pattern: "*trimming_report.txt", mode:'copy'
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
+  }, pattern: "*.fq.gz", mode: 'copy' 
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
+  }, pattern: "*_fastqc.{zip,html}", mode: 'copy' 
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
+  }, pattern: "*trimming_report.txt", mode: 'copy' 
+
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -40,7 +52,22 @@ process TRIM_GALORE {
   refer to the RRBS guide for the meaning of CTOT and CTOB strands). 
   */
 
+  if (params.workflow == "chipseq" && params.read_type == 'SE')
   """
+    [ ! -f  ${sampleID}.fastq.gz ] && ln -s ${fq_reads} ${sampleID}.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}.fastq.gz
+  """
+  else if (params.workflow == "chipseq" && params.read_type == 'PE')
+  """
+    [ ! -f  ${sampleID}_1.fastq.gz ] && ln -s ${fq_reads[0]} ${sampleID}_1.fastq.gz
+    [ ! -f  ${sampleID}_2.fastq.gz ] && ln -s ${fq_reads[1]} ${sampleID}_2.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}_1.fastq.gz ${sampleID}_2.fastq.gz
+  """
+  else
+  """ 
     trim_galore --basename ${sampleID} --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${fq_reads}
   """
+
 }
