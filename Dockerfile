@@ -26,5 +26,4 @@ ENV PATH $PATH:/opt/bowtie2
  
 RUN cd / && git clone https://github.com/MikeWLloyd/emase-zero.git && cd emase-zero/src && make
 RUN cd / && git clone https://github.com/churchill-lab/alntools --branch feature/py3 && cd alntools && pip install .
-RUN cd / && git clone https://github.com/churchill-lab/emase.git --branch py3 && cd emase && pip install .
 RUN cd / && git clone https://github.com/churchill-lab/gbrs.git --branch feature/py3 && cd gbrs && pip install .
