@@ -17,12 +17,12 @@ process PEAK_CALLING_CHIPSEQ {
 
 
   output:
-  tuple val(antibody), val(replicatesExist), val(multipleGroups), file("*_peaks.broadPeak"), emit : arm_peak
-  tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), val(control), file("*_peaks.broadPeak"), emit : ip_control_peak
-  tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), val(control), emit : ip_control
-  tuple val(ip), file("*_peaks.broadPeak"), emit : peak
-  tuple val(ip), file("*_peaks.gappedPeak"), emit : gapped
-  tuple val(ip), file("*_peaks.xls"), emit : xls
+  tuple val(antibody), val(replicatesExist), val(multipleGroups), file("*.{narrowPeak,broadPeak}"), emit: arm_peak
+  tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), val(control), file("*.{narrowPeak,broadPeak}"), emit: ip_control_peak
+  tuple val(antibody), val(replicatesExist), val(multipleGroups), val(ip), val(control), emit: ip_control
+  tuple val(ip), file("*.{narrowPeak,broadPeak}"), emit: peak
+  tuple val(ip), file("*_peaks.gappedPeak"), emit: gapped, optional: true
+  tuple val(ip), file("*_peaks.xls"), emit: xls
 
 
   script:
