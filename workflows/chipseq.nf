@@ -57,7 +57,6 @@ if (params.help){
 // log params
 param_log()
 
-
 // main workflow
 workflow CHIPSEQ {
 

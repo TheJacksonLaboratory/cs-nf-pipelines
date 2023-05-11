@@ -5,7 +5,10 @@ process HOMER_ANNOTATEPEAKS {
     memory 10.GB
     time '10:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/antibody_'+antibody+'/macs2' : 'macs2' }", pattern: "*annotatePeaks.txt", mode: 'copy'
+    publishDir {
+        def type = "${ip}" ? "${'immuno_precip_samples/'+ip+'_vs_'+control+'/macs2'}" : "${'consensusCalling_'+antibody+'/macs2'}"
+        "${params.pubdir}/${ params.organize_by=='sample' ? type : 'macs2'}"
+    }, pattern: "*annotatePeaks.txt", mode: 'copy'
 
     container 'quay.io/biocontainers/homer:4.11--pl526hc9558a2_3'
 
@@ -16,7 +19,6 @@ process HOMER_ANNOTATEPEAKS {
 
     output:
     tuple val(tuple_tag), path("*annotatePeaks.txt"), emit: txt
-
 
     script:
     prefix = peak =~ /bed/ ?  "${antibody}.consensus_peaks" : "${ip}_peaks"
