@@ -14,6 +14,9 @@ process PLOT_HOMER_ANNOTATEPEAKS {
     file(mqc_header)
     val suffix        //_peaks.annotatePeaks.txt
 
+    when:
+    params.macs_gsize && !params.skip_peak_annotation && !params.skip_peak_qc
+
     output:
     path '*.txt'       , emit: txt
     path '*.pdf'       , emit: pdf

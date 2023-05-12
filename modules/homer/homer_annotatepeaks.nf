@@ -17,6 +17,9 @@ process HOMER_ANNOTATEPEAKS {
     file(fasta)
     file(gtf)
 
+    when:
+    params.macs_gsize && !params.skip_peak_annotation
+
     output:
     tuple val(tuple_tag), path("*annotatePeaks.txt"), emit: txt
 

@@ -11,6 +11,9 @@ process PLOT_MACS2_QC {
     input:
     file(peaks)
 
+    when:
+    params.macs_gsize && !params.skip_peak_annotation && !params.skip_peak_qc
+
     output:
     path '*.txt'       , emit: txt
     path '*.pdf'       , emit: pdf

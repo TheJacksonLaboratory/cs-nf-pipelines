@@ -284,8 +284,10 @@ workflow CHIPSEQ {
   // [SPT5, true, true, /.../SPT5_T15_R1_peaks.broadPeak]
   // Then group by antibody. Map: keep only the first index position of replicatesExist, multipleGroups
   // as the remaining array for those are duplicate values. sort the broadpeak file array by file name. 
-  
+
   MACS2_CONSENSUS(ch_macs_consensus)
+  // Note: this step will not run when replicatesExist || multipleGroups are false. 
+  //       Subequently all steps beyond this point will not run as they rely on output from this step. 
 
   // Step 36 : Consensus peaks annotation
   CONSENSUS_PEAKS_ANNOTATE(MACS2_CONSENSUS.out.bed, ch_fasta, ch_gtf)

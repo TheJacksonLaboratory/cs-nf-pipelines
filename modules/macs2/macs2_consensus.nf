@@ -24,7 +24,10 @@ process MACS2_CONSENSUS {
     tuple val(antibody), path("*.boolean.txt")  , emit: boolean_txt
     tuple val(antibody), path("*.intersect.txt"), emit: intersect_txt
 
-    script: // This script is bundled with the pipeline, in nf-core/chipseq/bin/
+    when:
+    params.macs_gsize && (replicatesExist || multipleGroups) && !params.skip_consensus_peaks
+
+    script: 
     peak_type = params.narrow_peak ? 'narrowPeak' : 'broadPeak'
     prefix = "${antibody}.consensus_peaks"
     mergecols = params.narrow_peak ? (2..10).join(',') : (2..9).join(',')
