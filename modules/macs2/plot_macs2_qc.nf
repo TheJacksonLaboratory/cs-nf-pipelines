@@ -18,7 +18,7 @@ process PLOT_MACS2_QC {
     path '*.txt'       , emit: txt
     path '*.pdf'       , emit: pdf
 
-    script: // This script is bundled with the pipeline, in nf-core/chipseq/bin/
+    script: // This script was bundled withing the nf-core/chipseq/bin/ directory
     def peak_type = params.narrow_peak ? 'narrowPeak' : 'broadPeak'
     """
     ${projectDir}/bin/chipseq/plot_macs_qc.r \\

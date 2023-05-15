@@ -22,7 +22,7 @@ process PLOT_HOMER_ANNOTATEPEAKS {
     path '*.pdf'       , emit: pdf
     path '*.tsv'       , emit: tsv
 
-    script: // This script is bundled with the pipeline, in nf-core/chipseq/bin/
+    script: // This script was bundled withing the nf-core/chipseq/bin/ directory
     def prefix = "macs_annotatepeaks"
     """
     ${projectDir}/bin/chipseq/plot_homer_annotatepeaks.r \\

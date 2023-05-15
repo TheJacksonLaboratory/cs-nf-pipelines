@@ -25,6 +25,8 @@ extra_fn_clean_exts:
   - "_FilterTrim"
   - "_concordance"
   - "_contamination"
+  - ".final_sorted"
+  - ".R1"
   - type: "truncate"
     pattern: ".fastq"
 
