@@ -20,6 +20,8 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 --concat_lanes                  ${params.concat_lanes}
+--csv_input                     ${params.csv_input}
+--download_data                 ${params.download_data}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -54,6 +56,8 @@ ______________________________________________________
 --pattern                       ${params.pattern}
 --extension                     ${params.extension}
 --concat_lanes                  ${params.concat_lanes}
+--csv_input                     ${params.csv_input}
+--download_data                 ${params.download_data}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
