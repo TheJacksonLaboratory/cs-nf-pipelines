@@ -22,11 +22,11 @@ process PICARD_SORTSAM {
   my_mem =  my_mem[0..-4]
 
   """
-  picard -Xmx${my_mem}G SortSam \
+  picard -Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp SortSam \
   SO=coordinate \
   INPUT=${sam} \
   OUTPUT=${sampleID}_sortsam.bam  \
-  TMP_DIR=${workDir}/temp \
+  TMP_DIR=`pwd`/tmp \
   VALIDATION_STRINGENCY=SILENT \
   CREATE_INDEX=true
   """
