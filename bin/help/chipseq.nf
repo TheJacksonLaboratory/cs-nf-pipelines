@@ -13,7 +13,8 @@ Parameter | Default | Description
 --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
 
 --gen_org | mouse | Options: mouse and human.
-                        
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
+
 --fragment_size | 200 |  Number of base pairs to extend single-end reads when creating bigWig files (Default: 200)
 --fingerprint_bins | 500000 | Number of genomic bins to use when generating the deepTools fingerprint plot. Larger numbers will give a smoother profile, but take longer to run (Default: 500000)                              
 --gtf      | The full path to GTF file for annotating peaks and the GTF file should resemble the Ensembl format

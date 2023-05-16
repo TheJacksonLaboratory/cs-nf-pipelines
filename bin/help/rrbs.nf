@@ -16,6 +16,7 @@ Parameter | Default | Description
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
 --non_direction | true | Options: true and false. Selecting this option for non-directional RRBS libraries will screen quality-trimmed sequences for CAA or CGA at the start of the read and, if found, removes the first two base pairs. 
 

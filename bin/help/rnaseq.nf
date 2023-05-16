@@ -16,6 +16,7 @@ Parameter | Default | Description
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
 --pdx | false | Options: true or false. If 'true' Xenome is run to remove mouse reads from samples. 
 --xenome_prefix | '/projects/compsci/omics_share/human/GRCh38/supporting_files/xenome/trans_human_GRCh38_84_NOD_based_on_mm10_k25' | Pre-compiled Xenome classification index files. Used if PDX analysis is specified. 

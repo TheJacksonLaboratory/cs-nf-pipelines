@@ -15,6 +15,7 @@ Results Published to: ${params.pubdir}
 ________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
+--genome_build                  ${params.genome_build}
 --gen_ver                       ${params.gen_ver}
 --read_type                     ${params.read_type}
 --sample_folder                 ${params.sample_folder}
@@ -60,6 +61,7 @@ Results Published to: ${params.pubdir}
 ________________________________________________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
+--genome_build                  ${params.genome_build}
 --gen_ver                       ${params.gen_ver}
 --read_type                     ${params.read_type}
 --sample_folder                 ${params.sample_folder}

@@ -15,9 +15,10 @@ Parameter | Default | Description
 --csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
---gen_org | mouse | Options: mouse and human.
+--gen_org | mouse | Options: mouse or human.
+--genome_build | 'GRCm38' | Options: GRCm38 or GRCm39
 
---effective_genome_size | The length of the “mappable” genome. | Mouse only - Please see : 'https://deeptools.readthedocs.io/en/develop/content/feature/effectiveGenomeSize.html'.
+--effective_genome_size | The length of the “mappable” genome. | See : 'https://deeptools.readthedocs.io/en/develop/content/feature/effectiveGenomeSize.html'.
                         
 --chain | null | The default value for Mouse Reference Strain -  g2gtools chain file to adjust coordinates to reference                                                              
 

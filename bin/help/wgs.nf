@@ -18,6 +18,7 @@ Parameter | Default | Description
 --run_gvcf | false | Options: false and true. Default: false. If this boolean is specified, GCVF output will be generated.
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
 --ref_fa | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' 
          | Human: '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta'
