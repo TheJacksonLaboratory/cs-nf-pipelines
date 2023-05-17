@@ -12,7 +12,7 @@ process PICARD_MARKDUPLICATES {
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
-  }, pattern: "*.bam", mode: 'copy', enabled: params.gen_org=='mouse' || params.workflow=='chipseq' ? true : params.keep_intermediate
+  }, pattern: "*.{bam,bai}", mode: 'copy', enabled: params.gen_org=='mouse' || params.workflow=='chipseq' ? true : params.keep_intermediate
 
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
