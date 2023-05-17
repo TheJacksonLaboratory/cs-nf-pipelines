@@ -18,8 +18,6 @@ ______________________________________________________
 --genome_build                  ${params.genome_build}
 --read_type                     ${params.read_type}
 --input                         ${params.input}
---pattern                       ${params.pattern}
---extension                     ${params.extension}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -32,7 +30,6 @@ ______________________________________________________
 --ref_fa_indices                ${params.ref_fa_indices}
 --macs_gsize                    ${params.macs_gsize}
 --blacklist                     ${params.blacklist}
---non_directional      		      ${params.non_directional}
 --trimLength           		      ${params.trimLength}
 --qualThreshold        		      ${params.qualThreshold}
 --adapOverlap                   ${params.adapOverlap}
@@ -77,8 +74,6 @@ ______________________________________________________
 --genome_build                  ${params.genome_build}
 --read_type                     ${params.read_type}
 --input                         ${params.input}
---pattern                       ${params.pattern}
---extension                     ${params.extension}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -91,7 +86,6 @@ ______________________________________________________
 --ref_fa_indices                ${params.ref_fa_indices}
 --macs_gsize                    ${params.macs_gsize}
 --blacklist                     ${params.blacklist}
---non_directional               ${params.non_directional}
 --trimLength                    ${params.trimLength}
 --qualThreshold                 ${params.qualThreshold}
 --adapOverlap                   ${params.adapOverlap}
