@@ -11,7 +11,7 @@ In this major release we have added two additional pipelines, added flexibility 
 
 ### Subworkflows Added:
 
-1. aria download for remote input data
+1. Aria download for remote input data
 2. Concatenate paired tumor/normal FASTQ files
 3. RNA-seq for PDX input data
 
