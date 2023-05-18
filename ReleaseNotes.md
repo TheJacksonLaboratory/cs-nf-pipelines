@@ -2,7 +2,7 @@
 
 ## Release 0.3.0
 
-In this major release we have added two additional pipelines, added flexibility for specifying inputs via sample sheets, support for downloading remote input data, support for PDX data, and many more changes detailed below. Additionally, we have added the concept of "subworkflows" for tasks that are more complex than a module and/or involve multiple containers, yet can be potentially re-used in multiple pipelines.
+In this major release we have added two additional pipelines, added flexibility for specifying inputs via sample sheets, support for downloading remote input data, support for GRCm39, support for PDX data, and many more changes detailed below. Additionally, we have added the concept of "subworkflows" for tasks that are more complex than a module and/or involve multiple containers, yet can be potentially re-used in multiple pipelines.
 
 ### Pipelines Added:
 
@@ -160,18 +160,19 @@ In this major release we have added two additional pipelines, added flexibility 
 
 ### Pipeline Changes:
 
-1. WES, RNA-seq, and RNA-fusion added support for PDX data
-2. Support for input specification using sample sheets for ATAC, RNA-seq, RRBS, WES, WGS
-3. Support for downloading input data for ATAC, RNA-seq, RRBS, WES, WGS
-4. Added MULTIQC to ATAC, RNA-seq, RRBS, WES, WGS
-5. Added assessment of strandedness using python/python_check_strandedness.nf rather than requiring specification via parameters
-6. Added assessment of read length for RNAseq for STAR index selection rather than requiring specfication via parameters
-7. Modified variant annotations in WES and WGS
-8. Added GVCF support for WES and WGS
+1. WES, RNA-seq, and RNA-fusion added support for PDX data  
+2. WES, RNA-seq, WGS, ATAC, RRBS, ChIP added support for GRCm39  
+3. Support for input specification using sample sheets for ATAC, RNA-seq, RRBS, WES, WGS  
+4. Support for downloading input data for ATAC, RNA-seq, RRBS, WES, WGS  
+5. Added MULTIQC to ATAC, RNA-seq, RRBS, WES, WGS  
+6. Added assessment of strandedness using python/python_check_strandedness.nf rather than requiring specification via parameters  
+7. Added assessment of read length for RNAseq for STAR index selection rather than requiring specfication via parameters  
+8. Modified variant annotations in WES and WGS  
+9. Added GVCF support for WES and WGS  
 
 ### Module Changes:
 
-1. errorStrategy modified for all modules to catch and report instances where tasks fail due to walltime or memory contraints. This was previously required a deep reading of the subtask SLURM logs, but now will be reported in the top-level SLURM log and should be more user-friendly
+1. errorStrategy modified for all modules to catch and report instances where tasks fail due to walltime or memory contraints. This previously required a deep reading of the subtask SLURM logs, but now will be reported in the top-level SLURM log and is more user-friendly
 2. Removed log.info statements from modules to avoid noisy disruption of log files
 3. ChIP-seq support for bwa/bwa_mem.nf, fastqc/fastqc.nf, picard/picard_markduplicates.nf, trim_galore/trim_galore.nf
 4. Corrected emit statements for g2gtools/g2gtools_chain_convert_peak.nf
