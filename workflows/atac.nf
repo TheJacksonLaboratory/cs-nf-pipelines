@@ -5,15 +5,18 @@ nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/atac.nf"
 include {param_log} from "${projectDir}/bin/log/atac.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
+include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
+include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {TRIM_FASTQ} from "${projectDir}/modules/cutadapt/cutadapt_trim_fastq"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {ALIGN_TRIMMED_FASTQ} from "${projectDir}/modules/bowtie2/bowtie2_align_trimmed_fastq"
-include {SORT as SORT_ALIGN_TRIM;
-         SORT as SORT_SHIFTED_BAM;
-         SORT as SORT_MARK_DUP_BAM;
-         SORT as SORT_LIFTOVER_BAM } from "${projectDir}/modules/samtools/samtools_sort"
+include {SAMTOOLS_SORT as SORT_ALIGN_TRIM;
+         SAMTOOLS_SORT as SORT_SHIFTED_BAM;
+         SAMTOOLS_SORT as SORT_MARK_DUP_BAM;
+         SAMTOOLS_SORT as SORT_LIFTOVER_BAM } from "${projectDir}/modules/samtools/samtools_sort"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 include {REMOVE_DUPLICATE_READS} from "${projectDir}/modules/samtools/samtools_remove_duplicate_reads"
 include {CALC_MTDNA_FILTER_CHRM} from "${projectDir}/modules/samtools/samtools_calc_mtdna_filter_chrm"
@@ -33,9 +36,10 @@ include {PEAK_COVERAGE} from "${projectDir}/modules/macs2/macs2_peak_coverage"
 include {FEATURE_COUNTS} from "${projectDir}/modules/subread/subread_feature_counts"
 include {FEATURE_COUNT2BED} from "${projectDir}/modules/bedtools/bedtools_feature_count2bed"
 include {QUALITY_CHECKS} from "${projectDir}/modules/samtools/samtools_quality_checks"
-include {FRAG_LEN_PLOT} from "${projectDir}/modules/rstudio/rstudio_frag_len_plot"
+include {FRAG_LEN_PLOT} from "${projectDir}/modules/r/frag_len_plot"
 include {CALC_PBC_METRICS} from "${projectDir}/modules/bedtools/bedtools_calc_pbc_metrics"
 include {LOG_PARSER} from "${projectDir}/modules/python/python_log_parser"
+include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
 if (params.help){
@@ -46,8 +50,25 @@ if (params.help){
 // log params
 param_log()
 
+if (params.download_data && !params.csv_input) {
+    exit 1, "Data download was specified with `--download_data`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--download_data` requires a CSV manifest. See `--help` for information."
+}
+
 // prepare reads channel
-if (params.concat_lanes){
+if (params.csv_input) {
+
+    ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
+    
+    if (params.read_type == 'PE'){
+        ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    } else if (params.read_type == 'SE') {
+        ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
+        ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+    }
+
+} else if (params.concat_lanes){
+  
   if (params.read_type == 'PE'){
     read_ch = Channel
             .fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true, flat:true )
@@ -60,32 +81,51 @@ if (params.concat_lanes){
                 .groupTuple()
                 .map{t-> [t[0], t[1].flatten()]}
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
+
 } else {
+  
   if (params.read_type == 'PE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}",checkExists:true )
   }
   else if (params.read_type == 'SE'){
     read_ch = Channel.fromFilePairs("${params.sample_folder}/*${params.extension}",checkExists:true, size:1 )
   }
+    // if channel is empty give error message and exit
+    read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 }
-
-// if channel is empty give error message and exit
-read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern}"}
-
 
 // main workflow
 workflow ATAC {
 
-  // Step 0: Concatenate Fastq files if required.
-  if (params.concat_lanes){
-    if (params.read_type == 'PE'){
-        CONCATENATE_READS_PE(read_ch)
-        read_ch = CONCATENATE_READS_PE.out.concat_fastq
-    } else if (params.read_type == 'SE'){
-        CONCATENATE_READS_SE(read_ch)
-        read_ch = CONCATENATE_READS_SE.out.concat_fastq
-    }
+  // Step 0: Download data and concat Fastq files if needed. 
+  if (params.download_data){
+      FILE_DOWNLOAD(ch_input_sample)
+
+      FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+      FILE_DOWNLOAD.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
   }
+
+  // Step 00: Concat local Fastq files from CSV input if required.
+  if (!params.download_data && params.csv_input){
+      CONCATENATE_LOCAL_FILES(ch_input_sample)
+      CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+      CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+  }
+  
+  // Step 00: Concat local Fastq files if required.
+  if (params.concat_lanes && !params.csv_input){
+      if (params.read_type == 'PE'){
+          CONCATENATE_READS_PE(read_ch)
+          read_ch = CONCATENATE_READS_PE.out.concat_fastq
+      } else if (params.read_type == 'SE'){
+          CONCATENATE_READS_SE(read_ch)
+          read_ch = CONCATENATE_READS_SE.out.concat_fastq
+      }
+  }
+  
+  // ** MAIN workflow starts: 
 
   // Step 1: Trim_Fastq
   TRIM_FASTQ(read_ch)
@@ -97,7 +137,7 @@ workflow ATAC {
   ALIGN_TRIMMED_FASTQ(TRIM_FASTQ.out.paired_trimmed_fastq)
 
   // Step 4: Sort alignment file
-  SORT_ALIGN_TRIM(ALIGN_TRIMMED_FASTQ.out.sam, '')
+  SORT_ALIGN_TRIM(ALIGN_TRIMMED_FASTQ.out.sam, '-O bam', 'bam')
 
   // Step 5: Flag pcr duplicates
   PICARD_MARKDUPLICATES(SORT_ALIGN_TRIM.out) 
@@ -118,34 +158,35 @@ workflow ATAC {
   FILTER_REMOVE_MULTI_SIEVE(FILTER_REMOVE_MULTI_SHIFT.out[0])
 
   // Step 10: Re-sort shifted bam
-  SORT_SHIFTED_BAM(FILTER_REMOVE_MULTI_SIEVE.out[0], '')
+  SORT_SHIFTED_BAM(FILTER_REMOVE_MULTI_SIEVE.out[0], '-O bam', 'bam')
 
 
   // If Mouse
   if (params.gen_org=='mouse'){
     // Step 11: Convert peak coordinates
     //          Step occurs when chain != null || chain != false
-    CHAIN_CONVERT(SORT_SHIFTED_BAM.out[0])
+    CHAIN_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
 
     // Step 12: Sort bam by coordinates
-    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out[0], '')
+    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out.converted_bam, '-O bam', 'bam')
 
     // Step 13: Extract a list of 'bad reads'
-    CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out[0])
+    CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out.sorted_file)
 
     // Step 14: Remove 'bad reads' from bam file
     CHAIN_BAD2UNIQ_READS(CHAIN_EXTRACT_BADREADS.out.bad_reads)
 
     // Step 15: Filter list to unique names
-    filter_chain_reads = SORT_LIFTOVER_BAM.out[0].join(CHAIN_BAD2UNIQ_READS.out.uniq_reads)
+    filter_chain_reads = SORT_LIFTOVER_BAM.out.sorted_file.join(CHAIN_BAD2UNIQ_READS.out.uniq_reads)
     CHAIN_FILTER_READS(filter_chain_reads)
 
     // Step 16: Sort fixmate bam and filter mitochondrial reads
-    CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out[0])
+    CHAIN_SORT_FIXMATE_BAM(CHAIN_FILTER_READS.out.bam)
 
     // Step 17: Reference strain samples, filter mitochondrial, unplaced/unlocalized reads and reindex
     //          Step occurs when chain == null || chain == false
-    NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out[0])
+
+    NON_CHAIN_REINDEX(SORT_SHIFTED_BAM.out.sorted_file)
 
     // Step 18 : Mix chain and non-chain
 
@@ -155,10 +196,10 @@ workflow ATAC {
     //       Step 17 will only run when `--chain` is not used (controlled via modules). 
     //       A bam file is required in the next step. `mix` ensures that one OR the other output is used. 
     //       When '--gen_org == human' data_ch is set to the tuple output in step 10.  
-
+  
   }
   else if (params.gen_org=='human'){
-    data_ch = SORT_SHIFTED_BAM.out[0]
+    data_ch = SORT_SHIFTED_BAM.out.sorted_file
   } 
 
   // Step 19: Peak calling
@@ -197,14 +238,27 @@ workflow ATAC {
   FRAG_LEN_PLOT(QUALITY_CHECKS.out) 
 
   // Step 28: Sort markduplicates bam by read names 
-  SORT_MARK_DUP_BAM(PICARD_MARKDUPLICATES.out.dedup_bam, '-n ') 
+  SORT_MARK_DUP_BAM(PICARD_MARKDUPLICATES.out.dedup_bam, '-n -O bam', 'bam') 
 
   // Step 29: Calculating PBC Metrics
-  CALC_PBC_METRICS(SORT_MARK_DUP_BAM.out[0]) 
+  CALC_PBC_METRICS(SORT_MARK_DUP_BAM.out.sorted_file) 
 
   // Step 30: Log Parser
   log_agg = TRIM_FASTQ.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
-  LOG_PARSER(log_agg)
+  LOG_PARSER(log_agg) 
+
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(TRIM_FASTQ.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ALIGN_TRIMMED_FASTQ.out.bowtie_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(CALC_MTDNA_FILTER_CHRM.out.mtdna_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(CALC_PBC_METRICS.out.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FINAL_CALC_FRIP.out.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FRAG_LEN_PLOT.out.spline_table.collect{it[1]}.ifEmpty([]))
+
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 }
-

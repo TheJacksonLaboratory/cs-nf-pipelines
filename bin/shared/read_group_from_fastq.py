@@ -39,6 +39,8 @@ def parse_args():
                         help="Sample is tumor in a tumor/normal pair")
     parser.add_argument('-n', '--normal', action='store_true',
                         help="Sample is normal in a tumor/normal pair")
+    parser.add_argument('-s', '--sample_id', dest="sample_id",
+                        help="SampleID of file")
     parser.add_argument('-o', '--output', dest="output_file",
                         help="Output file name [STDOUT]")
     parser.add_argument('fastq', nargs="+",
@@ -115,15 +117,17 @@ def main():
             pos = n
             break
     if pos == -1:
-        # Didn't find the GES marker. Use the filename up to the end name.
-        match = re.search('(.*)[._]R[12]_.*',fn)
-        if match is not None:
-            fn = match.group(1)
-        else:
-            # something is seriously odd here, but we'll just use the
-            # whole filename
-            pass
-
+        if args.sample_id:
+            fn = args.sample_id
+        else: 
+            # Didn't find the GES marker. Use the filename up to the end name.
+            match = re.search('(.*)[._]R[12]_.*',fn)
+            if match is not None:
+                fn = match.group(1)
+            else:
+                # something is seriously odd here, but we'll just use the
+                # whole filename
+                pass
         cust_id = ges_id = fn
     else:
         cust_id = '_'.join(fn_parts[:pos])

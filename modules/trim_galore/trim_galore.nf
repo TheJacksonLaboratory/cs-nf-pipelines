@@ -4,11 +4,25 @@ process TRIM_GALORE {
   cpus 8
   memory 16.GB
   time '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/trimmed_fastq' : 'trim_galore' }", pattern: "*.fq.gz", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'fastqc' }", pattern: "*_fastqc.{zip,html}", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'trim_report' }", pattern: "*trimming_report.txt", mode:'copy'
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
+  }, pattern: "*.fq.gz", mode: 'copy', enabled: params.keep_intermediate
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
+  }, pattern: "*_fastqc.{zip,html}", mode: 'copy' 
+
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : ''
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
+  }, pattern: "*trimming_report.txt", mode: 'copy'
+
 
   input:
   tuple val(sampleID), file(fq_reads)
@@ -19,7 +33,6 @@ process TRIM_GALORE {
   tuple val(sampleID), file("*trimming_report.txt"), emit: trim_stats
 
   script:
-  log.info "----- Trim Galore Running on: ${sampleID} -----"
 
   paired_end = params.read_type == 'PE' ?  '--paired' : ''
   rrbs_flag = params.workflow == "rrbs" ? '--rrbs' : ''
@@ -39,8 +52,22 @@ process TRIM_GALORE {
   refer to the RRBS guide for the meaning of CTOT and CTOB strands). 
   */
 
+  if (params.workflow == "chipseq" && params.read_type == 'SE')
   """
+    [ ! -f  ${sampleID}.fastq.gz ] && ln -s ${fq_reads} ${sampleID}.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}.fastq.gz
+  """
+  else if (params.workflow == "chipseq" && params.read_type == 'PE')
+  """
+    [ ! -f  ${sampleID}_1.fastq.gz ] && ln -s ${fq_reads[0]} ${sampleID}_1.fastq.gz
+    [ ! -f  ${sampleID}_2.fastq.gz ] && ln -s ${fq_reads[1]} ${sampleID}_2.fastq.gz
+
+    trim_galore --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${sampleID}_1.fastq.gz ${sampleID}_2.fastq.gz
+  """
+  else
+  """ 
     trim_galore --basename ${sampleID} --cores ${task.cpus} ${paired_end} ${rrbs_flag} ${directionality} --gzip --length ${params.trimLength} -q ${params.qualThreshold}  --stringency ${params.adapOverlap}  -a ${params.adaptorSeq}  --fastqc ${fq_reads}
   """
-}
 
+}

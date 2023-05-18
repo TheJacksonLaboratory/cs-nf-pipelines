@@ -16,7 +16,6 @@ process FEATURE_COUNTS {
   tuple val(sampleID), file("*_peaks_countMatrix.txt")
 
   script:
-  log.info "----- Feature Counts on ${sampleID} -----"
   """
   featureCounts \
   -a ${peak_cvg_saf} \

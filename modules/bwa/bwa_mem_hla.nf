@@ -2,10 +2,9 @@ process BWA_MEM_HLA {
   tag "$sampleID"
 
   cpus 8
-  memory {60.GB * task.attempt}
-  time {30.hour * task.attempt}
-  errorStrategy 'retry' 
-  maxRetries 1
+  memory 60.GB
+  time 30.hour
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/bwakit:0.7.17.dev1--hdfd78af_1'
 
@@ -18,7 +17,6 @@ process BWA_MEM_HLA {
   tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-  log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
 
   if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"

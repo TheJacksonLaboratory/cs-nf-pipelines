@@ -4,20 +4,21 @@ process CHAIN_SORT_FIXMATE_BAM {
   cpus  8
   memory 20.GB
   time '20:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.filtered.shifted.*", mode: 'copy'
+  
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 
   input:
-  tuple val(sampleID), file(bam_mm10)
+  tuple val(sampleID), file(bam)
 
   output:
-  tuple val(sampleID), file("*.filtered.shifted.*")
+  tuple val(sampleID), path("*.filtered.shifted.*")
 
   when: params.chain != null
 
   script:
-  log.info "----- Performing sort, fixmate, filter the bam on ${sampleID} -----"
   // This module is for Non-Reference Strain Samples. 
   // To sort bam by read name, fix the mate information, re-sort by coordinates and filter Mitochondrial Reads from bam file. 
   """
@@ -25,7 +26,7 @@ process CHAIN_SORT_FIXMATE_BAM {
   samtools sort \
   -n \
   -@ $task.cpus -O bam \
-  -o ${sampleID}.tmp3.mm10.bam ${bam_mm10[0]}
+  -o ${sampleID}.tmp3.mm10.bam ${bam[0]}
 
   # fix the mate information. This is done to fix 'TLEN' which is required for MACS2
   samtools fixmate \

@@ -11,13 +11,26 @@ Parameter | Default | Description
 --extension | .fastq.gz | The expected extension for the input read files.
 --pattern | '*_R{1,2}*' | The expected R1 / R2 matching pattern. The default value will match reads with names like this READ_NAME_R1_MoreText.fastq.gz or READ_NAME_R1.fastq.gz
 --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
---concat_lanes | false | Options: false and true. Default: false. If this boolean is specific, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--concat_lanes | false | Options: false and true. Default: false. If this boolean is specified, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
+--download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
---read_prep | 'reverse_stranded' | Options: 'reverse_stranded', 'forward_stranded' or 'non_stranded'. This determines how RNA quantification is done, and statistics are calculated. It is based on the library strandedness. 
+--pdx | false | Options: true or false. If 'true' Xenome is run to remove mouse reads from samples. 
+--xenome_prefix | '/projects/compsci/omics_share/human/GRCh38/supporting_files/xenome/trans_human_GRCh38_84_NOD_based_on_mm10_k25' | Pre-compiled Xenome classification index files. Used if PDX analysis is specified. 
 
---min_pct_hq_reads| '0.0' | The minimum percent of high-quality reads passing when trimming the fastq files.
+--min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
+--hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
+
+--strandedness_ref | Mouse: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index'
+                   | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index' 
+                   | Modfied kallisto index file used in strandedness determination. 
+--strandedness_gtf | Mouse: '/projects/compsci/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.gtf'
+                   | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.gtf' 
+                   | GTF file used with kallisto index file used in strandedness determination. 
+
 --rsem_ref_files | /projects/omics_share/mouse/GRCm38/transcriptome/indices/ensembl/v102/bowtie2 | Pre-compiled index files. Refers to human indices when --gen_org human. JAX users should not change this, unless using STAR indices.
 --rsem_ref_prefix | 'Mus_musculus.GRCm38.dna.toplevel' | Prefix for index files. JAX users should not change this, unless using STAR indices. Refers to human indices when --gen_org human.
 --seed_length | 25 | 'Seed length used by the read aligner. Providing the correct value is important for RSEM. If RSEM runs Bowtie, it uses this value for Bowtie's seed length parameter.'
@@ -34,6 +47,8 @@ Parameter | Default | Description
 --ribo_intervals | Mouse: '/projects/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.chr_patch_hapl_scaff.rRNA.interval_list' 
                  | Human: '/projects/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.chr_patch_hapl_scaff.rRNA.interval_list'
                  | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
+
+--pdx | false | Options: false, true. If specified, 'Xenome' is run on reads to deconvolute human and mouse reads. Human only reads are used in analysis. 
 
 There are two additional parameters that are human specific. They are: 
 

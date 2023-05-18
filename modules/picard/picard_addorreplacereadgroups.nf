@@ -4,6 +4,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
   cpus 1
   memory 8.GB
   time '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
@@ -16,7 +17,6 @@ process PICARD_ADDORREPLACEREADGROUPS {
   tuple val(sampleID), file("*.bai"), emit: bai
 
   script:
-  log.info "----- Picard Add or Replace Read Groups Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

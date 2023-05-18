@@ -2,14 +2,17 @@ process BWA_MEM {
   tag "$sampleID"
 
   cpus 8
-  memory {60.GB * task.attempt}
-  time {30.hour * task.attempt}
-  errorStrategy 'retry' 
-  maxRetries 1
+  memory 60.GB
+  time 30.hour
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/bwakit:0.7.17.dev1--hdfd78af_1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.sam", mode:'copy', enabled: params.keep_intermediate
+  publishDir {
+      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID : 'bwa_mem'}"
+  }, pattern: "*.sam", mode: 'copy', enabled: params.keep_intermediate
+
 
   input:
   tuple val(sampleID), file(fq_reads), file(read_groups)
@@ -18,7 +21,6 @@ process BWA_MEM {
   tuple val(sampleID), file("*.sam"), emit: sam
 
   script:
-  log.info "----- BWA-MEM Alignment Running on: ${sampleID} -----"
 
   if (params.read_type == "SE"){
     inputfq="${fq_reads[0]}"
@@ -27,9 +29,11 @@ process BWA_MEM {
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
     }
 
+  score = params.bwa_min_score ? "-T ${params.bwa_min_score}" : ''
+  split_hits = params.workflow == "chipseq" ? "-M" : ''
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus ${params.mismatch_penalty} ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
   """
 }

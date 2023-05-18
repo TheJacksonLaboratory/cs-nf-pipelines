@@ -2,10 +2,9 @@ process BISMARK_DEDUPLICATION {
   tag "$sampleID"
 
   cpus 8
-  memory {60.GB * task.attempt}
-  time {30.hour * task.attempt}
-  errorStrategy 'retry' 
-  maxRetries 1
+  memory 60.GB
+  time 30.hour
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
@@ -20,7 +19,6 @@ process BISMARK_DEDUPLICATION {
   tuple val(sampleID), file("*report.txt"), emit: dedup_report
 
   script:
-  log.info "----- Bismark Deduplication Running on: ${sampleID} -----"
 
   fq_type = params.read_type == 'PE' ? '-p' : '-s'
   

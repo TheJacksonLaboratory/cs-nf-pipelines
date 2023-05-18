@@ -4,6 +4,7 @@ process CALC_MTDNA_FILTER_CHRM {
   cpus 4
   memory 4.GB
   time '10:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'samtools' }", pattern: "*_mtDNA_Content.txt", mode: 'copy'
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
@@ -17,7 +18,6 @@ process CALC_MTDNA_FILTER_CHRM {
   tuple val(sampleID), file("*_mtDNA_Content.txt"), emit: mtdna_log
 
   shell:
-  log.info "----- Calculate %mtDNA and Filter Mitochondrial Reads on ${sampleID} -----"
   // Get Mitochondrial and total read counts, calculate %mtDNA and filter Mitochondrial Reads from bam file 
 
   mt_name = params.gen_org == 'mouse' ?  'MT' : 'chrM'
@@ -37,7 +37,7 @@ process CALC_MTDNA_FILTER_CHRM {
   fi
 
   # Calculate %mtDNA
-  echo 'mtDNA Content:' $(bc <<< "scale=2;100*$mtReads/$totalReads")'%' >> !{sampleID}_mtDNA_Content.txt
+  echo -e 'sampleID\\tPerc mtDNA\\n'!{sampleID}'\\t'$(bc <<< "scale=2;100*$mtReads/$totalReads") >> !{sampleID}_mtDNA_Content.txt
 
   # Filter Mitochondrial Reads from bam file
   samtools view -@ !{task.cpus} -h !{rmdup_bam_file} \

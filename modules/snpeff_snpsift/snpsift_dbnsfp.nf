@@ -4,11 +4,11 @@ process SNPSIFT_DBNSFP{
   cpus = 1
   memory = 6.GB
   time = '06:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  // SNPEFF and SNPSIFT need updating
-  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1'
+  container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf)
@@ -18,7 +18,6 @@ process SNPSIFT_DBNSFP{
   tuple val(sampleID), file("*.vcf"), emit: vcf
 
   script:
-  log.info "----- snpSift DBNSFP Running on: ${sampleID} -----"
 
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]

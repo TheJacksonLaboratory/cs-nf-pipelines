@@ -11,19 +11,25 @@ Parameter | Default | Description
 --extension | .fastq.gz | The expected extension for the input read files.
 --pattern | '*_R{1,2}*' | The expected R1 / R2 matching pattern. The default value will match reads with names like this READ_NAME_R1_MoreText.fastq.gz or READ_NAME_R1.fastq.gz
 --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
---concat_lanes | false | Options: false and true. Default: false. If this boolean is specific, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--concat_lanes | false | Options: false and true. Default: false. If this boolean is specified, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
+--csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
+--download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
+
+--run_gvcf | false | Options: false and true. Default: false. If this boolean is specified, GCVF output will be generated.
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
 --ref_fa | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' 
          | Human: '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta'
          | The reference fasta to be used throughout the process for alignment as well as any downstream analysis, points to human reference when --gen_org human. JAX users should not change this parameter.
 
 --ref_fa_indices | Mouse: '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bwa/Mus_musculus.GRCm38.dna.toplevel.fa' 
-                 | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta.64'
+                 | Human: '/projects/omics_share/human/GRCh38/genome/indices/gatk/bwa/Homo_sapiens_assembly38.fasta'
                  | Pre-compiled BWA index files, points to human reference when --gen_org human. JAX users should not change this parameter.
 
---min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files.
+--min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
+--hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
 
 --target_gatk | Mouse: '/projects/omics_share/mouse/GRCm38/supporting_files/capture_kit_files/agilent/v2/S32371113_mouse_exon_V2.bare.bed' 
               | Human: '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.bed'

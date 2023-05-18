@@ -4,6 +4,7 @@ process PICARD_COLLECTHSMETRICS {
   cpus = 1
   memory = 6.GB
   time = '03:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
@@ -16,7 +17,6 @@ process PICARD_COLLECTHSMETRICS {
   tuple val(sampleID), file("*Metrics.txt"), emit: hsmetrics
 
   script:
-  log.info "----- Picard CollectHsMetrics Running on: ${sampleID} -----"
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 

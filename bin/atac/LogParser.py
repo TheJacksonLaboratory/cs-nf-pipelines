@@ -53,25 +53,29 @@ print("----mtDNA Content Log----")
 
 for file in glob.glob("*mtDNA_Content.txt"):
     with open(file) as f:
-        for line in f:
-            print(line.rstrip('\n'))
+        lines = f.readlines()[1:]
+    for line in lines:
+        input_reads = line.split(sep='\t')
+        print("mtDNA Percent:\t" + str(input_reads[1]).rstrip('\n'))
 
 print("----NRF and PBC Log----")
 
 for file in glob.glob("*pbc.qc"):
     with open(file) as f:
-        for line in f:
-            line = line.rstrip('\n')
-            input_reads = line.split(sep='\t')
-            print("Non-Redundant Fraction (NRF): " + str(input_reads[4]))
-            print("PCR Bottlenecking Coefficient 1 (PBC1):\t" + str(input_reads[5]))
-            print("PCR Bottlenecking Coefficient 2 (PBC2):\t" + str(input_reads[6]))
+        lines = f.readlines()[1:]
+    for line in lines:
+        line = line.rstrip('\n')
+        input_reads = line.split(sep='\t')
+        print("Non-Redundant Fraction (NRF): " + str(input_reads[5]))
+        print("PCR Bottlenecking Coefficient 1 (PBC1):\t" + str(input_reads[6]))
+        print("PCR Bottlenecking Coefficient 2 (PBC2):\t" + str(input_reads[7]))
 
 print("----Fraction Reads in Peak----")
 for file in glob.glob("*Fraction_reads_in_peak.txt"):
     with open(file) as f:
-        for line in f:
-            line.rstrip('\n')
-            input_reads = line.split(sep='\t')
-            print('Filtered Read Count:\t' + input_reads[1], end='')
-            print('Fraction Reads in Peak:\t' + input_reads[0])
+        lines = f.readlines()[1:]
+    for line in lines:
+        line.rstrip('\n')
+        input_reads = line.split(sep='\t')
+        print('Filtered Read Count:\t' + input_reads[2], end='')
+        print('Fraction Reads in Peak:\t' + input_reads[1])
