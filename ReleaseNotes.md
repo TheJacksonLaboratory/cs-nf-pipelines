@@ -166,8 +166,8 @@ In this major release we have added two additional pipelines, added flexibility 
 4. Added MULTIQC to ATAC, RNA-seq, RRBS, WES, WGS
 5. Added assessment of strandedness using python/python_check_strandedness.nf rather than requiring specification via parameters
 6. Added assessment of read length for RNAseq for STAR index selection rather than requiring specfication via parameters
-6. Modified variant annotations in WES and WGS
-7. Added GVCF support for WES and WGS
+7. Modified variant annotations in WES and WGS
+8. Added GVCF support for WES and WGS
 
 ### Module Changes:
 
