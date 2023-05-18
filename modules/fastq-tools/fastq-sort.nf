@@ -9,7 +9,7 @@ process FASTQ_SORT {
 
   container 'quay.io/biocontainers/fastq-tools:0.8.3--hbd632db_2'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/deconvoluted_reads': 'deconvoluted_reads' }", pattern: "*.fastq", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/deconvoluted_reads': 'deconvoluted_reads' }", pattern: "*.fastq", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(reads)

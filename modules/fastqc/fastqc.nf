@@ -10,7 +10,7 @@ process FASTQC {
   container 'quay.io/biocontainers/fastqc:0.11.9--hdfd78af_1'
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+      def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : '' 
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
   }, pattern: "*_fastqc.{zip,html}", mode: 'copy'
 

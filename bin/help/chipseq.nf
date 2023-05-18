@@ -13,7 +13,8 @@ Parameter | Default | Description
 --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
 
 --gen_org | mouse | Options: mouse and human.
-                        
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
+
 --fragment_size | 200 |  Number of base pairs to extend single-end reads when creating bigWig files (Default: 200)
 --fingerprint_bins | 500000 | Number of genomic bins to use when generating the deepTools fingerprint plot. Larger numbers will give a smoother profile, but take longer to run (Default: 500000)                              
 --gtf      | The full path to GTF file for annotating peaks and the GTF file should resemble the Ensembl format
@@ -27,8 +28,6 @@ Parameter | Default | Description
 
 --macs_gsize | Effective genome size parameter required by MACS2 | if this parameter is not specified then the MACS2 peak-calling and differential analysis will be skipped                            
 --blacklist | The BED format file, if provided, alignments that overlap with the regions in this file will be filtered out | Please see : 'https://sites.google.com/site/anshulkundaje/projects/blacklists'
-
---non_directional | true | Options: true and false. Selecting this option for non-directional RRBS libraries will screen quality-trimmed sequences for CAA or CGA at the start of the read and, if found, removes the first two base pairs.
 
 --trimLength | 30 | Discard reads that became shorter than length 'INT' because of either quality or adapter trimming. A value of 0 effectively disables this behaviour.
 --qualThreshold | 30 | Trim low-quality ends from reads in addition to adapter removal. For RRBS samples, quality trimming will be performed first, and adapter trimming is carried in a second round. Other files are quality and adapter trimmed in a single pass. The algorithm is the same as the one used by BWA (Subtract INT from all qualities; compute partial sums from all indices to the end of the sequence; cut sequence at the index at which the sum is minimal).

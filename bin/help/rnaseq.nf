@@ -16,12 +16,20 @@ Parameter | Default | Description
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
 --gen_org | mouse | Options: mouse and human.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
 
 --pdx | false | Options: true or false. If 'true' Xenome is run to remove mouse reads from samples. 
 --xenome_prefix | '/projects/compsci/omics_share/human/GRCh38/supporting_files/xenome/trans_human_GRCh38_84_NOD_based_on_mm10_k25' | Pre-compiled Xenome classification index files. Used if PDX analysis is specified. 
 
 --min_pct_hq_reads | 0.0 | The minimum percent of high-quality reads passing when trimming the fastq files to continue with the analysis. 0.0 disables this filter.
 --hq_pct | 70 | The percentage of bases within a read that must be high quality for the read to pass filtering"
+
+--strandedness_ref | Mouse: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index'
+                   | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index' 
+                   | Modfied kallisto index file used in strandedness determination. 
+--strandedness_gtf | Mouse: '/projects/compsci/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.gtf'
+                   | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.gtf' 
+                   | GTF file used with kallisto index file used in strandedness determination. 
 
 --rsem_ref_files | /projects/omics_share/mouse/GRCm38/transcriptome/indices/ensembl/v102/bowtie2 | Pre-compiled index files. Refers to human indices when --gen_org human. JAX users should not change this, unless using STAR indices.
 --rsem_ref_prefix | 'Mus_musculus.GRCm38.dna.toplevel' | Prefix for index files. JAX users should not change this, unless using STAR indices. Refers to human indices when --gen_org human.

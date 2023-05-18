@@ -7,19 +7,22 @@ process PLOT_HOMER_ANNOTATEPEAKS {
 
     container 'quay.io/biocontainers/mulled-v2-ad9dd5f398966bf899ae05f8e7c54d0fb10cdfa7:05678da05b8e5a7a5130e90a9f9a6c585b965afa-0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'cross_sample_plots' : 'deseq2' }", pattern: "*.{pdf,txt}", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/cross_sample_plots' : 'homer' }", pattern: "*.{pdf,txt}", mode: 'copy'
 
     input:
     file(annos)
     file(mqc_header)
     val suffix        //_peaks.annotatePeaks.txt
 
+    when:
+    params.macs_gsize && !params.skip_peak_annotation && !params.skip_peak_qc
+
     output:
     path '*.txt'       , emit: txt
     path '*.pdf'       , emit: pdf
     path '*.tsv'       , emit: tsv
 
-    script: // This script is bundled with the pipeline, in nf-core/chipseq/bin/
+    script: // This script was bundled withing the nf-core/chipseq/bin/ directory
     def prefix = "macs_annotatepeaks"
     """
     ${projectDir}/bin/chipseq/plot_homer_annotatepeaks.r \\

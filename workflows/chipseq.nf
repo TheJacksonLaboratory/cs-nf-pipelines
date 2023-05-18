@@ -16,10 +16,10 @@ include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter"
 include {SAMTOOLS_SORT;
          SAMTOOLS_SORT as PAIR_SORT;
          SAMTOOLS_SORT as NAME_SORT} from "${projectDir}/modules/samtools/samtools_sort"
-include {SAMTOOLS_INDEX as PAIR_INDEX} from "${projectDir}/modules/samtools/samtools_index"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {SAMTOOLS_STATS;
          SAMTOOLS_STATS as SAMTOOLS_STATS_MD;
-         SAMTOOLS_STATS as SAMTOOLS_STATS_PE;
+         SAMTOOLS_STATS as SAMTOOLS_STATS_FILTERED;
          SAMTOOLS_STATS as SAMTOOLS_STATS_BF} from "${projectDir}/modules/samtools/samtools_stats"
 include {PICARD_MERGESAMFILES} from "${projectDir}/modules/picard/picard_mergesamfiles"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
@@ -56,7 +56,6 @@ if (params.help){
 
 // log params
 param_log()
-
 
 // main workflow
 workflow CHIPSEQ {
@@ -171,29 +170,43 @@ workflow CHIPSEQ {
   // Step 15: Samtools Stats
   SAMTOOLS_STATS_BF(BAMTOOLS_FILTER.out.bam)
 
-  // Step 16: Samtools Name Sort
-  NAME_SORT(BAMTOOLS_FILTER.out.bam, '-n -O bam', 'bam')
+  if (params.read_type == 'SE'){
 
-  // Step 17: Remove singleton reads from paired-end BAM file
-  BAMPE_RM_ORPHAN(NAME_SORT.out.sorted_file)
+    filtered_sorted_bam = BAMTOOLS_FILTER.out.bam
+    // Note: the output BAM from the preceding step was coordinate sorted in step 8, 
+    //       and the sort was maintained in the optional merge step and in markduplicates step.
 
-  // Step 18 : Samtools Pair Sort
-  PAIR_SORT(BAMPE_RM_ORPHAN.out.bam, '-O bam', 'bam')
+  } else {
+    // Step 16: Samtools Name Sort
+    NAME_SORT(BAMTOOLS_FILTER.out.bam, '-n -O bam', 'bam')
+    // Name sorting is required to remove orphaned singletons in PE data. 
+
+    // Step 17: Remove singleton reads from paired-end BAM file
+    BAMPE_RM_ORPHAN(NAME_SORT.out.sorted_file)
+    
+    // Step 18 : Samtools Pair Sort
+    PAIR_SORT(BAMPE_RM_ORPHAN.out.bam, '-O bam', 'bam')
+    // Coordinate sorting must be used for next steps. 
+
+    filtered_sorted_bam = PAIR_SORT.out.sorted_file
+
+  }
 
   // Step 19 : Samtools Stats
-  SAMTOOLS_STATS_PE(PAIR_SORT.out.sorted_file)
+  SAMTOOLS_STATS_FILTERED(filtered_sorted_bam)
 
   // Step 20 : Preseq
-  PRESEQ(PICARD_MARKDUPLICATES.out.dedup_bam)
+  PRESEQ(PICARD_MARKDUPLICATES.out.dedup_bam) 
+  //Note: preseq package is aimed at predicting and estimating the complexity of a genomic sequencing library
 
   // Step 21 : Collect Multiple Metrics
 
-  PAIR_INDEX(PAIR_SORT.out.sorted_file)
+  SAMTOOLS_INDEX(filtered_sorted_bam)
 
-  PICARD_COLLECTMULTIPLEMETRICS(PAIR_SORT.out.sorted_file)
+  PICARD_COLLECTMULTIPLEMETRICS(filtered_sorted_bam)
 
   // Step 22 : Bedtools Genome Coverage
-  BEDTOOLS_GENOMECOV(PAIR_SORT.out.sorted_file.join(SAMTOOLS_STATS_PE.out.flagstat))
+  BEDTOOLS_GENOMECOV(filtered_sorted_bam.join(SAMTOOLS_STATS_FILTERED.out.flagstat))
 
   // Step 23 : USCS Bedgraph to bigwig
   UCSC_BEDGRAPHTOBIGWIG(BEDTOOLS_GENOMECOV.out.bedgraph, MAKE_GENOME_FILTER.out.sizes) 
@@ -210,14 +223,14 @@ workflow CHIPSEQ {
   DEEPTOOLS_PLOTHEATMAP(DEEPTOOLS_COMPUTEMATRIX.out.matrix)
 
   // Step 27 : Phantompeakqualtools
-  PHANTOMPEAKQUALTOOLS(BAMPE_RM_ORPHAN.out.bam)
+  PHANTOMPEAKQUALTOOLS(filtered_sorted_bam)
 
   // Step 28 : Multiqc Custom Phantompeakqualtools
   mcp_ch = PHANTOMPEAKQUALTOOLS.out.spp.join(PHANTOMPEAKQUALTOOLS.out.rdata, by: [0])
   MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS(mcp_ch, ch_spp_nsc_header, ch_spp_rsc_header, ch_spp_correlation_header)
 
   // Create channel linking IP bams with control bams  
-  ch_genome_bam_bai = PAIR_SORT.out.sorted_file.join(PAIR_INDEX.out.bai)
+  ch_genome_bam_bai = filtered_sorted_bam.join(SAMTOOLS_INDEX.out.bai)
                       .map{it -> [it[0], [it[1], it[2]]]}
                       // next step requires a tuple with [sampleID, [bam, bai]]
 
@@ -228,7 +241,7 @@ workflow CHIPSEQ {
   ch_group_bam = control_ch
                     .combine(ch_genome_bam_bai )
                     .filter { it[0] == it[5] && it[1] == it[7] }
-                    .join(SAMTOOLS_STATS_PE.out.flagstat)
+                    .join(SAMTOOLS_STATS_FILTERED.out.flagstat)
                     .map { it ->  it[2..-1] }
   // Generate combinations of all study design objects:
   // [SPT5_T0_R1, SPT5_INPUT_R1, SPT5, true, true]
@@ -285,8 +298,10 @@ workflow CHIPSEQ {
   // [SPT5, true, true, /.../SPT5_T15_R1_peaks.broadPeak]
   // Then group by antibody. Map: keep only the first index position of replicatesExist, multipleGroups
   // as the remaining array for those are duplicate values. sort the broadpeak file array by file name. 
-  
+
   MACS2_CONSENSUS(ch_macs_consensus)
+  // Note: this step will not run when replicatesExist || multipleGroups are false. 
+  //       Subequently all steps beyond this point will not run as they rely on output from this step. 
 
   // Step 36 : Consensus peaks annotation
   CONSENSUS_PEAKS_ANNOTATE(MACS2_CONSENSUS.out.bed, ch_fasta, ch_gtf)
@@ -299,13 +314,12 @@ workflow CHIPSEQ {
 
   ch_group_bam                                                 // [antibody, replicatesExist, multipleGroups, sample_id, [bam, bai], control_id, [bam, bai], sample_id bam.flagstat] 
       .map { it -> [ it[3], [ it[0], it[1], it[2] ] ] }        // [sample_id, [antibody, replicatesExist, multipleGroups]] 
-      .join(BAMPE_RM_ORPHAN.out.bam)                           // [sample_id, [antibody, replicatesExist, multipleGroups], Orphan Removed sample_id bam]
+      .join(filtered_sorted_bam)                               // [sample_id, [antibody, replicatesExist, multipleGroups], final filtered sample_id indexed bam]
       .map { it -> [ it[1][0], it[1][1], it[1][2], it[2] ] }   // [antibody, replicatesExist, multipleGroups, OR sample_id bam]
       .groupTuple()
       .map { it -> [ it[0], it[1][0], it[2][0], it[3].flatten().sort() ] } // [antibody, replicatesExist, multipleGroups, [OR sample_id1 R1 bam, OR sample_id1 R2 bam, OR sample_id2 R1 bam, OR sample_id2 R2 bam]]
       .join(MACS2_CONSENSUS.out.saf)  // [antibody, replicatesExist, multipleGroups, [OR sample_id1 R1 bam, OR sample_id1 R2 bam, OR sample_id2 R1 bam, OR sample_id2 R2 bam], SAF]
       .set { ch_group_bam }
-
 
   // Step 38 : Count reads in consensus peaks with featureCounts
   SUBREAD_FEATURECOUNTS(ch_group_bam)
@@ -327,9 +341,9 @@ workflow CHIPSEQ {
   ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out.flagstat.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out.idxstat.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_MD.out.stats.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out.flagstat.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out.idxstat.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_PE.out.stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_FILTERED.out.flagstat.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_FILTERED.out.idxstat.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(SAMTOOLS_STATS_FILTERED.out.stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTMULTIPLEMETRICS.out.metrics.collect{it[1]}.ifEmpty([]))
 

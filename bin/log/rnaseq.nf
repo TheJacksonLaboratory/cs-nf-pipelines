@@ -24,6 +24,7 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                   ${params.workflow}
 --gen_org                    ${params.gen_org}
+--genome_build               ${params.genome_build}
 --read_type                  ${params.read_type}
 --sample_folder              ${params.sample_folder}
 --extension                  ${params.extension}
@@ -41,6 +42,9 @@ ______________________________________________________
 
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
+
+--strandedness_ref           ${params.strandedness_ref}
+--strandedness_gtf           ${params.strandedness_gtf}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -75,6 +79,7 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                   ${params.workflow}
 --gen_org                    ${params.gen_org}
+--genome_build               ${params.genome_build}
 --read_type                  ${params.read_type}
 --sample_folder              ${params.sample_folder}
 --extension                  ${params.extension}
@@ -92,6 +97,9 @@ ______________________________________________________
 
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
+
+--strandedness_ref           ${params.strandedness_ref}
+--strandedness_gtf           ${params.strandedness_gtf}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -128,6 +136,7 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
 --gen_org              ${params.gen_org}
+--genome_build         ${params.genome_build}
 --read_type            ${params.read_type}
 --sample_folder        ${params.sample_folder}
 --extension            ${params.extension}
@@ -142,6 +151,8 @@ ______________________________________________________
 -c                     ${params.config}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
+--strandedness_ref     ${params.strandedness_ref}
+--strandedness_gtf     ${params.strandedness_gtf}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -167,6 +178,7 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
 --gen_org              ${params.gen_org}
+--genome_build         ${params.genome_build}
 --read_type            ${params.read_type}
 --sample_folder        ${params.sample_folder}
 --extension            ${params.extension}
@@ -181,6 +193,8 @@ ______________________________________________________
 -c                     ${params.config}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
+--strandedness_ref     ${params.strandedness_ref}
+--strandedness_gtf     ${params.strandedness_gtf}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -207,11 +221,14 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
+--genome_build                  ${params.genome_build}
 --read_type                     ${params.read_type}
 --sample_folder                 ${params.sample_folder}
 --extension                     ${params.extension}
 --pattern                       ${params.pattern}
 --concat_lanes                  ${params.concat_lanes}
+--csv_input                     ${params.csv_input}
+--download_data                 ${params.download_data}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
 -w                              ${workDir}
@@ -219,6 +236,8 @@ ______________________________________________________
 -c                              ${params.config}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--strandedness_ref              ${params.strandedness_ref}
+--strandedness_gtf              ${params.strandedness_gtf}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
@@ -242,11 +261,14 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
+--genome_build                  ${params.genome_build}
 --read_type                     ${params.read_type}
 --sample_folder                 ${params.sample_folder}
 --extension                     ${params.extension}
 --pattern                       ${params.pattern}
 --concat_lanes                  ${params.concat_lanes}
+--csv_input                     ${params.csv_input}
+--download_data                 ${params.download_data}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
 -w                              ${workDir}
@@ -254,6 +276,8 @@ ______________________________________________________
 -c                              ${params.config}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--strandedness_ref              ${params.strandedness_ref}
+--strandedness_gtf              ${params.strandedness_gtf}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}

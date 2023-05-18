@@ -8,7 +8,7 @@ process MACS2_CONSENSUS {
     memory 10.GB
     time '10:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/antibody_'+antibody+'/macs2' : 'macs2' }", pattern: "*_peaks.*", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'consensusCalling_'+antibody+'/macs2' : 'macs2' }", pattern: "*_peaks.*", mode: 'copy'
 
     container 'quay.io/biocontainers/mulled-v2-2f48cc59b03027e31ead6d383fe1b8057785dd24:5d182f583f4696f4c4d9f3be93052811b383341f-0'
 
@@ -19,16 +19,15 @@ process MACS2_CONSENSUS {
     tuple val(antibody), val(replicatesExist), val(multipleGroups), path('*.bed') , emit: ano
     tuple val(antibody), val(replicatesExist), val(multipleGroups), val(''), val(''), path('*.bed') , emit: bed
     tuple val(antibody), path('*.saf') , emit: saf
-
     tuple val(antibody), path("*.pdf")          , emit: pdf
     tuple val(antibody), path("*.antibody.txt") , emit: txt
-
     tuple val(antibody), path("*.boolean.txt")  , emit: boolean_txt
     tuple val(antibody), path("*.intersect.txt"), emit: intersect_txt
-    tuple val(antibody), path("*.bed.igv.txt"), emit: igv_txt
 
+    when:
+    params.macs_gsize && (replicatesExist || multipleGroups) && !params.skip_consensus_peaks
 
-    script: // This script is bundled with the pipeline, in nf-core/chipseq/bin/
+    script: 
     peak_type = params.narrow_peak ? 'narrowPeak' : 'broadPeak'
     prefix = "${antibody}.consensus_peaks"
     mergecols = params.narrow_peak ? (2..10).join(',') : (2..9).join(',')
@@ -52,10 +51,17 @@ process MACS2_CONSENSUS {
 
     ${projectDir}/bin/chipseq/plot_peak_intersect.r -i ${prefix}.boolean.intersect.txt -o ${prefix}.boolean.intersect.plot.pdf
 
-    find * -type f -name "${prefix}.bed" -exec echo -e "macs2/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
-
     echo "${prefix}.bed\t${antibody}/${prefix}.bed" > ${prefix}.antibody.txt
 
     """
 
 }
+
+/*
+IGV steps removed, re-add if IGV is needed: 
+
+    OUTPUT: tuple val(antibody), path("*.bed.igv.txt"), emit: igv_txt
+
+
+    SCRIPT: find * -type f -name "${prefix}.bed" -exec echo -e "macs2/"{}"\\t0,0,0" \\; > ${prefix}.bed.igv.txt
+*/

@@ -11,17 +11,17 @@ process TRIM_GALORE {
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
-  }, pattern: "*.fq.gz", mode: 'copy' 
+  }, pattern: "*.fq.gz", mode: 'copy', enabled: params.keep_intermediate
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : ''
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
   }, pattern: "*_fastqc.{zip,html}", mode: 'copy' 
 
   publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
+      def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : ''
       "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/trimmed_fastq' : 'trim_galore'}"
-  }, pattern: "*trimming_report.txt", mode: 'copy' 
+  }, pattern: "*trimming_report.txt", mode: 'copy'
 
 
   input:
