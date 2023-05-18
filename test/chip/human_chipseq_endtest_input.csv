@@ -1,4 +1,0 @@
-group,replicate,fastq_1,fastq_2,antibody,control
-H3K4me1_T0,1,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF501VGT_sample.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF980OWC_sample.fastq.gz,H3K4me1,H3K4me1_INPUT
-H3K4me1_T0,2,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF318LVI_sample.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF188UNI_sample.fastq.gz,H3K4me1,H3K4me1_INPUT
-H3K4me1_INPUT,1,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF388YCF_sample.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/raw_reads/ENCFF877ZJH_sample.fastq.gz,,
