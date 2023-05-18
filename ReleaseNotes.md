@@ -1,5 +1,194 @@
 # RELEASE NOTES
 
+## Release 0.3.0
+
+In this major release we have added two additional pipelines, added flexibility for specifying inputs via sample sheets, support for downloading remote input data, support for GRCm39, support for PDX data, and many more changes detailed below. Additionally, we have added the concept of "subworkflows" for tasks that are more complex than a module and/or involve multiple containers, yet can be potentially re-used in multiple pipelines.
+
+### Pipelines Added:
+
+1. ChIP-seq - human, mouse
+2. Paired Tumor Analysis (somatic/germline WGS) - human, PDX
+
+### Subworkflows Added:
+
+1. Aria download for remote input data
+2. Concatenate paired tumor/normal FASTQ files
+3. RNA-seq for PDX input data
+
+### Modules Added:
+
+1. arriba/arriba.nf
+2. bamtools/bamtools_filter.nf
+3. bcftools/bcftools_germline_filter.nf
+4. bcftools/bcftools_intersect_lancet_candidates.nf
+5. bcftools/bcftools_merge_callers.nf
+6. bcftools/bcftools_remove_spanning.nf
+7. bcftools/bcftools_split_multiallelic_regions.nf
+8. bcftools/bcftools_split_multiallelic.nf
+9. bedtools/bedtools_amplicon_metrics.nf
+10. bedtools/bedtools_genomecov.nf
+11. bedtools/bedtools_start_candidates.nf
+12. biqseq2/bicseq2_normalize.nf
+13. biqseq2/bicseq2_seg_unpaired.nf
+14. biqseq2/bicseq2_seg.nf
+15. conpair/conpair_pileup.nf
+16. conpair/conpair.nf
+17. cosmic/cosmic_add_cancer_resistance_mutations_germline.nf
+18. cosmic/cosmic_add_cancer_resistance_mutations_somatic.nf
+19. cosmic/cosmic_annotation_somatic.nf
+20. cosmic/cosmic_annotation.nf
+21. deeptools/deeptools_computematrix.nf
+22. deeptools/deeptools_plotfingerprint.nf
+23. deeptools/deeptools_plotheatmap.nf
+24. deeptools/deeptools_plotprofile.nf
+25. ensembl/varianteffectpredictor_germline.nf
+26. ensembl/varianteffectpredictor_somatic.nf
+27. fastq-tools/fastq-pair.nf
+28. fastq-tools/fastq-sort.nf
+29. fusion_report/fusion_report.nf
+30. fusioncatcher/fusioncatcher.nf
+31. gatk/gatk_cnnscorevariants.nf
+32. gatk/gatk_combinegvcfs.nf
+33. gatk/gatk_filtermutectcalls_tumorOnly.nf
+34. gatk/gatk_filtermutectcalls.nf
+35. gatk/gatk_filtervarianttranches.nf
+36. gatk/gatk_genotype_gvcf.nf
+37. gatk/gatk_getsamplename_noMeta.nf
+38. gatk/gatk_getsamplename.nf
+39. gatk/gatk_haplotypecaller_sv_germline.nf
+40. gatk/gatk_mergemutectstats.nf
+41. gatk/gatk_mutect2_tumorOnly.nf
+42. gatk/gatk_mutect2.nf
+43. gatk/gatk_sortvcf_germline.nf
+44. gatk/gatk_sortvcf_somatic_merge.nf
+45. gatk/gatk_sortvcf_somatic_tools.nf
+46. gatk/gatk_variantfiltration_af.nf
+47. gatk/gatk_variantfiltration_mutect2.nf
+48. gatk/gatk3_applyrecalibration.nf
+49. gatk/gatk3_genotypegvcf.nf
+50. gatk/gatk3_haplotypecaller.nf
+51. gatk/gatk3_indelrealigner.nf
+52. gatk/gatk3_realignertargetcreator.nf
+53. gatk/gatk3_variantannotator.nf
+54. gatk/gatk3_variantrecalibrator.nf
+55. gridss/gridss_assemble.nf
+56. gridss/gridss_calling.nf
+57. gridss/gridss_chrom_filter.nf
+58. gridss/gridss_preprocess.nf
+59. gridss/gripss_somatic_filter.nf
+60. homer/annotate_boolean_peaks.nf
+61. homer/homer_annotatepeaks.nf
+62. homer/plot_homer_annotatepeaks.nf
+63. illumina/manta.nf
+64. illumina/strelka2.nf
+65. jaffa/jaffa.nf
+66. kallisto/kallisto_insert_size.nf
+67. kallisto/kallisto_quant.nf
+68. lumpy_sv/lumpy_sv.nf
+69. macs2/macs2_consensus.nf
+70. macs2/macs2_peak_calling_chipseq.nf
+71. macs2/plot_macs2_qc.nf
+72. msisensor2/msisensor2_tumorOnly.nf
+73. msisensor2/msisensor2.nf
+74. multiqc/multiqc_custom_phantompeakqualtools.nf
+75. novocraft/novosort.nf
+76. nygc-short-alignment-marking/short_alignment_marking.nf
+77. nygenome/lancet_confirm.nf
+78. nygenome/lancet.nf
+79. phantompeakqualtools/phantompeakqualtools.nf
+80. picard/picard_cleansam.nf
+81. picard/picard_collectmultiplemetrics.nf
+82. picard/picard_collecttargetpcrmetrics.nf
+83. picard/picard_fix_mate_information.nf
+84. picard/picard_mergesamfiles.nf
+85. pizzly/pizzly.nf
+86. preseq/preseq.nf
+87. primerclip/primerclip.nf
+88. python/python_add_final_allele_counts.nf
+89. python/python_add_nygc_allele_counts.nf
+90. python/python_check_strandedness.nf
+91. python/python_filter_pon.nf
+92. python/python_filter_vcf.nf
+93. python/python_germline_vcf_finalization.nf
+94. python/python_get_candidates.nf
+95. python/python_merge_columns.nf
+96. python/python_merge_prep.nf
+97. python/python_remove_contig.nf
+98. python/python_rename_metadata.nf
+99. python/python_rename_vcf.nf
+100. python/python_reorder_vcf_columns.nf
+101. python/python_snv_to_mnv_final_filter.nf
+102. python/python_somatic_vcf_finalization.nf
+103. python/python_split_mnv.nf
+104. python/python_vcf_to_bed.nf
+105. r/annotate_bicseq2_cnv.nf
+106. r/annotate_genes_sv.nf
+107. r/annotate_sv_with_cnv.nf
+108. r/annotate_sv.nf
+109. r/filter_bedpe.nf
+110. r/frag_len_plot.nf
+111. r/merge_sv.nf
+112. samtools/samtools_faidx.nf
+113. samtools/samtools_filter_unique_reads.nf
+114. samtools/samtools_filter.nf
+115. samtools/samtools_mergebam_filter.nf
+116. samtools/samtools_stats_insertsize.nf
+117. samtools/samtools_stats.nf
+118. samtools/samtools_view.nf
+119. squid/squid_annotate.nf
+120. squid/squid_call.nf
+121. star/star_align.nf
+122. star-fusion/star-fusion.nf
+123. subread/subread_feature_counts_chipseq.nf
+124. svaba/svaba.nf
+125. tabix/compress_merged_vcf.nf
+126. tabix/compress_vcf_region.nf
+127. tabix/compress_vcf.nf
+128. ucsc/ucsc_bedgraphtobigwig.nf
+129. utility_modules/aria_download.nf
+130. utility_modules/chipseq_bampe_rm_orphan.nf
+131. utility_modules/chipseq_check_design.nf
+132. utility_modules/chipseq_make_genome_filter.nf
+133. utility_modules/concatenate_reads_sampleSheet.nf
+134. utility_modules/deseq2_qc.nf
+135. utility_modules/frip_score.nf
+136. utility_modules/get_read_length.nf
+137. utility_modules/gunzip.nf
+138. utility_modules/jax_trimmer.nf
+139. utility_modules/parse_extracted_sv_table.nf
+140. xenome/xenome.nf
+
+### Pipeline Changes:
+
+1. WES, RNA-seq, and RNA-fusion added support for PDX data  
+2. WES, RNA-seq, WGS, ATAC, RRBS, ChIP added support for GRCm39  
+3. Support for input specification using sample sheets for ATAC, RNA-seq, RRBS, WES, WGS  
+4. Support for downloading input data for ATAC, RNA-seq, RRBS, WES, WGS  
+5. Added MULTIQC to ATAC, RNA-seq, RRBS, WES, WGS  
+6. Added assessment of strandedness using python/python_check_strandedness.nf rather than requiring specification via parameters  
+7. Added assessment of read length for RNAseq for STAR index selection rather than requiring specfication via parameters  
+8. Modified variant annotations in WES and WGS  
+9. Added GVCF support for WES and WGS  
+
+### Module Changes:
+
+1. errorStrategy modified for all modules to catch and report instances where tasks fail due to walltime or memory contraints. This previously required a deep reading of the subtask SLURM logs, but now will be reported in the top-level SLURM log and is more user-friendly
+2. Removed log.info statements from modules to avoid noisy disruption of log files
+3. ChIP-seq support for bwa/bwa_mem.nf, fastqc/fastqc.nf, picard/picard_markduplicates.nf, trim_galore/trim_galore.nf
+4. Corrected emit statements for g2gtools/g2gtools_chain_convert_peak.nf
+5. Corrected emit statements for gatk/gatk_chain_filter_reads.nf
+6. Modified gatk/gatk_haplotypecaller_interval.nf and gatk/gatk_haplotypecaller.nf for optional GVCF support
+7. Generalized multiqc/multiqc.nf via parameter for multiqc config
+8. Removed --METRIC_ACCUMULATION_LEVEL ALL_READS and --VALIDATION_STRINGENCY LENIENT parameters from picard/picard_collectalignmentsummarymetrics.nf
+9. Modified strand specification logic for picard/picard_collectrnaseqmetrics.nf
+10. Updated rsem/rsem_alignment_expression.nf to reflect changes in strandedness detection, reorganized outputs and catching log files for multiqc
+11. Changes to output text for mt DNA content in samtools/samtools_calc_mtdna_filter_chrm.nf
+12. Changes to output text from samtools/samtools_final_calc_frip.nf
+13. Changes to output formatting for samtools/samtools_quality_checks.nf
+14. Updated snpEff container to v5.1d to support GRCm39
+15. Changes to output fields for mouse and human from snpeff_snpsift/snpsift_extractfields.nf
+16. Added missing container to utility_modules/concatenate_reads_PE.nf and utility_modules/concatenate_reads_SE.nf
+
 ## Release 0.2.2
 
 * Change WES and WGS COMSIC annotation to use SNPsift. 
