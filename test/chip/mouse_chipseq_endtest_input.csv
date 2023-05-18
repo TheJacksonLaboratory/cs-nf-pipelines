@@ -1,0 +1,7 @@
+group,replicate,fastq_1,fastq_2,antibody,control
+adult_untreated,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/adult_untreated_sample.fastq.gz,,p65,adult_untreated_input
+aged_control_IgGTreated,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/aged_control_IgGTreated_sample.fastq.gz,,p65,aged_control_IgGTreated_input
+aged_anti-IL17A_F_treated,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/aged_anti-IL17A_F_treated_sample.fastq.gz,,p65,aged_anti-IL17A_F_treated_input
+adult_untreated_input,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/adult_untreated_input_sample.fastq.gz,,,
+aged_control_IgGTreated_input,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/aged_control_IgGTreated_input_sample.fastq.gz,,,
+aged_anti-IL17A_F_treated_input,1,/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/raw_reads/aged_anti-IL17A_F_treated_input_sample.fastq.gz,,,

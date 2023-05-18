@@ -1,0 +1,4 @@
+patient,sex,status,sampleID,lane,fastq_1,fastq_2
+fizzbang,XX,0,n_fizz,test_L1,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/normal_withSV_hg38_WGS_sample_R1.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/normal_withSV_hg38_WGS_sample_R2.fastq.gz
+fizzbang,XX,1,t_bang,test_L1,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/tumor_withSV_hg38_WGS_sample_R1.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/tumor_withSV_hg38_WGS_sample_R2.fastq.gz
+foobar,XX,1,t_bar,test_L1,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/tumor2_withSV_hg38_WGS_sample_R1.fastq.gz,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/PTA/test_reads/tumor2_withSV_hg38_WGS_sample_R2.fastq.gz

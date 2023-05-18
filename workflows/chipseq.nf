@@ -79,8 +79,6 @@ workflow CHIPSEQ {
                    .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ] ] }
   }
 
-  /// NEED ERROR CATCH FOR IF PE IS PASSED WITH SE DATA.
-
   /*
    * Create a channel with [sample_id, control id, antibody, replicatesExist, multipleGroups]
    */

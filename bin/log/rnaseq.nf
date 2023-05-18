@@ -43,6 +43,9 @@ ______________________________________________________
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
 
+--strandedness_ref           ${params.strandedness_ref}
+--strandedness_gtf           ${params.strandedness_gtf}
+
 --rsem_aligner               ${params.rsem_aligner}
 
 Human specific files: 
@@ -95,6 +98,9 @@ ______________________________________________________
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
 
+--strandedness_ref           ${params.strandedness_ref}
+--strandedness_gtf           ${params.strandedness_gtf}
+
 --rsem_aligner               ${params.rsem_aligner}
 
 Human specific files: 
@@ -145,6 +151,8 @@ ______________________________________________________
 -c                     ${params.config}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
+--strandedness_ref     ${params.strandedness_ref}
+--strandedness_gtf     ${params.strandedness_gtf}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -185,6 +193,8 @@ ______________________________________________________
 -c                     ${params.config}
 --min_pct_hq_reads     ${params.min_pct_hq_reads}
 --hq_pct               ${params.hq_pct}
+--strandedness_ref     ${params.strandedness_ref}
+--strandedness_gtf     ${params.strandedness_gtf}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -226,6 +236,8 @@ ______________________________________________________
 -c                              ${params.config}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--strandedness_ref              ${params.strandedness_ref}
+--strandedness_gtf              ${params.strandedness_gtf}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
@@ -264,6 +276,8 @@ ______________________________________________________
 -c                              ${params.config}
 --min_pct_hq_reads              ${params.min_pct_hq_reads}
 --hq_pct                        ${params.hq_pct}
+--strandedness_ref              ${params.strandedness_ref}
+--strandedness_gtf              ${params.strandedness_gtf}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
