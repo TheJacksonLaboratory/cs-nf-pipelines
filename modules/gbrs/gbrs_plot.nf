@@ -5,7 +5,7 @@ process GBRS_PLOT  {
     memory 2.GB
     time '01:00:00'
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.pdf", mode: 'copy'
 
@@ -35,29 +35,17 @@ process GBRS_PLOT  {
 }
 
 /*
-usage: gbrs plot [-h] -i GPBFILE [-o OUTFILE] [-n SAMPLE_NAME]
-                 [--num-grids GRID_SIZE] [--xt-max XT_MAX] [--xt-size XT_SIZE]
-                 [--grid-width WIDTH]
+ Usage: gbrs plot [OPTIONS]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -i GPBFILE, --genoprob GPBFILE
-  -o OUTFILE, --outfile OUTFILE
-  -n SAMPLE_NAME, --sample-name SAMPLE_NAME
-  --num-grids GRID_SIZE
-  --xt-max XT_MAX
-  --xt-size XT_SIZE
-  --grid-width WIDTH
+ plot a reconstructed genome
 
-  mwl note: num-grids, xt-max, xt-size, and grid-width are used in setting the X tick marks.
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --genoprob-file  -i      FILE     EMASE genoprobs file [default: None] [required]                                                                                                                                                                               │
+│    --output         -o      FILE     name of output file [default: None]                                                                                                                                                                                           │
+│    --format         -f      TEXT     output file format [default: pdf]                                                                                                                                                                                             │
+│    --sample_name    -n      TEXT     name of the sample [default: None]                                                                                                                                                                                            │
+│    --verbose        -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                   │
+│    --help                            Show this message and exit.                                                                                                                                                                                                   │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
-    plot arguments: 
-    subparser_plot.add_argument('--num-grids', action='store', dest='grid_size', type=int, default=42586)
-    subparser_plot.add_argument('--xt-max', action='store', dest='xt_max', type=int, default=4501)
-    subparser_plot.add_argument('--xt-size', action='store', dest='xt_size', type=int, default=475)
-    subparser_plot.add_argument('--grid-width', action='store', dest='width', type=float, default=0.01)
-
-    plot code:
-    ax.set_xticklabels([ '%dM' % xt for xt in np.arange(0, xt_max*grid_size/1000000, xt_size*grid_size/1000000)])
-    pyplot.xticks(np.arange(0, xt_max*width, xt_size*width))
 */

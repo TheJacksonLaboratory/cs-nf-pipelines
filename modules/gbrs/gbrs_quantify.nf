@@ -6,7 +6,7 @@ process GBRS_QUANTIFY {
     time 5.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.tpm", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.expected_read_counts", mode: 'copy'
@@ -33,7 +33,7 @@ process GBRS_QUANTIFY {
         -g ${params.gene2transcript_csv} \
         -L ${params.full_transcript_info} \
         -M ${params.emase_model} \
-        --report-alignment-counts \
+        -a \
         -o ${sampleID}
     """
 
@@ -51,21 +51,24 @@ process GBRS_QUANTIFY {
 /*
 NOTE: gbrs quantify is a wrapper around the `run-emase` code.
 
-usage: gbrs quantify [-h] -i ALNFILE -g GRPFILE [-L LENFILE] [-G GTYPEFILE]
-                     [-M MULTIREAD_MODEL] [-o OUTBASE] [-p PSEUDOCOUNT]
-                     [-m MAX_ITERS] [-t TOLERANCE] [-a] [-w]
+ Usage: gbrs quantify [OPTIONS]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -i ALNFILE, --alignment-file ALNFILE
-  -g GRPFILE, --group-file GRPFILE
-  -L LENFILE, --length-file LENFILE
-  -G GTYPEFILE, --genotype GTYPEFILE
-  -M MULTIREAD_MODEL, --multiread-model MULTIREAD_MODEL
-  -o OUTBASE
-  -p PSEUDOCOUNT, --pseudocount PSEUDOCOUNT
-  -m MAX_ITERS, --max-iters MAX_ITERS
-  -t TOLERANCE, --tolerance TOLERANCE
-  -a, --report-alignment-counts
-  -w, --report-posterior
+ quantify allele-specific expressions
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --alignment-file           -i      FILE     EMASE alignment incidence file (in hdf5 format) [default: None] [required]                                                                                                                                          │
+│    --group-file               -g      FILE     tab delimited file of gene to transcript mapping [default: None]                                                                                                                                                    │
+│    --length-file              -L      FILE     tab delimited file of locus(transcript) and length [default: None]                                                                                                                                                  │
+│    --genotype                 -G      FILE     tab delimited file of locus(transcipt) and diplotype [default: None]                                                                                                                                                │
+│    --outbase                  -o      TEXT     basename of all the generated output files [default: gbrs.quantified]                                                                                                                                               │
+│    --multiread-model          -M      INTEGER  emase model (default: 4) [default: 4]                                                                                                                                                                               │
+│    --pseudocount              -p      FLOAT    prior read count (default: 0.0) [default: 0.0]                                                                                                                                                                      │
+│    --max-iters                -m      INTEGER  maximum iterations for EM iteration [default: 999]                                                                                                                                                                  │
+│    --tolerance                -t      FLOAT    tolerance for EM termination (default: 0.0001 in TPM) [default: 0.0001]                                                                                                                                             │
+│    --report-alignment-counts  -a               whether to report alignment counts                                                                                                                                                                                  │
+│    --report-posterior         -w               whether to report posterior probabilities                                                                                                                                                                           │
+│    --verbose                  -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                         │
+│    --help                                      Show this message and exit.                                                                                                                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

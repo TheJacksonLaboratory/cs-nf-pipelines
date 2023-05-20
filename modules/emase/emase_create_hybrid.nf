@@ -10,7 +10,7 @@ process EMASE_CREATE_HYBRID {
     time 24.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/emase", pattern: "*.fa", mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: "*.info", mode:'copy'
@@ -24,7 +24,7 @@ process EMASE_CREATE_HYBRID {
 
     script:
     """
-    create-hybrid -F ${params.genome_file_list} -s ${params.haplotype_list} -o ./ --create-bowtie-index
+    emase create-hybrid -F ${params.genome_file_list} -s ${params.haplotype_list} -o ./ --create-bowtie-index
     """
 
     stub:
@@ -42,16 +42,17 @@ process EMASE_CREATE_HYBRID {
 
 
 /*
-create-hybrid:
-Usage:
-    create-hybrid -F <fasta_files> [ -s <hap_list> -o <out_file> --create-bowtie-index ]
+ Usage: emase create-hybrid [OPTIONS]
 
-Input:
-    -F <fasta_files> : List of fasta files (comma delimited)
-    -s <hap_list>    : Names of haplotypes to be used instead (comma delimited, in the order of genomes)
-    -o <out_file>    : Output file name (default: './emase.pooled.targets.fa')
+ hybridize Fasta files
 
-Parameters:
-    --help, -h            : shows this help message
-    --create-bowtie-index : builds bowtie1 index
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --target-files        -F                             FILE     Fasta file to parse, can seperate files by "," or have multiple -i [default: None] [required]                                                                                                     │
+│ *  --suffices            -s                             TEXT     haplotype, either one per -h option, i.e. -h A -h B -h C, or a shortcut -h A,B,C [default: None] [required]                                                                                       │
+│    --output              -o                             FILE     [default: gbrs.hybridized.targets.fa]                                                                                                                                                             │
+│    --build-bowtie-index      --no-build-bowtie-index             [default: no-build-bowtie-index]                                                                                                                                                                  │
+│    --verbose             -v                             INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                       │
+│    --help                                                        Show this message and exit.                                                                                                                                                                       │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

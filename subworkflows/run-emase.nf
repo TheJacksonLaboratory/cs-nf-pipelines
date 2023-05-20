@@ -3,11 +3,13 @@ nextflow.enable.dsl=2
 
 include {BOWTIE} from "${projectDir}/modules/bowtie/bowtie"
 include {SAMTOOLS_VIEW} from "${projectDir}/modules/samtools/samtools_view"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {GBRS_BAM2EMASE} from "${projectDir}/modules/gbrs/gbrs_bam2emase"
 include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
          GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
 include {GBRS_QUANTIFY} from "${projectDir}/modules/gbrs/gbrs_quantify"
 
+// include {SNORLAX} from "${projectDir}/modules/utility_modules/snorlax"
 
 workflow RUN_EMASE {
 
@@ -16,13 +18,17 @@ workflow RUN_EMASE {
     
     main:
 
+        // SNORLAX()
+
         // Map each read with BOWTIE
         BOWTIE(read_ch)
 
         // Apply `-bS` to convert SAM to BAM
         SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS')
 
-        // ADD INDEX STEP HERE....AND JOIN AND PASS THE INDEX WITH THE BAM TO THE BAM2EMASE STEP
+        // SAMTOOLS_INDEX(SAMTOOLS_VIEW.out.bam)
+
+            /// ADD INDEX STEP.
 
         // Convert BAM to EMASE format. 
         GBRS_BAM2EMASE(SAMTOOLS_VIEW.out.bam)
@@ -34,7 +40,7 @@ workflow RUN_EMASE {
         // If PE, join R1 and R2 together with an additonal compress step. 
         if (params.read_type == 'PE'){
             gbrs_compress_pairedReads_input = GBRS_COMPRESS_SE.out.compressed_emase_h5
-                                                .groupTuple()
+                                                .groupTuple(size: 2)
                                                 .map { sampleID, reads -> tuple( sampleID, reads.sort{it.name} ) }
             // collect GBRS compression. by sample ID then map and sort tuple to [sampleID, [R1, R2]]
 
@@ -60,18 +66,17 @@ workflow RUN_EMASE {
         emase_genes_alignment_count =  GBRS_QUANTIFY.out.genes_alignment_count
         emase_isoforms_alignment_count = GBRS_QUANTIFY.out.isoforms_alignment_count
         compressed_emase_h5 = gbrs_quantify_input
-
 }
 
-    /*
-Note 1: run-emase can be used as an alternative module to provide near identical function as GBRS quantify. 
-        Files that are output by run-emase, are identical to `gbrs quantify` except run-emase does not provide `*.alignment_counts` files.
+/*
+Note 1: `emase run` can be used as an alternative module to provide near identical function as GBRS quantify. 
+        Files that are output by run-emase, are identical to `gbrs quantify`. 
         Should the user wish, the include and run statements for `run-emase` are provided as an alternative to `gbrs quantify`.
 
     include {EMASE_RUN} from "${projectDir}/modules/emase/emase_run"
 
     EMASE_RUN(gbrs_quantify_input)
 
-Note 2: `emase zero` is another alternative to the above `grbs quanitfy` and `run-emase`. However, `emase zero` requires a different input format.
+Note 2: `emase zero` is another alternative to the above `grbs quanitfy` and `emase run`. However, `emase zero` requires a different input format.
         This could be implimented, but at present code is only provided to pass `*.h5` and `*.compressed.h5` files to the oringal `emase` code base. 
 */

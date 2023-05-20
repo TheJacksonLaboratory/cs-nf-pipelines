@@ -14,7 +14,7 @@ process EMASE_PREPARE_EMASE {
     memory 15.GB
     time 24.hour
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy', enabled: params.keep_intermediate
@@ -29,7 +29,7 @@ process EMASE_PREPARE_EMASE {
 
     script:
     """
-    prepare-emase -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m --no-bowtie-index
+    emase prepare -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m --no-bowtie-index
     """
 
     stub:
@@ -48,21 +48,21 @@ process EMASE_PREPARE_EMASE {
 }
 
 /*
-prepare-emase:
-Usage:
-    prepare-emase -G <genome_files> [ -g <gtf_files> -s <hap_list> -o <out_dir> -m -x ]
 
-Input:
-    -G <genome_files> : List of Genome files (comma delimited)
-    -g <gtf_files>    : List of gene annotation files (comma delimited, in the order of genomes)
-    -s <hap_list>     : Names of haplotypes to be used instead (comma delimited, in the order of genomes)
-    -o <out_dir>      : Output folder to store results (default: the current working directory)
+ Usage: emase prepare [OPTIONS]
 
-Parameters:
-    -h, --help            : shows this help message
-    -m, --save-g2tmap     : saves gene id to transcript id list in a tab-delimited text file
-    -x, --no-bowtie-index : skips building bowtie index
+ prepare EMASE
 
-Note:
-    Does not work if the input gtf file is older than Ensembl Release 75.
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --genome-file      -G      FILE     Genome files, can seperate files by "," or have multiple -G [default: None] [required]                                                                                                                                      │
+│    --haplotype-char   -s      TEXT     haplotype, either one per -h option, i.e. -h A -h B -h C, or a shortcut -h A,B,C [default: None]                                                                                                                            │
+│    --gtf-file         -g      FILE     Gene Annotation File files, can seperate files by "," or have multiple -G [default: None]                                                                                                                                   │
+│    --out_dir          -o      TEXT     Output folder to store results (default: the current working directory) [default: None]                                                                                                                                     │
+│    --save-g2tmap      -m               saves gene id to transcript id list in a tab-delimited text file                                                                                                                                                            │
+│    --save-dbs         -d               save dbs                                                                                                                                                                                                                    │
+│    --no-bowtie-index  -m               skips building bowtie index                                                                                                                                                                                                 │
+│    --verbose          -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                 │
+│    --help                              Show this message and exit.                                                                                                                                                                                                 │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

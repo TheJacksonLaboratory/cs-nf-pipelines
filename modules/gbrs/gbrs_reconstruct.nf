@@ -5,7 +5,7 @@ process GBRS_RECONSTRUCT  {
     memory 2.GB
     time '01:00:00'
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.tsv", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.npz", mode: 'copy', enabled: params.keep_intermediate
@@ -43,19 +43,21 @@ process GBRS_RECONSTRUCT  {
 }
 
 /*
-usage: gbrs reconstruct [-h] -e EXPRFILE -t TPROBFILE [-x AVECFILE]
-                        [-g GPOSFILE] [-c EXPR_THRESHOLD] [-s SIGMA]
-                        [-o OUTBASE]
+ Usage: gbrs reconstruct [OPTIONS]
 
-optional arguments:
-  -h, --help         show this help message and exit
-  -e EXPRFILE
-  -t TPROBFILE
-  -x AVECFILE
-  -g GPOSFILE
-  -c EXPR_THRESHOLD
-  -s SIGMA
-  -o OUTBASE
+ reconstruct the genome based upon gene-level TPM quantities
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --expr-file       -e      FILE     file containing gene-level TPM quantities [default: None] [required]                                                                                                                                                         │
+│ *  --tprob-file      -t      FILE     transition probabilities file [default: None] [required]                                                                                                                                                                     │
+│    --avec-file       -x      FILE     alignment specificity file [default: None]                                                                                                                                                                                   │
+│    --gpos-file       -g      FILE     meta information for genes (chrom, id, location) [default: None]                                                                                                                                                             │
+│    --expr-threshold  -c      FLOAT    [default: 1.5]                                                                                                                                                                                                               │
+│    --sigma           -s      FLOAT    [default: 0.12]                                                                                                                                                                                                              │
+│    --outbase         -o      TEXT     basename of all the generated output files [default: None]                                                                                                                                                                   │
+│    --verbose         -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                  │
+│    --help                             Show this message and exit.                                                                                                                                                                                                  │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 
  sigma defaults to 0.12.
  expr_threshold defaults to 1.5. 

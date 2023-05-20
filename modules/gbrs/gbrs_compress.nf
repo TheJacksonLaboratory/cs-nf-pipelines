@@ -6,7 +6,7 @@ process GBRS_COMPRESS {
     time 10.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: "${ suffix == 'merged' || params.read_type == 'SE' ? true : false }"
 
@@ -18,7 +18,7 @@ process GBRS_COMPRESS {
     tuple val(sampleID), file("*.compressed.emase.h5"), emit: compressed_emase_h5
 
     script:
-    bam_list = bam.collect { "$it" }.join(',')
+    bam_list = bam.collect { "$it" }.join(' -i ')
 
     output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${bam[0].baseName}.compressed.emase.h5"
 
@@ -33,11 +33,16 @@ process GBRS_COMPRESS {
 }
 
 /*
-usage: gbrs compress [-h] -i EMASEFILES -o OUTFILE [-c COMPLIB]
+ Usage: gbrs compress [OPTIONS]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -i EMASEFILES, --emase-files EMASEFILES
-  -o OUTFILE
-  -c COMPLIB
+ compress EMASE format alignment incidence matrix
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --emase-file  -i      FILE     EMASE file to compress, can seperate files by "," or have multiple -i [default: None] [required]                                                                                                                                 │
+│ *  --output      -o      FILE     name of the compressed EMASE file [default: None] [required]                                                                                                                                                                     │
+│    --comp-lib    -c      TEXT     compression library to use [default: zlib]                                                                                                                                                                                       │
+│    --verbose     -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                      │
+│    --help                         Show this message and exit.                                                                                                                                                                                                      │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

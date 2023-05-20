@@ -6,7 +6,7 @@ process EMASE_RUN {
     time 5.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.isoforms.tpm", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.isoforms.expected_read_counts", mode: 'copy'
@@ -28,12 +28,13 @@ process EMASE_RUN {
 
     script:
     """
-    run-emase \
+    emase run \
         -i ${h5} \
         -g ${params.gene2transcript_csv} \
         -L ${params.full_transcript_info} \
         -M ${params.emase_model} \
-        -o ${sampleID}
+        -o ${sampleID} \
+        -a
     """
 
     stub:
@@ -51,26 +52,24 @@ process EMASE_RUN {
 
 
 /*
-run-emase:
-Usage:
-    run-emase -i <h5_file> -g <grp_file> -L <len_file> -M <multiread_model> -o <outbase> \
-              -p <pseudocount> -r <read_length> -m <max_iters> -t <tolerance>
-Input:
-    -i <h5_file>         : Alignments stored in a PyTables HDF5 format
-    -g <grp_file>        : Gene-to-transcript map (ENSMUSGxxx followed by a list of ENSMUSTyyy's)
-    -L <len_file>        : File that contains transcript lengths
-    -M <multiread_model> : Multiread model ID
-                           1: Gene->Allele->Isoform,
-                           2: Gene->Isoform->Allele,
-                           3: Gene->(Isoform*Allele),
-                           4: Gene*Isoform*Allele  (default model)
-    -o <outbase>         : EMASE outputs the result to <folder/basename> (default: './emase')
-    -p <pseudocount>     : Pseudocount for allele specificity (default: 0.0)
-    -r <read_length>     : Read length (default: 100)
-    -m <max_iters>       : The number of maximum iterations for EM (default: 999)
-    -t <tolerance>       : Tolerance for the termination of EM. (default: 0.0001)
-Parameters:
-    -h, --help : shows this help message
-    -c         : reports the alignment counts (Consider using another script 'count-alignments' instead.)
-    -w         : reports the posterior probability for each read
+ Usage: emase run [OPTIONS]
+
+ run EMASE
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --alignment-file           -i      FILE     EMASE alignment incidence file (in hdf5 format) [default: None] [required]                                                                                                                                          │
+│    --group-file               -g      FILE     tab delimited file of gene to transcript mapping [default: None]                                                                                                                                                    │
+│    --length-file              -L      FILE     tab delimited file of locus(transcript) and length [default: None]                                                                                                                                                  │
+│    --outbase                  -o      TEXT     basename of all the generated output files [default: emase]                                                                                                                                                         │
+│    --multiread-model          -M      INTEGER  emase model (default: 4) [default: 4]                                                                                                                                                                               │
+│    --pseudocount              -p      FLOAT    prior read count (default: 0.0) [default: 0.0]                                                                                                                                                                      │
+│    --read-length              -l      INTEGER  specify read length [default: 100]                                                                                                                                                                                  │
+│    --max-iters                -m      INTEGER  maximum iterations for EM iteration [default: 999]                                                                                                                                                                  │
+│    --tolerance                -t      FLOAT    tolerance for EM termination (default: 0.0001 in TPM) [default: 0.0001]                                                                                                                                             │
+│    --report-alignment-counts  -c               whether to report alignment counts                                                                                                                                                                                  │
+│    --report-posterior         -w               whether to report posterior probabilities                                                                                                                                                                           │
+│    --verbose                  -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                         │
+│    --help                                      Show this message and exit.                                                                                                                                                                                         │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

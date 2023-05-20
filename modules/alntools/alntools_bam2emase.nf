@@ -6,7 +6,7 @@ process ALNTOOLS_BAM2EMASE {
     time 10.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'alntools' }", pattern: "*.h5", mode: 'copy', enabled: params.keep_intermediate
 

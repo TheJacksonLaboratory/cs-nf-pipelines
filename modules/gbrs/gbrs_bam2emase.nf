@@ -6,7 +6,7 @@ process GBRS_BAM2EMASE {
     time 5.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/mikewlloyd/gbrs_test:latest'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: params.keep_intermediate
 
@@ -20,7 +20,7 @@ process GBRS_BAM2EMASE {
     """
     gbrs bam2emase -i ${bam} \
                 -m ${params.transcripts_info} \
-                -s ${params.gbrs_strain_list} \
+                -h ${params.gbrs_strain_list} \
                 -o ${bam.baseName}.emase.h5
     """
 
@@ -32,17 +32,18 @@ process GBRS_BAM2EMASE {
 
 
 /*
-usage: gbrs bam2emase [-h] -i ALNFILE [-m LIDFILE] [-s HAPLOGYPES]
-                      [-o OUTFILE] [--delim DELIM] [--index-dtype INDEX_DTYPE]
-                      [--data-dtype DATA_DTYPE]
+ Usage: gbrs bam2emase [OPTIONS]
 
-optional arguments:
-  -h, --help            show this help message and exit
-  -i ALNFILE, --bamfile ALNFILE
-  -m LIDFILE, --locus-ids LIDFILE
-  -s HAPLOGYPES, --haplotype-codes HAPLOGYPES
-  -o OUTFILE
-  --delim DELIM
-  --index-dtype INDEX_DTYPE
-  --data-dtype DATA_DTYPE
+ convert a BAM file to EMASE format
+
+╭─ Options ──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --alignment-file  -i      FILE     bam file to convert [default: None] [required]                                                                                                                                                                               │
+│ *  --haplotype-char  -h      TEXT     haplotype, either one per -h option, i.e. -h A -h B -h C, or a shortcut -h A,B,C [default: None] [required]                                                                                                                  │
+│ *  --locus-ids       -m      FILE     filename for the locus (usually transcripts) info [default: None] [required]                                                                                                                                                 │
+│    --output          -o      FILE     EMASE file (hdf5 format) [default: None]                                                                                                                                                                                     │
+│    --delim           -d      TEXT     delimiter string between locus and haplotype in BAM file [default: _]                                                                                                                                                        │
+│    --verbose         -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                  │
+│    --help                             Show this message and exit.                                                                                                                                                                                                  │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+
 */

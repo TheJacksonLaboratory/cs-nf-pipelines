@@ -12,7 +12,7 @@ include {GBRS_RECONSTRUCT} from "${projectDir}/modules/gbrs/gbrs_reconstruct"
 include {GBRS_QUANTIFY_GENOTYPES} from "${projectDir}/modules/gbrs/gbrs_quantify_genotype"
 include {GBRS_INTERPOLATE} from "${projectDir}/modules/gbrs/gbrs_interpolate"
 include {GBRS_PLOT} from "${projectDir}/modules/gbrs/gbrs_plot"
-include {GBRS_EXPORT_GENOPROBS} from "${projectDir}/modules/gbrs/gbrs_export_genoprob_file"
+include {GBRS_EXPORT} from "${projectDir}/modules/gbrs/gbrs_export"
 
 // help if needed
 if (params.help){
@@ -81,6 +81,6 @@ workflow GBRS {
 
     GBRS_PLOT(GBRS_INTERPOLATE.out.interpolated_genoprobs)
 
-    GBRS_EXPORT_GENOPROBS(GBRS_INTERPOLATE.out.interpolated_genoprobs)
+    GBRS_EXPORT(GBRS_INTERPOLATE.out.interpolated_genoprobs)
 
 }
