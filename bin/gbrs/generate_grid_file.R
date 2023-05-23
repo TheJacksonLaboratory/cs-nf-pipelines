@@ -2,7 +2,7 @@
 
 ############# Generate Transition Probabilities from Gene Positions ################
 
-# This scripts functions space 'marker' positions ever 0.02 cM along chr1:19 and X.
+# This scripts functions to space 'marker' positions every 0.02 cM along chr1:19 and X.
 # cM positions are converted to bp and Mbp via mmconvert. 
 # 'marker' positions are set to start at cM = 0 = 3,000,000bp,
 #  and capped to not exceed the distal telomere starting positions.

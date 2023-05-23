@@ -5,7 +5,7 @@ process GBRS_EXPORT {
     memory 2.GB
     time '01:00:00'
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.tsv", mode: 'copy'
 

@@ -6,7 +6,7 @@ process GBRS_COMPRESS {
     time 10.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: "${ suffix == 'merged' || params.read_type == 'SE' ? true : false }"
 

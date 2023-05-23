@@ -2,7 +2,7 @@ process DO_TRANSITION_PROBABILITIES {
 
     cpus 2
     memory 40.GB
-    time 48.hour
+    time 2.hour
 
     container 'quay.io/jaxcompsci/r-qtl2-deseq-biomart-tidy:v4'
 
@@ -11,7 +11,8 @@ process DO_TRANSITION_PROBABILITIES {
     publishDir "${params.pubdir}/transprob_matrix_plots", pattern: '*.pdf', mode:'copy'
 
     output:
-    tuple path('*.F.h5'), path('*.M.h5'), emit: h5_files
+    path('*.F.h5'), emit: female_h5_file
+    path('*.M.h5'), emit: male_h5_file
     path('*.tsv'), emit: gene_list_tsv
     path('*.pdf'), emit: pdf_files
 

@@ -10,7 +10,7 @@ process EMASE_CREATE_HYBRID {
     time 24.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
 
     publishDir "${params.pubdir}/emase", pattern: "*.fa", mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: "*.info", mode:'copy'

@@ -158,7 +158,7 @@ generate_female_transprobs <- function() {
     genes <- joined_allChr_jittered %>% dplyr::filter(chr == !!chr)
     tprobs = do.trans.probs(states, genes, chr=chr, sex=sex, gen=gens)
     for (j in c(1:num_gens)) {
-      h5write(tprobs[[j]], file=h5file, name=paste(chr, j, sex, sep=":"))
+      h5write(tprobs[[j]], file=h5file, name=paste(chr, j-1, sex, sep=":"))
     }
     
     pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_Chrom_', i, '_F.genPlots.pdf'))
@@ -179,7 +179,7 @@ generate_female_transprobs <- function() {
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'MT')
   tprobs = do.trans.probs(states, genes, chr="X", sex="M", gen=c(2)) # KB_NOTE: chr="X", sex="M" when we want 8x8 matrices
   for (j in c(1:num_gens)) {
-    h5write(tprobs[[1]], file=h5file, name=paste("MT", j, sex, sep=":"))
+    h5write(tprobs[[1]], file=h5file, name=paste("MT", j-1, sex, sep=":"))
   }
 }
 
@@ -198,7 +198,7 @@ generate_male_transprobs <- function() {
     genes <- joined_allChr_jittered %>% dplyr::filter(chr == !!chr)
     tprobs = do.trans.probs(states, genes, chr=chr, sex=sex, gen=gens)
     for (j in c(1:num_gens)) {
-      h5write(tprobs[[j]], file=h5file, name=paste(chr, j, sex, sep=":"))
+      h5write(tprobs[[j]], file=h5file, name=paste(chr, j-1, sex, sep=":"))
     }
     pdf(paste0(opt$output_prefix, 'G0-', opt$num_generation, '_Chrom_', i, '_M.genPlots.pdf'))
       image(tprobs[[1]][,,1], main = "Transition Prob. Matrix Gen.: 1, Gene: 1")
@@ -213,21 +213,21 @@ generate_male_transprobs <- function() {
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'X')
   tprobs = do.trans.probs(states, genes, chr="X", sex="M", gen=gens)
   for (j in c(1:num_gens)) {
-    h5write(tprobs[[j]], file=h5file, name=paste("X", j, sex, sep=":"))
+    h5write(tprobs[[j]], file=h5file, name=paste("X", j-1, sex, sep=":"))
   }
 
   # KB_NOTE: For "Y" chromosome (male only)
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'Y')
   tprobs = do.trans.probs(states, genes, chr="X", sex="M", gen=gens)
   for (j in c(1:num_gens)) {
-    h5write(tprobs[[j]], file=h5file, name=paste("Y", j, sex, sep=":"))
+    h5write(tprobs[[j]], file=h5file, name=paste("Y", j-1, sex, sep=":"))
   }
 
   # KB_NOTE: For "MT" chromosome
   genes <- joined_allChr_jittered %>% dplyr::filter(chr == 'MT')
   tprobs = do.trans.probs(states, genes, chr="X", sex="M", gen=c(1)) # KB_NOTE: chr="X", sex="M" when we want 8x8 matrices
   for (j in c(1:num_gens)) {
-    h5write(tprobs[[1]], file=h5file, name=paste("MT", j, sex, sep=":"))
+    h5write(tprobs[[1]], file=h5file, name=paste("MT", j-1, sex, sep=":"))
   }
 }
 

@@ -7,7 +7,7 @@ process GBRS_QUANTIFY_GENOTYPES {
     errorStrategy 'finish' 
     maxRetries 1
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-b362dec'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.diploid.isoforms.tpm", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.diploid.isoforms.expected_read_counts", mode: 'copy'
