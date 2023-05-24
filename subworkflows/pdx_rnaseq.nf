@@ -9,8 +9,6 @@ include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_SORT as FASTQ_SORT_HUMAN;
-         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
          RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_MOUSE} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {PICARD_ADDORREPLACEREADGROUPS as PICARD_ADDORREPLACEREADGROUPS_HUMAN;
@@ -49,16 +47,12 @@ workflow PDX_RNASEQ {
     // Xenome Classification
     XENOME_CLASSIFY(xenome_input)
 
-    // Xenome Read Sort
-    FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
-    FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')    
-
-    human_reads = FASTQ_SORT_HUMAN.out.sorted_fastq
+    human_reads = XENOME_CLASSIFY.out.xenome_human_fastq
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_human', it[1], it[2], it[3])}
 
-    mouse_reads = FASTQ_SORT_MOUSE.out.sorted_fastq
+    mouse_reads = XENOME_CLASSIFY.out.xenome_mouse_fastq
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_mouse', it[1], it[2], it[3])}
