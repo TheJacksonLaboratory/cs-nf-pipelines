@@ -30,7 +30,9 @@ process XENOME_CLASSIFY {
         gzip -c mouse_sorted_1.fastq > ${sampleID}_sorted_mouse_1.fastq.gz
 
         rm human_1.fastq
+        rm human_sorted_1.fastq
         rm mouse_1.fastq
+        rm mouse_sorted_1.fastq
         rm ambiguous_1.fastq
         rm both_1.fastq
         rm neither_1.fastq
@@ -51,9 +53,13 @@ process XENOME_CLASSIFY {
         gzip -c mouse_sorted_2.fastq > ${sampleID}_sorted_mouse_2.fastq.gz
 
         rm human_1.fastq
+        rm human_sorted_1.fastq
         rm human_2.fastq
+        rm human_sorted_2.fastq
         rm mouse_1.fastq
+        rm mouse_sorted_1.fastq
         rm mouse_2.fastq
+        rm mouse_sorted_2.fastq
         rm ambiguous_1.fastq
         rm ambiguous_2.fastq
         rm both_1.fastq
