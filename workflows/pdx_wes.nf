@@ -13,8 +13,6 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_SORT as FASTQ_SORT_HUMAN;
-         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
@@ -149,15 +147,11 @@ workflow PDX_WES {
     // Step 2: Xenome classify and sort. 
     XENOME_CLASSIFY(xenome_input)
 
-    // Xenome Read Sort
-    FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
-    FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse')
-
     // Step 3: Get Read Group Information
     READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
     // Step 4: BWA-MEM Alignment
-    bwa_mem_mapping = FASTQ_SORT_HUMAN.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+    bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
 
     BWA_MEM(bwa_mem_mapping)
 
