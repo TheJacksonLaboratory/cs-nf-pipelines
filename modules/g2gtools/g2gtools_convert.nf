@@ -7,7 +7,7 @@ process G2GTOOLS_CONVERT {
 
     container 'quay.io/jaxcompsci/g2gtools:0.2.9'
 
-    publishDir "${params.pubdir}/g2gtools", pattern: "*.${format}", mode:'copy'
+    publishDir "${params.pubdir}/g2gtools", pattern: "*.${format}", mode:'copy', enabled: "${output_gtf}"
 
     input:
     tuple val(strain), path(vci), path(tbi)
@@ -24,33 +24,14 @@ process G2GTOOLS_CONVERT {
     debug_run = params.debug ? '--debug' : ''
     run_reverse = reverse ? '--reverse' : ''
 
-    if (params.append_chromosomes.find() == true | params.append_chromosomes == null) {
-        append_chroms = false
+    if (params.append_chromosomes == 'false' | !params.append_chromosomes) {
+        output_gtf = true
     } else {
-        append_chroms = true
+        output_gtf = false
     }
-    // params.append_chromosomes.find() looks at the string params.append_chromosomes.
-    // If there is no string, it returns 'true'. Also, we check if the param is 'null' as no append is needed in that case. 
 
     """
     /g2gtools/bin/g2gtools convert ${debug_run} -i ${input_file} -c ${vci} --format ${format} ${run_reverse} -o ${strain}.${params.genome_version}.${format}
-
-    if [ ${append_chroms} ]
-    then
-        chroms_to_append=\$(echo ${params.append_chromosomes} | tr "," "\\n")
-        
-        for chrom in \$chroms_to_append
-        do
-            grep -P "\${chrom}\\t" ${strain}.${params.genome_version}.${format}.unmapped >> ${strain}.${params.genome_version}.${format}
-        done
-        
-    fi
-
-    ### CHECK IF VCI HAS ENTRIES FOR ALL CHROMS
-    ### IF CHROM IS MISSING FROM VCI CONVERSION CALLS
-    ### ADD BACK IN ANYTHING FROM UNMAPPED THAT IS NOT PRESENT IN THE VCI
-    ### IF A SINGLE VARIANT IS THERE, HOW DOES IT WORK? DOES WHOLE CHROM GO? 
-    
     """
 
     stub:

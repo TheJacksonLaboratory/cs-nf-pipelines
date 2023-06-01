@@ -10,6 +10,7 @@ include {G2GTOOLS_TRANSFORM} from "${projectDir}/modules/g2gtools/g2gtools_trans
 include {SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_G2GTOOLS;
          SAMTOOLS_FAIDX as SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {G2GTOOLS_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_convert"
+include {APPEND_DROPPED_CHROMS} from "${projectDir}/modules/python/append_dropped_chroms"
 include {G2GTOOLS_GTF2DB} from "${projectDir}/modules/g2gtools/g2gtools_gtf2db"
 include {G2GTOOLS_EXTRACT as G2GTOOLS_EXTRACT_GENES;
          G2GTOOLS_EXTRACT as G2GTOOLS_EXTRACT_TRANSCRIPTS;
@@ -56,7 +57,15 @@ workflow GENERATE_PSEUDOREFERENCE  {
     G2GTOOLS_TRANSFORM(transform_input)
     SAMTOOLS_FAIDX_G2GTOOLS(G2GTOOLS_TRANSFORM.out.final_fasta)
     G2GTOOLS_CONVERT(G2GTOOLS_VCF2VCI.out.vci_tbi, params.primary_reference_gtf, 'gtf', false)
-    G2GTOOLS_GTF2DB(G2GTOOLS_CONVERT.out.coverted_file)
+    
+    if (params.append_chromosomes) {
+        APPEND_DROPPED_CHROMS(G2GTOOLS_VCF2VCI.out.vci_tbi.join(G2GTOOLS_CONVERT.out.unmapped_file).join(G2GTOOLS_CONVERT.out.coverted_file))
+        gtf2db_input = APPEND_DROPPED_CHROMS.out.appended_gtf
+    } else {
+        gtf2db_input = G2GTOOLS_CONVERT.out.coverted_file
+    }
+    
+    G2GTOOLS_GTF2DB(gtf2db_input)
     extract_input = G2GTOOLS_TRANSFORM.out.final_fasta.join(G2GTOOLS_GTF2DB.out.db)
     G2GTOOLS_EXTRACT_GENES(extract_input, 'genes')
     G2GTOOLS_EXTRACT_TRANSCRIPTS(extract_input, 'transcripts')
