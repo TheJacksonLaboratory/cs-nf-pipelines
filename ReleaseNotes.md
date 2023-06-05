@@ -22,7 +22,8 @@ None
 
 1. xenome/xenome.nf modified to combine `xenome classify` and `fastq-sort` into the XENOME_CLASSIFY module. For non-fusion applications, human and mouse reads are now emitted as compressed .fastq.gz files
 2. Removed fastq-tools/fastq-sort.nf as its functionality is now in xenome/xenome.nf
-3. Modified input type specification for kallisto/kallisto_insert_size.nf to address issue with flash storage mounting in Singularity
+3. Modified input type specification for kallisto/kallisto_insert_size.nf to address issue with flash storage mounting in Singularity.
+4. Added text file to pubDir statement in Picard collectRNAseqMetrics
 
 ## Release 0.3.0
 
