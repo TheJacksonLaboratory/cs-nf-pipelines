@@ -19,11 +19,7 @@ workflow RUN_EMASE {
         BOWTIE(read_ch)
 
         // Apply `-bS` to convert SAM to BAM
-        SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS')
-
-        // SAMTOOLS_INDEX(SAMTOOLS_VIEW.out.bam)
-
-            /// ADD INDEX STEP.
+        SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS', '_bowtieAlign')
 
         // Convert BAM to EMASE format. 
         GBRS_BAM2EMASE(SAMTOOLS_VIEW.out.bam)
