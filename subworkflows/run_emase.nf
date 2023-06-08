@@ -9,17 +9,12 @@ include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
          GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
 include {GBRS_QUANTIFY} from "${projectDir}/modules/gbrs/gbrs_quantify"
 
-// include {SNORLAX} from "${projectDir}/modules/utility_modules/snorlax"
-
 workflow RUN_EMASE {
 
     take:
         read_ch
     
     main:
-
-        // SNORLAX()
-
         // Map each read with BOWTIE
         BOWTIE(read_ch)
 
