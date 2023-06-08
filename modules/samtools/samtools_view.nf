@@ -23,4 +23,9 @@ process SAMTOOLS_VIEW {
     """
     samtools view ${view_string} ${sam} > ${sampleID}_${filename}.bam 
     """
+  
+  stub:
+    """
+    ${sam.baseName}.bam 
+    """
 }
