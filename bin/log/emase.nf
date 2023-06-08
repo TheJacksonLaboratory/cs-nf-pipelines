@@ -1,6 +1,41 @@
 def param_log(){
-    if (params.concat_lanes)
-        
+
+    if (params.csv_input)
+    log.info """
+    ______________________________________________________
+
+        EMASE RUN PARAMETER LOG
+
+    --comment: ${params.comment}
+
+    Results Published to: ${params.pubdir}
+    ______________________________________________________
+    --workflow                      ${params.workflow}
+    -w                              ${workDir}
+    -c                              ${params.config}
+    --sample_folder                 ${params.sample_folder}
+    --extension                     ${params.extension}
+    --pattern                       ${params.pattern}
+    --read_type                     ${params.read_type}
+    --csv_input                     ${params.csv_input}
+    --download_data                 ${params.download_data}
+    --bowtie_index                  ${params.bowtie_index}
+    --transcripts_info              ${params.transcripts_info}
+    --gbrs_strain_list              ${params.gbrs_strain_list}
+    --gene2transcript_csv           ${params.gene2transcript_csv}
+    --full_transcript_info          ${params.full_transcript_info}
+    --emase_model                   ${params.emase_model}
+
+    --keep_intermediate             ${params.keep_intermediate}
+
+    Project Directory: ${projectDir}
+
+    Command line call: 
+    ${workflow.commandLine}
+    ______________________________________________________
+    """
+
+    else if (params.concat_lanes)
     log.info """
     ______________________________________________________
 

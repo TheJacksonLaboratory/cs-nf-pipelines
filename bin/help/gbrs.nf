@@ -11,6 +11,8 @@ Parameter | Type | Description
 --extension | <string> | Default: '.fastq.gz' The expected extension for the input read files.
 --pattern | <string> | Default: '*_R{1,2}*'. The expected R1 / R2 matching pattern. The default value will match reads with names like this READ_NAME_R1_MoreText.fastq.gz or READ_NAME_R1.fastq.gz
 --read_type | <string> | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
+--csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,sex,generation,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
+--download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 --concat_lanes | <boolean> | Options: false and true. Default: false. If this boolean is specific, FASTQ files will be concatenated by sample. This option is used in cases where samples are divided across individual sequencing lanes.
 
 NOTE: When `--concat_lanes` is used. Unique Sample IDs must be parsed from FASTQ names. The following commands split FASTQ names on a delimiter and keep 'n' positions of the split array. 

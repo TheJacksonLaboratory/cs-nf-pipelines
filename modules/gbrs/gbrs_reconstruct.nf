@@ -11,7 +11,7 @@ process GBRS_RECONSTRUCT  {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.npz", mode: 'copy', enabled: params.keep_intermediate
     
     input:
-    tuple val(sampleID), path(tpm)
+    tuple val(sampleID), path(tpm), val(sex), val(generation)
 
     output:
     tuple val(sampleID), file("*genoprobs.npz"), emit: genoprobs_npz
@@ -21,12 +21,11 @@ process GBRS_RECONSTRUCT  {
     script:
 
     """
-
     cp ${params.base_ref_index_fai} ref.fa.fai
 
     gbrs reconstruct \
         -e ${tpm} \
-        -t ${params.trans_prob_dir}/tranprob.DO.G${params.sample_generation}.${params.sample_sex}.npz \
+        -t ${params.trans_prob_dir}/tranprob.DO.G${generation}.${sex}.npz \
         -x ${params.emission_prob_avecs} \
         -g ${params.gene_position_file} \
         -o ${sampleID} \

@@ -128,7 +128,11 @@ min_expr = int(options.min_expression)
 axes = dict()
 ases = dict()
 avecs = dict()
+all_genes = set()
+passed_genes = set()
+
 for g in gname:
+    all_genes.add(g)
     axes[g] = np.zeros((8, 8))
     ases[g] = np.zeros((1, 8))
     good = np.zeros(8)
@@ -140,8 +144,17 @@ for g in gname:
             good[i] = 1.0
     if sum(good) > 0:  # At least one strain expresses
         avecs[g] = np.zeros((8, 8))
+        passed_genes.add(g)
         for i in range(8):
             avecs[g][i, :] = unit_vector(axes[g][i, :])
+
+with open(os.path.join(options.output_directory, options.output_prefix + '.included_genes.txt'), 'w') as f:
+    for item in list(all_genes.intersection(passed_genes)):
+        f.write("%s\n" % item)
+
+with open(os.path.join(options.output_directory, options.output_prefix + '.excluded_genes.txt'), 'w') as f:
+    for item in list(all_genes.difference(passed_genes)):
+        f.write("%s\n" % item)
 
 print('After filtering, there are ' + str(len(avecs)) + ' genes.\nExporting vectors to output directory...')
 
