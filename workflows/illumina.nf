@@ -44,19 +44,23 @@ workflow ILLUMINA {
 
     // Prepare reads channel
 
-    if (!params.fastq2 && !params.bam) {
+    if (params.sample_folder && !params.fastq1 && !params.fastq2 && !params.bam) {
+        fq_reads = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}", checkExists:true )
+    }
+
+    else if (params.fastq1 && !params.fastq2 && !params.bam && !params.sample_folder) {
         fq_reads = ch_sampleID.concat(ch_fastq1)
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
     }
 
-    else if (params.fastq1 && params.fastq2) {
+    else if (params.fastq1 && params.fastq2 && !params.bam && !params.sample_folder) {
         fq_reads = ch_sampleID.concat(ch_fastq1, ch_fastq2)
                             .collect()
                             .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     }
 
-    else {
+    else if (params.bam && !params.fastq1 && !params.fastq2 && !params.sample_folder) {
         fq_reads = null
         pre_bam = ch_sampleID.concat(ch_bam)
                              .collect()
