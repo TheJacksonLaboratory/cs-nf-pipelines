@@ -11,11 +11,11 @@ process SURVIVOR_ANNOTATION {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : '' }", mode:'copy', enabled: params.workflow == 'ont' ? false : true
 
     input:
-        tuple val(sampleID), file("${sampleID}.ins.bed"),file("${sampleID}.del.bed"),file("${sampleID}.dup.bed"),file("${sampleID}.inv.bed"),file("${sampleID}.tra.bed"), file("${sampleID}.ins.s.bed"), file("${sampleID}.ins.e.bed"), file("${sampleID}.del.s.bed"), file("${sampleID}.del.e.bed"), file("${sampleID}.inv.e.bed"), file("${sampleID}.tra.e.bed"), file("${sampleID}.dup.e.bed"), file("${sampleID}.ins.genes.bed"), file("${sampleID}.del.genes.bed"), file("${sampleID}.inv.genes.bed"), file("${sampleID}.dup.genes.bed"), file("${sampleID}.tra.genes.bed"), file("${sampleID}.ins.exons.bed"), file("${sampleID}.del.exons.bed"), file("${sampleID}.inv.exons.bed"), file("${sampleID}.dup.exons.bed"), file("${sampleID}.tra.exons.bed"), file("${sampleID}.survivor_summary.csv"), file("${sampleID}.merged.overlap.annotated.txt")
+        tuple val(sampleID), file("${sampleID}.ins.bed"), file("${sampleID}.del.bed"), file("${sampleID}.dup.bed"), file("${sampleID}.inv.bed"), file("${sampleID}.tra.bed"), file("${sampleID}.ins.c.bed"), file("${sampleID}.del.c.bed"), file("${sampleID}.inv.c.bed"), file("${sampleID}.ins.genes.bed"), file("${sampleID}.del.genes.bed"), file("${sampleID}.inv.genes.bed"), file("${sampleID}.dup.genes.bed"), file("${sampleID}.tra.genes.bed"), file("${sampleID}.ins.exons.bed"), file("${sampleID}.del.exons.bed"), file("${sampleID}.inv.exons.bed"), file("${sampleID}.dup.exons.bed"), file("${sampleID}.tra.exons.bed"), file("${sampleID}.ins.regulatory.bed"), file("${sampleID}.del.regulatory.bed"), file("${sampleID}.inv.regulatory.bed"), file("${sampleID}.dup.regulatory.bed"), file("${sampleID}.tra.regulatory.bed"), file("${sampleID}.survivor_summary.csv"), file("${sampleID}.merged.overlap.annotated.txt")
     output:
         tuple val(sampleID), file("${sampleID}.survivor_joined_results.csv"), emit: csv
     script:
         """
-        /usr/bin/env Rscript ${projectDir}/bin/post_filt.R ${sampleID}
+        /usr/bin/env Rscript ${projectDir}/bin/summarize_intersections.R ${sampleID}
         """
 }
