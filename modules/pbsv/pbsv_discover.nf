@@ -15,7 +15,7 @@ process PBSV_DISCOVER {
     script:
         if (params.pbsv_tandem)
             """
-            /usr/bin/env bash ${projectDir}/bin/pbsv_tandem.sh ${pbmm2_bam} ${sampleID}.svsig.gz
+            pbsv discover --tandem-repeats ${params.tandem_repeats} ${pbmm2_bam} ${sampleID}.svsig.gz
             """
         else
             """
