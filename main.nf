@@ -13,20 +13,6 @@ Mike Lloyd (mike.lloyd@jax.org) for The Jackson Laboratory.
 
 */
 
-def helpMessage() {
-    log.info"""
-    Usage:
-    The typical command for running the pipeline is as follows:
-    nextflow -c /path/to/params.config run /path/to/mmrSVD/main.nf -profile slurm,singularity --genome mm10
-
-    """
-}
-
-// Show help message
-if (params.help) exit 0, helpMessage()
-
-params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
-
 if (params.workflow == "pacbio") {
 	include {PACBIO} from "./workflows/pacbio"
 }

@@ -1,6 +1,6 @@
 #!/usr/bin/env nextflow
 nextflow.enable.dsl=2
-
+include {help} from "${projectDir}/bin/help/illumina"
 include {PARAM_LOG} from "${projectDir}/bin/log/illumina"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {BWA_INDEX} from "${projectDir}/modules/bwa/bwa_index"
@@ -33,6 +33,12 @@ include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_anno
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
 workflow ILLUMINA {
+
+    if (params.help){
+       help()
+        exit 0
+    }
+
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
     ch_fasta = Channel.fromPath(params.fasta)
     ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null

@@ -9,7 +9,11 @@ ______________________________________________________
 Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
+--genome_build         ${params.genome_build}
 --fasta                ${params.fasta}
+--genome               ${params.genome}
+--bwa_index            ${params.bwa_index}
+--sample_folder        ${params.sample_folder}
 --fastq1               ${params.fastq1}
 --fastq2               ${params.fastq2}
 --bam                  ${params.bam}

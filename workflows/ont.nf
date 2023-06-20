@@ -2,8 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-//include {help} from '../bin/help/rnaseq'
-
+include {help} from "${projectDir}/bin/help/ont"
 include {PARAM_LOG} from "${projectDir}/bin/log/ont"
 include {NANOSTAT as NANOSTAT_PREFILT;
          NANOSTAT as NANOSTAT_POSTFILT} from "${projectDir}/modules/nanostat/nanostat"
@@ -37,6 +36,11 @@ include {PYTHON_ANNOT_ON_TARGET} from "${projectDir}/modules/python/python_annot
 PARAM_LOG()
 
 workflow ONT {
+    if (params.help){
+       help()
+       exit 0
+    }
+
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
     ch_fasta = Channel.fromPath(params.fasta)
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null

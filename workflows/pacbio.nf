@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-//include {help} from '../bin/help/rnaseq'
+include {help} from "${projectDir}/bin/help/pacbio"
 include {PARAM_LOG} from "${projectDir}/bin/log/pacbio"
 include {PBMM2_INDEX} from "${projectDir}/modules/pbmm2/pbmm2_index"
 include {PBMM2_CALL} from "${projectDir}/modules/pbmm2/pbmm2_call"
@@ -21,6 +21,12 @@ include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 PARAM_LOG()
 
 workflow PACBIO {
+
+    if (params.help){
+       help()
+        exit 0
+    }
+
     params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
     ch_fasta = Channel.fromPath(params.fasta)
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
