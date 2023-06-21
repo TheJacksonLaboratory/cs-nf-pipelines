@@ -74,10 +74,19 @@ workflow ONT {
         NANOSTAT_POSTFILT(NANOFILT.out.porechop_nanofilt_fastq)
 
         // Prepare index
-        MINIMAP2_INDEX(ch_fasta)
+        
+
+        // Generate reference index if neccesary
+        if(!params.minimap2_index) {
+            MINIMAP2_INDEX(ch_fasta)
+            ch_minimap2_index = MINIMAP2_INDEX.out.minimap2_index
+        }
+        else {
+            ch_minimap2_index = file("${params.minimap2_index}")
+        }        
 
         // Map reads to indexed genome
-        MINIMAP2_MAP_ONT(NANOFILT.out.porechop_nanofilt_fastq, MINIMAP2_INDEX.out.minimap2_index)
+        MINIMAP2_MAP_ONT(NANOFILT.out.porechop_nanofilt_fastq, ch_minimap2_index)
 
         SAMTOOLS_SORT(MINIMAP2_MAP_ONT.out.minimap_sam)
         

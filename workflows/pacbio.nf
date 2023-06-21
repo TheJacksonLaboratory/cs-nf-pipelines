@@ -49,11 +49,17 @@ workflow PACBIO {
     // ** Optional mapping steps when input is a FASTQ file
     if (params.fastq1) {
         
-        // Prepare index
-        PBMM2_INDEX(ch_fasta)
+        // Generate reference index if neccesary
+        if(!params.minimap2_index) {
+            PBMM2_INDEX(ch_fasta)
+            ch_minimap2_index = PBMM2_INDEX.out.pbmm2_index
+        }
+        else {
+            ch_minimap2_index = file("${params.minimap2_index}")
+        }
 
         // Map reads to indexed genome
-        PBMM2_CALL(fq_reads, PBMM2_INDEX.out.pbmm2_index)
+        PBMM2_CALL(fq_reads, ch_minimap2_index)
         // Map reads to reference
 
         ch_pbmm2_bam = PBMM2_CALL.out.pbmm2_bam
