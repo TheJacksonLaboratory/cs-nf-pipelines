@@ -6,7 +6,7 @@ process LUMPY_CALL_SV {
     time = "10:00:00"
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-    container 'quay.io/jaxcompsci/lumpy-ref_data:0.3.1--2'
+    container 'quay.io/jaxcompsci/lumpy-ref_data:0.3.1--refv0.2.0'
     
     input:
         tuple val(sampleID), file(bam_bwa_lumpy_sort), file(bam_bwa_lumpy_sort_bai), file(split_sorted_bam), file(split_sorted_bai), file(dis_sorted_bam), file(dis_sorted_bai)
@@ -19,7 +19,7 @@ process LUMPY_CALL_SV {
         histo          = sampleID + "_alignBWA_lumpySort.lib1.histo"
         lumpy_vcf      = sampleID + "_lumpyOut.vcf"
         lumpy_sort_vcf = sampleID + "_lumpySort.vcf"
-        exclude_regions = "/ref_data/mm10.gaps.centro_telo.scafold.exclude.bed"
+        exclude_regions = params.exclude_regions
         '''
         RG_ID=$(samtools view -H !{bam_bwa_lumpy_sort} | grep '^@RG' | sed "s/.*ID:\\([^\\t]*\\).*/\\1/g")
         #orig: metrics=$(samtools view -r "${RG_ID}" !{bam_bwa_lumpy_sort[1]} | tail -n+100000 | !{pairend_distro} -r 150 -X 4 -N 10000 -o !{histo}) 2>&1

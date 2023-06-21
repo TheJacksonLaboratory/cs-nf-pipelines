@@ -6,7 +6,7 @@ process SURVIVOR_BED_INTERSECT {
     time "00:30:00"
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-    container 'quay.io/jaxcompsci/bedtools-sv_refs:2.30.0--hc088bd4_0'
+    container 'quay.io/jaxcompsci/bedtools-sv_refs:2.30.0--refv0.2.0'
 
     input:
         tuple val(sampleID), file("${sampleID}.ins.bed"),file("${sampleID}.del.bed"),file("${sampleID}.dup.bed"),file("${sampleID}.inv.bed"),file("${sampleID}.tra.bed")
