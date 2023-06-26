@@ -5,7 +5,7 @@ process G2GTOOLS_PATCH {
     memory 8.GB
     time '02:30:00'
 
-    container 'quay.io/jaxcompsci/g2gtools:0.2.9'
+    container 'quay.io/jaxcompsci/g2gtools:74926ad'
 
     publishDir "${params.pubdir}/g2gtools", pattern: '*.patched.fa', mode:'copy', enabled: params.keep_intermediate
 
@@ -20,7 +20,7 @@ process G2GTOOLS_PATCH {
     debug_run = params.debug ? '--debug' : ''
 
     """
-    /g2gtools/bin/g2gtools patch -p ${task.cpus} ${params.region} ${params.bed} ${debug_run} -i ${params.primary_reference_fasta} -c ${vci} -o ${strain}.${params.genome_version}.patched.fa
+    g2gtools patch -p ${task.cpus} ${params.region} ${params.bed} ${debug_run} -i ${params.primary_reference_fasta} -c ${vci} -o ${strain}.${params.genome_version}.patched.fa
     """
 
     stub:
@@ -31,25 +31,19 @@ process G2GTOOLS_PATCH {
 }
 
 /*
-    Patch SNPs onto the reference sequence
+ Usage: g2gtools patch [OPTIONS]
 
-    Usage: g2gtools patch -i <Fasta file> -c <VCI file> [options]
+ Patch SNPs onto the reference sequence
 
-    Required Parameters:
-        -i, --input <Fasta file>         Reference fasta file to extract and patch on
-        -c, --vci <VCI file>             VCI file
-
-    Optional Parameters:
-        -p, --num-processes <number>     The number of processes to use, defaults to the number of cores
-        -o, --output <Output file>       Name of output fasta file that contains SNP-patched sequences
-        -r, --region <seqid:start-end>   Region to extract (cannot be used with -b)
-        -b, --bed <BED file>             BED file (cannot be used with -r)
-        --bgzip                          Compress and index output (can only be used with -o)
-
-    Help Parameters:
-        -h, --help                       Print the help and exit
-        -d, --debug                      Turn debugging mode on (list multiple times for more messages)
-
-    Note:
-        --bgzip can be potentially slow depending on the size of the file
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --input    -i      FILE     Fasta file to extract from [default: None] [required]                                                                                                                                                                                                  │
+│ *  --vci      -c      FILE     VCI File to use [default: None] [required]                                                                                                                                                                                                             │
+│    --output   -o      FILE     Name of output file [default: None]                                                                                                                                                                                                                    │
+│    --bed      -b      FILE     BED file name [default: None]                                                                                                                                                                                                                          │
+│    --region   -r      TEXT     Region to extract in chromosome:start-end format [default: None]                                                                                                                                                                                       │
+│    --reverse                   Reverse the direction of VCI file                                                                                                                                                                                                                      │
+│    --bgzip                     compress and index output                                                                                                                                                                                                                              │
+│    --verbose  -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                                            │
+│    --help                      Show this message and exit.                                                                                                                                                                                                                            │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 */

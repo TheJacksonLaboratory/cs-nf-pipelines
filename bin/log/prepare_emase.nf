@@ -1,8 +1,12 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 log.info """
-______________________________________________________
-
-    PREPARE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+PREPARE MULTIWAY TRANSCRIPTOME PARAMETER LOG
 
 --comment: ${params.comment}
 

@@ -5,7 +5,7 @@ process G2GTOOLS_GTF2DB {
     memory 1.GB
     time '02:30:00'
 
-    container 'quay.io/jaxcompsci/g2gtools:0.2.9'
+    container 'quay.io/jaxcompsci/g2gtools:74926ad'
 
     publishDir "${params.pubdir}/g2gtools", pattern: '*.gtf.db', mode:'copy'
 
@@ -20,7 +20,7 @@ process G2GTOOLS_GTF2DB {
     debug_run = params.debug ? '--debug' : ''
 
     """
-    /g2gtools/bin/g2gtools gtf2db ${debug_run} -i ${gtf} -o ${strain}.${params.genome_version}.gtf.db
+    g2gtools gtf2db ${debug_run} -i ${gtf} -o ${strain}.${params.genome_version}.gtf.db
     """
 
     stub:
@@ -31,17 +31,14 @@ process G2GTOOLS_GTF2DB {
 }
 
 /*
-    Convert a GTF file to a G2G DB file
+ Usage: g2gtools fasta-format [OPTIONS]
 
-    Usage: g2gtools gtf2db -i <GTF file> -o <G2G DB file> [options]
+ Convert a GTF file to a G2G DB file
 
-    Required Parameters:
-        -i, --input <GTF file>           GTF file to parse
-        -o, --output <G2G DB file>       G2G DB file to create
-
-    Help Parameters:
-        -h, --help                       Print the help and exit
-        -d, --debug                      Turn debugging mode on (list multiple times for more messages)
-
-
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --input    -i      FILE     GTF file [default: None] [required]                                                                                                                                                                                                                    │
+│    --output   -o      FILE     Name of output file [default: None]                                                                                                                                                                                                                    │
+│    --verbose  -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                                            │
+│    --help                      Show this message and exit.                                                                                                                                                                                                                            │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 */

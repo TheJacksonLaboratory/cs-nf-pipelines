@@ -29,7 +29,7 @@ process EMASE_PREPARE_EMASE {
 
     script:
     """
-    emase prepare -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} -o ./ -m --no-bowtie-index
+    emase prepare -G ${params.genome_file_list} -g ${params.gtf_file_list} -s ${params.haplotype_list} --save-g2tmap -o ./ -m --no-bowtie-index
     """
 
     stub:
@@ -64,5 +64,4 @@ process EMASE_PREPARE_EMASE {
 │    --verbose          -v      INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                 │
 │    --help                              Show this message and exit.                                                                                                                                                                                                 │
 ╰────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
-
 */

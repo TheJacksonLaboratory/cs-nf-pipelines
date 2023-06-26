@@ -40,5 +40,11 @@ Examples:
   4: assumes no hierarchy and multi-reads are
       apportioned equally among genes, isoforms, and
       alleles
+
+--emission_prob_avecs | /<PATH> | The emission probability vector file. 
+--trans_prob_dir | /<PATH>  | A directory containing all transition probability files. 
+--gbrs_expression_threshold | 1.5 | GBRS expression threshold limit to quantify a gene.
+--gbrs_sigma | 0.12 | GBRS scaling factor
+
 '''
 }

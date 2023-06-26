@@ -5,7 +5,7 @@ process G2GTOOLS_EXTRACT {
     memory 6.GB
     time '02:30:00'
 
-    container 'quay.io/jaxcompsci/g2gtools:0.2.9'
+    container 'quay.io/jaxcompsci/g2gtools:74926ad'
 
     publishDir "${params.pubdir}/g2gtools", pattern: '*.fa', mode:'copy'
 
@@ -21,7 +21,7 @@ process G2GTOOLS_EXTRACT {
     debug_run = params.debug ? '--debug' : ''
 
     """
-    /g2gtools/bin/g2gtools extract ${debug_run} -i ${final_fasta} -db ${db} --${extract_type} > ${strain}.${params.genome_version}.${extract_type}.fa
+    g2gtools extract ${debug_run} -i ${final_fasta} -db ${db} --${extract_type} 2> ${strain}.${params.genome_version}.${extract_type}.fa
     """
 
     stub:
@@ -38,33 +38,26 @@ NOTE: The above script is hard-coded for extraction of regions from database fil
 */ 
 
 /*
-    Extract subsequence from a fasta file given a region
+ Usage: g2gtools extract [OPTIONS]
 
-    Usage: g2gtools extract -i <Fasta file> [-r <region> | -b <BED file> | -db <Database> | -id <seqid>] [options]
+ Extract subsequence from a fasta file given a region
 
-    Required Parameters:
-        -i, --input <Fasta file>         Fasta file to extract subsequence from, BGZIP files supported
-        -b, --bed <BED file>             BED file -OR-
-        -id, --identifier <identifier>   Fasta identifier -OR-
-        -r, --region <seqid:start-end>   Region to extract -OR-
-        -db, --database <DB file>        Database file
-             --transcripts                 For use with -db, extracts transcripts (default)
-             --exons                       For use with -db, extracts exons
-             --genes                       For use with -db, extracts genes
-
-    Optional Parameters:
-        -c, --vci <VCI file>             Input VCI file, matching input Fasta file
-        -R, --vci-reverse                Reverse the direction of liftover
-        --complement                     Complement the extracted sequence
-        --reverse                        Reverse the extracted sequence
-        --reverse-complement             Reverse complement the extracted sequence
-        --raw                            Just shows the extracted sequence
-
-    Help Parameters:
-        -h, --help                       Print the help and exit
-        -d, --debug                      Turn debugging mode on (list multiple times for more messages)
-
-    Note:
-        Locations specified on command line are 1-based coordinates.
-        Locations specified via BED file are 0-based coordinates.
+╭─ Options ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│ *  --fasta               -i       FILE     Fasta file to extract from [default: None] [required]                                                                                                                                                                                      │
+│    --bed                 -b       FILE     BED file name [default: None]                                                                                                                                                                                                              │
+│    --database            -db      FILE     Database file name, use with --genes, --transcripts, --exons [default: None]                                                                                                                                                               │
+│    --genes                                 Extract genes from --database                                                                                                                                                                                                              │
+│    --transcripts                           Extract transcripts from --database                                                                                                                                                                                                        │
+│    --exons                                 Extract exons from --database                                                                                                                                                                                                              │
+│    --identifier          -id      TEXT     Fasta identifier [default: None]                                                                                                                                                                                                           │
+│    --region              -r       TEXT     Region to extract in chromosome:start-end format [default: None]                                                                                                                                                                           │
+│    --vci                 -c       FILE     VCI File to use [default: None]                                                                                                                                                                                                            │
+│    --vci-reverse         -R                Reverse the direction of the VCI file                                                                                                                                                                                                      │
+│    --complement                            Complement the extracted sequence                                                                                                                                                                                                          │
+│    --reverse                               Reverse the extracted sequence                                                                                                                                                                                                             │
+│    --reverse-complement                    Reverse-complement the extracted sequence                                                                                                                                                                                                  │
+│    --raw                                   Shows just the extracted sequences                                                                                                                                                                                                         │
+│    --verbose             -v       INTEGER  specify multiple times for more verbose output [default: 0]                                                                                                                                                                                │
+│    --help                                  Show this message and exit.                                                                                                                                                                                                                │
+╰───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
 */

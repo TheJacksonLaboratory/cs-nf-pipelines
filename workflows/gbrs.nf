@@ -2,8 +2,8 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/emase.nf"
-include {param_log} from "${projectDir}/bin/log/emase.nf"
+include {help} from "${projectDir}/bin/help/gbrs.nf"
+include {param_log} from "${projectDir}/bin/log/gbrs.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId_emase.nf"
 include {extract_gbrs_csv} from "${projectDir}/bin/shared/extract_gbrs_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_gbrs_download_parse"
@@ -85,6 +85,8 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 // main workflow
 workflow GBRS {
     // Step 0: Download data and concat Fastq files if needed. 
+    meta_ch = null
+    
     if (params.download_data){
         FILE_DOWNLOAD(ch_input_sample)
 

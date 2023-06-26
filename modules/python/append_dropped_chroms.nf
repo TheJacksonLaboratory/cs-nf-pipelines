@@ -21,7 +21,7 @@ process APPEND_DROPPED_CHROMS {
 
     script:
     """
-    python ${projectDir}/bin/g2gtools/append_dropped_chroms.py -v ${vci} -u ${unmapped} -g ${gtf} -o ${strain}.${params.genome_version}_droppedChromAppend.gtf
+    python ${projectDir}/bin/g2gtools/append_dropped_chroms.py -v ${vci} -u ${unmapped} -g ${gtf} -o ${strain}.${params.genome_version}_DroppedChromAppended.gtf
     """
 
     stub:

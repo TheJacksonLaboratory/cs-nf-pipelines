@@ -4,6 +4,7 @@ nextflow.enable.dsl=2
 // import modules
 include {help} from "${projectDir}/bin/help/generate_pseudoreference.nf"
 include {param_log} from "${projectDir}/bin/log/generate_pseudoreference.nf"
+include {FILTER_GTF} from "${projectDir}/modules/utility_modules/filter_gtf_biotypes"
 include {G2GTOOLS_VCF2VCI} from "${projectDir}/modules/g2gtools/g2gtools_vcf2vci"
 include {G2GTOOLS_PATCH} from "${projectDir}/modules/g2gtools/g2gtools_patch"
 include {G2GTOOLS_TRANSFORM} from "${projectDir}/modules/g2gtools/g2gtools_transform"
@@ -32,6 +33,13 @@ if (params.region != '' && params.bed != '') {
 // main workflow
 workflow GENERATE_PSEUDOREFERENCE  {
 
+    if (params.gtf_biotype_include) {
+        FILTER_GTF()
+        gtf_file = FILTER_GTF.out.filtered_gtf
+    } else {
+        gtf_file = params.primary_reference_gtf
+    }
+
     Channel
     .of( params.strain.split(',') )
     .set { strain }
@@ -56,7 +64,7 @@ workflow GENERATE_PSEUDOREFERENCE  {
     transform_input = G2GTOOLS_PATCH.out.patched_fasta.join(G2GTOOLS_VCF2VCI.out.vci_tbi)
     G2GTOOLS_TRANSFORM(transform_input)
     SAMTOOLS_FAIDX_G2GTOOLS(G2GTOOLS_TRANSFORM.out.final_fasta)
-    G2GTOOLS_CONVERT(G2GTOOLS_VCF2VCI.out.vci_tbi, params.primary_reference_gtf, 'gtf', false)
+    G2GTOOLS_CONVERT(G2GTOOLS_VCF2VCI.out.vci_tbi, gtf_file, 'gtf', false)
     
     if (params.append_chromosomes) {
         APPEND_DROPPED_CHROMS(G2GTOOLS_VCF2VCI.out.vci_tbi.join(G2GTOOLS_CONVERT.out.unmapped_file).join(G2GTOOLS_CONVERT.out.coverted_file))
@@ -90,7 +98,4 @@ workflow GENERATE_PSEUDOREFERENCE  {
     // GBRS requies 'ref.fa.idx' which is fasta index of the primary refernce. 
     // The index of that file is easily done here. 
     // SAMTOOLS_FAIDX requires an input tuple. It is dummied here to strain = 'primary_strain', fasta = primary_reference_fasta
-
-
-
 }

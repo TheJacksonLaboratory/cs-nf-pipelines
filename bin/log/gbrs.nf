@@ -1,9 +1,26 @@
-def param_log(){
-    if (params.csv_input)
-    log.info """
-    ______________________________________________________
+import Logos
 
-        EMASE RUN PARAMETER LOG
+logo = new Logo()
+println '\n'
+println logo.show()
+
+// Boolean isNumber(value) {
+//     try {
+//         new BigInteger(value)
+//         return true
+//     } catch (Exception exception) {
+//         return false
+//     }
+// }
+
+def isValidInteger(value) {
+    value.toString().isInteger()
+}
+
+def param_log(){
+    if (params.csv_input) {
+    log.info """
+    GBRS RUN PARAMETER LOG
 
     --comment: ${params.comment}
 
@@ -24,6 +41,10 @@ def param_log(){
     --gene2transcript_csv           ${params.gene2transcript_csv}
     --full_transcript_info          ${params.full_transcript_info}
     --emase_model                   ${params.emase_model}
+    --emission_prob_avecs           ${params.emission_prob_avecs}
+    --trans_prob_dir                ${params.trans_prob_dir}
+    --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
+    --gbrs_sigma                    ${params.gbrs_sigma}
 
     --keep_intermediate             ${params.keep_intermediate}
 
@@ -33,11 +54,18 @@ def param_log(){
     ${workflow.commandLine}
     ______________________________________________________
     """
-    else if (params.concat_lanes)   
-    log.info """
-    ______________________________________________________
+    } else if (params.concat_lanes) {
 
-        GBRS RUN PARAMETER LOG
+    if (!params.sample_generation || !isValidInteger(params.sample_generation) || params.sample_generation > 100) {
+        error "ERROR: '--sample_generation' is empty, not an integer, or greater than 100. Input was: \"${params.sample_generation}\"." 
+    }
+
+    if (!params.sample_sex || (params.sample_sex != 'M' && params.sample_sex != 'F')) {
+        error "ERROR: '--sample_sex' is empty, or not 'M' or 'F'. Input was: \"${params.sample_sex}\"." 
+    }
+
+    log.info """
+    GBRS RUN PARAMETER LOG
 
     --comment: ${params.comment}
 
@@ -66,7 +94,6 @@ def param_log(){
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
 
-
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}
@@ -75,11 +102,18 @@ def param_log(){
     ${workflow.commandLine}
     ______________________________________________________
     """
-    else
-        log.info """
-    ______________________________________________________
+    } else {
 
-        GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+    if (!params.sample_generation || !isValidInteger(params.sample_generation) || params.sample_generation > 100) {
+        error "ERROR: '--sample_generation' is empty, not an integer, or greater than 100. Input was: \"${params.sample_generation}\"." 
+    }
+
+    if (!params.sample_sex || (params.sample_sex != 'M' && params.sample_sex != 'F')) {
+        error "ERROR: '--sample_sex' is empty, or not 'M' or 'F'. Input was: \"${params.sample_sex}\"." 
+    }
+
+    log.info """
+    GBRS RUN PARAMETER LOG
 
     --comment: ${params.comment}
 
@@ -116,4 +150,6 @@ def param_log(){
     ${workflow.commandLine}
     ______________________________________________________
     """
+    }
 }
+

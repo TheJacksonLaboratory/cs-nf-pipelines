@@ -1,8 +1,12 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 log.info """
-______________________________________________________
-
-        GENERATE DO GBRS INPUT FILES
+GENERATE DO GBRS INPUT FILES
 
 Results Published to: ${params.pubdir}
 ______________________________________________________

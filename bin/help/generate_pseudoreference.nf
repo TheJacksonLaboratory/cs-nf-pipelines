@@ -8,6 +8,7 @@ Parameter | Type | Description
 --indel_vcf | /<PATH> | VCF containing only InDELs for transforming into primary reference fasta. 
 --primary_reference_fasta | /<PATH> | The primary reference fasta file, where patched SNPs and transformed InDELs are applied.
 --primary_reference_gtf | /<PATH> | The primary reference gtf file, used to patch and transform gene/transcripts/exons. 
+--gtf_biotype_include | protein_coding,lncRNA,IG_C_gene,IG_D_gene,IG_J_gene,IG_LV_gene,IG_V_gene,TR_C_gene,TR_D_gene,TR_J_gene,TR_V_gene | A comma delimited list of terms to include from the full GTF. All other biotype terms will be excluded. 
 --strain | <comma,delim,string> | A comma delimilited string of strains/haplotypes. (e.g., 'A_J,CAST_EiJ,...')
 --genome_version | <string> | A genome ID string (e.g., 39)
 --diploid | <boolean> | Create diploid VCI file

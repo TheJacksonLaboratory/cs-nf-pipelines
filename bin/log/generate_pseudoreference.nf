@@ -1,8 +1,12 @@
+import Logos
+
+logo = new Logo()
+println '\n'
+println logo.show()
+
 def param_log(){
 log.info """
-______________________________________________________
-
-    GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
 
 --comment: ${params.comment}
 
@@ -15,6 +19,7 @@ ______________________________________________________
 --indel_vcf                     ${params.indel_vcf}
 --primary_reference_fasta       ${params.primary_reference_fasta}
 --primary_reference_gtf         ${params.primary_reference_gtf}
+--gtf_biotype_include           ${params.gtf_biotype_include}
 --strain                        ${params.strain}
 --genome_version                ${params.genome_version}
 --append_chromosomes            ${params.append_chromosomes}
@@ -25,7 +30,7 @@ ______________________________________________________
 --region                        ${params.region}
 --bed                           ${params.bed}
 
---keep_intermediate               ${params.keep_intermediate}
+--keep_intermediate             ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
 

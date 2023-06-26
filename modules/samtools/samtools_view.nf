@@ -20,8 +20,10 @@ process SAMTOOLS_VIEW {
 
   script:
 
+    output_name = "${filename}" == 'emase' ? "${sam.baseName}.bam" : "${sampleID}_${filename}.bam"
+
     """
-    samtools view ${view_string} ${sam} > ${sampleID}_${filename}.bam 
+    samtools view ${view_string} ${sam} >  ${output_name}
     """
   
   stub:
