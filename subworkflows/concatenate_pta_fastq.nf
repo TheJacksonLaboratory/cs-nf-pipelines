@@ -32,7 +32,6 @@ workflow CONCATENATE_PTA_FASTQ {
             .multiMap { it ->
                 R1: tuple(it[0], it[1].lane, it[1], 'R1', it[2][0])
             }
-            .mix()
             .groupTuple(by: [0,2,3])
             .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4]) } // sampleID, num_lanes, meta, read_ID:[R1], file
             

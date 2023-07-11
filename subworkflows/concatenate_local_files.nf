@@ -37,7 +37,6 @@ workflow CONCATENATE_LOCAL_FILES {
                 meta.sampleID   = it[1].sampleID
                 R1: tuple(it[0], it[1].lane, meta, 'R1', it[2])
             }
-            .mix()
             .groupTuple(by: [0,2,3])
             .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4]) } // sampleID, num_lanes, meta, read_ID:[R1], file
             
