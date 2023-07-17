@@ -8,7 +8,6 @@ include {EMASE_PREPARE_EMASE} from "${projectDir}/modules/emase/emase_prepare_em
 include {BOWTIE_BUILD} from "${projectDir}/modules/bowtie/bowtie_build"
 include {CLEAN_TRANSCRIPT_LISTS} from "${projectDir}/modules/python/clean_prepEmase_transcriptList"
 
-
 // help if needed
 if (params.help){
     help()

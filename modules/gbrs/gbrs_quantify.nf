@@ -6,7 +6,7 @@ process GBRS_QUANTIFY {
     time 5.hour
     errorStrategy 'finish' 
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.tpm", mode: 'copy'
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.multiway.isoforms.expected_read_counts", mode: 'copy'

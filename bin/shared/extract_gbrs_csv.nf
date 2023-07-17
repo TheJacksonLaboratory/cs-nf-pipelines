@@ -14,8 +14,8 @@ def extract_gbrs_csv(csv_file) {
 
     Channel.from(csv_file).splitCsv(header: true)
         .map{ row ->
-            if (!(row.sampleID && row.sex && row.generation)){
-                log.error "Missing field in csv file header. The csv file must have a fields named 'sampleID, sex, and generation'."
+            if (!(row.sampleID && row.sex && row.generation && row.fastq_1)){
+                log.error "Error in CSV file: Missing field in csv file header. The csv file must have a fields named 'sampleID, sex, generation, fastq_1, {fastq_2}'. Where fastq_2 is optional"
                 System.exit(1)
             }
             [row.sampleID.toString(), row]

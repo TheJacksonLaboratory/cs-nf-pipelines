@@ -86,7 +86,7 @@ read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder}
 workflow GBRS {
     // Step 0: Download data and concat Fastq files if needed. 
     meta_ch = null
-    
+
     if (params.download_data){
         FILE_DOWNLOAD(ch_input_sample)
 

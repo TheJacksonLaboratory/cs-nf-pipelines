@@ -25,9 +25,9 @@ transcript_table = pd.read_csv(args.input_transcript_list, sep='\t', header = No
     # import transcript table
 
 transcript_table_working = transcript_table.copy()
-    # avoid panads slice error by making a copy, also original is used in final cat statement. 
+    # avoid pandas slice error by making a copy, also original is used in final cat statement. 
 
-transcript_table_working[['Transcript', 'Haplotype']] = transcript_table_working['transcript_id'].str.split('_', 1, expand=True)
+transcript_table_working[['Transcript', 'Haplotype']] = transcript_table_working['transcript_id'].str.split(pat='_', n=1, expand=True)
     # split transcript and haplotype ID into new columns. 
 
 pivot_transcripts = transcript_table_working.pivot(index='Transcript', columns='Haplotype', values='length')
@@ -37,20 +37,26 @@ pivot_transcripts = transcript_table_working.pivot(index='Transcript', columns='
 missing_transcripts = pivot_transcripts[pivot_transcripts.isna().any(axis=1)]
     # subset pivot to only columns with NA data (i.e., missing transcripts within that haplotype). 
 
-stacked = pd.melt(missing_transcripts.reset_index(), id_vars='Transcript',value_vars=haplotypes)
-    # convert wide to long on transcript. 
+if (not missing_transcripts.empty):
+    # if the transcript list is incomplete, add back those that are missing. 
 
-transcripts_to_add = stacked[stacked['value'].isna()].copy()
-transcripts_to_add['transcript_id'] = transcripts_to_add[['Transcript', 'Haplotype']].agg('_'.join, axis=1)
-transcripts_to_add['value'] = 0.0
-transcripts_to_add['length'] = transcripts_to_add['value']
-transcripts_to_merge = transcripts_to_add[["transcript_id", "length"]]
-    # Filter the long list to only NA. Reconstruct a 'transcript_haplotype' string. Add value = 0.0. change 'value' to 'length'. Keep just 2 columns. 
-    # long list with NA are transcripts missing from the original 'emase.pooled.transcripts.info'
+    stacked = pd.melt(missing_transcripts.reset_index(), id_vars='Transcript',value_vars=haplotypes)
+        # convert wide to long on transcript. 
 
-updated_transcript_table = pd.concat([transcript_table, transcripts_to_merge])
-updated_transcript_table.to_csv(args.haplotype_outfile, sep='\t', index = False, header = False)
-    # concat the missing transcripts to to the original table, and output to file. 
+    transcripts_to_add = stacked[stacked['value'].isna()].copy()
+    transcripts_to_add['transcript_id'] = transcripts_to_add[['Transcript', 'Haplotype']].agg('_'.join, axis=1)
+    transcripts_to_add['value'] = 0.0
+    transcripts_to_add['length'] = transcripts_to_add['value']
+    transcripts_to_merge = transcripts_to_add[["transcript_id", "length"]]
+        # Filter the long list to only NA. Reconstruct a 'transcript_haplotype' string. Add value = 0.0. change 'value' to 'length'. Keep just 2 columns. 
+        # long list with NA are transcripts missing from the original 'emase.pooled.transcripts.info'
+
+    updated_transcript_table = pd.concat([transcript_table, transcripts_to_merge])
+    updated_transcript_table.to_csv(args.haplotype_outfile, sep='\t', index = False, header = False)
+        # concat the missing transcripts to to the original table, and output to file. 
+else:
+    # else, if all transcripts are present, just write the file out as it is. 
+    transcript_table.to_csv(args.haplotype_outfile, sep='\t', index = False, header = False)
 
 full_transcript_list = pd.DataFrame(pivot_transcripts.sort_index().index)
 full_transcript_list['length'] = 0.0

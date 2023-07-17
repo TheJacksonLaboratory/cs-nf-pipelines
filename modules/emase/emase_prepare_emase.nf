@@ -14,7 +14,7 @@ process EMASE_PREPARE_EMASE {
     memory 15.GB
     time 24.hour
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
 
     publishDir "${params.pubdir}/emase", pattern: '*.fa', mode:'copy'
     publishDir "${params.pubdir}/emase", pattern: '*.info', mode:'copy', enabled: params.keep_intermediate

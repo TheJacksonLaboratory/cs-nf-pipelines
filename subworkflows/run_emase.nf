@@ -2,8 +2,6 @@
 nextflow.enable.dsl=2
 
 include {BOWTIE} from "${projectDir}/modules/bowtie/bowtie"
-include {SAMTOOLS_VIEW} from "${projectDir}/modules/samtools/samtools_view"
-include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 include {GBRS_BAM2EMASE} from "${projectDir}/modules/gbrs/gbrs_bam2emase"
 include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
          GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
@@ -18,11 +16,8 @@ workflow RUN_EMASE {
         // Map each read with BOWTIE
         BOWTIE(read_ch)
 
-        // Apply `-bS` to convert SAM to BAM
-        SAMTOOLS_VIEW(BOWTIE.out.sam, '-bS', 'emase')
-
         // Convert BAM to EMASE format. 
-        GBRS_BAM2EMASE(SAMTOOLS_VIEW.out.bam)
+        GBRS_BAM2EMASE(BOWTIE.out.bam)
 
         // Compress EMASE format file. 
         GBRS_COMPRESS_SE(GBRS_BAM2EMASE.out.emase_h5, '')

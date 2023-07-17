@@ -3,7 +3,7 @@ process BOWTIE_BUILD {
     memory {30.GB}
     time {15.hour}
 
-    container 'quay.io/biocontainers/bowtie:1.3.1--py310h4070885_4'
+    container 'quay.io/jaxcompsci/bowtie-samtools:v1'
 
     publishDir "${params.pubdir}/bowtie", pattern: '*.ebwt', mode:'copy'
 

@@ -5,7 +5,7 @@ process BOWTIE {
     memory 30.GB
     time 15.hour
 
-    container 'quay.io/biocontainers/bowtie:1.3.1--py310h4070885_4'
+    container 'quay.io/jaxcompsci/bowtie-samtools:v1'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'bowtie' }", pattern: "*.log", mode: 'copy'
 
@@ -13,26 +13,25 @@ process BOWTIE {
     tuple val(sampleID), path(fq_read), val(paired_read_num)
 
     output:
-    tuple val(sampleID), file("*.sam"), emit: sam
+    tuple val(sampleID), file("*.bam"), emit: bam
     tuple val(sampleID), file("*.log"), emit: bowtie_log
 
     script:
     """
-    zcat ${fq_read} | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -x ${params.bowtie_index} - > ${sampleID}_mapped_${paired_read_num}.sam 2> ${sampleID}.bowtie_${paired_read_num}.log 
+    zcat ${fq_read} | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -x ${params.bowtie_index} - 2> ${sampleID}.bowtie_${paired_read_num}.log | samtools view -bS - > ${sampleID}_mapped_${paired_read_num}.bam
     """
     // NOTE: This is hard coded to .gz input files. 
 
     stub:
     """
     touch ${sampleID}.bowtie_${paired_read_num}.log
-    touch ${sampleID}_mapped_${paired_read_num}.sam
+    touch ${sampleID}_mapped_${paired_read_num}.bam
     """
 }
 
-
 /*
 
- -m 100
+-m 100
 
 OPTIONS USED SUMMARY: 
 

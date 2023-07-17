@@ -33,19 +33,32 @@ if not os.path.exists(options.gtf):
     raise SystemExit("\nERROR: Can not find the vci file: " + options.vci + '. Check it exists. Exiting.\n')
 
 vci_chroms = set()
-gtf_chroms = set()
+missing_chroms = set()
+
+# with gzip.open(options.vci, 'rt') as vci_file:        
+#     for line in vci_file:
+#         if '##CONTIG' in line:
+#             vci_chroms.add(line.rstrip().split(":")[0].replace("##CONTIG=", ""))
+#         if '#' in line:
+#             pass
+#         else:
+#             gtf_chroms.add(line.rstrip().split("\t")[0])
+# vci_file.close()
 
 with gzip.open(options.vci, 'rt') as vci_file:        
     for line in vci_file:
         if '##CONTIG' in line:
             vci_chroms.add(line.rstrip().split(":")[0].replace("##CONTIG=", ""))
-        if '#' in line:
-            pass
         else:
-            gtf_chroms.add(line.rstrip().split("\t")[0])
+            pass
 vci_file.close()
 
-dropped_chroms = list(vci_chroms.difference(gtf_chroms))
+with open(options.unmapped) as unmapped_file:
+    for line in unmapped_file:
+        missing_chroms.add(line.rstrip().split("\t")[0])
+unmapped_file.close()
+
+dropped_chroms = list(missing_chroms.difference(vci_chroms))
 
 with open(options.gtf, "r") as gtf_file, open(options.output,'w') as output_file:
     # read content from first file

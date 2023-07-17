@@ -5,7 +5,7 @@ process GBRS_PLOT  {
     memory 2.GB
     time '01:00:00'
 
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-0f38b1b'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.pdf", mode: 'copy'
 
