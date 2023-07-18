@@ -13,6 +13,7 @@ ______________________________________________________
 -w                          ${workDir}
 --num_generations           ${params.num_generations}
 --ensembl_build             ${params.ensembl_build}
+--emase_gene2transcript     ${params.emase_gene2transcript}
 
 Project Directory: ${projectDir}
 

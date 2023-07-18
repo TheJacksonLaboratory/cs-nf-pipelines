@@ -43,6 +43,9 @@ def param_log(){
     --emase_model                   ${params.emase_model}
     --emission_prob_avecs           ${params.emission_prob_avecs}
     --trans_prob_dir                ${params.trans_prob_dir}
+    --gene_position_file            ${params.gene_position_file}
+    --genotype_grid                 ${params.genotype_grid}
+    --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
 
@@ -91,6 +94,9 @@ def param_log(){
     --emase_model                   ${params.emase_model}
     --emission_prob_avecs           ${params.emission_prob_avecs}
     --trans_prob_dir                ${params.trans_prob_dir}
+    --gene_position_file            ${params.gene_position_file}
+    --genotype_grid                 ${params.genotype_grid}
+    --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
 
@@ -139,6 +145,9 @@ def param_log(){
     --emase_model                   ${params.emase_model}
     --emission_prob_avecs           ${params.emission_prob_avecs}
     --trans_prob_dir                ${params.trans_prob_dir}
+    --gene_position_file            ${params.gene_position_file}
+    --genotype_grid                 ${params.genotype_grid}
+    --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
 

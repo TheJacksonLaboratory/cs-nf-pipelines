@@ -6,7 +6,7 @@ println logo.show()
 
 def param_log(){
 log.info """
-GENERATE MULTIWAY TRANSCRIPTOME PARAMETER LOG
+GENERATE PSEUDOREFERENCE PARAMETER LOG
 
 --comment: ${params.comment}
 
