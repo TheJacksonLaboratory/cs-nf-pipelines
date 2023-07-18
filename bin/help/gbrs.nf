@@ -42,9 +42,13 @@ Examples:
       alleles
 
 --emission_prob_avecs | /<PATH> | The emission probability vector file. 
---trans_prob_dir | /<PATH>  | A directory containing all transition probability files. 
+--trans_prob_dir | /<PATH>  | A directory containing all transition probability files.
+--gene_position_file | /<PATH> | A python compressed NPZ file containing gene position in original reference coordinates. 
+--genotype_grid | /<PATH> | Simulated marker grid used in genotype inference.
+--founder_hex_colors | /<PATH> | A file containing hexcode colors for plotting genotypes. 
 --gbrs_expression_threshold | 1.5 | GBRS expression threshold limit to quantify a gene.
---gbrs_sigma | 0.12 | GBRS scaling factor
+--gbrs_sigma | 0.12 | GBRS scaling factor.
 
+--keep_intermediate | <boolean> | Default: false. Keep intermediate files, not otherwise saved. 
 '''
 }

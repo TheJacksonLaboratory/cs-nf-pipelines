@@ -40,5 +40,7 @@ Examples:
   4: assumes no hierarchy and multi-reads are
       apportioned equally among genes, isoforms, and
       alleles
+
+--keep_intermediate | <boolean> | Default: false. Keep intermediate files, not otherwise saved. 
 '''
 }
