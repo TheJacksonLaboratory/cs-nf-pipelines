@@ -11,8 +11,6 @@ include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_l
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {GUNZIP} from "${projectDir}/modules/utility_modules/gunzip"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_SORT as FASTQ_SORT_HUMAN;
-         FASTQ_SORT as FASTQ_SORT_MOUSE} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {STAR_ALIGN as STAR_ARRIBA;
          STAR_ALIGN as STAR_SQUID;
          STAR_ALIGN as STAR_STARFUSION} from "${projectDir}/modules/star/star_align"
@@ -114,10 +112,7 @@ workflow RNA_FUSION {
         XENOME_CLASSIFY(GUNZIP.out.gunzip_fastq)
         ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
-        // Xenome Read Sort
-        FASTQ_SORT_HUMAN(XENOME_CLASSIFY.out.xenome_fastq, 'human')
-        FASTQ_SORT_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq, 'mouse') 
-        fusion_tool_input = FASTQ_SORT_HUMAN.out.sorted_fastq
+        fusion_tool_input = XENOME_CLASSIFY.out.xenome_human_fastq
 
     } else { 
         fusion_tool_input = GUNZIP.out.gunzip_fastq

@@ -9,7 +9,6 @@ include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {FASTQ_SORT} from "${projectDir}/modules/fastq-tools/fastq-sort"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {SHORT_ALIGNMENT_MARKING} from "${projectDir}/modules/nygc-short-alignment-marking/short_alignment_marking"
@@ -162,9 +161,7 @@ workflow PTA {
         XENOME_CLASSIFY(JAX_TRIMMER.out.trimmed_fastq)
         ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats // set log file for multiqc
 
-        // Xenome Read Sort
-        FASTQ_SORT(XENOME_CLASSIFY.out.xenome_fastq, 'human')
-        bwa_mem_mapping = FASTQ_SORT.out.sorted_fastq.join(READ_GROUPS.out.read_groups)
+        bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
 
     } else { 
         bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)

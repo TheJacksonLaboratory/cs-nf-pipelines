@@ -1,5 +1,30 @@
 # RELEASE NOTES
 
+## Release 0.3.1
+
+In this minor release we have modified the behavior of Xenome to output compressed FASTQ files, and to delete the intermediate FASTQ files that are generated. We are implementing this change because the previous behavior of Xenome resulted in a large amount of redundant data in work directories.
+
+We also added PDX test data for RNA-fusion.
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. Changes to PDX RNA-seq, PDX WES, PDX RNA Fusion, and PDX PTA to reflect modifications to Xenome
+
+### Module Changes:
+
+1. xenome/xenome.nf modified to combine `xenome classify` and `fastq-sort` into the XENOME_CLASSIFY module. For non-fusion applications, human and mouse reads are now emitted as compressed .fastq.gz files
+2. Removed fastq-tools/fastq-sort.nf as its functionality is now in xenome/xenome.nf
+3. Modified input type specification for kallisto/kallisto_insert_size.nf to address issue with flash storage mounting in Singularity.
+4. Added text file to pubDir statement in Picard collectRNAseqMetrics
+
 ## Release 0.3.0
 
 In this major release we have added two additional pipelines, added flexibility for specifying inputs via sample sheets, support for downloading remote input data, support for GRCm39, support for PDX data, and many more changes detailed below. Additionally, we have added the concept of "subworkflows" for tasks that are more complex than a module and/or involve multiple containers, yet can be potentially re-used in multiple pipelines.

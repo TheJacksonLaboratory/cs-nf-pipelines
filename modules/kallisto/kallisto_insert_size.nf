@@ -11,7 +11,7 @@ process KALLISTO_INSERT_SIZE {
     container 'quay.io/biocontainers/pizzly:0.37.3--h470a237_3'
 
     input:
-        tuple val(sampleID), val(kallisto_abundance)
+        tuple val(sampleID), path(kallisto_abundance)
 
     output:
         tuple val(sampleID), path('insert_size.txt'), emit: kallisto_insert_size
