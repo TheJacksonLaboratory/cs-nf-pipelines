@@ -1,7 +1,7 @@
 #!/usr/bin/env Rscript
 
-#zout <- file("messages.Rout", open = "wt")
-#sink(zout, type = "message")
+zout <- file("messages.Rout", open = "wt")
+sink(zout, type = "message")
 
 library(tidyverse)
 
@@ -481,6 +481,11 @@ bind_rows(ins_full, del_full, tra_full, inv_full, dup_full) %>%
     relocate(chr, pos, sv_name, sv_size, sv_type, 
              beck, regulatory_regions, gene, exons) %>%
     select(., -start, -stop) %>%
+    left_join(., read_delim(sv_olap_fh,
+                        delim = "\t",
+                        col_types = cols("chr" = "c")) %>%
+             select(., -chr, -pos), 
+             by = c("sv_name" = "SV")) %>%    
     arrange(., chr, pos) %>%
     mutate(., gene = case_when(sv_size > 5000000 ~ "sv_too_large",
                                TRUE ~ gene),
