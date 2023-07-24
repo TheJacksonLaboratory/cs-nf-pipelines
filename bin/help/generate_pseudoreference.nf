@@ -10,7 +10,7 @@ Parameter | Type | Description
 --primary_reference_gtf | /<PATH> | The primary reference gtf file, used to patch and transform gene/transcripts/exons. 
 --gtf_biotype_include | protein_coding,lncRNA,IG_C_gene,IG_D_gene,IG_J_gene,IG_LV_gene,IG_V_gene,TR_C_gene,TR_D_gene,TR_J_gene,TR_V_gene | A comma delimited list of terms to include from the full GTF. All other biotype terms will be excluded. 
 --append_chromosomes | true | Add back any full chromosomes that are dropped due to lack of variants in the SNP or INDEL file. See the Wiki for additional information.
---strain | <comma,delim,string> | A comma delimilited string of strains/haplotypes. (e.g., 'A_J,CAST_EiJ,...')
+--strain | <comma,delim,string> | A comma delimited string of strains/haplotypes. (e.g., 'A_J,CAST_EiJ,...')
 --genome_version | <string> | A genome ID string (e.g., 39)
 --diploid | <boolean> | Create diploid VCI file
 --keep_fails | <boolean> | Default: false. Keep track of VCF lines that could not be converted to VCI file

@@ -22,7 +22,7 @@ param_log()
 // main workflow
 workflow PREP_DO_GBRS_INPUT {
     DO_TRANSITION_PROBABILITIES()
-    // Generate transition probablies in R
+    // Generate transition probabilities in R
 
     generations = Channel.from( 0..params.num_generations )
 
@@ -32,7 +32,6 @@ workflow PREP_DO_GBRS_INPUT {
     male_transProbs = DO_TRANSITION_PROBABILITIES.out.male_h5_file.combine(generations)
     PARSE_TRANSITION_PROBABILITIES_MALE(male_transProbs, 'M')
     // For each generation, and sex, parse the h5 file to npz. 
-
 
     PARSE_GENE_POSITONS(DO_TRANSITION_PROBABILITIES.out.gene_list_tsv)
     // It is possible that genes are filtered out during the conversion from GTF to FASTA in g2gtools and prepare emase. 
