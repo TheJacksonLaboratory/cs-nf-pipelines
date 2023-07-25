@@ -147,7 +147,7 @@ workflow ILLUMINA {
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
-    survivor_input = REHEADER_DELLY.out.vcf_rehead).join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
+    survivor_input = REHEADER_DELLY.out.vcf_rehead.join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
                      .map { it -> tuple(it[0], tuple(it[1], it[2], it[3]))}
     SURVIVOR_MERGE(survivor_input)
     SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
