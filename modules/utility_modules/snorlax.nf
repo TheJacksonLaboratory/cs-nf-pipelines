@@ -15,3 +15,5 @@ process SNORLAX {
     echo "DONE"
   """
 }
+
+// This module is for testing module / nextflow failures only. It is not intended for production level pipeline use. 

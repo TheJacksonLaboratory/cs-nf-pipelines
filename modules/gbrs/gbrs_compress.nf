@@ -4,7 +4,7 @@ process GBRS_COMPRESS {
     cpus 1
     memory { suffix == 'merged' ? 6.GB * task.attempt : 40.GB * task.attempt}
     time 10.hour
-    errorStrategy 'finish' 
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
 
