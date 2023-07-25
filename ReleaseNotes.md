@@ -1,5 +1,57 @@
 # RELEASE NOTES
 
+## Release 0.4.0
+
+In this release we have added five additional pipelines as part of the genetic diversity analysis suite. These pipelines support the analysis of genetically diverse samples (e.g., DO and CC mice) with [EMASE](https://github.com/churchill-lab/emase)) and [GBRS](https://github.com/churchill-lab/GBRS), and the generation of reference files required for running these tools. 
+
+### Pipelines Added:
+
+1. EMASE
+2. GBRS
+3. Generate Pseudoreference
+4. Prepare EMASE Reference/Inputs
+5. Prepare DO GBRS Inputs
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. alntools/alntools_bam2emase.nf
+2. bowtie/bowtie.nf
+3. bowtie/bowtie_build.nf
+4. emase/emase_create_hybrid.nf
+5. emase/emase_prepare_emase.nf
+6. emase/emase_run.nf
+7. g2gtools/g2gtools_convert.nf
+8. g2gtools/g2gtools_extract.nf
+9. g2gtools/g2gtools_gtf2db.nf
+10. g2gtools/g2gtools_patch.nf
+11. g2gtools/g2gtools_transform.nf
+12. g2gtools/g2gtools_vcf2vci.nf
+13. gbrs/gbrs_bam2emase.nf
+14. gbrs/gbrs_compress.nf
+15. gbrs/gbrs_export.nf
+16. gbrs/gbrs_interpolate.nf
+17. gbrs/gbrs_plot.nf
+18. gbrs/gbrs_quantify.nf
+19. gbrs/gbrs_quantify_genotype.nf
+20. gbrs/gbrs_reconstruct.nf
+21. python/append_dropped_chroms.nf
+22. python/clean_prepEmase_transcriptList.nf
+23. python/parse_gene_positions.nf
+24. python/parse_transprobs.nf
+25. r/do_transition_probablities.nf
+26. r/generate_grid_file.nf
+27. samtools/samtools_faidx_g2gtool.nf
+28. utility_modules/filter_gtf_biotypes.nf
+29. utility_modules/snorlax.nf
+
+### Module Changes:
+
+None
+
 ## Release 0.3.1
 
 In this minor release we have modified the behavior of Xenome to output compressed FASTQ files, and to delete the intermediate FASTQ files that are generated. We are implementing this change because the previous behavior of Xenome resulted in a large amount of redundant data in work directories.
