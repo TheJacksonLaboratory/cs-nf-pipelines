@@ -16,6 +16,8 @@ workflow CONCATENATE_LOCAL_FILES {
             .multiMap { it ->
                 def meta = [:]
                 meta.sampleID   = it[1].sampleID
+                meta.sex        = it[1].sex
+                meta.generation = it[1].generation
                 R1: tuple(it[0], it[1].lane, meta, 'R1', it[2])
                 R2: tuple(it[0], it[1].lane, meta, 'R2', it[3])
             }
@@ -35,6 +37,8 @@ workflow CONCATENATE_LOCAL_FILES {
             .multiMap { it ->
                 def meta = [:]
                 meta.sampleID   = it[1].sampleID
+                meta.sex        = it[1].sex
+                meta.generation = it[1].generation
                 R1: tuple(it[0], it[1].lane, meta, 'R1', it[2])
             }
             .groupTuple(by: [0,2,3])

@@ -21,6 +21,11 @@ process SAMTOOLS_VIEW {
   script:
 
     """
-    samtools view ${view_string} ${sam} > ${sampleID}_${filename}.bam 
+    samtools view ${view_string} ${sam} > ${sampleID}_${filename}.bam
+    """
+  
+  stub:
+    """
+    ${sampleID}_${filename}.bam
     """
 }

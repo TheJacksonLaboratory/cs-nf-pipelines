@@ -30,6 +30,21 @@ else if (params.workflow == "pta"){
 else if (params.workflow == "rna_fusion"){
   include {RNA_FUSION} from './workflows/rna_fusion'
 }
+else if (params.workflow == "generate_pseudoreference"){
+  include {GENERATE_PSEUDOREFERENCE} from './workflows/generate_pseudoreference'
+}
+else if (params.workflow == "prepare_emase"){
+  include {PREPARE_EMASE} from './workflows/prepare_emase'
+}
+else if (params.workflow == "prep_do_gbrs_inputs"){
+  include {PREP_DO_GBRS_INPUT} from './subworkflows/prep_do_gbrs_inputs'
+}
+else if (params.workflow == "emase"){
+  include {EMASE} from './workflows/emase'
+}
+else if (params.workflow == "gbrs"){
+  include {GBRS} from './workflows/gbrs'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -63,5 +78,20 @@ workflow{
   } 
   if (params.workflow == "rna_fusion"){
     RNA_FUSION()
+  }
+  if (params.workflow == "generate_pseudoreference") {
+    GENERATE_PSEUDOREFERENCE()
+  }
+  if (params.workflow == "prepare_emase"){
+    PREPARE_EMASE()
+  }
+  if (params.workflow == "emase"){
+    EMASE()
+  }
+  if (params.workflow == "gbrs"){
+    GBRS()
+  }
+  if (params.workflow == "prep_do_gbrs_inputs"){
+    PREP_DO_GBRS_INPUT()
   }
 }
