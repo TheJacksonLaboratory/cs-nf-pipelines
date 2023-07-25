@@ -4,7 +4,7 @@ This repository holds a [Nextflow](https://www.nextflow.io/) implementation of s
 
 For short-read data, either raw- or mapped reads can be used as input. 
 
-If provided aligned short-reads, the alignment file is passed to the individual tools for SV calling. If supplied raw short-read data, raw-reads are mapped to a provided reference with [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml), duplicates are marked with GATK MarkDuplicates and the subsequent marked aligned BAM file is passed to the individual tools for SV calling. The short-reads SV callers included are: [Lumpy](https://github.com/arq5x/lumpy-sv), [Breakdancer](https://github.com/genome/breakdancer), [Delly](https://github.com/dellytools/delly), and [Manta](https://github.com/Illumina/manta).
+If provided aligned short-reads, the alignment file is passed to the individual tools for SV calling. If supplied raw short-read data, raw-reads are mapped to a provided reference with [BWA mem](http://bio-bwa.sourceforge.net/bwa.shtml), duplicates are marked with GATK MarkDuplicates and the subsequent marked aligned BAM file is passed to the individual tools for SV calling. The short-reads SV callers included are: [Lumpy](https://github.com/arq5x/lumpy-sv), [Delly](https://github.com/dellytools/delly), and [Manta](https://github.com/Illumina/manta).
 
 For PacBio data, raw-reads are used as input. 
 

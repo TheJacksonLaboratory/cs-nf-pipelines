@@ -17,10 +17,7 @@ include {PICARD_SORTSAM as LUMPY_SORTSAM;
 include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
 include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
 include {REHEADER_VCF as REHEADER_LUMPY;
-         REHEADER_VCF as REHEADER_BREAKDANCER;
          REHEADER_VCF as REHEADER_DELLY} from "${projectDir}/modules/utility_modules/reheader_vcf"
-include {BREAKDANCER_CALL} from "${projectDir}/modules/breakdancer/breakdancer_call"
-include {BREAKDANCER_SV_TO_VCF} from "${projectDir}/modules/breakdancer/breakdancer_sv_to_vcf"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
 include {DELLY_POST_PROCESS} from "${projectDir}/modules/delly/delly_post_process"
@@ -132,16 +129,6 @@ workflow ILLUMINA {
     LUMPY_CALL_SV(lumpy_input)
     REHEADER_LUMPY(LUMPY_CALL_SV.out.lumpy_vcf, "lumpy")
 
-    // * Breakdancer
-
-    // Call SV with Breakdancer
-    BREAKDANCER_CALL(GATK_MARK_DUPLICATES.out.bam_and_index)
-
-    // Convert Breakdancer SV to VCF
-    breakdancer_vcf_input = GATK_MARK_DUPLICATES.out.bam_and_index.join(BREAKDANCER_CALL.out.breakdancer_sv)
-    BREAKDANCER_SV_TO_VCF(breakdancer_vcf_input)
-    REHEADER_BREAKDANCER(BREAKDANCER_SV_TO_VCF.out.breakdancer_vcf, "breakdancer")
-
     // * Manta
 
     // Call SV with Manta
@@ -160,8 +147,8 @@ workflow ILLUMINA {
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
-    survivor_input = REHEADER_BREAKDANCER.out.vcf_rehead.join(REHEADER_DELLY.out.vcf_rehead).join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
-                     .map { it -> tuple(it[0], tuple(it[1], it[2], it[3], it[4]))}
+    survivor_input = REHEADER_DELLY.out.vcf_rehead).join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
+                     .map { it -> tuple(it[0], tuple(it[1], it[2], it[3]))}
     SURVIVOR_MERGE(survivor_input)
     SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
     SURVIVOR_SUMMARY(SURVIVOR_MERGE.out.vcf)
