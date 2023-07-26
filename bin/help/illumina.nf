@@ -15,23 +15,19 @@ def help(){
   --sample_folder | /<PATH> | The path to the folder that contains all the samples to be run by the pipeline. The files in this path can also be symbolic links.
   --bam | /<PATH> | The path to a BAM input data if alignment has already been performed outside this pipeline.
 
-
-
   Reference data parameters:
   Parameter | Default | Description
   --genome_build | "GRCm38" | Parameter that controls reference data used for alignment and annotation. GRCm38 is the default value, GRCm39 is an accepted alternate value.
-  --fasta | /projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.primary_assembly.fa
-  --fasta_index | /projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.primary_assembly.fa.fai
-  --bwa_index | null |
-  --exclude_regions | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/ucsc_mm10_gap_chr_sorted.bed | BED file that lists the coordinates of centromeres and telomeres to exclude as alignment targets
-  --tandem_repeats | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/ucsc_mm10_trf_chr_sorted.bed | BED file that lists the coorinates of tandem repeats
-  --sv_ins_ref | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/variants_freeze5_sv_INS_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified insertion SVs
-  --sv_del_ref | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/variants_freeze5_sv_DEL_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified deletion SVs
-  --sv_inv_ref | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/variants_freeze5_sv_INV_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified inversion SVs
-  --reg_ref | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/mus_musculus.GRCm38.Regulatory_Build.regulatory_features.20180516.gff.gz | BED file that lists regulatory features
-  --genes_bed | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/Mus_musculus.GRCm38.102.gene_symbol.bed | BED file that lists gene symbol IDs and coordinates
-  --exons_bed | /projects/reinholdt-lab/ONT/pipeline_development/new_refs/Mus_musculus.GRCm38.102.exons.bed | BED file that lists exons and coordinates
-
+  --fasta | /<PATH> | Path to the reference genome in FASTA format.
+  --fasta_index | /<PATH> | Optional paramter to specify index for reference genome. If not provided, pipeline will generate an index.
+  --bwa_index | /<PATH> | Optional paramter to specify BWA indices for alignment. If not provided, pipeline will generate these indices.
+  --exclude_regions | /ref_data/ucsc_mm10_gap_chr_sorted.bed | BED file that lists the coordinates of centromeres and telomeres to exclude as alignment targets
+  --sv_ins_ref | /ref_data/variants_freeze5_sv_INS_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified insertion SVs
+  --sv_del_ref | /ref_data/variants_freeze5_sv_DEL_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified deletion SVs
+  --sv_inv_ref | /ref_data/variants_freeze5_sv_INV_mm39_to_mm10_sorted.bed.gz | BED file that lists previously indentified inversion SVs
+  --reg_ref | /ref_data/mus_musculus.GRCm38.Regulatory_Build.regulatory_features.20180516.gff.gz | BED file that lists regulatory features
+  --genes_bed | /ref_data/Mus_musculus.GRCm38.102.gene_symbol.bed | BED file that lists gene symbol IDs and coordinates
+  --exons_bed | /ref_data/Mus_musculus.GRCm38.102.exons.bed | BED file that lists exons and coordinates
 
   fastp filtering paramenters:
   Parameter | Default | Description

@@ -15,12 +15,12 @@ grep -v "#" ${merged_vcf} | \
 
 if [[ ${seqmode} == "pacbio" ]]
 then
-    printf "chr\tpos\tSV\tpbsv\tsniffels\n" > ${name_string}.merged.overlap.annotated.txt && \
+    printf "chr\tpos\tSV\tpbsv\tsniffles\n" > ${name_string}.merged.overlap.annotated.txt && \
         paste ${name_string}.merged.SVs.txt ${name_string}.merged.overlap.txt | \
         sed -e 's/ /\t/g' >> ${name_string}.merged.overlap.annotated.txt
 elif [[ ${seqmode} == "illumina" ]]
 then
-    printf "chr\tpos\tSV\tbreakdancer\tdelly\tlumpy\tmanta\n" > ${name_string}.merged.overlap.annotated.txt && \
+    printf "chr\tpos\tSV\tdelly\tlumpy\tmanta\n" > ${name_string}.merged.overlap.annotated.txt && \
         paste ${name_string}.merged.SVs.txt ${name_string}.merged.overlap.txt | \
         sed -e 's/ /\t/g' >> ${name_string}.merged.overlap.annotated.txt
 elif [[ ${seqmode} == "ont" ]]

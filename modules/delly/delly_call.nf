@@ -6,7 +6,7 @@ process DELLY_CALL {
     time {bam.size() < 40.GB ? '10:00:00' : '24:00:00' }
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
     
-    container 'quay.io/jaxcompsci/delly-ref_data:0.8.3--refv0.2.0'
+    container 'quay.io/jaxcompsci/delly-ref_data:1.1.6--refv0.2.0'
     
     input:
         tuple val(sampleID), file(bam), file(bai)

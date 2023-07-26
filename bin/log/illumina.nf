@@ -24,7 +24,6 @@ ______________________________________________________
 --quality_phred        ${params.quality_phred}
 --unqualified_perc     ${params.unqualified_perc}
 --exclude_regions      ${params.exclude_regions}
---tandem_repeats       ${params.tandem_repeats}
 --sv_ins_ref           ${params.sv_ins_ref}
 --sv_del_ref           ${params.sv_del_ref}
 --sv_inv_ref           ${params.sv_inv_ref}

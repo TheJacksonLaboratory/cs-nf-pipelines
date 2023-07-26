@@ -41,8 +41,7 @@ workflow ONT {
        exit 0
     }
 
-    params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
-    ch_fasta = Channel.fromPath(params.fasta)
+    ch_fasta = params.fasta ? Channel.fromPath(params.fasta): null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_sampleID = params.names ? Channel.value(params.names) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
