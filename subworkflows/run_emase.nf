@@ -5,6 +5,7 @@ include {BOWTIE} from "${projectDir}/modules/bowtie/bowtie"
 include {GBRS_BAM2EMASE} from "${projectDir}/modules/gbrs/gbrs_bam2emase"
 include {GBRS_COMPRESS as GBRS_COMPRESS_SE;
          GBRS_COMPRESS as GBRS_COMPRESS_PE} from "${projectDir}/modules/gbrs/gbrs_compress"
+include {EMASE_GET_COMMON_ALIGNMENT} from "${projectDir}/modules/emase/emase_get_common_alignment"
 include {GBRS_QUANTIFY} from "${projectDir}/modules/gbrs/gbrs_quantify"
 
 workflow RUN_EMASE {
@@ -19,23 +20,26 @@ workflow RUN_EMASE {
         // Convert BAM to EMASE format. 
         GBRS_BAM2EMASE(BOWTIE.out.bam)
 
-        // Compress EMASE format file. 
-        GBRS_COMPRESS_SE(GBRS_BAM2EMASE.out.emase_h5, '')
-        // Inputs required: (input_h5 tuple, suffix). Suffix is null except for PE merge. 
-
-        // If PE, join R1 and R2 together with an additonal compress step. 
+        // If PE, join R1 and R2 together with emase get-common-alignments. 
         if (params.read_type == 'PE'){
-            gbrs_compress_pairedReads_input = GBRS_COMPRESS_SE.out.compressed_emase_h5
+            emase_common_align_pairedReads_input = GBRS_BAM2EMASE.out.emase_h5
                                                 .groupTuple(size: 2)
                                                 .map { sampleID, reads -> tuple( sampleID, reads.sort{it.name} ) }
-            // collect GBRS compression. by sample ID then map and sort tuple to [sampleID, [R1, R2]]
+            // collect EMASE files by sample ID then map and sort tuple to [sampleID, [R1, R2]]
 
-            GBRS_COMPRESS_PE(gbrs_compress_pairedReads_input, 'merged')
+            EMASE_GET_COMMON_ALIGNMENT(emase_common_align_pairedReads_input)
+            // Get common alignments among fastq files.
+
+            GBRS_COMPRESS_PE(EMASE_GET_COMMON_ALIGNMENT.out.common_emase_h5, 'merged')
             // Inputs required: (input_h5 tuple, suffix). Suffix is null except for PE merge, when 'merged' is used.  
 
             gbrs_quantify_input = GBRS_COMPRESS_PE.out.compressed_emase_h5
             // Setting an input channel for next step, which catches PE or SE files. Here PE files. 
         } else {
+            // Compress EMASE format file. 
+            GBRS_COMPRESS_SE(GBRS_BAM2EMASE.out.emase_h5, '')
+            // Inputs required: (input_h5 tuple, suffix). Suffix is null except for PE merge. 
+
             gbrs_quantify_input = GBRS_COMPRESS_SE.out.compressed_emase_h5
             // Setting an input channel for next step, which catches PE or SE files. Here SE files. 
         }
