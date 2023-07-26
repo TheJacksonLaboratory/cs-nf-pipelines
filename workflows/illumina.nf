@@ -36,8 +36,7 @@ workflow ILLUMINA {
         exit 0
     }
 
-    params.fasta = params.genome ? params.genomes[params.genome].fasta ?: null : null
-    ch_fasta = Channel.fromPath(params.fasta)
+    ch_fasta = params.fasta ? Channel.fromPath(params.fasta) : null
     ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_fastq2 = params.fastq2 ? Channel.fromPath(params.fastq2) : null
@@ -47,11 +46,7 @@ workflow ILLUMINA {
 
     // Prepare reads channel
 
-    if (params.sample_folder && !params.fastq1 && !params.fastq2 && !params.bam) {
-        fq_reads = Channel.fromFilePairs("${params.sample_folder}/${params.pattern}${params.extension}", checkExists:true )
-    }
-
-    else if (params.fastq1 && !params.fastq2 && !params.bam && !params.sample_folder) {
+    if (params.fastq1 && !params.fastq2 && !params.bam && !params.sample_folder) {
         fq_reads = ch_sampleID.concat(ch_fastq1)
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
