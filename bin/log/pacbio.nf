@@ -11,11 +11,10 @@ ______________________________________________________
 --workflow             ${params.workflow}
 --genome_build         ${params.genome_build}
 --pbmode               ${params.pbmode}
---genome               ${params.genome}
 --fasta                ${params.fasta}
 --fastq1               ${params.fastq1}
 --bam                  ${params.bam}
---names                ${params.names}
+--sampleID             ${params.sampleID}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}
 -c                     ${params.config}

@@ -14,7 +14,7 @@ ______________________________________________________
 --fasta_index          ${params.fasta_index}
 --fastq1               ${params.fastq1}
 --bam                  ${params.bam}
---names                ${params.names}
+--sampleID             ${params.sampleID}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}
 -c                     ${params.config}

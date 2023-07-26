@@ -29,7 +29,7 @@ workflow PACBIO {
 
     ch_fasta = params.fasta ? Channel.fromPath(params.fasta): null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
-    ch_sampleID = params.names ? Channel.value(params.names) : null
+    ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
 
     if (params.fastq1 && !params.bam) {

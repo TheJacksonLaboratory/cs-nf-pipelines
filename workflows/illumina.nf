@@ -40,7 +40,7 @@ workflow ILLUMINA {
     ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_fastq2 = params.fastq2 ? Channel.fromPath(params.fastq2) : null
-    ch_sampleID = params.names ? Channel.value(params.names) : null
+    ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
     ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
 
