@@ -1,5 +1,8 @@
 #!/usr/bin/env Rscript
 
+zout <- file("messages.Rout", open = "wt")
+sink(zout, type = "message")
+
 library(tidyverse)
 
 args = commandArgs(trailingOnly=TRUE)
@@ -54,55 +57,26 @@ inv <- read_delim(paste(sample_name, "inv.bed", sep="."), delim = "\t",
                                    "stop" = "d",
                                    "sv_name" = "c"))
 
-ins_s <- read_delim(paste(sample_name, "ins.s.bed", sep="."), delim = "\t",
+ins_c <- read_delim(paste(sample_name, "ins.c.bed", sep="."), delim = "\t",
                     col_names = c("chr", "start", "stop", "sv_name"),
                   col_types = cols("chr" = "c",
                                    "start" = "d",
                                    "stop" = "d",
                                    "sv_name" = "c"))
 
-ins_e <- read_delim(paste(sample_name, "ins.e.bed", sep="."), delim = "\t",
+del_c <- read_delim(paste(sample_name, "del.c.bed", sep="."), delim = "\t",
                     col_names = c("chr", "start", "stop", "sv_name"),
                   col_types = cols("chr" = "c",
                                    "start" = "d",
                                    "stop" = "d",
                                    "sv_name" = "c"))
 
-del_s <- read_delim(paste(sample_name, "del.s.bed", sep="."), delim = "\t",
+inv_c <- read_delim(paste(sample_name, "inv.c.bed", sep="."), delim = "\t",
                     col_names = c("chr", "start", "stop", "sv_name"),
                   col_types = cols("chr" = "c",
                                    "start" = "d",
                                    "stop" = "d",
                                    "sv_name" = "c"))
-
-del_e <- read_delim(paste(sample_name, "del.e.bed", sep="."), delim = "\t",
-                    col_names = c("chr", "start", "stop", "sv_name"),
-                  col_types = cols("chr" = "c",
-                                   "start" = "d",
-                                   "stop" = "d",
-                                   "sv_name" = "c"))
-
-tra_e <- read_delim(paste(sample_name, "tra.e.bed", sep="."), delim = "\t",
-                    col_names = c("chr", "start", "stop", "sv_name"),
-                  col_types = cols("chr" = "c",
-                                   "start" = "d",
-                                   "stop" = "d",
-                                   "sv_name" = "c"))
-
-inv_e <- read_delim(paste(sample_name, "inv.e.bed", sep="."), delim = "\t",
-                    col_names = c("chr", "start", "stop", "sv_name"),
-                  col_types = cols("chr" = "c",
-                                   "start" = "d",
-                                   "stop" = "d",
-                                   "sv_name" = "c"))
-
-dup_e <- read_delim(paste(sample_name, "dup.e.bed", sep="."), delim = "\t",
-                    col_names = c("chr", "start", "stop", "sv_name"),
-                  col_types = cols("chr" = "c",
-                                   "start" = "d",
-                                   "stop" = "d",
-                                   "sv_name" = "c"))
-
 
 ins_genes <- read_delim(paste(sample_name, "ins.genes.bed", sep="."), delim = "\t",
                         col_names = c("chr", "start", "stop", "sv_name",
@@ -264,15 +238,156 @@ inv_exons <- read_delim(paste(sample_name, "inv.exons.bed", sep="."), delim = "\
                                    "exon_num" = "d",
                                    "gene" = "c"))
 
+ins_regulatory <- read_delim(paste(sample_name, "ins.regulatory.bed", sep="."), delim = "\t",
+                        col_names = c("chr", "start", "stop", "sv_name",
+                                      "ref_chr", "ref_build",
+                                      "ref_type", "ref_start",
+                                      "ref_stop", "blank_1",
+                                      "blank_2", "blank_3",
+                                      "meta_string"),
+                  col_types = cols("chr" = "c",
+                                   "start" = "c",
+                                   "stop" = "c",
+                                   "sv_name" = "c",
+                                   "ref_chr" = "c",
+                                   "ref_build" = "c",
+                                   "ref_type" = "c",
+                                   "ref_start" = "c",
+                                   "ref_stop" = "c",
+                                   "blank_1" = "c",
+                                   "blank_2" = "c",
+                                   "blank_3" = "c",
+                                   "meta_string"  = "c")) %>%
+                  {if(nrow(.) != 0)
+                  separate(., meta_string, 
+                  into = c("ID", "bound_end", "bound_start", "description", "feature_type"), 
+                            sep = ";") %>% 
+                  mutate(., ID = str_replace(ID, "ID=regulatory_region:", ""),
+                            description = str_replace(description, "description=", ""),
+                            reg_out = str_c(ID, description, sep = ":")) 
+                   else(.)}
+
+del_regulatory <- read_delim(paste(sample_name, "del.regulatory.bed", sep="."), delim = "\t",
+                        col_names = c("chr", "start", "stop", "sv_name",
+                                      "ref_chr", "ref_build",
+                                      "ref_type", "ref_start",
+                                      "ref_stop", "blank_1",
+                                      "blank_2", "blank_3",
+                                      "meta_string"),
+                  col_types = cols("chr" = "c",
+                                   "start" = "c",
+                                   "stop" = "c",
+                                   "sv_name" = "c",
+                                   "ref_chr" = "c",
+                                   "ref_build" = "c",
+                                   "ref_type" = "c",
+                                   "ref_start" = "c",
+                                   "ref_stop" = "c",
+                                   "blank_1" = "c",
+                                   "blank_2" = "c",
+                                   "blank_3" = "c",
+                                   "meta_string"  = "c")) %>%
+                  {if(nrow(.) != 0)
+                  separate(., meta_string, 
+                  into = c("ID", "bound_end", "bound_start", "description", "feature_type"), 
+                            sep = ";") %>% 
+                  mutate(., ID = str_replace(ID, "ID=regulatory_region:", ""),
+                            description = str_replace(description, "description=", ""),
+                            reg_out = str_c(ID, description, sep = ":")) 
+                   else(.)}
+
+inv_regulatory <- read_delim(paste(sample_name, "inv.regulatory.bed", sep="."), delim = "\t",
+                        col_names = c("chr", "start", "stop", "sv_name",
+                                      "ref_chr", "ref_build",
+                                      "ref_type", "ref_start",
+                                      "ref_stop", "blank_1",
+                                      "blank_2", "blank_3",
+                                      "meta_string"),
+                  col_types = cols("chr" = "c",
+                                   "start" = "c",
+                                   "stop" = "c",
+                                   "sv_name" = "c",
+                                   "ref_chr" = "c",
+                                   "ref_build" = "c",
+                                   "ref_type" = "c",
+                                   "ref_start" = "c",
+                                   "ref_stop" = "c",
+                                   "blank_1" = "c",
+                                   "blank_2" = "c",
+                                   "blank_3" = "c",
+                                   "meta_string"  = "c")) %>%
+                  {if(nrow(.) != 0)
+                  separate(., meta_string, 
+                  into = c("ID", "bound_end", "bound_start", "description", "feature_type"), 
+                            sep = ";") %>% 
+                  mutate(., ID = str_replace(ID, "ID=regulatory_region:", ""),
+                            description = str_replace(description, "description=", ""),
+                            reg_out = str_c(ID, description, sep = ":")) 
+                   else(.)}             
+
+dup_regulatory <- read_delim(paste(sample_name, "dup.regulatory.bed", sep="."), delim = "\t",
+                        col_names = c("chr", "start", "stop", "sv_name",
+                                      "ref_chr", "ref_build",
+                                      "ref_type", "ref_start",
+                                      "ref_stop", "blank_1",
+                                      "blank_2", "blank_3",
+                                      "meta_string"),
+                  col_types = cols("chr" = "c",
+                                   "start" = "c",
+                                   "stop" = "c",
+                                   "sv_name" = "c",
+                                   "ref_chr" = "c",
+                                   "ref_build" = "c",
+                                   "ref_type" = "c",
+                                   "ref_start" = "c",
+                                   "ref_stop" = "c",
+                                   "blank_1" = "c",
+                                   "blank_2" = "c",
+                                   "blank_3" = "c",
+                                   "meta_string"  = "c")) %>%
+                  {if(nrow(.) != 0)
+                  separate(., meta_string, 
+                  into = c("ID", "bound_end", "bound_start", "description", "feature_type"), 
+                            sep = ";") %>% 
+                  mutate(., ID = str_replace(ID, "ID=regulatory_region:", ""),
+                            description = str_replace(description, "description=", ""),
+                            reg_out = str_c(ID, description, sep = ":")) 
+                   else(.)}
+
+tra_regulatory <- read_delim(paste(sample_name, "tra.regulatory.bed", sep="."), delim = "\t",
+                        col_names = c("chr", "start", "stop", "sv_name",
+                                      "ref_chr", "ref_build",
+                                      "ref_type", "ref_start",
+                                      "ref_stop", "blank_1",
+                                      "blank_2", "blank_3",
+                                      "meta_string"),
+                  col_types = cols("chr" = "c",
+                                   "start" = "c",
+                                   "stop" = "c",
+                                   "sv_name" = "c",
+                                   "ref_chr" = "c",
+                                   "ref_build" = "c",
+                                   "ref_type" = "c",
+                                   "ref_start" = "c",
+                                   "ref_stop" = "c",
+                                   "blank_1" = "c",
+                                   "blank_2" = "c",
+                                   "blank_3" = "c",
+                                   "meta_string"  = "c")) %>%
+                  {if(nrow(.) != 0)
+                  separate(., meta_string, 
+                  into = c("ID", "bound_end", "bound_start", "description", "feature_type"), 
+                            sep = ";") %>% 
+                  mutate(., ID = str_replace(ID, "ID=regulatory_region:", ""),
+                            description = str_replace(description, "description=", ""),
+                            reg_out = str_c(ID, description, sep = ":")) 
+                   else(.)}
+                                                       
 ins_full <- ins %>%
     mutate(., sv_type = "insertion") %>%
-    {if(nrow(ins_s) != 0) 
-      mutate(., sanger = if_else(sv_name %in% ins_s$sv_name,  "Y", "N"))
-     else(mutate(., sanger = "N")) } %>%
-    {if(nrow(ins_e) != 0)
-      mutate(., ensembl = if_else(sv_name %in% ins_e$sv_name, 
-                                  "Y", "N"))
-      else(mutate(., ensembl = "N")) } %>%
+    {if(nrow(ins_c) != 0) 
+      mutate(., beck = if_else(sv_name %in% ins_c$sv_name,  "Y", "N"))
+     else(mutate(., beck = "N")) } %>%  
     {if(nrow(ins_genes) != 0)
       left_join(., select(ins_genes, sv_name, gene))
      else(.) } %>%
@@ -282,17 +397,16 @@ ins_full <- ins %>%
                 arrange(., sv_name, gene, exon_num) %>%
                 group_by(., sv_name, gene) %>% 
                 summarize(., exons = paste(exon_num, collapse = ";")))
-    else(.) }
+     else(.) } %>%
+    {if(nrow(ins_regulatory) != 0)
+       mutate(., regulatory_regions = if_else(sv_name %in% ins_regulatory$sv_name,  "Y", "N"))
+        else(mutate(., regulatory_regions = "N")) }
 
 del_full <- del %>%
     mutate(., sv_type = "deletion") %>%
-    {if(nrow(del_s) != 0) 
-      mutate(., sanger = if_else(sv_name %in% del_s$sv_name,  "Y", "N"))
-     else(mutate(., sanger = "N")) } %>%
-    {if(nrow(del_e) != 0)
-      mutate(., ensembl = if_else(sv_name %in% del_e$sv_name, 
-                                  "Y", "N"))
-      else(mutate(., ensembl = "N")) } %>%
+    {if(nrow(del_c) != 0) 
+      mutate(., beck = if_else(sv_name %in% del_c$sv_name,  "Y", "N"))
+     else(mutate(., beck = "N")) } %>%
     {if(nrow(del_genes) != 0)
       left_join(., select(del_genes, sv_name, gene))
      else(.) } %>%
@@ -302,15 +416,14 @@ del_full <- del %>%
                 arrange(., sv_name, gene, exon_num) %>%
                 group_by(., sv_name, gene) %>% 
                 summarize(., exons = paste(exon_num, collapse = ";")))
-    else(.) }              
+    else(.) } %>%
+    {if(nrow(del_regulatory) != 0)
+       mutate(., regulatory_regions = if_else(sv_name %in% del_regulatory$sv_name,  "Y", "N"))
+        else(mutate(., regulatory_regions = "N")) }                
 
 tra_full <- tra %>%
     mutate(., sv_type = "translocation") %>%
-    mutate(., sanger = NA) %>%
-    {if(nrow(tra_e) != 0)
-      mutate(., ensembl = if_else(sv_name %in% tra_e$sv_name, 
-                                  "Y", "N"))
-      else(mutate(., ensembl = "N")) } %>%
+    mutate(., beck = NA) %>%
     {if(nrow(tra_genes) != 0)
       left_join(., select(tra_genes, sv_name, gene))
      else(.) } %>%
@@ -320,15 +433,17 @@ tra_full <- tra %>%
                 arrange(., sv_name, gene, exon_num) %>%
                 group_by(., sv_name, gene) %>% 
                 summarize(., exons = paste(exon_num, collapse = ";")))
-     else(.)}
+     else(.)} %>%
+    {if(nrow(tra_regulatory) != 0)
+       mutate(., regulatory_regions = if_else(sv_name %in% tra_regulatory$sv_name,  "Y", "N"))
+        else(mutate(., regulatory_regions = "N")) }
 
 inv_full <- inv %>%
     mutate(., sv_type = "inversion") %>%
-    mutate(., sanger = NA) %>%
-    {if(nrow(inv_e) != 0)
-      mutate(., ensembl = if_else(sv_name %in% inv_e$sv_name, 
+    {if(nrow(inv_c) != 0)
+      mutate(., beck = if_else(sv_name %in% inv_c$sv_name, 
                                   "Y", "N"))
-      else(mutate(., ensembl = "N")) } %>%
+      else(mutate(., beck = "N")) } %>%
     {if(nrow(inv_genes) != 0)
       left_join(., select(inv_genes, sv_name, gene))
      else(.) } %>%
@@ -338,15 +453,14 @@ inv_full <- inv %>%
                 arrange(., sv_name, gene, exon_num) %>%
                 group_by(., sv_name, gene) %>% 
                 summarize(., exons = paste(exon_num, collapse = ";")))
-     else(.)}
+     else(.)} %>%
+    {if(nrow(inv_regulatory) != 0)
+       mutate(., regulatory_regions = if_else(sv_name %in% inv_regulatory$sv_name,  "Y", "N"))
+        else(mutate(., regulatory_regions = "N")) }
 
 dup_full <- dup %>%
     mutate(., sv_type = "duplication") %>%
-    mutate(., sanger = NA) %>%
-    {if(nrow(dup_e) != 0)
-      mutate(., ensembl = if_else(sv_name %in% dup_e$sv_name, 
-                                  "Y", "N"))
-      else(mutate(., ensembl = "N")) } %>%
+    mutate(., beck = NA) %>%
     {if(nrow(dup_genes) != 0)
       left_join(., select(dup_genes, sv_name, gene))
      else(.) } %>%
@@ -356,18 +470,28 @@ dup_full <- dup %>%
                 arrange(., sv_name, gene, exon_num) %>%
                 group_by(., sv_name, gene) %>% 
                 summarize(., exons = paste(exon_num, collapse = ";")))
-     else(.)}
+     else(.)} %>%
+    {if(nrow(dup_regulatory) != 0)
+       mutate(., regulatory_regions = if_else(sv_name %in% dup_regulatory$sv_name,  "Y", "N"))
+        else(mutate(., regulatory_regions = "N")) }
 
 bind_rows(ins_full, del_full, tra_full, inv_full, dup_full) %>%
     mutate(., pos = start + 1) %>%
     mutate(., sv_size = abs(stop - start) + 1) %>%
     relocate(chr, pos, sv_name, sv_size, sv_type, 
-             sanger, ensembl, gene, exons) %>%
+             beck, regulatory_regions, gene, exons) %>%
     select(., -start, -stop) %>%
     left_join(., read_delim(sv_olap_fh,
                         delim = "\t",
                         col_types = cols("chr" = "c")) %>%
              select(., -chr, -pos), 
-             by = c("sv_name" = "SV")) %>%
+             by = c("sv_name" = "SV")) %>%    
     arrange(., chr, pos) %>%
+    mutate(., gene = case_when(sv_size > 5000000 ~ "sv_too_large",
+                               TRUE ~ gene),
+              exons = case_when(sv_size > 5000000 ~ "sv_too_large",
+                               TRUE ~ exons),
+              regulatory_regions = case_when(sv_size > 5000000 ~ "sv_too_large",
+                               TRUE ~ regulatory_regions)) %>%
+    distinct() %>%
     write_csv(., surv_out_fh)
