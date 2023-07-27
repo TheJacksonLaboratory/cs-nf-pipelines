@@ -18,7 +18,7 @@ process GBRS_COMPRESS {
     tuple val(sampleID), file("*.compressed.emase.h5"), emit: compressed_emase_h5
 
     script:
-    output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${bam[0].baseName}.compressed.emase.h5"
+    output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${sampleID}.compressed.emase.h5"
 
     """
     gbrs compress -i ${h5} -o ${output_name}
