@@ -1,6 +1,6 @@
 # Mouse Mutant Resource Structural Variant Detection
 
-This repository holds a [Nextflow](https://www.nextflow.io/) implementation of structural variant callers for both short-read Illumina based data, and PacBio CCS and CLR data. It was developed to provide results that are compatible with the [Mouse Mutant Resource Database](https://mmrdb.jax.org).
+This repository holds a [Nextflow](https://www.nextflow.io/) implementation of structural variant callers for both short-read Illumina based data, PacBio CCS and CLR data, and Oxford Nanopore data. It was developed to provide results that are compatible with the [Mouse Mutant Resource Database](https://mmrdb.jax.org).
 
 ## Pipeline Level Documentation, Quick Start, and Developer Documentation: 
 
