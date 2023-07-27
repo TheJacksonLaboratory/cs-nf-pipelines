@@ -17,7 +17,7 @@ include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_b
 include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
-// log paramater info
+// log parameter info
 PARAM_LOG()
 
 workflow PACBIO {

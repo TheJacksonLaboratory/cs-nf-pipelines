@@ -1,4 +1,15 @@
 def PARAM_LOG(){
+    if (params.pbmode != "CCS" && params.pbmode != "CLR") {
+        error "'--pbmode': \"${params.pbmode}\" is not valid, supported options are 'CCS' or 'CLR'" 
+    }
+
+    if (!params.fasta || params.fasta == "<PATH>" || params.fasta == "/<PATH>") {
+        error "'--fasta': \"${params.fasta}\" is not valid, specify path to reference FASTA" 
+    }
+
+    if (!params.sampleID || params.fasta == "<STRING>") {
+        error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
+    }
     log.info """
 ______________________________________________________
 

@@ -29,13 +29,16 @@ include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_b
 include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
+// log parameter info
+PARAM_LOG()
+
 workflow ILLUMINA {
 
     if (params.help){
        help()
         exit 0
     }
-
+ 
     ch_fasta = params.fasta ? Channel.fromPath(params.fasta) : null
     ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
@@ -46,26 +49,24 @@ workflow ILLUMINA {
 
     // Prepare reads channel
 
-    if (params.fastq1 && !params.fastq2 && !params.bam && !params.sample_folder) {
+    if (params.fastq1 && !params.fastq2 && !params.bam) {
         fq_reads = ch_sampleID.concat(ch_fastq1)
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
     }
 
-    else if (params.fastq1 && params.fastq2 && !params.bam && !params.sample_folder) {
+    else if (params.fastq1 && params.fastq2 && !params.bam) {
         fq_reads = ch_sampleID.concat(ch_fastq1, ch_fastq2)
                             .collect()
                             .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     }
 
-    else if (params.bam && !params.fastq1 && !params.fastq2 && !params.sample_folder) {
+    else if (params.bam && !params.fastq1 && !params.fastq2) {
         fq_reads = null
         pre_bam = ch_sampleID.concat(ch_bam)
                              .collect()
                              .map { it -> tuple(it[0], it[1])}
     }
-
-    PARAM_LOG()
 
     // Index reference fasta
     SAMTOOLS_FAIDX(ch_fasta)

@@ -30,8 +30,7 @@ include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 include {PYTHON_ANNOT_DEPTHS} from "${projectDir}/modules/python/python_annot_depths"
 include {PYTHON_ANNOT_ON_TARGET} from "${projectDir}/modules/python/python_annot_on_target"
 
-// log paramater info
-//param_log()
+// log parameter info
 
 PARAM_LOG()
 

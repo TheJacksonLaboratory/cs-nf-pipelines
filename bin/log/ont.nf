@@ -1,4 +1,13 @@
 def PARAM_LOG(){
+
+    if (!params.fasta || params.fasta == "<PATH>" || params.fasta == "/<PATH>") {
+        error "'--fasta': \"${params.fasta}\" is not valid, specify path to reference FASTA" 
+    }
+
+    if (!params.sampleID || params.fasta == "<STRING>") {
+        error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
+    }
+    
     log.info """
 ______________________________________________________
 
