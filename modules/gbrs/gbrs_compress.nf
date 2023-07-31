@@ -2,28 +2,26 @@ process GBRS_COMPRESS {
     tag "$sampleID"
 
     cpus 1
-    memory { suffix == 'merged' ? 6.GB * task.attempt : 40.GB * task.attempt}
-    time 10.hour
+    memory { params.read_type == 'SE' ? 12.GB : 40.GB }
+    time 5.hour
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.h5", mode: 'copy', enabled: "${ suffix == 'merged' || params.read_type == 'SE' ? true : false }"
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/emase' : 'emase' }", pattern: "*.h5", mode: 'copy'
 
     input:
-    tuple val(sampleID), path(bam)
+    tuple val(sampleID), path(h5)
     val(suffix)
 
     output:
     tuple val(sampleID), file("*.compressed.emase.h5"), emit: compressed_emase_h5
 
     script:
-    bam_list = bam.collect { "$it" }.join(' -i ')
-
-    output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${bam[0].baseName}.compressed.emase.h5"
+    output_name = suffix == 'merged' ? "${sampleID}.merged.compressed.emase.h5" : "${sampleID}.compressed.emase.h5"
 
     """
-    gbrs compress -i ${bam_list} -o ${output_name}
+    gbrs compress -i ${h5} -o ${output_name}
     """
 
     stub:
