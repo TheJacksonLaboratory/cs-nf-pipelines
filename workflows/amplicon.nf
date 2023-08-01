@@ -18,11 +18,12 @@ include {SAMTOOLS_SORT as SAMTOOLS_SORT_PRIMERCLIP;
          SAMTOOLS_SORT as SAMTOOLS_SORT_CALLING} from "${projectDir}/modules/samtools/samtools_sort"
 include {PRIMERCLIP} from "${projectDir}/modules/primerclip/primerclip"
 include {TARGET_COVERAGE_METRICS} from "${projectDir}/modules/bedtools/bedtools_amplicon_metrics"
-include {SNPSIFT_ANNOTATE} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {PICARD_COLLECTTARGETPCRMETRICS} from "${projectDir}/modules/picard/picard_collecttargetpcrmetrics"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
+include {SNPSIFT_ANNOTATE} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+include {GENERATE_FINGERPRINT_REPORT} from "${projectDir}/modules/python/python_generate_fingerprint_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -146,6 +147,8 @@ workflow AMPLICON {
   GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai), '')
 
   SNPSIFT_ANNOTATE(GATK_HAPLOTYPECALLER.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+
+  GENERATE_FINGERPRINT_REPORT(SNPSIFT_ANNOTATE.out.vcf)
 
   // MultiQC
   // coverage metrics? 

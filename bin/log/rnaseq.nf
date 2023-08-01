@@ -54,6 +54,7 @@ Human specific files:
 --picard_dict_human          ${params.picard_dict_human}
 --ref_flat_human             ${params.ref_flat_human}
 --ribo_intervals_human       ${params.ribo_intervals_human}
+--classifier_table           ${params.classifier_table}
 
 Mouse specific files: 
 --rsem_ref_prefix_mouse      ${params.rsem_ref_prefix_mouse}
@@ -110,6 +111,7 @@ Human specific files:
 --picard_dict_human          ${params.picard_dict_human}
 --ref_flat_human             ${params.ref_flat_human}
 --ribo_intervals_human       ${params.ribo_intervals_human}
+--classifier_table           ${params.classifier_table}
 
 Mouse specific files: 
 --rsem_ref_prefix_mouse      ${params.rsem_ref_prefix_mouse}

@@ -49,6 +49,7 @@ Parameter | Default | Description
                  | The coverage metric calculation step requires this file. Refers to human assembly when --gen_org human. JAX users should not change this parameter.
 
 --pdx | false | Options: false, true. If specified, 'Xenome' is run on reads to deconvolute human and mouse reads. Human only reads are used in analysis. 
+--classifier_table | '/projects/compsci/omics_share/human/GRCh38/supporting_files/rna_ebv_classifier/EBVlym_classifier_table_48.txt' | EBV expected gene signatures used in EBV classifier. Only used when '--pdx' is run. 
 
 There are two additional parameters that are human specific. They are: 
 
