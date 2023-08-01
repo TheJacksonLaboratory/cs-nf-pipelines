@@ -30,6 +30,7 @@ Parameter | Default | Description
 --strandedness_gtf | Mouse: '/projects/compsci/omics_share/mouse/GRCm38/transcriptome/annotation/ensembl/v102/Mus_musculus.GRCm38.102.gtf'
                    | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/annotation/ensembl/v104/Homo_sapiens.GRCh38.104.gtf' 
                    | GTF file used with kallisto index file used in strandedness determination. 
+--strandedness     | null | Library strandedness override. Supported options are 'reverse_stranded' or 'forward_stranded' or 'non_stranded'. This override parameter is only used when the tool `check_strandedness` fails to classify the strandedness of a sample. If the tool provides a strand direction, that determination is used." 
 
 --rsem_ref_files | /projects/omics_share/mouse/GRCm38/transcriptome/indices/ensembl/v102/bowtie2 | Pre-compiled index files. Refers to human indices when --gen_org human. JAX users should not change this, unless using STAR indices.
 --rsem_ref_prefix | 'Mus_musculus.GRCm38.dna.toplevel' | Prefix for index files. JAX users should not change this, unless using STAR indices. Refers to human indices when --gen_org human.

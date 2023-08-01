@@ -14,6 +14,10 @@ if (params.gen_org != "mouse" && params.gen_org != "human") {
   error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse' or 'human'" 
 }
 
+if (params.strandedness != "reverse_stranded" || params.strandedness != "forward_stranded" || params.strandedness != "non_stranded") {
+  error "'--strandedness': \"${params.strandedness}\" is not valid, supported options are 'reverse_stranded' or 'forward_stranded' or 'non_stranded'" 
+}
+
 if (params.pdx && params.rsem_aligner=='bowtie2')
 log.info """
 RNASEQ PARAMETER LOG
