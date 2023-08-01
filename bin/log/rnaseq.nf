@@ -14,7 +14,7 @@ if (params.gen_org != "mouse" && params.gen_org != "human") {
   error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse' or 'human'" 
 }
 
-if (params.strandedness != "reverse_stranded" || params.strandedness != "forward_stranded" || params.strandedness != "non_stranded") {
+if (params.strandedness != null && params.strandedness != "reverse_stranded" && params.strandedness != "forward_stranded" && params.strandedness != "non_stranded") {
   error "'--strandedness': \"${params.strandedness}\" is not valid, supported options are 'reverse_stranded' or 'forward_stranded' or 'non_stranded'" 
 }
 
@@ -49,6 +49,7 @@ ______________________________________________________
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}
+--stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -105,6 +106,7 @@ ______________________________________________________
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}
+--stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -159,6 +161,7 @@ ______________________________________________________
 --hq_pct               ${params.hq_pct}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
+--stradedness          ${params.strandedness}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -201,6 +204,7 @@ ______________________________________________________
 --hq_pct               ${params.hq_pct}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
+--stradedness          ${params.strandedness}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -244,6 +248,7 @@ ______________________________________________________
 --hq_pct                        ${params.hq_pct}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
+--stradedness                   ${params.strandedness}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
@@ -284,6 +289,7 @@ ______________________________________________________
 --hq_pct                        ${params.hq_pct}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
+--stradedness                   ${params.strandedness}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
