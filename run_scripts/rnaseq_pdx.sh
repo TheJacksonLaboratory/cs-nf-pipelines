@@ -23,4 +23,4 @@ nextflow ../main.nf \
 --gen_org human \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run rnaseq on pdx samples using default hg38 and mm10"
+--comment "This script will run rna sequencing analysis on pdx samples using default hg38 and mm10"

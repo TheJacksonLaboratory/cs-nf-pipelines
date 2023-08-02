@@ -23,4 +23,4 @@ nextflow ../main.nf \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --sample_generation 42 \
 --sample_sex F \
---comment "This script will run gbrs on mouse samples"
+--comment "This script will run gbrs analysis on mouse samples"

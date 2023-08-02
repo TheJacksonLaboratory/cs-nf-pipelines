@@ -21,4 +21,4 @@ nextflow ../main.nf \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w /fastscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
---comment "This script will run emase on mouse samples"
+--comment "This script will run emase analysis on mouse samples"

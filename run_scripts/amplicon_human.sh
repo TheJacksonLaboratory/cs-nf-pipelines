@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mail-user=first.last@jax.org
-#SBATCH --job-name=rna_fusion_human
+#SBATCH --job-name=atac_human
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
 #SBATCH -q batch
@@ -16,10 +16,10 @@ module load nextflow
 
 # RUN PIPELINE
 nextflow ../main.nf \
---workflow rna_fusion \
+--workflow amplicon \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run rna fusion analysis on human samples using default hg38"
+--comment "This script will run amplicon sequencing analysis on human samples using default hg38"

@@ -22,4 +22,4 @@ nextflow ../main.nf \
 --gen_org human \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run atac sequencing on human samples using default hg38"
+--comment "This script will run atac sequencing analysis on human samples using default hg38"

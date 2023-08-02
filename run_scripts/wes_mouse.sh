@@ -22,4 +22,4 @@ nextflow ../main.nf \
 --gen_org mouse \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run whole exome sequencing on mouse samples using default mm10"
+--comment "This script will run whole exome sequencing analysis on mouse samples using default mm10"
