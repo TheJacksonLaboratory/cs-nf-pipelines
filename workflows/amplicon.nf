@@ -151,7 +151,6 @@ workflow AMPLICON {
   GENERATE_FINGERPRINT_REPORT(SNPSIFT_ANNOTATE.out.vcf)
 
   // MultiQC
-  // coverage metrics? 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
