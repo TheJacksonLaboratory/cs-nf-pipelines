@@ -25,4 +25,4 @@ nextflow ../main.nf \
 --chain '' \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run atac sequencing on mouse samples using default mm10"
+--comment "This script will run atac sequencing analysis on mouse samples using default mm10"

@@ -11,6 +11,7 @@ include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_str
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
          RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_MOUSE} from "${projectDir}/modules/rsem/rsem_alignment_expression"
+include {LYMPHOMA_CLASSIFIER} from "${projectDir}/modules/python/python_lymphoma_classifier"
 include {PICARD_ADDORREPLACEREADGROUPS as PICARD_ADDORREPLACEREADGROUPS_HUMAN;
          PICARD_ADDORREPLACEREADGROUPS as PICARD_ADDORREPLACEREADGROUPS_MOUSE} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
 include {PICARD_REORDERSAM as PICARD_REORDERSAM_HUMAN;
@@ -19,7 +20,6 @@ include {PICARD_SORTSAM as PICARD_SORTSAM_HUMAN;
          PICARD_SORTSAM as PICARD_SORTSAM_MOUSE} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_COLLECTRNASEQMETRICS as PICARD_COLLECTRNASEQMETRICS_HUMAN;
          PICARD_COLLECTRNASEQMETRICS as PICARD_COLLECTRNASEQMETRICS_MOUSE} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
-
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 workflow PDX_RNASEQ {
@@ -61,6 +61,8 @@ workflow PDX_RNASEQ {
 
     RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, params.rsem_ref_files_human, params.rsem_star_prefix_human, params.rsem_ref_prefix_human)
     
+    LYMPHOMA_CLASSIFIER(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_genes)
+
     // Picard Alignment Metrics
     READ_GROUPS_HUMAN(human_reads.map{it -> tuple(it[0], it[1])}, "picard")
 

@@ -45,6 +45,9 @@ else if (params.workflow == "emase"){
 else if (params.workflow == "gbrs"){
   include {GBRS} from './workflows/gbrs'
 }
+else if (params.workflow == "amplicon"){
+  include {AMPLICON} from './workflows/amplicon'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -93,5 +96,8 @@ workflow{
   }
   if (params.workflow == "prep_do_gbrs_inputs"){
     PREP_DO_GBRS_INPUT()
+  }
+  if (params.workflow == "amplicon"){
+    AMPLICON()
   }
 }

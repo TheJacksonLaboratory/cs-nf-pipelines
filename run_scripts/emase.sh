@@ -15,10 +15,10 @@ module use --append /projects/omics_share/meta/modules
 module load nextflow
 
 # RUN PIPELINE
-nextflow ../main.nf \ 
+nextflow ../main.nf \
 -profile sumner \
 --workflow emase \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w /fastscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
---comment "This script will run emase on mouse samples"
+--comment "This script will run emase analysis on mouse samples"

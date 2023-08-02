@@ -10,7 +10,7 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {TRIM_FASTQ} from "${projectDir}/modules/cutadapt/cutadapt_trim_fastq"
+include {CUTADAPT} from "${projectDir}/modules/cutadapt/cutadapt"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {ALIGN_TRIMMED_FASTQ} from "${projectDir}/modules/bowtie2/bowtie2_align_trimmed_fastq"
 include {SAMTOOLS_SORT as SORT_ALIGN_TRIM;
@@ -127,14 +127,14 @@ workflow ATAC {
   
   // ** MAIN workflow starts: 
 
-  // Step 1: Trim_Fastq
-  TRIM_FASTQ(read_ch)
+  // Step 1: Cutadapt
+  CUTADAPT(read_ch)
 
   // Step 2: Get fastqc report
-  FASTQC(TRIM_FASTQ.out.paired_trimmed_fastq)
+  FASTQC(CUTADAPT.out.paired_trimmed_fastq)
 
   // Step 3: Align trimmed fastq to reference
-  ALIGN_TRIMMED_FASTQ(TRIM_FASTQ.out.paired_trimmed_fastq)
+  ALIGN_TRIMMED_FASTQ(CUTADAPT.out.paired_trimmed_fastq)
 
   // Step 4: Sort alignment file
   SORT_ALIGN_TRIM(ALIGN_TRIMMED_FASTQ.out.sam, '-O bam', 'bam')
@@ -244,12 +244,12 @@ workflow ATAC {
   CALC_PBC_METRICS(SORT_MARK_DUP_BAM.out.sorted_file) 
 
   // Step 30: Log Parser
-  log_agg = TRIM_FASTQ.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
+  log_agg = CUTADAPT.out.cutadapt_log.join(ALIGN_TRIMMED_FASTQ.out.bowtie_log).join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(CALC_MTDNA_FILTER_CHRM.out.mtdna_log).join(CALC_PBC_METRICS.out).join(FINAL_CALC_FRIP.out)
   LOG_PARSER(log_agg) 
 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-  ch_multiqc_files = ch_multiqc_files.mix(TRIM_FASTQ.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(ALIGN_TRIMMED_FASTQ.out.bowtie_log.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(CALC_MTDNA_FILTER_CHRM.out.mtdna_log.collect{it[1]}.ifEmpty([]))

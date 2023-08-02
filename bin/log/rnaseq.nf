@@ -14,6 +14,10 @@ if (params.gen_org != "mouse" && params.gen_org != "human") {
   error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse' or 'human'" 
 }
 
+if (params.strandedness != null && params.strandedness != "reverse_stranded" && params.strandedness != "forward_stranded" && params.strandedness != "non_stranded") {
+  error "'--strandedness': \"${params.strandedness}\" is not valid, supported options are 'reverse_stranded' or 'forward_stranded' or 'non_stranded'" 
+}
+
 if (params.pdx && params.rsem_aligner=='bowtie2')
 log.info """
 RNASEQ PARAMETER LOG
@@ -45,6 +49,7 @@ ______________________________________________________
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}
+--stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -54,6 +59,7 @@ Human specific files:
 --picard_dict_human          ${params.picard_dict_human}
 --ref_flat_human             ${params.ref_flat_human}
 --ribo_intervals_human       ${params.ribo_intervals_human}
+--classifier_table           ${params.classifier_table}
 
 Mouse specific files: 
 --rsem_ref_prefix_mouse      ${params.rsem_ref_prefix_mouse}
@@ -100,6 +106,7 @@ ______________________________________________________
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}
+--stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
 
@@ -110,6 +117,7 @@ Human specific files:
 --picard_dict_human          ${params.picard_dict_human}
 --ref_flat_human             ${params.ref_flat_human}
 --ribo_intervals_human       ${params.ribo_intervals_human}
+--classifier_table           ${params.classifier_table}
 
 Mouse specific files: 
 --rsem_ref_prefix_mouse      ${params.rsem_ref_prefix_mouse}
@@ -153,6 +161,7 @@ ______________________________________________________
 --hq_pct               ${params.hq_pct}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
+--stradedness          ${params.strandedness}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -195,6 +204,7 @@ ______________________________________________________
 --hq_pct               ${params.hq_pct}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
+--stradedness          ${params.strandedness}
 --seed_length          ${params.seed_length}
 --rsem_ref_prefix      ${params.rsem_ref_prefix}
 --rsem_ref_files       ${params.rsem_ref_files}
@@ -238,6 +248,7 @@ ______________________________________________________
 --hq_pct                        ${params.hq_pct}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
+--stradedness                   ${params.strandedness}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
@@ -278,6 +289,7 @@ ______________________________________________________
 --hq_pct                        ${params.hq_pct}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
+--stradedness                   ${params.strandedness}
 --seed_length                   ${params.seed_length}
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}

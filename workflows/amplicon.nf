@@ -10,7 +10,7 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {TRIM_FASTQ as CUTADAPT} from "${projectDir}/modules/cutadapt/cutadapt_trim_fastq"
+include {CUTADAPT} from "${projectDir}/modules/cutadapt/cutadapt"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -18,11 +18,12 @@ include {SAMTOOLS_SORT as SAMTOOLS_SORT_PRIMERCLIP;
          SAMTOOLS_SORT as SAMTOOLS_SORT_CALLING} from "${projectDir}/modules/samtools/samtools_sort"
 include {PRIMERCLIP} from "${projectDir}/modules/primerclip/primerclip"
 include {TARGET_COVERAGE_METRICS} from "${projectDir}/modules/bedtools/bedtools_amplicon_metrics"
-include {SNPSIFT_ANNOTATE} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
 include {PICARD_COLLECTTARGETPCRMETRICS} from "${projectDir}/modules/picard/picard_collecttargetpcrmetrics"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_HAPLOTYPECALLER} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
+include {SNPSIFT_ANNOTATE} from "${projectDir}/modules/snpeff_snpsift/snpsift_annotate"
+include {GENERATE_FINGERPRINT_REPORT} from "${projectDir}/modules/python/python_generate_fingerprint_report"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -147,8 +148,9 @@ workflow AMPLICON {
 
   SNPSIFT_ANNOTATE(GATK_HAPLOTYPECALLER.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
 
+  GENERATE_FINGERPRINT_REPORT(SNPSIFT_ANNOTATE.out.vcf)
+
   // MultiQC
-  // coverage metrics? 
   ch_multiqc_files = Channel.empty()
   ch_multiqc_files = ch_multiqc_files.mix(CUTADAPT.out.cutadapt_log.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))

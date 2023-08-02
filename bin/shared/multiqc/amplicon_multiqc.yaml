@@ -24,6 +24,7 @@ extra_fn_clean_exts:
   - "_realigned_BQSR"
   - "_paired"
   - "_001"
+  - "_R2"
 
 custom_logo: "./JAX_logo_rgb_transparentback.png"
 custom_logo_url: "https://github.com/TheJacksonLaboratory/cs-nf-pipelines"

@@ -15,7 +15,7 @@ module use --append /projects/omics_share/meta/modules
 module load nextflow
 
 # RUN PIPELINE
-nextflow ../main.nf \ 
+nextflow ../main.nf \
 -profile sumner \
 --workflow gbrs \
 --pubdir "/fastscratch/${USER}/outputDir" \
@@ -23,4 +23,4 @@ nextflow ../main.nf \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --sample_generation 42 \
 --sample_sex F \
---comment "This script will run gbrs on mouse samples"
+--comment "This script will run gbrs analysis on mouse samples"

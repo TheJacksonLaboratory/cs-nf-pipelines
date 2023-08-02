@@ -2,7 +2,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tag "$sampleID"
 
   cpus 12
-  memory 60.GB
+  memory 70.GB
   time 24.h
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
@@ -67,7 +67,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
-    samtools_mem = task.memory.giga / task.cpus
+    samtools_mem = (int)(task.memory.giga / task.cpus) 
+    // cast to integer rounding down no matter what. If 'round' is used, memory request will exceed limits. 
     sort_command="samtools sort -@ ${task.cpus} -m ${samtools_mem}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
 

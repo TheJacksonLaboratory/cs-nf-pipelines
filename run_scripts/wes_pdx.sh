@@ -22,4 +22,4 @@ nextflow ../main.nf \
 --gen_org human \
 --pubdir "/fastscratch/${USER}/outputDir" \
 -w "/fastscratch/${USER}/outputDir/work" \
---comment "This script will run whole exome sequencing on pdx samples using default hg38"
+--comment "This script will run whole exome sequencing analysis on pdx samples using default hg38"
