@@ -1,5 +1,29 @@
 # RELEASE NOTES
 
+## Release 0.4.1
+
+In this release we have added one additional pipeline: amplicon sequencing. This pipeline support the analysis of [IDT xGen Amplicon panels](https://www.idtdna.com/pages/products/next-generation-sequencing/workflow/xgen-ngs-amplicon-sequencing/predesigned-amplicon-panels/), with current file support for [xGen Human Sample ID Amplicon Panel](https://www.idtdna.com/pages/products/next-generation-sequencing/workflow/xgen-ngs-amplicon-sequencing/predesigned-amplicon-panels/sample-id-amp-panel). Additionally, we have added a [classifier for EBV-associated PDX lymphomas](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6604205/) to the PDX RNA pipeline.
+
+### Pipelines Added:
+
+1. Amplicon
+
+### Modules Added:
+
+1. python/python_generate_fingerprint_report.nf  
+2. python/python_lymphoma_classifier.nf  
+
+### Pipeline Changes:
+
+1. PDX RNAseq: added a classifier for EBV-associated PDX lymphomas.  
+
+### Module Changes:
+
+1. Cutadapt module function renamed from 'FILTER_FASTQ' to 'CUTADAPT'. Module file name adjusted to cutdadapt/cutadapt.nf   
+2. python/python_check_strandedness.nf: Added strandedness override parameter for cases when `check_strandedness` fails to determine strand directionality. Corrected logic bug associated with parsing output from the tool.  
+3. rsem/rsem_alignment_expression.nf: Resource request adjustment.  
+
+
 ## Release 0.4.0
 
 In this release we have added five additional pipelines as part of the genetic diversity analysis suite. These pipelines support the analysis of genetically diverse samples (e.g., DO and CC mice) with [EMASE](https://github.com/churchill-lab/emase) and [GBRS](https://github.com/churchill-lab/GBRS), and the generation of reference files required for running these tools. 
@@ -13,10 +37,6 @@ In this release we have added five additional pipelines as part of the genetic d
 5. Prepare DO GBRS Inputs
 
 ### Modules Added:
-
-None
-
-### Pipeline Changes:
 
 1. alntools/alntools_bam2emase.nf
 2. bowtie/bowtie.nf
@@ -48,6 +68,10 @@ None
 28. samtools/samtools_faidx_g2gtool.nf
 29. utility_modules/filter_gtf_biotypes.nf
 30. utility_modules/snorlax.nf
+
+### Pipeline Changes:
+
+None
 
 ### Module Changes:
 
