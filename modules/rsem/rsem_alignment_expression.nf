@@ -67,7 +67,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
-    samtools_mem = task.memory.giga / task.cpus
+    samtools_mem = (int)(task.memory.giga / task.cpus) 
+    // cast to integer rounding down no matter what. If 'round' is used, memory request will exceed limits. 
     sort_command="samtools sort -@ ${task.cpus} -m ${samtools_mem}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
 

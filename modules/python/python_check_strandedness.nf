@@ -38,7 +38,7 @@ process CHECK_STRANDEDNESS {
     
     else
     
-        if [[ ${params.strandedness} == reverse_stranded || ${params.strandedness} == forward_stranded || ${params.strandedness} == non_stranded ]] ; then
+        if [[ ${params.strandedness} == "reverse_stranded" || ${params.strandedness} == "forward_stranded" || ${params.strandedness} == "non_stranded" ]] ; then
             STRAND='${params.strandedness}'
         else
             echo "RNA Seq data does not fall into a likely stranded (max percent explained > 0.9) or unstranded layout (max percent explained < 0.6), and the parameter to override this: '--strandedness' is not set. Please check your data for low quality and contaminating reads"; exit 42;
