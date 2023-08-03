@@ -76,15 +76,26 @@ def normalize_counts_z_total(counts, expected):
         upper_quantile = np.quantile(non_zero, [0.75])[0]
         ## calc upper 75th quantile from non-zero expected counts
 
+        zero_norm = 0
+        norm_count = 0
+
         for ensembl in c.keys():
             c[ensembl]['normalized_count'] = ((c[ensembl]['raw_count'] / upper_quantile) * 1000)
             # normalize all expected counts
+
             if ensembl in expected:
+                if c[ensembl]['normalized_count'] != 0:
+                    zero_norm += 1
+                else: 
+                    norm_count += 1
+                # edge case: Return no z total where 0 genes are quantified in the expected set. 
+
                 e = expected[ensembl]
+
                 z_total += z_score(c[ensembl]['normalized_count'], e['updown'], e['average'], e['stddev'])
                 # match to genes used in classifier, and classify 
 
-        return(z_total)
+        return([z_total, zero_norm, norm_count])
 
 def main():
     print("Starting lymphoma_classifier")
@@ -92,13 +103,25 @@ def main():
 
     expected = get_expected(args.expected_expression)
 
-    z_total = normalize_counts_z_total(args.counts, expected)
+    z_calc = normalize_counts_z_total(args.counts, expected)
+
+    z_total = z_calc[0]
+    zero_norm = z_calc[1]
+    norm_count = z_calc[1]
 
     with open(args.output, 'w') as f:
-        if z_total > args.cutoff:
-            f.write(str(z_total) + '\tSuspected EBV-transformed tumor. Classifier z-score > cutoff threshold of: ' + str(args.cutoff))
+
+        if zero_norm == 0:
+            f.write('Sample contained no quantified expression in EBV classifier related genes. Classifier can not make a determination.\n')
+        # edge case: Return no z total where 0 genes are quantified in the expected set. 
+
+        elif z_total > args.cutoff:
+            f.write(str(round(z_total, 3)) + '\tSample is possibly EBV-transformed or is a lymphoma model (z-score > cutoff threshold: ' + str(args.cutoff) + ').\n')
+        # over the threshold
+
         else:
-            f.write(str(z_total) + '\Sample is below classifier z-score cutoff threshold of: ' + str(args.cutoff))
+            f.write(str(round(z_total, 3)) + '\tSample is below EBV classifier z-score cutoff threshold: ' + str(args.cutoff) + ').\n')
+        # under the threshold
 
     print("Finished lymphoma_classifier")
 
