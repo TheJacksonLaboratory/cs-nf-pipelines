@@ -20,10 +20,10 @@ process BCFTOOLS_REHEAD_SORT {
 
     script:
 
-        if ${caller} == "lumpy"
+        if (caller == "lumpy")
             """
             bcftools view -h ${variants} | grep ^## > reheader.txt
-            awk '{printf "##contig=<ID=%s,length=%s>\n", $1, $2}' ${fai} >> reheader.txt
+            awk '{printf "##contig=<ID=%s,length=%s>\n", \$1, \$2}' ${fai} >> reheader.txt
             bcftools view -h ${variants} | grep -v ^## >> reheader.txt
             printf "${sampleID}_${caller}\n" > sample_head.txt
             bcftools reheader --header reheader.txt \
@@ -34,7 +34,7 @@ process BCFTOOLS_REHEAD_SORT {
             bcftools sort ${sampleID}_${caller}Reheader.vcf -O v -o ${sampleID}_${caller}Sort.vcf
             """
 
-        else if ${caller} == "delly"
+        else if (caller == "delly")
             """
             printf "${sampleID}_${caller}\n" > rehead.txt
             bcftools reheader --samples rehead.txt \
