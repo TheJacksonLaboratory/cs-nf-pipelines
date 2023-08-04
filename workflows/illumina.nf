@@ -16,11 +16,11 @@ include {PICARD_SORTSAM as LUMPY_SORTSAM;
          PICARD_SORTSAM as LUMPY_SORTSAM_SPLIT} from "${projectDir}/modules/picard/picard_sortsam"
 include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
 include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
-include {REHEADER_VCF as REHEADER_LUMPY;
-         REHEADER_VCF as REHEADER_DELLY} from "${projectDir}/modules/utility_modules/reheader_vcf"
+include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
+         BCFTOOLS_REHEAD_SORT as REHEAD_SORT_DELLY;
+         BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
-include {DELLY_POST_PROCESS} from "${projectDir}/modules/delly/delly_post_process"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -123,27 +123,25 @@ workflow ILLUMINA {
     // Call SV with Lumpy
     lumpy_input = LUMPY_SORTSAM.out.sorted_bam.join(LUMPY_SORTSAM_SPLIT.out.sorted_bam).join(LUMPY_SORTSAM_DISCORDANT.out.sorted_bam)
     LUMPY_CALL_SV(lumpy_input)
-    REHEADER_LUMPY(LUMPY_CALL_SV.out.lumpy_vcf, "lumpy")
+    REHEAD_SORT_LUMPY(LUMPY_CALL_SV.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fasta_fai)
 
     // * Manta
 
     // Call SV with Manta
     MANTA_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
+    REHEAD_SORT_MANTA(MANTA_CALL.out.manta_sv, "manta", SAMTOOLS_FAIDX.out.fasta_fai)
 
     // * Delly
 
     // Call SV with Delly
     DELLY_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
-    
-    // Convert Delly BCF to VCF and reheader with sample name
-    DELLY_POST_PROCESS(DELLY_CALL.out.delly_bcf)
-    REHEADER_DELLY(DELLY_POST_PROCESS.out.delly_vcf, "delly")
+    REHEAD_SORT_DELLY(DELLY_CALL.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
 
     // * Merge callers and annotate results
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
-    survivor_input = REHEADER_DELLY.out.vcf_rehead.join(REHEADER_LUMPY.out.vcf_rehead).join(MANTA_CALL.out.manta_sv)
+    survivor_input = REHEAD_SORT_DELLY.out.vcf_sort.join(REHEAD_SORT_LUMPY.out.vcf_sort).join(REHEAD_SORT_MANTA.out.vcf_sort)
                      .map { it -> tuple(it[0], tuple(it[1], it[2], it[3]))}
     SURVIVOR_MERGE(survivor_input)
     SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)

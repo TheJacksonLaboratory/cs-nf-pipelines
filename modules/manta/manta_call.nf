@@ -15,7 +15,7 @@ process MANTA_CALL {
         tuple file(fasta), file(fai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_mantaSort.vcf"), emit: manta_sv
+        tuple val(sampleID), file("${sampleID}_mantaCandidate.vcf"), emit: manta_sv
 
     script:
         """
@@ -26,6 +26,5 @@ process MANTA_CALL {
         python ./mantaSVOut/runWorkflow.py -m local -j ${task.cpus}
         mv mantaSVOut/results/variants/candidateSV.vcf.gz ./${sampleID}_mantaCandidate.vcf.gz
         gunzip ${sampleID}_mantaCandidate.vcf.gz
-        bash ${projectDir}/bin/vcfSort.sh ${sampleID}_mantaCandidate.vcf ${sampleID}_mantaSort.vcf
         """
 }

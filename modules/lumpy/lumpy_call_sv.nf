@@ -12,13 +12,12 @@ process LUMPY_CALL_SV {
         tuple val(sampleID), file(bam_bwa_lumpy_sort), file(bam_bwa_lumpy_sort_bai), file(split_sorted_bam), file(split_sorted_bai), file(dis_sorted_bam), file(dis_sorted_bai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_lumpySort.vcf"), emit: lumpy_vcf
+        tuple val(sampleID), file("${sampleID}_lumpyOut.vcf"), emit: lumpy_vcf
 
     shell:
         pairend_distro = "pairend_distro.py"
         histo          = sampleID + "_alignBWA_lumpySort.lib1.histo"
         lumpy_vcf      = sampleID + "_lumpyOut.vcf"
-        lumpy_sort_vcf = sampleID + "_lumpySort.vcf"
         exclude_regions = params.exclude_regions
         '''
         RG_ID=$(samtools view -H !{bam_bwa_lumpy_sort} | grep '^@RG' | sed "s/.*ID:\\([^\\t]*\\).*/\\1/g")
@@ -38,7 +37,5 @@ process LUMPY_CALL_SV {
             -pe id:"${RG_ID}",bam_file:!{dis_sorted_bam},histo_file:!{histo},mean:"${mean}",stdev:"${std_dev}",read_length:150,min_non_overlap:150,discordant_z:5,back_distance:10,weight:1,min_mapping_threshold:20 \
             -sr id:"${RG_ID}",bam_file:!{split_sorted_bam},back_distance:10,weight:1,min_mapping_threshold:20 \
             > !{lumpy_vcf}
-
-        bash !{projectDir}/bin/vcfSort.sh !{lumpy_vcf} !{lumpy_sort_vcf}
         '''
 }
