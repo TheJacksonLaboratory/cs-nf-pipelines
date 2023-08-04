@@ -18,7 +18,7 @@ include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_s
 include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
 include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_DELLY;
-         BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools_rehead_sort"
+         BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
