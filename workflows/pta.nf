@@ -585,7 +585,7 @@ workflow PTA {
 
     /*
         NOTE: 
-        The call merging and annotatoins sections of this workflow becomes highly complex. 
+        The call merging and annotations sections of this workflow becomes highly complex. 
         Files from each caller are passed through a set of 'merge prep' steps. 
         These steps apply various functions to manipulate the VCF header, and also calls within the VCFs. 
         Once the VCFs are prepared, a merge occurs. Following the merge, non-exonic regions are parsed out, 

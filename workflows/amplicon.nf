@@ -127,10 +127,6 @@ workflow AMPLICON {
 
   SAMTOOLS_SORT_CALLING(PRIMERCLIP.out.sam, '-O bam', 'bam')
 
-  PICARD_COLLECTTARGETPCRMETRICS(SAMTOOLS_SORT_CALLING.out.sorted_file)
-
-  TARGET_COVERAGE_METRICS(SAMTOOLS_SORT_CALLING.out.sorted_file)
-
   /*
   Important: While the use of the Picard tool, MarkDuplicates, is a common quality control step to identify
   low-complexity libraries, MarkDuplicates cannot be used on data derived from PCR-based target enrichment
@@ -143,6 +139,10 @@ workflow AMPLICON {
   GATK_BASERECALIBRATOR(SAMTOOLS_SORT_CALLING.out.sorted_file)
   
   GATK_APPLYBQSR(SAMTOOLS_SORT_CALLING.out.sorted_file.join(GATK_BASERECALIBRATOR.out.table))
+
+  PICARD_COLLECTTARGETPCRMETRICS(GATK_APPLYBQSR.out.bam)
+
+  TARGET_COVERAGE_METRICS(GATK_APPLYBQSR.out.bam)
 
   GATK_HAPLOTYPECALLER(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai), '')
 

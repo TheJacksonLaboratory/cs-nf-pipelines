@@ -9,11 +9,14 @@ process CHECK_STRANDEDNESS {
 
     container 'quay.io/jaxcompsci/how-are-we-stranded-here:v1.0.1-e6ce74d'
 
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats' : 'python' }", pattern:"*_strandedness.txt", mode:'copy'
+
     input:
     tuple val(sampleID), path(reads)
 
     output:
     tuple val(sampleID), env(STRAND), emit: strand_setting
+    tuple val(sampleID), path('*_strandedness.txt'), emit: strandedness_report
 
     script:
     paired = params.read_type == 'PE' ? "-r2 ${reads[1]}" : ''
