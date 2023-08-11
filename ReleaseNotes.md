@@ -1,5 +1,27 @@
 # RELEASE NOTES
 
+## Release 0.4.2
+
+In this minor release we have made minor adjustments to the amplicon workflow, and added strandedness log output. 
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. Amplicon: Alignment statistics are now taken post BQSR re-alignment.  
+
+### Module Changes:
+
+1. Primerclip: memory request increase.
+2. python/python_check_strandedness.nf: added log file output.
+
+
 ## Release 0.4.1
 
 In this release we have added one additional pipeline: amplicon sequencing. This pipeline support the analysis of [IDT xGen Amplicon panels](https://www.idtdna.com/pages/products/next-generation-sequencing/workflow/xgen-ngs-amplicon-sequencing/predesigned-amplicon-panels/), with current file support for [xGen Human Sample ID Amplicon Panel](https://www.idtdna.com/pages/products/next-generation-sequencing/workflow/xgen-ngs-amplicon-sequencing/predesigned-amplicon-panels/sample-id-amp-panel). Additionally, we have added a [classifier for EBV-associated PDX lymphomas](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6604205/) to the PDX RNA pipeline.
