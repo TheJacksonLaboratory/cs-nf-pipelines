@@ -379,8 +379,6 @@ workflow PTA {
     chrom_list = chroms.collect().dropRight(1)
     chrom_list_noY = chrom_list.dropRight(1)
     
-
-
     // Variant calling. 
     GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
@@ -405,7 +403,7 @@ workflow PTA {
 
     // Germline annotation - Filtered
     // 1. SplitMultiAllelicRegions & compress & index
-    BCFTOOLS_SPLITMULTIALLELIC_REGIONS(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list_noY)
+    BCFTOOLS_SPLITMULTIALLELIC_REGIONS(BCFTOOLS_GERMLINE_FILTER.out.vcf_idx, chrom_list)
     // 2. vepPublicSvnIndel
     VEP_GERMLINE(BCFTOOLS_SPLITMULTIALLELIC_REGIONS.out.vcf_idx)
     // 3. RemoveSpanning
@@ -627,7 +625,7 @@ workflow PTA {
     callers_for_merge = GATK_SORTVCF_TOOLS.out.vcf_tbi
                         .groupTuple(size: 5)
                         .map{sampleID, vcf, idx, meta, normal_sample, tumor_sample, tool_list -> tuple( sampleID, vcf, idx, meta.unique()[0] )  }
-                        .combine(chrom_list_noY.flatten())
+                        .combine(chrom_list.flatten())
     // The above collects all callers on sampleID, then maps to avoid duplication of data and to drop the tool list, which is not needed anymore. 
     // Note that this could be done using 'by' in the groupTuple statement. However, the map is still required to remove the tool list. 
     // 'size: 5' corresponds to the 5 callers used in the workflow. If additional callers are added, this must be changed. 
@@ -772,7 +770,7 @@ workflow PTA {
 
     // ** Annotation of somatic CNV and SV
 
-    ANNOTATE_BICSEQ2_CNV(bicseq2_calls, chrom_list_noY)
+    ANNOTATE_BICSEQ2_CNV(bicseq2_calls, chrom_list)
     
     // note: joining on the sampleID, metadata, tumor_name, and normal_name for
     // safety. This re-arranges the values in the channel to:
