@@ -2,7 +2,7 @@
 
 ## Release 0.4.3
 
-In this minor release we have patched PTA to correct a potential error relating to calling variants, SVs and CNVs on chromosome Y.  
+In this minor release we have patched PTA to correct for a potential script error relating annotating CNVs and SVs on chromosome Y.  
 
 ### Pipelines Added:
 
