@@ -48,6 +48,18 @@ else if (params.workflow == "gbrs"){
 else if (params.workflow == "amplicon"){
   include {AMPLICON} from './workflows/amplicon'
 }
+else if (params.workflow == "pacbio") {
+  // mmrsvd    
+  include {PACBIO} from "./workflows/pacbio"
+}
+else if (params.workflow == "illumina") {
+  // mmrsvd
+  include {ILLUMINA} from "./workflows/illumina"
+}
+else if (params.workflow == "ont") {
+  // mmrsvd
+  include {ONT} from "./workflows/ont"
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -100,4 +112,14 @@ workflow{
   if (params.workflow == "amplicon"){
     AMPLICON()
   }
+  if (params.workflow == "pacbio") {
+    PACBIO()
+  }
+  if (params.workflow == "illumina") {
+    ILLUMINA()
+  }
+  if (params.workflow == "ont") {
+    ONT()
+  }
+
 }
