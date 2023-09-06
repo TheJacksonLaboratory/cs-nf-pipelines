@@ -5,6 +5,11 @@ println '\n'
 println logo.show()
 
 def param_log(){
+
+if (params.gen_org != "mouse" && params.gen_org != "human") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'human' or 'mouse'" 
+}
+
 log.info """
 PTA PARAMETER LOG
 

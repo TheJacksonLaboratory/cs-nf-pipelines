@@ -65,13 +65,13 @@ def read_vcf(vcf_file):
     return bcf_in
 
 
-def check_build(bcf_in):
+def check_build(bcf_in, genome_build):
         '''
             Check if genome is in a list of supprted non-human genomes.
         '''
         VEP_line = [metadata.value for metadata in bcf_in.header.records if metadata.key == 'VEP'][0]
         vep_info  = {entry.split('=')[0] : entry.split('=')[-1]  for entry in VEP_line.split(' ')}
-        if vep_info['assembly'] in ['"GRCm38.p6"']:
+        if genome_build in vep_info['assembly']:
             return False
         else:
             return True
@@ -115,8 +115,10 @@ def make_row(record, csq_columns, bcf_in,
             CosmicNonCoding = csq_dicts[i]['CosmicNonCoding']
             fathmm = csq_dicts[i]['FATHMM_pred']
             fathmm_MKL_coding = csq_dicts[i]['fathmm-MKL_coding_pred']
-        sift = csq_dicts[i]['SIFT_pred']
-        sift_4g = csq_dicts[i]['SIFT4G_pred']
+            sift = csq_dicts[i]['SIFT_pred']
+            sift_4g = csq_dicts[i]['SIFT4G_pred']
+        else:
+            sift = csq_dicts[i]['SIFT']
         HighConfidence = record.info['HighConfidence']
         if 'called_by' in record.info:
             called_by = ','.join(record.info['called_by'])
@@ -153,7 +155,7 @@ def make_row(record, csq_columns, bcf_in,
             line = [record.chrom, record.pos, id, record.ref, alt,
                     consequence, impact, GENE_SYMBOL, HGVSc, HGVSp, type,
                     n_ref_count, n_alt_count, t_ref_count, t_alt_count,
-                    t_VAF, sift, sift_4g, HighConfidence, called_by, supported_by]
+                    t_VAF, sift, HighConfidence, called_by, supported_by]
         line = [str(part).replace('&', ',') for part in line]
         line = [str(part).replace(';', ',') for part in line]
         yield line
@@ -177,7 +179,7 @@ def write_file(bcf_in, out, csq_columns,
             header = ['CHROM', 'POS', 'ID', 'REF', 'ALT', 'Consequence', 'IMPACT',
                       'GENE_SYMBOL', 'HGVSc', 'HGVSp', 'TYPE',
                       'n_ref_count', 'n_alt_count', 't_ref_count', 't_alt_count',
-                      't_VAF', 'SIFT', 'SIFT4G', 'HighConfidence',
+                      't_VAF', 'SIFT', 'HighConfidence',
                       'called_by', 'supported_by']
         o.write('\t'.join(header) + '\n')
         header_len = len(header)
@@ -213,13 +215,16 @@ def main():
     parser.add_argument('-t', '--tumor',
                      dest='tumor',
                      help='Tumor sample name')
+    parser.add_argument('-b', '--vep-version',
+                       dest='genome_build',
+                       help='The VEP genome build ID')
     parser.add_argument('-n', '--normal',
                         dest='normal',
                         help='Normal sample name')
     args = parser.parse_args()
     assert os.path.isfile(args.vcf_file), 'Failed to find caller VCF call file :' + args.vcf_file
     bcf_in = read_vcf(args.vcf_file)
-    human = check_build(bcf_in)
+    human = check_build(bcf_in, args.genome_build)
     csq_columns = get_csq_columns(bcf_in)
     write_file(bcf_in, args.txt, csq_columns,
                args.normal, args.tumor, human=human)

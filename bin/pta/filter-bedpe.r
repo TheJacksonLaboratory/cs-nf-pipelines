@@ -41,13 +41,21 @@ isHighConfidence = function(x, cpmax) {
   multi.caller = grepl(',', x['tools'])
 
   ## Is either breakpoint close enough to its nearest changepoint?
-  x1.gr = GRanges(seqnames=x['#chr1'], ranges=IRanges(as.numeric(x['start1']), as.numeric(x['end1'])))
-  ch1.gr = makeGRangesFromChangepoint(x['cnv_changepoint_1'])
-  near.ch1 = any(GenomicRanges::distance(x1.gr, ch1.gr) <= cpmax)
-  
-  x2.gr = GRanges(seqnames=x['chr2'], ranges=IRanges(as.numeric(x['start2']), as.numeric(x['end2'])))
-  ch2.gr = makeGRangesFromChangepoint(x['cnv_changepoint_2'])
-  near.ch2 = any(GenomicRanges::distance(x2.gr, ch2.gr) <= cpmax)
+  if (x['cnv_changepoint_1'] == '') {
+    near.ch1 = FALSE
+  } else {
+    x1.gr = GRanges(seqnames=x['#chr1'], ranges=IRanges(as.numeric(x['start1']), as.numeric(x['end1'])))
+    ch1.gr = makeGRangesFromChangepoint(x['cnv_changepoint_1'])
+    near.ch1 = any(GenomicRanges::distance(x1.gr, ch1.gr) <= cpmax)
+  }
+
+  if (x['cnv_changepoint_2'] == '') {
+    near.ch2 = FALSE
+  } else {
+    x2.gr = GRanges(seqnames=x['chr2'], ranges=IRanges(as.numeric(x['start2']), as.numeric(x['end2'])))
+    ch2.gr = makeGRangesFromChangepoint(x['cnv_changepoint_2'])
+    near.ch2 = any(GenomicRanges::distance(x2.gr, ch2.gr) <= cpmax)
+  }
   
   return(multi.caller || near.ch1 || near.ch2)
   
@@ -70,6 +78,7 @@ opt$filter_databases = unlist(strsplit(opt$filter_databases, ',', fixed=T))
 
 ## Read bedpe, filter for known germline variants 
 x = read.csv(opt$bedpe, h=T, stringsAsFactors=F, sep='\t', check.names=F)
+print(x)
 x = x[!sapply(x$info, inDatabase, opt$filter_databases), ]
 
 ## Write out somatic variants

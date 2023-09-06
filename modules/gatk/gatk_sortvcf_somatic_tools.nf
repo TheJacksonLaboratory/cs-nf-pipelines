@@ -23,8 +23,15 @@ process GATK_SORTVCF {
 
     inputs = list.collect { "-I $it" }.join(' ')
 
-    if (tool == 'lancet_support') {
+    if (tool == 'lancet_support' && params.gen_org == 'human') {
         chrom_extract = (list =~ /\w+merged_(chr.+)_h.+/)
+        tool_name = "lancet_support_"+chrom_extract[0][1]
+        tool = chrom_extract[0][1]
+        // for final sort merge of lancet confirm, set 'tool_name' to include chrom.
+        // set tool to chrom. These steps are required for tuple build as input to final merge. 
+
+    } else if (tool == 'lancet_support' && params.gen_org == 'mouse') {
+        chrom_extract = (list =~ /\w+merged_(.+)_h.+/)
         tool_name = "lancet_support_"+chrom_extract[0][1]
         tool = chrom_extract[0][1]
         // for final sort merge of lancet confirm, set 'tool_name' to include chrom.

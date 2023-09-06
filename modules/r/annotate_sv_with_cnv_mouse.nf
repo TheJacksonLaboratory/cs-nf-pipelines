@@ -11,27 +11,27 @@ process ANNOTATE_SV_WITH_CNV {
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
 
   input:
-    tuple val(sampleID), val(normal_name), val(tumor_name), file(bicseq_annot), file(annot_sv_genes_bedpe)
+    tuple val(sampleID), val(normal_name), val(tumor_name), file(delly_annot), file(annot_sv_genes_bedpe)
     val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("${sampleID}_manta_gridss_sv_annotated_genes_cnv*.bed"), val(normal_name), val(tumor_name), emit: sv_genes_cnv_bedpe
+    tuple val(sampleID), file("${sampleID}_manta_lumpy_delly_sv_annotated_genes_cnv*.bedpe"), val(normal_name), val(tumor_name), emit: sv_genes_cnv_bedpe
  
   script:
 
     if (suppl_switch == "main")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-cnv.r \
-        --cnv=${bicseq_annot} \
+        --cnv=${delly_annot} \
         --bedpe=${annot_sv_genes_bedpe} \
-        --out_file=${sampleID}_manta_gridss_sv_annotated_genes_cnv.bedpe
+        --out_file=${sampleID}_manta_lumpy_delly_sv_annotated_genes_cnv.bedpe
     """
 
     else if (suppl_switch == "supplemental")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-cnv.r \
-        --cnv=${bicseq_annot} \
+        --cnv=${delly_annot} \
         --bedpe=${annot_sv_genes_bedpe} \
-        --out_file=${sampleID}_manta_gridss_sv_annotated_genes_cnv_supplemental.bedpe
+        --out_file=${sampleID}_manta_lumpy_delly_sv_annotated_genes_cnv_supplemental.bedpe
     """    
 }

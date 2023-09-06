@@ -79,13 +79,13 @@ def modify_record(record, csq_columns, good_fields):
     return csq_out
 
 
-def check_build(bcf_in):
+def check_build(bcf_in, genome_version):
         '''
             Check if genome is in a list of supprted non-human genomes.
         '''
         VEP_line = [metadata.value for metadata in bcf_in.header.records if metadata.key == 'VEP'][0]
         vep_info  = {entry.split('=')[0] : entry.split('=')[-1]  for entry in VEP_line.split(' ')}
-        if vep_info['assembly'] in ['"GRCm38.p6"']:
+        if genome_version in vep_info['assembly']:
             return False
         else:
             return True
@@ -191,7 +191,8 @@ def write_vcf(bcf_in, vcf_out_file, csq_columns, human=True):
     else:
         good_fields = ['Gene', 'BIOTYPE', 'Consequence',
                        'Existing_variation', 'HGVSc', 'HGVSp', 'IMPACT',
-                       'SIFT4G_pred', 'SIFT_pred', 'SYMBOL', 'SYMBOL_SOURCE']
+                       'NEAREST', 'SIFT', 'SYMBOL', 'SYMBOL_SOURCE']
+
     # Import the header after removal of extra metadata
     header = str(bcf_in.header).rstrip()
     csq_format = '|'.join(good_fields)
@@ -214,8 +215,9 @@ def main():
     '''
     vcf_file = sys.argv[1]
     vcf_out_file = sys.argv[2]
+    genome_version = sys.argv[3]
     bcf_in = read_vcf(vcf_file)
-    human = check_build(bcf_in)
+    human = check_build(bcf_in, genome_version)
     csq_columns = bcf_in.header.info['CSQ'].description.split()[-1].split('|') # grab the definitions
     bcf_in = remove_format(bcf_in)
     bcf_in = remove_info(bcf_in, csq_columns)

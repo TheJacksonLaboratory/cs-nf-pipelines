@@ -319,7 +319,7 @@ def make_row(record, csq_columns, bcf_in, library,
             entrez_id = ensembl_gene_id_entrez_id(ensembl_gene_id, mg) # default '0'
         else:
             entrez_id = ensembl_gene_entrez_local(ensembl_gene_id, ensembl_entrez)
-        center = 'NYGenome'
+        center = 'JAX'
         ncbi_build = VEP_version
         chrom = record.chrom
         if record.info['TYPE'] == 'DEL':

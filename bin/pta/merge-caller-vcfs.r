@@ -8,7 +8,7 @@ invisible(suppressPackageStartupMessages(sapply(libs, require, character.only=T,
 options(width=200, scipen=999)
 
 
-SUPPORTED_CALLERS = c('manta', 'lumpy', 'svaba', 'gridss')     ## Update this flag when adding support for new callers
+SUPPORTED_CALLERS = c('manta', 'lumpy', 'svaba', 'gridss', 'delly')     ## Update this flag when adding support for new callers
 SVABA_MIN_LENGTH = 1001                                        ## Svaba-unique calls shorter than this appear to be artifactual
 
 
@@ -61,7 +61,6 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
     sr = unlist(sr)
     pe = geno(vcf)$PE[, sample_id]
     pe = unlist(pe)
-    
     ## Supplementary info
     ro = paste0(caller,'_RO=', geno(vcf)$RO[, sample_id])
     ao = paste0(caller,'_AO=', geno(vcf)$AO[, sample_id])
@@ -82,6 +81,19 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
     qual = paste0(caller,'_QUAL=', geno(vcf)$QUAL[, sample_id])
     supp_string = paste(vf, asq, qual, sep=',')
     
+  } else if (caller == 'delly') {
+    ## Common info
+    sr = info(vcf)$SR
+    # sr = sapply(sr, `[`, 2)
+    pe = info(vcf)$PE
+    # pe = sapply(pe, `[`, 2)
+    ## Supplementary info
+    dr = paste0(caller,'_DR=', geno(vcf)$DR[, sample_id])
+    dv = paste0(caller,'_DV=', geno(vcf)$DV[, sample_id])
+    rr = paste0(caller,'_RR=', geno(vcf)$RR[, sample_id])
+    rv = paste0(caller,'_RV=', geno(vcf)$RV[, sample_id])
+    gt = paste0(caller,'_GT=', geno(vcf)$GT[, sample_id])
+    supp_string = paste(dr, dv, rr, rv, gt, sep=',')
   }
   
   ## Set NA to 0
@@ -227,13 +239,11 @@ mergeCallsets = function(a, b, slop) {
                                                                 restrictMarginToSizeMultiple=0.8)
   
   
-  
   ## If we have any duplicate query hits, choose hit based on match quality
   if(anyDuplicated(queryHits(overlaps))) {
     
     ## Compute local and remote breakend basepair error on matches  
     error = computeError(query=a, subject=b, hits=overlaps)
-    
     ## Get duplicate hits  
     dup.query.hits = table(queryHits(overlaps))
     dup.query.hits = names(dup.query.hits[dup.query.hits > 1])
@@ -243,7 +253,6 @@ mergeCallsets = function(a, b, slop) {
     for (d in dup.query.hits) {
       
       idx.dup.query.hits = which(queryHits(overlaps) %in% d)
-      
       local.error = error$local[idx.dup.query.hits]
       remote.error = error$remote[idx.dup.query.hits]
       mean.error = rowMeans(cbind(local.error, remote.error))
@@ -253,8 +262,7 @@ mergeCallsets = function(a, b, slop) {
       
     }
     
-    overlaps = overlaps[-idx.hits.rm]
-                
+    overlaps = overlaps[-idx.hits.rm]   
   }
   
   ## For matching SVs, merge caller support
@@ -263,7 +271,7 @@ mergeCallsets = function(a, b, slop) {
   
   ## Pull in non-matching SVs from b
   res = c(a, b[-subjectHits(overlaps)])
-  
+
   return(res)
   
 }
@@ -379,10 +387,8 @@ for (i in 1:length(opt$vcf)) {
   
   ## Convert to breakpointRanges object, don't adjust for CIPOS uncertainty (i.e. keep nominalPosition) 
   vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T)
-  
   ## Add breakendPosID for later redundancy checks
   vcf$breakendPosID = paste0('[',caller,'=',as.character(seqnames(vcf)),':',start(vcf),':',strand(vcf),']')
-  
   ## Overlap if this isn't the first callset
   if (i == 1) {
     res = vcf
@@ -392,12 +398,8 @@ for (i in 1:length(opt$vcf)) {
   
 }
 
-
-
 ## Handle breakpoints with duplicate start or end positions
 res = removeRedundantBreakpoints(res)
-
-
 
 ## Convert to bedpe, apply some filters 
 for (i in c('main','supplemental')) {
