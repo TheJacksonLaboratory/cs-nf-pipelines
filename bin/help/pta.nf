@@ -47,7 +47,6 @@ Parameter | Default | Description
 --bicseq2_chromList | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/configs/sampleId.bicseq2.config' | Bicseq2 config requirement. Derived from the tool developer resource pack.
 --bicseq2_no_scaling | false | false: estimate 'lamda' smoothing factor from data for CNV profile calling. true: Use standard 'lamda | 4' smoothing for CNV profile calling. If BicSeq2 fails with an error, set this parameter to 'true'.
 
---germline_filtering_vcf | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/filtering/gnomad-and-ALL_GRCh38_sites.20170504.normalized.modified.PASS.vcf.gz' | Germline reference file used in Gridss SV call filtering. Provided by the tool developer resource pack. 
 --gripss_pon | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/gripss_pon' | Panel of normal files for Gripss SV call filering. Provided by the tool developer resource pack.
 
 --callRegions | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/intervals/GRCh38.callregions.bed.gz' | Manta calling regions. Provided by the tool developer resource pack.
@@ -64,6 +63,7 @@ Parameter | Default | Description
 
 --ensembl_entrez | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh39.p13_ensemblv109_entrez_id_map.csv' | Ensembl to Entrez gene ID to HGNC symbol mapping file. used in somatic vcf finalization.
 
+--germline_filtering_vcf | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/filtering/gnomad-and-ALL_GRCh38_sites.20170504.normalized.modified.PASS.vcf.gz' | Germline reference file used in SNV call filtering. 
 --cytoband | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/GRCh38.cytoBand.UCSC.chr.sorted.txt' | File used in bicseq2 annotations
 --dgv | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/DGV.GRCh38_hg38_variants_2020-02-25.bed' | File used in bicseq2 annotations
 --thousandG | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/annotations/1KGP.CNV.GRCh38.canvas.merged.bed' | File used in bicseq2 annotations

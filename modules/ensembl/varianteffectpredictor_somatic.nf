@@ -82,9 +82,8 @@ process VEP_SOMATIC {
 
 // VEP Cache setup: 
 
-// singularity pull --name vep.sif docker://ensemblorg/ensembl-vep:release_108.2
+// singularity pull --name vep.sif docker://ensemblorg/ensembl-vep:release_109.3
 // singularity exec vep.sif INSTALL.pl -c /PATH_TO_VEP/vep -a cfp -s homo_sapiens_refseq -y GRCh38 -g dbNSFP,dbscSNV,MaxEntScan
-// ln -sf homo_sapiens homo_sapiens_refseq
 
 // In the plugin directory: 
 

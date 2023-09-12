@@ -1,5 +1,24 @@
 # RELEASE NOTES
 
+## Release 0.4.3
+
+In this release we have added an mouse version of PTA. 
+
+### Pipelines Added:
+
+1. Mouse PTA
+
+### Modules Added:
+
+
+### Pipeline Changes:
+
+
+### Module Changes:
+
+
+
+
 ## Release 0.4.2
 
 In this minor release we have made minor adjustments to the amplicon workflow, and added strandedness log output. 

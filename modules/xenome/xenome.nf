@@ -3,7 +3,7 @@ process XENOME_CLASSIFY {
 
     cpus 8
     memory 50.GB
-    time 8.h
+    time 12.h
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/xenome:1.0.1'
@@ -24,8 +24,8 @@ process XENOME_CLASSIFY {
         """
         xenome classify -T 8 -P ${params.xenome_prefix} --host-name mouse --graft-name human -i ${trimmed[0]} > ${sampleID}_xenome_stats.txt
         
-        fastq-sort --id human_1.fastq > ${sampleID}_sorted_human_1.fastq
-        fastq-sort --id mouse_1.fastq > ${sampleID}_sorted_mouse_1.fastq
+        fastq-sort --temporary-directory ./ --id human_1.fastq > ${sampleID}_sorted_human_1.fastq
+        fastq-sort --temporary-directory ./ --id mouse_1.fastq > ${sampleID}_sorted_mouse_1.fastq
 
         rm human_1.fastq
         rm mouse_1.fastq
@@ -38,11 +38,11 @@ process XENOME_CLASSIFY {
         """
         xenome classify -T 8 -P ${params.xenome_prefix} --pairs --host-name mouse --graft-name human -i ${trimmed[0]} -i ${trimmed[1]} > ${sampleID}_xenome_stats.txt
         
-        fastq-sort --id human_1.fastq > ${sampleID}_sorted_human_1.fastq
-        fastq-sort --id mouse_1.fastq > ${sampleID}_sorted_mouse_1.fastq
+        fastq-sort --temporary-directory ./ --id human_1.fastq > ${sampleID}_sorted_human_1.fastq
+        fastq-sort --temporary-directory ./ --id mouse_1.fastq > ${sampleID}_sorted_mouse_1.fastq
         
-        fastq-sort --id human_2.fastq > ${sampleID}_sorted_human_2.fastq
-        fastq-sort --id mouse_2.fastq > ${sampleID}_sorted_mouse_2.fastq
+        fastq-sort --temporary-directory ./ --id human_2.fastq > ${sampleID}_sorted_human_2.fastq
+        fastq-sort --temporary-directory ./ --id mouse_2.fastq > ${sampleID}_sorted_mouse_2.fastq
 
         rm human_1.fastq
         rm human_2.fastq
