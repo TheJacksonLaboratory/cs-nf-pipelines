@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## Release 0.4.3
+## Release 0.4.4
 
 In this release we have added an mouse version of PTA. 
 
@@ -16,8 +16,25 @@ In this release we have added an mouse version of PTA.
 
 ### Module Changes:
 
+## Release 0.4.3
 
+In this minor release we have patched PTA to correct for a potential script error relating annotating CNVs and SVs on chromosome Y.  
 
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. PTA: Adjusted when chromosome Y is included vs. excluded in caller merge and annotation steps.   
+
+### Module Changes:
+
+None
 
 ## Release 0.4.2
 
