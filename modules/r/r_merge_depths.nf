@@ -18,6 +18,6 @@ process R_MERGE_DEPTHS {
         tuple val(sampleID), file("${sampleID}.merged_depths.bed"), emit: bed
     script:
         """
-        /usr/bin/env Rscript ${projectDir}/bin/merge_depths.R ${sampleID} ${nanosv_depths} ${sniffles_depths} ${survivor_ids} ${summary_table}
+        /usr/bin/env Rscript ${projectDir}/bin/germline_sv/merge_depths.R ${sampleID} ${nanosv_depths} ${sniffles_depths} ${survivor_ids} ${summary_table}
         """
 }

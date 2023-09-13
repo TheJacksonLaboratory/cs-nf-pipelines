@@ -48,17 +48,9 @@ else if (params.workflow == "gbrs"){
 else if (params.workflow == "amplicon"){
   include {AMPLICON} from './workflows/amplicon'
 }
-else if (params.workflow == "pacbio") {
+else if (params.workflow == "germline_sv") {
   // mmrsvd    
-  include {PACBIO} from "./workflows/pacbio"
-}
-else if (params.workflow == "illumina") {
-  // mmrsvd
-  include {ILLUMINA} from "./workflows/illumina"
-}
-else if (params.workflow == "ont") {
-  // mmrsvd
-  include {ONT} from "./workflows/ont"
+  include {GERMLINE_SV} from "./workflows/germline_sv.nf"
 }
 else {
   // if workflow name is not supported: 
@@ -112,14 +104,8 @@ workflow{
   if (params.workflow == "amplicon"){
     AMPLICON()
   }
-  if (params.workflow == "pacbio") {
-    PACBIO()
-  }
-  if (params.workflow == "illumina") {
-    ILLUMINA()
-  }
-  if (params.workflow == "ont") {
-    ONT()
+  if (params.workflow == "germline_sv") {
+    GERMLINE_SV()
   }
 
 }

@@ -16,14 +16,14 @@ process SURVIVOR_VCF_TO_TABLE {
     script:
         if (params.workflow == "pacbio")
             """
-            /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} pacbio
+            /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} pacbio
             """
         else if (params.workflow == "illumina")
             """
-            /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} illumina
+            /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} illumina
             """
         else if (params.workflow == "ont")
             """
-            /usr/bin/env bash ${projectDir}/bin/surv_annot.sh ${sampleID} ${vcf} ont
+            /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} ont
             """            
 }

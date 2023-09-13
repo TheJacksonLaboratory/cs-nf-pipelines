@@ -16,6 +16,6 @@ process READ_GROUPS {
 
     script:
         """
-        /usr/bin/env python ${projectDir}/bin/read_group_from_fastq.py -o ${sampleID}_read_group.txt ${fq_reads}[0]
+        /usr/bin/env python ${projectDir}/bin/germline_sv/read_group_from_fastq.py -o ${sampleID}_read_group.txt ${fq_reads}[0]
         """
 }

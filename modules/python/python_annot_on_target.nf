@@ -20,7 +20,7 @@ process PYTHON_ANNOT_ON_TARGET {
 
     if (params.workflow == "ont" && params.targ_chr && params.targ_start && params.targ_end)
         """
-        /usr/bin/env python ${projectDir}/bin/annot_vcf_with_on_target.py \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_on_target.py \
             -v ${vcf} \
             -c ${params.targ_chr} \
             -s ${params.targ_start} \
@@ -29,7 +29,7 @@ process PYTHON_ANNOT_ON_TARGET {
         """
     else if (params.workflow == "ont")
         """
-        /usr/bin/env python ${projectDir}/bin/annot_vcf_with_on_target.py \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_on_target.py \
             -v ${vcf} \
             -c NA \
             -s NA \

@@ -14,6 +14,6 @@ process SURVIVOR_TO_BED {
         tuple val(sampleID), file("${sampleID}.ins.bed"), file("${sampleID}.del.bed"), file("${sampleID}.dup.bed"), file("${sampleID}.inv.bed"), file("${sampleID}.tra.bed"), emit: sv_beds
     script:
         """
-        /usr/bin/env Rscript ${projectDir}/bin/surv_annot_process.R ${sampleID}
+        /usr/bin/env Rscript ${projectDir}/bin/germline_sv/surv_annot_process.R ${sampleID}
         """
 }

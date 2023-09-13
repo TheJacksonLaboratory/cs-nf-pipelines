@@ -17,6 +17,7 @@ ______________________________________________________
 Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
+--data_type            ${params.data_type}
 --genome_build         ${params.genome_build}
 --fasta                ${params.fasta}
 --bwa_index            ${params.bwa_index}

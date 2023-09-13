@@ -19,21 +19,21 @@ process SURVIVOR_INEXON {
 
     if (params.workflow == "pacbio")
         """
-        /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${survivor_vcf} \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
             -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
             -o ${sampleID}_PACBIO_PS_struct_var.vcf
         """
     else if (params.workflow == "illumina")
         """
-        /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${survivor_vcf} \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
             -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
             -o ${sampleID}_ILLUMINA_DLM_struct_var.vcf
         """
     else if (params.workflow == "ont")
         """
-        /usr/bin/env python ${projectDir}/bin/annot_vcf_with_exon.py -v ${survivor_vcf} \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
             -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
             -o ${sampleID}_PACBIO_NS_struct_var.vcf

@@ -17,6 +17,6 @@ process SURVIVOR_ANNOTATION {
         tuple val(sampleID), file("${sampleID}.survivor_joined_results.csv"), emit: csv
     script:
         """
-        /usr/bin/env Rscript ${projectDir}/bin/summarize_intersections.R ${sampleID}
+        /usr/bin/env Rscript ${projectDir}/bin/germline_sv/summarize_intersections.R ${sampleID}
         """
 }

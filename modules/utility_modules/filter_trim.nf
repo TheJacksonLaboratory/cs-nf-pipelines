@@ -28,6 +28,6 @@ process FILTER_TRIM {
   }
 
   """
-  python ${projectDir}/bin/filter_trim.py $inputfq
+  python ${projectDir}/bin/germline_sv/filter_trim.py $inputfq
   """
 }

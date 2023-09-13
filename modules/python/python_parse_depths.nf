@@ -18,7 +18,7 @@ process PYTHON_PARSE_DEPTHS {
 
     if (params.workflow == "ont")
         """
-        /usr/bin/env python ${projectDir}/bin/parse_caller_depths.py \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/parse_caller_depths.py \
         -v ${vcf} \
         -o ${sampleID}_${caller}_depths.csv
         """

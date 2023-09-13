@@ -19,12 +19,12 @@ process SNIFFLES {
             """
             sniffles --input ${bam} --vcf ${sampleID}.sniffles_calls.vcf --tandem-repeats ${params.tandem_repeats} --output-rnames -t ${task.cpus}
             
-            bash ${projectDir}/bin/clean_sniffles.sh ${sampleID}
+            bash ${projectDir}/bin/germline_sv/clean_sniffles.sh ${sampleID}
             """
         else
             """
             sniffles --input ${bam} --vcf ${sampleID}.sniffles_calls.vcf --output-rnames -t ${task.cpus}
 
-            bash ${projectDir}/bin/clean_sniffles.sh ${sampleID}            
+            bash ${projectDir}/bin/germline_sv/clean_sniffles.sh ${sampleID}            
             """
 }

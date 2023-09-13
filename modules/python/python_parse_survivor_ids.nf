@@ -17,7 +17,7 @@ process PYTHON_PARSE_SURVIVOR_IDS {
 
     if (params.workflow == "ont")
         """
-        /usr/bin/env python ${projectDir}/bin/parse_survivor_ids.py \
+        /usr/bin/env python ${projectDir}/bin/germline_sv/parse_survivor_ids.py \
         -v ${vcf} \
         -o ${sampleID}_survivor_depths.csv
         """
