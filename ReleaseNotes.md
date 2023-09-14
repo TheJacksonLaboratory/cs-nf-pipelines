@@ -1,5 +1,26 @@
 # RELEASE NOTES
 
+## Release 0.4.4
+
+In this minor release we have corrected a syntax error in the parsing of single end CSV input to EMASE and GBRS. The syntax error prevented the workflow from running single end data when CSV input files were used.  
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. EMASE: Correct csv single end parsing syntax.   
+2. GBRS: Correct csv single end parsing syntax.  
+
+### Module Changes:
+
+None
+
 ## Release 0.4.3
 
 In this minor release we have patched PTA to correct for a potential script error relating annotating CNVs and SVs on chromosome Y.  
