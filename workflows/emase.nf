@@ -99,7 +99,7 @@ workflow EMASE {
             CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2][1], 'R2']}.set{r2}
             read_ch = r1.mix(r2)
         } else if (params.read_type == 'SE'){
-            CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]][0], 'R1'}.set{read_ch}
+            CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2][0], 'R1']}.set{read_ch}
         }
 
         CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
