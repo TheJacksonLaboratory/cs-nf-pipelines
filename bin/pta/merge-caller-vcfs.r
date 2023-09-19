@@ -57,10 +57,8 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
   } else if (caller == 'lumpy') {
     
     ## Common info
-    sr = geno(vcf)$SR[, sample_id]
-    sr = unlist(sr)
-    pe = geno(vcf)$PE[, sample_id]
-    pe = unlist(pe)
+    sr = info(vcf)$SR
+    pe = info(vcf)$PE
     ## Supplementary info
     ro = paste0(caller,'_RO=', geno(vcf)$RO[, sample_id])
     ao = paste0(caller,'_AO=', geno(vcf)$AO[, sample_id])

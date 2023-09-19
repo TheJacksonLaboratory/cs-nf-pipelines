@@ -25,8 +25,9 @@ process FILTER_BEDPE {
     """
     Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
-        --filter_databases=MGP \
+        --filter_databases=INS,DEL,INV \
         --bedpe=${sv_genes_cnv_bedpe} \
+        --genome=GRCm39 \
         --out_file_somatic=${sampleID}_sv_annotated_somatic_final.bedpe \
         --out_file_highconf=${sampleID}_sv_annotated_somatic_high_confidence_final.bedpe
     """
@@ -35,8 +36,9 @@ process FILTER_BEDPE {
     """
     Rscript ${projectDir}/bin/pta/filter-bedpe.r \
         --max_changepoint_distance=1000 \
-        --filter_databases=MGP \
+        --filter_databases=INS,DEL,INV \
         --bedpe=${sv_genes_cnv_bedpe} \
+        --genome=GRCm39 \
         --out_file_somatic=${sampleID}_sv_annotated_somatic_supplemental.bedpe \
         --out_file_highconf=${sampleID}_sv_annotated_somatic_high_confidence_supplemental.bedpe
     """

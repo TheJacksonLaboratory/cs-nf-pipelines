@@ -28,8 +28,8 @@ process ANNOTATE_DELLY_CNV {
         --tumor=${tumor_name} \
         --normal=${normal_name} \
         --cytoband=${params.cytoband} \
-        --db_names="MGP" \
-        --db_files=${params.mgp} \
+        --db_names="INS,DEL,INV" \
+        --db_files=${params.known_del},${params.known_ins},${params.known_inv} \
         --ensembl=${params.ensemblUniqueBed} \
         --allowed_chr=${listOfChroms} \
         --overlap_fraction=0.8 \
