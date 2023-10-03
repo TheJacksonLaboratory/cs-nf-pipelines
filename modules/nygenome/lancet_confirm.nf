@@ -2,7 +2,7 @@ process LANCET_CONFIRM {
   tag "$sampleID"
 
   cpus = 8
-  memory = 15.GB
+  memory = 50.GB
   time = '20:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
