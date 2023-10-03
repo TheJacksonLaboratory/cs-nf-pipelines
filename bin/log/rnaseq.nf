@@ -41,8 +41,9 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---min_pct_hq_reads           ${params.min_pct_hq_reads}
 --seed_length                ${params.seed_length}
+--quality_phred              ${params.quality_phred}
+--unqualified_perc           ${params.unqualified_perc}
 
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
@@ -157,8 +158,8 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---min_pct_hq_reads     ${params.min_pct_hq_reads}
---hq_pct               ${params.hq_pct}
+--quality_phred        ${params.quality_phred}
+--unqualified_perc     ${params.unqualified_perc}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
 --stradedness          ${params.strandedness}
@@ -200,8 +201,8 @@ ______________________________________________________
 -w                     ${workDir}
 --keep_intermediate    ${params.keep_intermediate}
 -c                     ${params.config}
---min_pct_hq_reads     ${params.min_pct_hq_reads}
---hq_pct               ${params.hq_pct}
+--quality_phred        ${params.quality_phred}
+--unqualified_perc     ${params.unqualified_perc}
 --strandedness_ref     ${params.strandedness_ref}
 --strandedness_gtf     ${params.strandedness_gtf}
 --stradedness          ${params.strandedness}
@@ -244,8 +245,8 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
---hq_pct                        ${params.hq_pct}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
 --stradedness                   ${params.strandedness}
@@ -285,8 +286,8 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
---hq_pct                        ${params.hq_pct}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
 --stradedness                   ${params.strandedness}
