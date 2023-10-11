@@ -23,9 +23,10 @@ process PICARD_REORDERSAM {
   my_mem =  my_mem[0..-4]
 
   """
-  picard -Xmx${my_mem}G ReorderSam \
+  picard -Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp ReorderSam \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_group_reorder.bam \
+  TMP_DIR=`pwd`/tmp \
   SEQUENCE_DICTIONARY=${picard_dict} \
   CREATE_INDEX=true
   """

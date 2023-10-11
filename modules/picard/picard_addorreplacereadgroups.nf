@@ -3,7 +3,7 @@ process PICARD_ADDORREPLACEREADGROUPS {
 
   cpus 1
   memory 35.GB
-  time '12:00:00'
+  time '16:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
@@ -21,10 +21,11 @@ process PICARD_ADDORREPLACEREADGROUPS {
   my_mem =  my_mem[0..-4]
 
   """
-  picard AddOrReplaceReadGroups \
+  picard -Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp AddOrReplaceReadGroups \
   INPUT=${bam} \
   OUTPUT=${sampleID}_genome_bam_with_read_groups.bam \
   SORT_ORDER=coordinate \
+  TMP_DIR=`pwd`/tmp \
   \$(cat $read_groups) \
   CREATE_INDEX=true
   """
