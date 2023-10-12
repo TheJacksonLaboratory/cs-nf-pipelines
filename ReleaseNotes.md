@@ -1,5 +1,26 @@
 # RELEASE NOTES
 
+## Release 0.4.5
+
+In this minor release we have updated GBRS and EMASE containers to include a correction made on an index position bug in GBRS genotype printing. GBRS was failing to print the final gene genotype on each chromosome to the `*.genotype.tsv` file.
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+None
+
+### Module Changes:
+
+1. All EMASE and GBRS modules updated to the latest version of the EMASE/GBRS container. 
+
+
 ## Release 0.4.4
 
 In this minor release we have corrected a syntax error in the parsing of single end CSV input to EMASE and GBRS. The syntax error prevented the workflow from running single end data when CSV input files were used.  
