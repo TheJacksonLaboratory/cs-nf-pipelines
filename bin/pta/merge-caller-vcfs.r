@@ -374,7 +374,6 @@ opt$allowed_chr = unlist(strsplit(opt$allowed_chr, ',', fixed=T))
 ## Iteratively merge VCFs
 res = NULL
 for (i in 1:length(opt$vcf)) {
-  
   ## Read VCF
   caller = opt$caller[i]
   vcf = VariantAnnotation::readVcf(opt$vcf[i], genome=opt$build)
@@ -383,8 +382,9 @@ for (i in 1:length(opt$vcf)) {
   rowRanges(vcf)$support = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor)
   rowRanges(vcf)$supplemental = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor, supplementary=T )
   
-  ## Convert to breakpointRanges object, don't adjust for CIPOS uncertainty (i.e. keep nominalPosition) 
-  vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T)
+  ## Convert to breakpointRanges object, don't adjust for CIPOS uncertainty (i.e. keep nominalPosition). 
+  ## For Manta, infer missing breakpoint is required as the caller does not insert the recip call in the VCF as the other calls do. 
+  vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T, inferMissingBreakends=T)
   ## Add breakendPosID for later redundancy checks
   vcf$breakendPosID = paste0('[',caller,'=',as.character(seqnames(vcf)),':',start(vcf),':',strand(vcf),']')
   ## Overlap if this isn't the first callset
@@ -393,7 +393,6 @@ for (i in 1:length(opt$vcf)) {
   } else {
     res = mergeCallsets(a=res, b=vcf, slop=opt$slop)
   }
-  
 }
 
 ## Handle breakpoints with duplicate start or end positions
