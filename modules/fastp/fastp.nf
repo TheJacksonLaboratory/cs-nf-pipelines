@@ -12,12 +12,12 @@ process FASTP {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "${sampleID}_fastp_report.*", mode:'copy'
 
   input:
-    tuple val(sampleID), file(fq_reads)
+    tuple val(sampleID), path(fq_reads)
 
   output:
-    tuple val(sampleID), file("${sampleID}_fastp_report.html"), emit: quality_html
-    tuple val(sampleID), file("${sampleID}_fastp.json"), emit: quality_json
-    tuple val(sampleID), file("${sampleID}.trimmed.R*.fastq"), emit: trimmed_fastq
+    tuple val(sampleID), path("${sampleID}_fastp_report.html"), emit: quality_html
+    tuple val(sampleID), path("${sampleID}_fastp.json"), emit: quality_json
+    tuple val(sampleID), path("${sampleID}.trimmed.R*.fastq"), emit: trimmed_fastq
 
   script:
 

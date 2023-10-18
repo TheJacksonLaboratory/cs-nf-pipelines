@@ -111,6 +111,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${rsem_ref_prefix} \
   ${sampleID} \
   ${intermediate} \
+  --sort-bam-memory-per-thread 5G \
   2> rsem_aln_${sampleID}.stats
 
   ${star_log}

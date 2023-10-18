@@ -8,13 +8,13 @@ process LYMPHOMA_CLASSIFIER {
 
     container 'quay.io/jaxcompsci/biopython-pyvcf:1.78'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'python' }", pattern:"*EBV_classifer.txt", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'python' }", pattern:"*EBV_classifier.txt", mode:'copy'
 
     input:
     tuple val(sampleID), file(rsem_counts)
 
     output:
-    tuple val(sampleID), file("*EBV_classifer.txt"), emit: ebv_classification
+    tuple val(sampleID), file("*EBV_classifier.txt"), emit: ebv_classification
 
     script:
     """
@@ -22,6 +22,6 @@ process LYMPHOMA_CLASSIFIER {
     ${projectDir}/bin/rnaseq/lymphoma_classifier.py \
     --expected_expression ${params.classifier_table} \
     --counts ${rsem_counts} \
-    --output ${sampleID}.EBV_classifer.txt
+    --output ${sampleID}.EBV_classifier.txt
     """
 }
