@@ -27,8 +27,8 @@ ______________________________________________________
 --gen_org                       ${params.gen_org}
 --pdx                           ${params.pdx}
 --read_type                     ${params.read_type}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
---hq_pct                        ${params.hq_pct}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
 --xenome_prefix                 ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}

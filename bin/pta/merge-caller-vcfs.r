@@ -26,7 +26,7 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
   ## the full path to the BAM used instead of just the sample ID
   ## Just grab the index of the correct column
   if (!sample_id %in% colnames(geno(vcf)[[1]])) {
-    sample_id = which(gsub('\\.final\\.bam$','',basename(colnames(geno(vcf)[[1]]))) %in% sample_id)
+    sample_id = which(gsub('_dedup.bam','',basename(colnames(geno(vcf)[[1]]))) %in% sample_id)
   }
   
   

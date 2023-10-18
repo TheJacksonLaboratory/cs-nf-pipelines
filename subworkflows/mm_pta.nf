@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -37,6 +37,9 @@ include {DELLY_CALL_SOMATIC} from "${projectDir}/modules/delly/delly_call_somati
 include {DELLY_FILTER_SOMATIC} from "${projectDir}/modules/delly/delly_filter_somatic"
 include {BCFTOOLS_BCF_TO_VCF} from "${projectDir}/modules/bcftools/bcftools_bcf_to_vcf"
 include {SMOOVE_CALL} from "${projectDir}/modules/smoove/smoove_call"
+include {SVABA} from "${projectDir}/modules/svaba/svaba"
+include {GATK_UPDATEVCFSEQUENCEDICTIONARY as SVABA_SV_UPDATE_DICTIONARY;
+         GATK_UPDATEVCFSEQUENCEDICTIONARY as SVABA_INDEL_UPDATE_DICTIONARY} from "${projectDir}/modules/gatk/gatk_updatevcfsequencedictionary"
 
 include {DELLY_CNV_SOMATIC} from "${projectDir}/modules/delly/delly_cnv_somatic"
 include {BCFTOOLS_MERGE_DELLY_CNV} from "${projectDir}/modules/bcftools/bcftools_merge_delly_cnv"
@@ -111,14 +114,14 @@ workflow MM_PTA {
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
 
         // ** Trimmer
-        JAX_TRIMMER(read_ch)
+        FASTP(read_ch)
         
-        FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+        FASTQC(FASTP.out.trimmed_fastq)
         
         // ** Get Read Group Information
-        READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
+        READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-        bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+        bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         
         // ** BWA-MEM Alignment
         BWA_MEM(bwa_mem_mapping)
@@ -400,6 +403,11 @@ workflow MM_PTA {
 
         PLOT_DELLY_CNV(r_plot_input)
 
+        SVABA(ch_paired_samples)
+        SVABA_SV_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_sv_vcf_tbi) 
+        SVABA_INDEL_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_indel_vcf_tbi)
+        // Note: SVABA jumbles the dict header in the VCF, and must be adjusted prior to use in GATK tools.
+
         /*
         The follow are the harmonized output channels for each tool: 
 
@@ -427,6 +435,12 @@ workflow MM_PTA {
         Delly CNV
         BCFTOOLS_QUERY_DELLY_CNV.out.segmentation_file
 
+        SVABA_SV
+        SVABA_SV_UPDATE_DICTIONARY.out.vcf_tbi
+
+        SVABA_INDEL
+        SVABA_INDEL_UPDATE_DICTIONARY.out.vcf_tbi
+
         */
 
         /*
@@ -445,6 +459,7 @@ workflow MM_PTA {
         somatic_caller_concat = MANTA.out.manta_somaticsv_tbi.concat(STRELKA2.out.strelka_snv_vcf_tbi, 
                                                                     STRELKA2.out.strelka_indel_vcf_tbi, 
                                                                     GATK_FILTERMUECTCALLS.out.mutect2_vcf_tbi, 
+                                                                    SVABA_INDEL_UPDATE_DICTIONARY.out.vcf_tbi,
                                                                     GATK_SORTVCF_LANCET.out.vcf_tbi)
 
         // Merge prep: 
@@ -471,12 +486,13 @@ workflow MM_PTA {
         GATK_SORTVCF_TOOLS(SPLIT_MNV.out.split_mnv_vcf)
 
         callers_for_merge = GATK_SORTVCF_TOOLS.out.vcf_tbi
-                            .groupTuple(size: 5)
+                            .groupTuple(size: 6)
                             .map{sampleID, vcf, idx, meta, normal_sample, tumor_sample, tool_list -> tuple( sampleID, vcf, idx, meta.unique()[0] )  }
                             .combine(chrom_list.flatten())
+
         // The above collects all callers on sampleID, then maps to avoid duplication of data and to drop the tool list, which is not needed anymore. 
         // Note that this could be done using 'by' in the groupTuple statement. However, the map is still required to remove the tool list. 
-        // 'size: 5' corresponds to the 5 callers used in the workflow. If additional callers are added, this must be changed. 
+        // 'size: 6' corresponds to the 6 callers used in the workflow. If additional callers are added, this must be changed. 
 
         // Merge Callers, Extract non-exonic calls and try to confirm those with Lancet, 
         // then prep confirmed calls for merged back to full merge set: 
@@ -627,9 +643,12 @@ workflow MM_PTA {
 
         merge_sv_input = MANTA.out.manta_somaticsv_tbi.join(SMOOVE_CALL.out.vcf_tbi, by : [0,4,5])
                          .map{it -> tuple(it[0], it[3], it[4], it[5], it[1], it[2], it[7], it[8])}
+
                          .join(BCFTOOLS_BCF_TO_VCF.out.vcf_tbi, by : [0,4,5])
-                         .map{it -> tuple(it[0], it[1], it[2], it[3], it[4], it[6], it[7], it[8], it[9])}
-        // tuple val(sampleID), val(normal_name), val(tumor_name), path(manta_vcf), path(manta_vcf_tbi), path(smoove_vcf), path(smoove_tbi), path(delly_vcf), path(delly_tbi)
+                         .map{it -> tuple(it[0], it[3], it[4], it[6], it[1], it[2], it[7], it[8], it[9])}
+                         .join(SVABA_SV_UPDATE_DICTIONARY.out.vcf_tbi, by : [0,4,5])
+                         .map{it -> tuple(it[0], it[1], it[2], it[3], it[4], it[5], it[6], it[7], it[8], it[9], it[10])}
+        // tuple val(sampleID), val(normal_name), val(tumor_name), path(manta_vcf), path(manta_vcf_tbi), path(smoove_vcf), path(smoove_tbi), path(delly_vcf), path(delly_tbi), path(svaba_vcf), path(svaba_tbi)
 
         MERGE_SV(merge_sv_input, chrom_list) //slop=1000 and min_sv_length=200
         
@@ -653,7 +672,7 @@ workflow MM_PTA {
         FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
    
         ch_multiqc_files = Channel.empty()
-        ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))

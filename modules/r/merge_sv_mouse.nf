@@ -9,12 +9,12 @@ process MERGE_SV {
   container 'quay.io/jaxcompsci/r-sv_cnv_annotate:4.1.1'
 
   input:
-    tuple val(sampleID), val(normal_name), val(tumor_name), path(manta_vcf), path(manta_tbi), path(lumpy_vcf), path(lumpy_tbi), path(delly_vcf), path(delly_tbi)
+    tuple val(sampleID), val(normal_name), val(tumor_name), path(manta_vcf), path(manta_tbi), path(lumpy_vcf), path(lumpy_tbi), path(delly_vcf), path(delly_tbi), path(svaba_vcf), path(svaba_tbi)
     val(chrom_list)
 
   output:
-    tuple val(sampleID), path("${sampleID}.manta_lumpy_delly_sv.bed"), val(normal_name), val(tumor_name), emit: merged
-    tuple val(sampleID), path("${sampleID}.manta_lumpy_delly_sv_supplemental.bed"), val(normal_name), val(tumor_name), emit: merged_suppl
+    tuple val(sampleID), path("${sampleID}.manta_lumpy_delly_svaba_sv.bed"), val(normal_name), val(tumor_name), emit: merged
+    tuple val(sampleID), path("${sampleID}.manta_lumpy_delly_svaba_sv_supplemental.bed"), val(normal_name), val(tumor_name), emit: merged_suppl
     
 
   script:
@@ -22,15 +22,15 @@ process MERGE_SV {
 
     """
     Rscript ${projectDir}/bin/pta/merge-caller-vcfs.r \
-        --vcf=${manta_vcf},${lumpy_vcf},${delly_vcf} \
-        --caller=manta,lumpy,delly \
+        --vcf=${manta_vcf},${lumpy_vcf},${delly_vcf},${svaba_vcf} \
+        --caller=manta,lumpy,delly,svaba \
         --tumor=${tumor_name} \
         --normal=${normal_name} \
         --build=GRCm39 \
         --slop=1000 \
         --allowed_chr=${listOfChroms} \
         --min_sv_length=200 \
-        --out_file=${sampleID}.manta_lumpy_delly_sv.bed \
-        --out_file_supplemental=${sampleID}.manta_lumpy_delly_sv_supplemental.bed
+        --out_file=${sampleID}.manta_lumpy_delly_svaba_sv.bed \
+        --out_file_supplemental=${sampleID}.manta_lumpy_delly_svaba_sv_supplemental.bed
     """
 }

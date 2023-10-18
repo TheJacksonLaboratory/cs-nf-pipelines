@@ -2,7 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
@@ -127,12 +127,12 @@ workflow HS_PTA {
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
 
         // ** Step 1: Trimmer
-        JAX_TRIMMER(read_ch)
+        FASTP(read_ch)
         
-        FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+        FASTQC(FASTP.out.trimmed_fastq)
 
         // ** Step 2: Get Read Group Information
-        READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
+        READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
         // PDX CASES TO ADD AND VALIDATE: 
         // Normal samples should PASS the PDX step. 
@@ -141,13 +141,13 @@ workflow HS_PTA {
         ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
         if (params.pdx){
             // Xenome Classification
-            XENOME_CLASSIFY(JAX_TRIMMER.out.trimmed_fastq)
+            XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
             ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats // set log file for multiqc
 
             bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
 
         } else { 
-            bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+            bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         }
 
         // ** Step 3: BWA-MEM Alignment
@@ -784,7 +784,7 @@ workflow HS_PTA {
         FILTER_BEDPE_SUPPLEMENTAL(ANNOTATE_SV_WITH_CNV_SUPPLEMENTAL.out.sv_genes_cnv_bedpe, "supplemental")
 
         ch_multiqc_files = Channel.empty()
-        ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+        ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
         ch_multiqc_files = ch_multiqc_files.mix(GATK_BASERECALIBRATOR.out.table.collect{it[1]}.ifEmpty([]))

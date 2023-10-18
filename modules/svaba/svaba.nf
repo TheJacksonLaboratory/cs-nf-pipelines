@@ -8,16 +8,16 @@ process SVABA {
 
   container 'quay.io/jaxcompsci/svaba:v0.2.1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" + '/callers'  : 'svaba' }", pattern: "*.vcf.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" + '/callers'  : 'svaba' }", pattern: "*gemline*.vcf.gz", mode:'copy'
 
   input:
   tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
   output:
-  tuple val(sampleID), path("*svaba.germline.indel.vcf.gz"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_indel_vcf
-  tuple val(sampleID), path("*svaba.germline.sv.vcf.gz"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_sv_vcf
-  tuple val(sampleID), path("*svaba.somatic.indel.vcf.gz"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_indel_vcf
-  tuple val(sampleID), path("*svaba.somatic.sv.vcf.gz"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_sv_vcf
+  tuple val(sampleID), path("*svaba.germline.indel.vcf.gz"), path("*svaba.germline.indel.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_indel_vcf_tbi
+  tuple val(sampleID), path("*svaba.germline.sv.vcf.gz"), path("*svaba.germline.sv.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_germline_sv_vcf_tbi
+  tuple val(sampleID), path("*svaba.somatic.indel.vcf.gz"), path("*svaba.somatic.indel.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_indel_vcf_tbi
+  tuple val(sampleID), path("*svaba.somatic.sv.vcf.gz"), path("*svaba.somatic.sv.vcf.gz.tbi"), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_somatic_sv_vcf_tbi
   tuple val(sampleID), path("*svaba.bps.txt.gz"), val('no_idx'), val(meta), val(normal_name), val(tumor_name), val('svaba'), emit: svaba_unfiltered_variants
   tuple val(sampleID), path("*svaba.contigs.bam"), emit: svaba_contigs_bam
   tuple val(sampleID), path("*svaba.discordant.txt.gz"), emit: svaba_discordants
