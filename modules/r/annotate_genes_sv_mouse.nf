@@ -13,24 +13,22 @@ process ANNOTATE_GENES_SV {
     val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("*.manta_lumpy_delly_sv_annotated_genes*.bed"), val(normal_name), val(tumor_name), emit: annot_sv_genes_bedpe
+    tuple val(sampleID), file("*.manta_lumpy_delly_svaba_sv_annotated_genes*.bed"), val(normal_name), val(tumor_name), emit: annot_sv_genes_bedpe
 
-  script:
-
-    
+  script:    
   if (suppl_switch == "main")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-genes-mouse.r \
         --ensembl=${params.ensemblUniqueBed} \
         --bedpe=${annot_sv_bedpe} \
-        --out_file=${sampleID}.manta_lumpy_delly_sv_annotated_genes.bed
+        --out_file=${sampleID}.manta_lumpy_delly_svaba_sv_annotated_genes.bed
     """
   else if (suppl_switch == "supplemental")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-genes-mouse.r \
         --ensembl=${params.ensemblUniqueBed} \
         --bedpe=${annot_sv_bedpe} \
-        --out_file=${sampleID}.manta_lumpy_delly_sv_annotated_genes_supplemental.bed \
+        --out_file=${sampleID}.manta_lumpy_delly_svaba_sv_annotated_genes_supplemental.bed \
         --supplemental
     """
 }

@@ -14,27 +14,27 @@ process ANNOTATE_SV {
     val(suppl_switch)
 
   output:
-    tuple val(sampleID), file("${sampleID}.manta_lumpy_delly_sv_annotated*.bed"), val(normal_name), val(tumor_name), emit: annot_sv_bedpe
+    tuple val(sampleID), file("${sampleID}.manta_lumpy_delly_svaba_sv_annotated*.bed"), val(normal_name), val(tumor_name), emit: annot_sv_bedpe
 
   script:
 
     if (suppl_switch == "main")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-databases.r \
-        --db_names=GAP,INS,DEL,INV,EXCLUDE_RANGE \
+        --db_names=GAP,DEL,INS,INV,EXCLUDE_RANGE \
         --db_files=${params.gap},${params.known_del},${params.known_ins},${params.known_inv},${params.exclude_list} \
         --slop=500 \
         --bedpe=${merged_sv_bed} \
-        --out_file=${sampleID}.manta_lumpy_delly_sv_annotated.bed
+        --out_file=${sampleID}.manta_lumpy_delly_svaba_sv_annotated.bed
 
     """
     else if (suppl_switch == "supplemental")
     """
     Rscript ${projectDir}/bin/pta/annotate-bedpe-with-databases.r \
-        --db_names=GAP,INS,DEL,INV,EXCLUDE_RANGE \
+        --db_names=GAP,DEL,INS,INV,EXCLUDE_RANGE \
         --db_files=${params.gap},${params.known_del},${params.known_ins},${params.known_inv},${params.exclude_list} \
         --slop=500 \
         --bedpe=${merged_sv_bed} \
-        --out_file=${sampleID}.manta_lumpy_delly_sv_annotated_supplemental.bed
+        --out_file=${sampleID}.manta_lumpy_delly_svaba_sv_annotated_supplemental.bed
     """
 }

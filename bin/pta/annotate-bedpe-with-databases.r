@@ -94,8 +94,28 @@ pairInBed = function(query, subject) {
     } else {
       
       bkpt = GRanges(as.character(seqnames(query))[i], IRanges(start(query)[i], end(query)[partner.idx]))  
-      overlap = any(bkpt %^% subject) 
-      
+
+      # overlap = any(bkpt %^% subject) 
+      # MWL NOTE: the original script check for ANY overlap between the database and the range. 
+      #           This was only done for BED files. When BEDPE files are used, 0.8 prop overlap 
+      #           is required to consider an overlap valid. 
+      #           The code below takes the overlap between SV, and subject DB, 
+      #           then for overlapping hits calculates the prop overlap. 
+      #           Overlap = TRUE for hits that overlap, and are greater than 80% size overlap.
+
+      hits <- findOverlaps(bkpt, subject)
+
+      if (sum(countSubjectHits(hits)) > 0) {
+        hit_overlaps <- pintersect(bkpt[queryHits(hits)], subject[subjectHits(hits)])
+        percent_hit_Overlap <- width(hit_overlaps) / width(bkpt[queryHits(hits)])
+        if (sum(countSubjectHits(hits[percent_hit_Overlap > 0.8])) > 0) {
+          overlap = TRUE
+        } else {
+          overlap = FALSE
+        }
+      } else {
+        overlap = FALSE
+      }
     } 
     
     overlaps[c(i, partner.idx)] = overlap
@@ -237,6 +257,8 @@ for (i in 1:length(opt$db_names)) {
   db.file = opt$db_files[i]
   is = !is.null(opt$db_ignore_strand) && db.name %in% opt$db_ignore_strand
   
+  print(db.name)
+
   db = readDB(db.file)
   dta = annotateDB(x=dta, 
                    db=db, 
