@@ -16,7 +16,10 @@ include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
+include {GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline_mouse"
 include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+include {DUPHOLD as DUPHOLD_DELLY;
+         DUPHOLD as DUPHOLD_MANTA} from "${projectDir}/modules/duphold/duphold"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -121,11 +124,20 @@ workflow ILLUMINA {
     DELLY_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
     REHEAD_SORT_DELLY(DELLY_CALL.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
 
+    // GATK HAPLOTYPECALLER
+    GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, params.target_gatk, 'gatk') 
+
 
     // * Vep
 
     //  VepPublicSvnIndel
-        VEP_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index)
+    VEP_GERMLINE(GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.vcf, GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.idx)
+
+
+    // Duphold
+    DUPHOLD_DELLY(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_DELLY.out.vcf_sort, VEP_GERMLINE.out.vcf, VEP_GERMLINE.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_MANTA(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_MANTA.out.vcf_sort, VEP_GERMLINE.out.vcf, VEP_GERMLINE.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
+
 
 
     // * Merge callers and annotate results
