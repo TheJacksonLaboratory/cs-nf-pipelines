@@ -26,6 +26,7 @@ process ANNOTATE_SV {
         --slop=500 \
         --db_ignore_strand=COSMIC \
         --bedpe=${merged_sv_bed} \
+        --genome=GRCh38 \
         --out_file=${sampleID}.manta_gridss_sv_annotated.bed
 
     """
@@ -37,6 +38,7 @@ process ANNOTATE_SV {
         --slop=500 \
         --db_ignore_strand=COSMIC \
         --bedpe=${merged_sv_bed} \
+        --genome=GRCh38 \
         --out_file=${sampleID}.manta_gridss_sv_annotated_supplemental.bed
     """
 }
