@@ -1,6 +1,6 @@
 # RELEASE NOTES
 
-## Release 0.4.4
+## Release 0.5
 
 In this release we have added an mouse version of PTA. 
 
@@ -15,6 +15,48 @@ In this release we have added an mouse version of PTA.
 
 
 ### Module Changes:
+
+## Release 0.4.5
+
+In this minor release we have updated GBRS and EMASE containers to include a correction made on an index position bug in GBRS genotype printing. GBRS was failing to print the final gene genotype on each chromosome to the `*.genotype.tsv` file.
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+None
+
+### Module Changes:
+
+1. All EMASE and GBRS modules updated to the latest version of the EMASE/GBRS container. 
+
+
+## Release 0.4.4
+
+In this minor release we have corrected a syntax error in the parsing of single end CSV input to EMASE and GBRS. The syntax error prevented the workflow from running single end data when CSV input files were used.  
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+None
+
+### Pipeline Changes:
+
+1. EMASE: Correct csv single end parsing syntax.   
+2. GBRS: Correct csv single end parsing syntax.  
+
+### Module Changes:
+
+None
 
 ## Release 0.4.3
 
