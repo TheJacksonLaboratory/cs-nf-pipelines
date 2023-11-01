@@ -9,8 +9,8 @@ include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {GZIP as GZIP_HUMAN;
-         GZIP as GZIP_MOUSE} from "${projectDir}/modules/utility_modules/gzip"
+// include {GZIP as GZIP_HUMAN;
+//          GZIP as GZIP_MOUSE} from "${projectDir}/modules/utility_modules/gzip"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
          RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_MOUSE} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {LYMPHOMA_CLASSIFIER} from "${projectDir}/modules/python/python_lymphoma_classifier"
@@ -59,8 +59,8 @@ workflow PDX_RNASEQ {
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_mouse', it[1], it[2], it[3])}
 
-    GZIP_HUMAN(XENOME_CLASSIFY.out.xenome_human_fastq)
-    GZIP_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq)
+    // GZIP_HUMAN(XENOME_CLASSIFY.out.xenome_human_fastq)
+    // GZIP_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq)
 
     // Step 2: RSEM Human and Stats: 
 

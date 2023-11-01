@@ -13,7 +13,7 @@ include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/conca
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {GZIP} from "${projectDir}/modules/utility_modules/gzip"
+// include {GZIP} from "${projectDir}/modules/utility_modules/gzip"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
@@ -151,7 +151,7 @@ workflow PDX_WES {
     // Step 3: Get Read Group Information
     READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
 
-    GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
+    // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
 
     // Step 4: BWA-MEM Alignment
     bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
