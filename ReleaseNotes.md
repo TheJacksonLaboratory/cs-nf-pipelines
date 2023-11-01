@@ -4,22 +4,6 @@
 
 In this release we have added an mouse version of PTA. 
 
-Update to nextflow XXXX
-
-
-Thank you for reaching out, and you have great timing as I had intended to send an update tomorrow on the progress we have made. I am happy to say that there has been a great deal accomplished to this point and we are nearing completion of the mouse paired tumor analysis (PTA) workflow.
- 
-Based on the results you provided from NYGC, we were able to infer a great deal about the NYGC mouse pipeline. The results highly resemble those from the NYGC human pipeline. As such, we were able to reverse engineer and port the majority of the human PTA we built in collaboration with Francesca (Jax port of NYGC human v7 somatic) to mouse. The major components and reference files for the mouse pipeline are complete, and we have successfully run the data you provided through an alpha version of the mouse PTA pipeline. Based on our initial testing, additional refinement of several of merging and filtering scripts is required, and we are currently working to tune the call filtering. As part of this, we are ensuring that all NYGC scripts function for mouse in the same way they do for human, and that the final high confidence call set mirrors your prior results. In our initial testing, we recovered the majority of prior high confidence calls and only expect to improve with additional refinement.
- 
-Regarding key changes between NYGC and what we are able to implement:
-NYGC has publicly released their human pipeline and supporting files. They have not done the same for mouse; therefore, we lack several of the reference and filtering files that NYGC uses for mouse. We have rebuilt missing references, and implement the filters and scripts as we understand them to be used in mouse but slight differences will exist.  
-We were unable to get the CNV caller BicSeq2 to run properly for mouse. We replaced BicSeq2 with the somatic CNV caller within Delly. Initial testing shows good concordance with BicSeq2 results.
-We have added the somatic SV caller Delly, which we have had success using in other mouse SV projects.
-Lumpy is included via the tool Smoove, which implements the Lumpy algorithm. We encountered many issues with Lumpy, which are not present in the updated Smoove implementation of the algorithm. Note that Lumpy was removed in v7 of the NYGC human pipeline, but is included for mouse to mirror prior results more closely.
-NYGC also removed Svaba from v7 of their human pipeline, but to match prior results we are including this tool in the mouse pipeline.
- 
-Moving forward, we will keep you updated weekly, and expect completion of a beta version for your testing by the end of October. In the meantime, if you have additional questions, don’t hesitate to ask.
- 
 
 ### Pipelines Added:
 
