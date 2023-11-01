@@ -4,17 +4,104 @@
 
 In this release we have added an mouse version of PTA. 
 
+Update to nextflow XXXX
+
+
+Thank you for reaching out, and you have great timing as I had intended to send an update tomorrow on the progress we have made. I am happy to say that there has been a great deal accomplished to this point and we are nearing completion of the mouse paired tumor analysis (PTA) workflow.
+ 
+Based on the results you provided from NYGC, we were able to infer a great deal about the NYGC mouse pipeline. The results highly resemble those from the NYGC human pipeline. As such, we were able to reverse engineer and port the majority of the human PTA we built in collaboration with Francesca (Jax port of NYGC human v7 somatic) to mouse. The major components and reference files for the mouse pipeline are complete, and we have successfully run the data you provided through an alpha version of the mouse PTA pipeline. Based on our initial testing, additional refinement of several of merging and filtering scripts is required, and we are currently working to tune the call filtering. As part of this, we are ensuring that all NYGC scripts function for mouse in the same way they do for human, and that the final high confidence call set mirrors your prior results. In our initial testing, we recovered the majority of prior high confidence calls and only expect to improve with additional refinement.
+ 
+Regarding key changes between NYGC and what we are able to implement:
+NYGC has publicly released their human pipeline and supporting files. They have not done the same for mouse; therefore, we lack several of the reference and filtering files that NYGC uses for mouse. We have rebuilt missing references, and implement the filters and scripts as we understand them to be used in mouse but slight differences will exist.  
+We were unable to get the CNV caller BicSeq2 to run properly for mouse. We replaced BicSeq2 with the somatic CNV caller within Delly. Initial testing shows good concordance with BicSeq2 results.
+We have added the somatic SV caller Delly, which we have had success using in other mouse SV projects.
+Lumpy is included via the tool Smoove, which implements the Lumpy algorithm. We encountered many issues with Lumpy, which are not present in the updated Smoove implementation of the algorithm. Note that Lumpy was removed in v7 of the NYGC human pipeline, but is included for mouse to mirror prior results more closely.
+NYGC also removed Svaba from v7 of their human pipeline, but to match prior results we are including this tool in the mouse pipeline.
+ 
+Moving forward, we will keep you updated weekly, and expect completion of a beta version for your testing by the end of October. In the meantime, if you have additional questions, don’t hesitate to ask.
+ 
+
 ### Pipelines Added:
 
 1. Mouse PTA
 
 ### Modules Added:
 
+1. bcftools/bcftools_bcf_to_vcf.nf
+2. bcftools/bcftools_compress_index.nf
+3. bcftools/bcftools_merge_delly_cnv.nf
+4. bcftools/bcftools_query_delly_cnv.nf
+5. delly/delly_call_somatic.nf
+6. delly/delly_classify.nf
+7. delly/delly_cnv_somatic.nf
+8. delly/delly_filter_somatic.nf
+9. ensembl/varianteffectpredictor_germline_mouse.nf
+10. ensembl/varianteffectpredictor_somatic_mouse.nf
+11. fastp/fastp.nf
+12. gatk/gatk_updatevcfsequencedictionary.nf
+13. python/python_somatic_vcf_finalization_mouse.nf
+14. r/annotate_delly_cnv.nf
+15. r/annotate_genes_sv_mouse.nf
+16. r/annotate_sv_mouse.nf
+17. r/annotate_sv_with_cnv_mouse.nf
+18. r/filter_bedpe_mouse.nf
+19. r/merge_sv_mouse.nf
+20. r/plot_delly_cnv.nf
+21. smoove/smoove_call.nf
+22. svtyper/svtyper.nf
+23. utility_modules/gzip.nf
+24. utility_modules/lumpy_compress_index.nf
 
 ### Pipeline Changes:
 
+1. RNAseq: The read trimmer script was replaced with `fastp`. STAR logs from RSEM now saved and passed to MultiQC for summary.
+2. Human PTA: The read trimmer script was replace with `fastp`.
 
 ### Module Changes:
+
+1. bwa/bwa_mem.nf: Wallclock and memory request adjustment.
+2. emase/emase_get_common_alignment.nf: Wallclock request adjustment.
+3. gatk/gatk_applybqsr.nf: Wallclock request adjustmnet.
+4. gatk/gatk_sortvcf_somatic_tools.nf: Added mouse PTA support.
+5. gridss/gridss_assemble.nf: Update container to correct bug in prior container build. Wallclock and memory adjustment.
+6. gridss/gridss_calling.nf: Update container to correct bug in prior container build.
+7. gridss/gridss_preprocess.nf: Update container to correct bug in prior container build.
+8. lumpy_sv/lumpy_sv.nf: Modified previously unused module for use in mouse PTA.
+9. msisensor2/msisensor2.nf: Correct `cp` error that can occur on nextflow resume.
+10. msisensor2/msisensor2_tumorOnly.nf: Correct `cp` error that can occur on nextflow resume.
+11. multiqc/multiqc.nf: Added cpu, memory, and wallclock requests.
+12. nygenome/lancet.nf: Memory request adjustment.
+13. nygenome/lancet_confirm.nf: Memory request adjustment.
+14. picard/picard_addorreplacereadgroups.nf: Memory request adjustment. Adjusted PICARD temp directory to Nextflow work directory.
+15. picard/picard_collectalignmentsummarymetrics.nf: Wallclock request adjustment.
+16. picard/picard_collecthsmetrics.nf: Wallclock request adjustment.
+17. picard/picard_reordersam.nf: Memory request adjustment. Adjust PICARD temp directory to Nextflow work directory.  
+18. picard/picard_sortsam.nf: Wallclock request adjustment. 
+19. python/python_lymphoma_classifier.nf: Typo correction in output name.
+20. python/python_somatic_vcf_finalization.nf: Added explicit genome support to facilitate adding mouse to PTA.
+21. python/python_split_mnv.nf: Memory request adjustment.
+22. r/annotate_sv.nf: Added explicit genome support to facilitate adding mouse to PTA.
+23. r/annotate_sv_with_cnv.nf: Minor output file name adjustment.
+24. rsem/rsem_alignment_expression.nf: Memory request adjustment. Remove dynamic memory request for STAR genome sort to correct memory failure errors. Added support to save STAR alignment logs.
+25. samtools/samtools_filter_unique_reads.nf: Adjust expected file name input.
+26. snpeff_snpsift/snpsift_annotate.nf: Adjusted output file name with respect to PTA.
+27. svaba/svaba.nf: Adjust Nextflow output streams to caputure index files.
+28. utility_modules/jax_trimmer.nf: Wallclock request adjustment.
+29. xenome/xenome.nf: Wallclock and memory request adjustment. Adjusted temp directory for `fastq-sort` to Nextflow work directory.  
+
+### Script Added: 
+
+1. pta/annotate-bedpe-with-genes-mouse.r: Removed human specific database expectations. 
+2. pta/annotate-cnv-delly.r: Adjusted CNV annotation for Delly output.
+3. pta/delly_cnv_plot.r: Added Delly CNV plot. 
+
+### Script Changes: 
+
+1. pta/annotate-bedpe-with-databases.r: Added genome support. For BED annotations, the existing script checks for ANY overlap between BED intervals. For mouse data, this lead to errant overlaps in small InDEL and inversion regions; therefore, mouse PTA requires 80% overlap between target region and query BED.
+2. pta/filter-bedpe.r: For mouse PTA we know the type of SV event annotated from databases; therefore, we filter only calls that match annotation type (i.e., DEL, INS, INV). Adjustment to CNV breakpoint checks for cases when breakpoints are not present for targets being annotated. This can occur in mouse PTA due to the change to Delly CNV calling.
+4. pta/make_main_vcf.py: Added explicit genome support to facilitate adding mouse to PTA.
+5. pta/make_txt.py: Added explicit genome support to facilitate adding mouse to PTA.
+6. pta/merge-caller-vcfs.r: Added support for Delly. For Manta the 'infer missing breakpoint' was added as the caller does not insert the reciprocal call in the VCF as the other callers do.
 
 ## Release 0.4.5
 
