@@ -8,7 +8,7 @@ The following are human specific parameters. To see help for mouse, add `--gen_o
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
 --organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 --cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
--w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
+-w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
 --csv_input | /<FILE_PATH> | CSV delimited sample sheet that controls how samples are processed. The required input header is: patient,sex,status,sampleID,lane,fastq_1,fastq_2. See the repository wiki (https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki) for additional information. 
 
@@ -94,7 +94,7 @@ The following are mouse specific parameters. To see help for mouse, add `--gen_o
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
 --organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 --cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
--w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
+-w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
 --csv_input | /<FILE_PATH> | CSV delimited sample sheet that controls how samples are processed. The required input header is: patient,sex,status,sampleID,lane,fastq_1,fastq_2. See the repository wiki (https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki) for additional information. 
 
@@ -108,7 +108,7 @@ The following are mouse specific parameters. To see help for mouse, add `--gen_o
 
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
 
---dbSNP | '/projects/omics_share/mouse/GRCm39/genome/annotation/snps_indels/GCA_000001635.9_current_ids.vcf.gz' | Used in variant annotation, GATK BaseRecalibrator, variant tranche recalibration, and by SVABA. JAX users should not change this parameter.
+--dbSNP | '/projects/omics_share/mouse/GRCm39/genome/annotation/snps_indels/GCA_000001635.9_current_ids.vcf.gz' | Used in variant annotation and by SVABA. JAX users should not change this parameter.
 --dbSNP_index | '/projects/omics_share/mouse/GRCm39/genome/annotation/snps_indels/GCA_000001635.9_current_ids.vcf.gz.tbi' | Index associated with the dbsnp file. 
 
 --chrom_contigs | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/ensembl/GRCm39.p0/Mus_musculus.GRCm39.dna.primary_assembly.primaryChr.contig_list' | Contig list used for scatter / gather in calling and annotation. 
@@ -146,9 +146,9 @@ The following are mouse specific parameters. To see help for mouse, add `--gen_o
 --gap | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/GRCm39_gap.bed' | File used in SV annotation. From UCSC table browser.
 --exclude_list | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/mm39.excluderanges_cleaned.bed' | File used in SV annotation. From: https://dozmorovlab.github.io/excluderanges/.
 
---proxy_normal_bam | '' | C57L_J BAM file. Used in un-paired sample analysis. 
---proxy_normal_bai | '' | C57L_J BAM index file. Used in un-paired sample analysis. 
---proxy_normal_sampleName | '' | C57L_J sample name within the C57L_J BAM file. 
+--proxy_normal_bam | '/projects/omics_share/mouse/GRCm39/supporting_files/PTA_inputs/C57L_J/C57L_J_dedup.bam' | C57L_J BAM file. Used in un-paired sample analysis. 
+--proxy_normal_bai | '/projects/omics_share/mouse/GRCm39/supporting_files/PTA_inputs/C57L_J/C57L_J_dedup.bam.bai' | C57L_J BAM index file. Used in un-paired sample analysis. 
+--proxy_normal_sampleName | 'C57L_J' | C57L_J sample name within the C57L_J BAM file. 
 
 --read_type | PE | Only 'PE' is accepted for this workflow. 
 '''

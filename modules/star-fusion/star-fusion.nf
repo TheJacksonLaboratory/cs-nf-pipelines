@@ -70,7 +70,7 @@ process STAR_FUSION {
 
 To build a new reference set: 
 
-    export TMPDIR=/fastscratch/lloydm/tmp
+    export TMPDIR=/flashscratch/lloydm/tmp
     
     wget http://ftp.ebi.ac.uk/pub/databases/Pfam/releases/Pfam34.0/Pfam-A.hmm.gz --no-check-certificate
     wget https://github.com/FusionAnnotator/CTAT_HumanFusionLib/releases/download/v0.3.0/fusion_lib.Mar2021.dat.gz -O CTAT_HumanFusionLib_Mar2021.dat.gz --no-check-certificate

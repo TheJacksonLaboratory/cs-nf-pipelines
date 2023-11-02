@@ -20,6 +20,6 @@ nextflow ../main.nf \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
---pubdir "/fastscratch/${USER}/outputDir" \
--w "/fastscratch/${USER}/outputDir/work" \
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run rna sequencing analysis on human samples using default hg38"
