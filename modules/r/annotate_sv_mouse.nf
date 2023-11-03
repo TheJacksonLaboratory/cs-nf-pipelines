@@ -36,7 +36,7 @@ process ANNOTATE_SV {
         --db_files=${params.gap},${params.known_del},${params.known_ins},${params.known_inv},${params.exclude_list} \
         --slop=500 \
         --bedpe=${merged_sv_bed} \
-        --genome=GRCm39 \        
+        --genome=GRCm39 \
         --out_file=${sampleID}.manta_lumpy_delly_svaba_sv_annotated_supplemental.bed
     """
 }

@@ -1,9 +1,8 @@
 # RELEASE NOTES
 
-## Release 0.5
+## Release 0.5.0
 
-In this release we have added an mouse version of PTA. 
-
+In this release we have added the mouse version of PTA, and changed the read trimmer for the RNAseq pipeline to Fastp. Additionally, the latest version of Nextflow is now supported.
 
 ### Pipelines Added:
 
