@@ -44,24 +44,25 @@ params {
     quality_phred = 30
     unqualified_perc = 30
 
-    exclude_regions = "/ref_data/ucsc_mm10_gap_chr_sorted.bed"
+    exclude_regions = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/mm39.excluderanges_cleaned.bed' // From: https://dozmorovlab.github.io/excluderanges/
+    //exclude_regions = "/ref_data/ucsc_mm10_gap_chr_sorted.bed"
 
     // WES capture array BED and GATK intervals lists
     target_gatk = '/projects/omics_share/mouse/GRCm38/supporting_files/capture_kit_files/agilent/v2/S32371113_mouse_exon_V2.bare.bed'
 
     call_val = "50.0"
 
-    // Delly
-    delly_exclusion = ''
-    delly_mappability = '/projects/compsci/omics_share/mouse/GRCm38/genome/annotation/intervals/mappability/GRCm38.dna.primary_assembly.map.gz'
+    //delly
+    delly_exclusion = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/GRCm39_gap_delly_exclusion.txt'
+    delly_mappability = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/mappability/GRCm39.p0.map.gz'
     cnv_window = 10000
     cnv_min_size = 10000
     cnv_germline_prob = 0.00100000005 // default, param included for testing purpose. 
 
     // Annotations:
     // VEP
-    vep_cache_directory = '/projects/compsci/omics_share/mouse/GRCm38/genome/annotation/vep_data' // VEP annotation cache. Note this directory contains additional annotation cache files.
-    vep_fasta = '/projects/compsci/omics_share/mouse/GRCm38/genome/annotation/vep_data/mus_musculus/102_GRCm38/Mus_musculus.GRCm38.dna.toplevel.fa.gz'
+    vep_cache_directory = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data' // VEP annotation cache. Note this directory contains additional annotation cache files.
+    vep_fasta = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data/mus_musculus/110_GRCm39/Mus_musculus.GRCm39.dna.toplevel.fa.gz'
 
 
 }
@@ -75,9 +76,6 @@ if (params.genome_build == "GRCm39"){
     params.genes_bed = "/ref_data/Mus_musculus.GRCm39.109.gene_symbol.bed.gz"
     params.exons_bed = "/ref_data/Mus_musculus.GRCm39.109.exons.bed.gz"  
 
-    params.exclude_regions = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/mm39.excluderanges_cleaned.bed' // From: https://dozmorovlab.github.io/excluderanges/
-
-    params.target_gatk = '/projects/omics_share/mouse/GRCm39/supporting_files/capture_kit_files/agilent/v2/S32371113_mouse_exon_V2.mm39.bare.bed'
 
     // Delly 
     params.delly_exclusion = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/GRCm39_gap_delly_exclusion.txt'
@@ -85,11 +83,5 @@ if (params.genome_build == "GRCm39"){
     params.cnv_window = 10000
     params.cnv_min_size = 10000
     params.cnv_germline_prob = 0.00100000005 // default, param included for testing purpose. 
-
-    // Annotations:
-    // VEP
-    params.vep_cache_directory = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data' // VEP annotation cache. Note this directory contains additional annotation cache files.
-    params.vep_fasta = '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data/mus_musculus/110_GRCm39/Mus_musculus.GRCm39.dna.toplevel.fa.gz'
-
     
 }

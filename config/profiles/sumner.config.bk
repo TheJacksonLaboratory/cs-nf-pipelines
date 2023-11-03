@@ -21,10 +21,13 @@ executor {
     submitRateLimit = '1 / 2 s'
     // Determines the max rate of job submission per time unit, for example '10sec' eg. max 10 jobs per second or '1/2 s' i.e. 1 job submissions every 2 seconds.
 }
+env {
+    NXF_ANSI_SUMMARY = true
+    NXF_ANSI_LOG = true
+}
 
 trace {
     enabled = true
-    overwrite = true
     file = "${params.pubdir}/trace/trace.txt"
     fields = \
          "task_id,"   \

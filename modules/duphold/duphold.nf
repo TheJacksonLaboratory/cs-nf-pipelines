@@ -16,35 +16,41 @@ process DUPHOLD {
     tuple path(fasta), path(fasta_fai)
 
     output:
-    tuple val(sampleID), path("*.vcf.gz")   , emit: vcf
+    tuple val(sampleID), path("*.vcf")   , emit: vcf
 
     script:
 
     def snp_annotation = snp_variants ? "--snp ${snp_variants}" : ""
     name="\$(echo \"${sv_variants}\" | sed 's/Sort.vcf//g')"
+    suffix="\$(echo \"${name}\" | sed 's/.*_//g')"
 
-
-    if ("${sv_variants}" =~ "delly")
+    if ("${sv_variants}" =~ "delly" || "${sv_variants}" =~ "lumpy")
     """
     export DUPHOLD_SAMPLE_NAME=${name}
   
     duphold \\
         --threads ${task.cpus} \\
-        --output ${sampleID}_delly.vcf.gz \\
+        --output ${sampleID}_${suffix}.vcf.gz \\
         --vcf ${sv_variants} \\
         --bam ${alignment_file} \\
         --fasta ${fasta} \\
         ${snp_annotation}
+   
+    gunzip ${sampleID}_${suffix}.vcf.gz
+
     """
     else if ("${sv_variants}" =~ "manta")
     """
     duphold \\
         --threads ${task.cpus} \\
-        --output ${sampleID}_manta.vcf.gz \\
+        --output ${sampleID}_${suffix}.vcf.gz \\
         --vcf ${sv_variants} \\
         --bam ${alignment_file} \\
         --fasta ${fasta} \\
         ${snp_annotation}
+
+    gunzip ${sampleID}_${suffix}.vcf.gz
+
     """
 
 }
