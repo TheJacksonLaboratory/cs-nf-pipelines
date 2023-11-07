@@ -4,7 +4,7 @@ process BICSEQ2_SEG {
   cpus = 1
   memory = 8.GB
   time = '03:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/jaxcompsci/bicseq2:v3'
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'biqseq2' }", pattern:"{*.txt,*.png}", mode:'copy'

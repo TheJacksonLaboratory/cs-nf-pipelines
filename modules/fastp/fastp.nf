@@ -5,7 +5,7 @@ process FASTP {
   cpus 6
   memory 64.GB
   time '24:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
   
   container 'quay.io/biocontainers/fastp:0.23.2--h5f740d0_3'
 
@@ -20,6 +20,10 @@ process FASTP {
     tuple val(sampleID), path("${sampleID}.trimmed.R*.fastq"), emit: trimmed_fastq
 
   script:
+
+   = 
+
+  detect_adapter = params.detect_adapter_for_pe ? "--detect_adapter_for_pe" : ""
 
   if (params.read_type == "SE")
     """
@@ -41,6 +45,7 @@ process FASTP {
           -q ${params.quality_phred} \
           -u ${params.unqualified_perc} \
           -w ${task.cpus} \
+          ${detect_adapter} \
           -j ${sampleID}_fastp.json \
           -h ${sampleID}_fastp_report.html \
           -R "${sampleID} fastp report"
