@@ -3,7 +3,7 @@ def help(){
 Parameter | Type | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
--w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
+-w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
 --genome_file_list | /<PATH> OR /<PATH>,/<PATH/,... | A comma separated list of FASTA genome file(s) for use hybrid genome construction (e.g., genome1.fa OR genome1.fa,genome2.fa,...). NOTE: FASTA AND GTF MUST BE IN THE SAME ORDER.  
 --gtf_file_list | /<PATH> OR /<PATH>,/<PATH/,... |  A comma separated list of GTF files corresponding to the genomes for use hybrid transcriptome construction (e.g., genome1.gtf OR genome1.gtf,genome2.gtf,...). NOTE: GTF AND FASTA MUST BE IN THE SAME ORDER. 

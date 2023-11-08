@@ -18,9 +18,9 @@ module load nextflow
 nextflow ../main.nf \
 -profile sumner \
 --workflow prepare_emase \
---pubdir "/fastscratch/${USER}/outputDir" \
--w /fastscratch/${USER}/outputDir/work \
---sample_folder <PATH_TO_YOUR_SEQUENCES> \
---sample_generation 42 \
---sample_sex F \
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w /flashscratch/${USER}/outputDir/work \
+--genome_file_list "/path/to/genome/A.fa,/path/to/genome/B.fa,..." \
+--gtf_file_list "/path/to/gtf/A.gtf,/path/to/gtf/B.gtf,..." \
+--haplotype_list "A,B,..." \
 --comment "This script will run prepare_emase to generate multiway references based on default parameters"

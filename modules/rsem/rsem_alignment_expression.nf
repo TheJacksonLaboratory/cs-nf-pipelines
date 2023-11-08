@@ -2,9 +2,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tag "$sampleID"
 
   cpus 12
-  memory 70.GB
+  memory 90.GB
   time 24.h
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/jaxcompsci/rsem_bowtie2_star:0.1.0'
 
@@ -30,6 +30,7 @@ process RSEM_ALIGNMENT_EXPRESSION {
   tuple val(sampleID), path("*.transcript.bam"), emit: transcript_bam
   tuple val(sampleID), path("*.genome.sorted.bam"), path("*.genome.sorted.bam.bai"), emit: sorted_genomic_bam
   tuple val(sampleID), path("*.transcript.sorted.bam"), path("*.transcript.sorted.bam.bai"), emit: sorted_transcript_bam
+  tuple val(sampleID), path("*final.out"), emit: star_log, optional: true
  
   script:
 
@@ -63,14 +64,18 @@ process RSEM_ALIGNMENT_EXPRESSION {
     seed_length="--seed-length ${params.seed_length}"
     sort_command=''
     index_command=''
+    intermediate=''
+    star_log=''
   }
   if (params.rsem_aligner == "star") {
     outbam="--star-output-genome-bam --sort-bam-by-coordinate"
     seed_length=""
     samtools_mem = (int)(task.memory.giga / task.cpus) 
     // cast to integer rounding down no matter what. If 'round' is used, memory request will exceed limits. 
-    sort_command="samtools sort -@ ${task.cpus} -m ${samtools_mem}G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    sort_command="samtools sort -@ 6 -m 5G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
     index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
+    intermediate='--keep-intermediate-files'
+    star_log="cp ${sampleID}.temp/*.final.out ./${sampleID}.STAR.Log.final.out && rm -r ${sampleID}.temp"
 
     read_length = read_length.toInteger()
 
@@ -105,7 +110,11 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${trimmedfq} \
   ${rsem_ref_prefix} \
   ${sampleID} \
+  ${intermediate} \
+  --sort-bam-memory-per-thread 5G \
   2> rsem_aln_${sampleID}.stats
+
+  ${star_log}
 
   ${sort_command}
 

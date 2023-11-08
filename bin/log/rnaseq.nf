@@ -41,8 +41,10 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---min_pct_hq_reads           ${params.min_pct_hq_reads}
 --seed_length                ${params.seed_length}
+--quality_phred              ${params.quality_phred}
+--unqualified_perc           ${params.unqualified_perc}
+--detect_adapter_for_pe      ${params.detect_adapter_for_pe}
 
 --pdx                        ${params.pdx}
 --xenome_prefix              ${params.xenome_prefix}
@@ -98,7 +100,9 @@ ______________________________________________________
 -w                           ${workDir}
 --keep_intermediate          ${params.keep_intermediate}
 -c                           ${params.config}
---min_pct_hq_reads           ${params.min_pct_hq_reads}
+--quality_phred              ${params.quality_phred}
+--unqualified_perc           ${params.unqualified_perc}
+--detect_adapter_for_pe      ${params.detect_adapter_for_pe}
 --seed_length                ${params.seed_length}
 
 --pdx                        ${params.pdx}
@@ -142,33 +146,34 @@ RNASEQ PARAMETER LOG
 
 Results Published to: ${params.pubdir}
 ______________________________________________________
---workflow             ${params.workflow}
---gen_org              ${params.gen_org}
---genome_build         ${params.genome_build}
---read_type            ${params.read_type}
---sample_folder        ${params.sample_folder}
---extension            ${params.extension}
---pattern              ${params.pattern}
---concat_lanes         ${params.concat_lanes}
---csv_input            ${params.csv_input}
---download_data        ${params.download_data}
---organize_by          ${params.organize_by}
---pubdir               ${params.pubdir}
--w                     ${workDir}
---keep_intermediate    ${params.keep_intermediate}
--c                     ${params.config}
---min_pct_hq_reads     ${params.min_pct_hq_reads}
---hq_pct               ${params.hq_pct}
---strandedness_ref     ${params.strandedness_ref}
---strandedness_gtf     ${params.strandedness_gtf}
---stradedness          ${params.strandedness}
---seed_length          ${params.seed_length}
---rsem_ref_prefix      ${params.rsem_ref_prefix}
---rsem_ref_files       ${params.rsem_ref_files}
---rsem_aligner         ${params.rsem_aligner}
---picard_dict          ${params.picard_dict}
---ref_flat             ${params.ref_flat}
---ribo_intervals       ${params.ribo_intervals}
+--workflow                ${params.workflow}
+--gen_org                 ${params.gen_org}
+--genome_build            ${params.genome_build}
+--read_type               ${params.read_type}
+--sample_folder           ${params.sample_folder}
+--extension               ${params.extension}
+--pattern                 ${params.pattern}
+--concat_lanes            ${params.concat_lanes}
+--csv_input               ${params.csv_input}
+--download_data           ${params.download_data}
+--organize_by             ${params.organize_by}
+--pubdir                  ${params.pubdir}
+-w                        ${workDir}
+--keep_intermediate       ${params.keep_intermediate}
+-c                        ${params.config}
+--quality_phred           ${params.quality_phred}
+--unqualified_perc        ${params.unqualified_perc}
+--detect_adapter_for_pe   ${params.detect_adapter_for_pe}
+--strandedness_ref        ${params.strandedness_ref}
+--strandedness_gtf        ${params.strandedness_gtf}
+--stradedness             ${params.strandedness}
+--seed_length             ${params.seed_length}
+--rsem_ref_prefix         ${params.rsem_ref_prefix}
+--rsem_ref_files          ${params.rsem_ref_files}
+--rsem_aligner            ${params.rsem_aligner}
+--picard_dict             ${params.picard_dict}
+--ref_flat                ${params.ref_flat}
+--ribo_intervals          ${params.ribo_intervals}
 
 Project Directory: ${projectDir}
 
@@ -185,34 +190,35 @@ RNASEQ PARAMETER LOG
 
 Results Published to: ${params.pubdir}
 ______________________________________________________
---workflow             ${params.workflow}
---gen_org              ${params.gen_org}
---genome_build         ${params.genome_build}
---read_type            ${params.read_type}
---sample_folder        ${params.sample_folder}
---extension            ${params.extension}
---pattern              ${params.pattern}
---concat_lanes         ${params.concat_lanes}
---csv_input            ${params.csv_input}
---download_data        ${params.download_data}
---organize_by          ${params.organize_by}
---pubdir               ${params.pubdir}
--w                     ${workDir}
---keep_intermediate    ${params.keep_intermediate}
--c                     ${params.config}
---min_pct_hq_reads     ${params.min_pct_hq_reads}
---hq_pct               ${params.hq_pct}
---strandedness_ref     ${params.strandedness_ref}
---strandedness_gtf     ${params.strandedness_gtf}
---stradedness          ${params.strandedness}
---seed_length          ${params.seed_length}
---rsem_ref_prefix      ${params.rsem_ref_prefix}
---rsem_ref_files       ${params.rsem_ref_files}
---rsem_aligner         ${params.rsem_aligner}
---rsem_star_prefix     ${params.rsem_star_prefix}
---picard_dict          ${params.picard_dict}
---ref_flat             ${params.ref_flat}
---ribo_intervals       ${params.ribo_intervals}
+--workflow                ${params.workflow}
+--gen_org                 ${params.gen_org}
+--genome_build            ${params.genome_build}
+--read_type               ${params.read_type}
+--sample_folder           ${params.sample_folder}
+--extension               ${params.extension}
+--pattern                 ${params.pattern}
+--concat_lanes            ${params.concat_lanes}
+--csv_input               ${params.csv_input}
+--download_data           ${params.download_data}
+--organize_by             ${params.organize_by}
+--pubdir                  ${params.pubdir}
+-w                        ${workDir}
+--keep_intermediate       ${params.keep_intermediate}
+-c                        ${params.config}
+--quality_phred           ${params.quality_phred}
+--unqualified_perc        ${params.unqualified_perc}
+--detect_adapter_for_pe   ${params.detect_adapter_for_pe}
+--strandedness_ref        ${params.strandedness_ref}
+--strandedness_gtf        ${params.strandedness_gtf}
+--stradedness             ${params.strandedness}
+--seed_length             ${params.seed_length}
+--rsem_ref_prefix         ${params.rsem_ref_prefix}
+--rsem_ref_files          ${params.rsem_ref_files}
+--rsem_aligner            ${params.rsem_aligner}
+--rsem_star_prefix        ${params.rsem_star_prefix}
+--picard_dict             ${params.picard_dict}
+--ref_flat                ${params.ref_flat}
+--ribo_intervals          ${params.ribo_intervals}
 
 Project Directory: ${projectDir}
 
@@ -244,8 +250,9 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
---hq_pct                        ${params.hq_pct}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
 --stradedness                   ${params.strandedness}
@@ -285,8 +292,9 @@ ______________________________________________________
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
---hq_pct                        ${params.hq_pct}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --strandedness_ref              ${params.strandedness_ref}
 --strandedness_gtf              ${params.strandedness_gtf}
 --stradedness                   ${params.strandedness}

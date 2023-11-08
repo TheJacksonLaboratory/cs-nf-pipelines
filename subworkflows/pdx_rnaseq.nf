@@ -2,13 +2,15 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {READ_GROUPS as READ_GROUPS_HUMAN;
          READ_GROUPS as READ_GROUPS_MOUSE} from "${projectDir}/modules/utility_modules/read_groups"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+// include {GZIP as GZIP_HUMAN;
+//          GZIP as GZIP_MOUSE} from "${projectDir}/modules/utility_modules/gzip"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
          RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_MOUSE} from "${projectDir}/modules/rsem/rsem_alignment_expression"
 include {LYMPHOMA_CLASSIFIER} from "${projectDir}/modules/python/python_lymphoma_classifier"
@@ -29,20 +31,20 @@ workflow PDX_RNASEQ {
 
     main:
     // Step 1: Qual_Stat, Get read group information, Run Xenome
-    JAX_TRIMMER(read_ch)
+    FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)
     
     if (params.read_type == 'PE') {
-      xenome_input = JAX_TRIMMER.out.trimmed_fastq
+      xenome_input = FASTP.out.trimmed_fastq
     } else {
-      xenome_input = JAX_TRIMMER.out.trimmed_fastq
+      xenome_input = FASTP.out.trimmed_fastq
     }
 
     // QC is assess on all reads. Mouse/human is irrelevant here. 
-    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+    FASTQC(FASTP.out.trimmed_fastq)
 
-    CHECK_STRANDEDNESS(JAX_TRIMMER.out.trimmed_fastq)
+    CHECK_STRANDEDNESS(FASTP.out.trimmed_fastq)
 
     // Xenome Classification
     XENOME_CLASSIFY(xenome_input)
@@ -56,6 +58,9 @@ workflow PDX_RNASEQ {
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_mouse', it[1], it[2], it[3])}
+
+    // GZIP_HUMAN(XENOME_CLASSIFY.out.xenome_human_fastq)
+    // GZIP_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq)
 
     // Step 2: RSEM Human and Stats: 
 
@@ -99,18 +104,19 @@ workflow PDX_RNASEQ {
  
     PICARD_COLLECTRNASEQMETRICS_MOUSE(mouse_qc_input, params.ref_flat_mouse, params.ribo_intervals_mouse)
 
-
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.star_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS_HUMAN.out.picard_metrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.star_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS_MOUSE.out.picard_metrics.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect()
     )
 
-}
+} 

@@ -4,18 +4,18 @@ process CUTADAPT {
     cpus 8
     memory 10.GB
     time '20:00:00'
-    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'cutadapt' }", pattern: "*.log", mode: 'copy'
 
     container 'quay.io/biocontainers/cutadapt:2.3--py37h14c3975_0'
 
     input:
-    tuple val(sampleID), file(fq_reads)
+    tuple val(sampleID), path(fq_reads)
 
     output:
-    tuple val(sampleID), file("*paired_trimmed.fq"), emit: paired_trimmed_fastq
-    tuple val(sampleID), file("*.log"), emit: cutadapt_log
+    tuple val(sampleID), path("*paired_trimmed.fq"), emit: paired_trimmed_fastq
+    tuple val(sampleID), path("*.log"), emit: cutadapt_log
 
     script:
 

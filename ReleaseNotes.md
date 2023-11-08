@@ -1,5 +1,94 @@
 # RELEASE NOTES
 
+## Release 0.5.0
+
+In this release we have added the mouse version of PTA, and changed the read trimmer for the RNAseq pipeline to Fastp. Additionally, the latest version of Nextflow is now supported.
+
+Note for Jackson Laboratory users on the Sumner cluster: Fastscratch has reached end of life, and is no longer supported. We have updated all example run scripts to point at `/flashscratch` rather than `/fastscratch`. For production analyses all working directories (i.e., `-w <PATH>`) should use `/flashscratch/$USER/...`. 
+
+### Pipelines Added:
+
+1. Mouse PTA
+
+### Modules Added:
+
+1. bcftools/bcftools_bcf_to_vcf.nf
+2. bcftools/bcftools_compress_index.nf
+3. bcftools/bcftools_merge_delly_cnv.nf
+4. bcftools/bcftools_query_delly_cnv.nf
+5. delly/delly_call_somatic.nf
+6. delly/delly_classify.nf
+7. delly/delly_cnv_somatic.nf
+8. delly/delly_filter_somatic.nf
+9. ensembl/varianteffectpredictor_germline_mouse.nf
+10. ensembl/varianteffectpredictor_somatic_mouse.nf
+11. fastp/fastp.nf
+12. gatk/gatk_updatevcfsequencedictionary.nf
+13. python/python_somatic_vcf_finalization_mouse.nf
+14. r/annotate_delly_cnv.nf
+15. r/annotate_genes_sv_mouse.nf
+16. r/annotate_sv_mouse.nf
+17. r/annotate_sv_with_cnv_mouse.nf
+18. r/filter_bedpe_mouse.nf
+19. r/merge_sv_mouse.nf
+20. r/plot_delly_cnv.nf
+21. smoove/smoove_call.nf
+22. svtyper/svtyper.nf
+23. utility_modules/gzip.nf
+24. utility_modules/lumpy_compress_index.nf
+
+### Pipeline Changes:
+
+1. RNAseq: The read trimmer script was replaced with `fastp`. STAR logs from RSEM now saved and passed to MultiQC for summary.
+2. Human PTA: The read trimmer script was replace with `fastp`.
+
+### Module Changes:
+
+1. bwa/bwa_mem.nf: Wallclock and memory request adjustment.
+2. emase/emase_get_common_alignment.nf: Wallclock request adjustment.
+3. gatk/gatk_applybqsr.nf: Wallclock request adjustmnet.
+4. gatk/gatk_sortvcf_somatic_tools.nf: Added mouse PTA support.
+5. gridss/gridss_assemble.nf: Update container to correct bug in prior container build. Wallclock and memory adjustment.
+6. gridss/gridss_calling.nf: Update container to correct bug in prior container build.
+7. gridss/gridss_preprocess.nf: Update container to correct bug in prior container build.
+8. lumpy_sv/lumpy_sv.nf: Modified previously unused module for use in mouse PTA.
+9. msisensor2/msisensor2.nf: Correct `cp` error that can occur on nextflow resume.
+10. msisensor2/msisensor2_tumorOnly.nf: Correct `cp` error that can occur on nextflow resume.
+11. multiqc/multiqc.nf: Added cpu, memory, and wallclock requests.
+12. nygenome/lancet.nf: Memory request adjustment.
+13. nygenome/lancet_confirm.nf: Memory request adjustment.
+14. picard/picard_addorreplacereadgroups.nf: Memory request adjustment. Adjusted PICARD temp directory to Nextflow work directory.
+15. picard/picard_collectalignmentsummarymetrics.nf: Wallclock request adjustment.
+16. picard/picard_collecthsmetrics.nf: Wallclock request adjustment.
+17. picard/picard_reordersam.nf: Memory request adjustment. Adjust PICARD temp directory to Nextflow work directory.  
+18. picard/picard_sortsam.nf: Wallclock request adjustment. 
+19. python/python_lymphoma_classifier.nf: Typo correction in output name.
+20. python/python_somatic_vcf_finalization.nf: Added explicit genome support to facilitate adding mouse to PTA.
+21. python/python_split_mnv.nf: Memory request adjustment.
+22. r/annotate_sv.nf: Added explicit genome support to facilitate adding mouse to PTA.
+23. r/annotate_sv_with_cnv.nf: Minor output file name adjustment.
+24. rsem/rsem_alignment_expression.nf: Memory request adjustment. Remove dynamic memory request for STAR genome sort to correct memory failure errors. Added support to save STAR alignment logs.
+25. samtools/samtools_filter_unique_reads.nf: Adjust expected file name input.
+26. snpeff_snpsift/snpsift_annotate.nf: Adjusted output file name with respect to PTA.
+27. svaba/svaba.nf: Adjust Nextflow output streams to caputure index files.
+28. utility_modules/jax_trimmer.nf: Wallclock request adjustment.
+29. xenome/xenome.nf: Wallclock and memory request adjustment. Adjusted temp directory for `fastq-sort` to Nextflow work directory.  
+30. All modules: `${task.memory}` replaced the incorrect `${task.mem}` in the Nextflow error catch statement. 
+
+### Script Added: 
+
+1. pta/annotate-bedpe-with-genes-mouse.r: Removed human specific database expectations. 
+2. pta/annotate-cnv-delly.r: Adjusted CNV annotation for Delly output.
+3. pta/delly_cnv_plot.r: Added Delly CNV plot. 
+
+### Script Changes: 
+
+1. pta/annotate-bedpe-with-databases.r: Added genome support. For BED annotations, the existing script checks for ANY overlap between BED intervals. For mouse data, this lead to errant overlaps in small InDEL and inversion regions; therefore, mouse PTA requires 80% overlap between target region and query BED.
+2. pta/filter-bedpe.r: For mouse PTA we know the type of SV event annotated from databases; therefore, we filter only calls that match annotation type (i.e., DEL, INS, INV). Adjustment to CNV breakpoint checks for cases when breakpoints are not present for targets being annotated. This can occur in mouse PTA due to the change to Delly CNV calling.
+4. pta/make_main_vcf.py: Added explicit genome support to facilitate adding mouse to PTA.
+5. pta/make_txt.py: Added explicit genome support to facilitate adding mouse to PTA.
+6. pta/merge-caller-vcfs.r: Added support for Delly. For Manta the 'infer missing breakpoint' was added as the caller does not insert the reciprocal call in the VCF as the other callers do.
+
 ## Release 0.4.5
 
 In this minor release we have updated GBRS and EMASE containers to include a correction made on an index position bug in GBRS genotype printing. GBRS was failing to print the final gene genotype on each chromosome to the `*.genotype.tsv` file.
