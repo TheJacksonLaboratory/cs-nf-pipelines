@@ -21,8 +21,6 @@ process FASTP {
 
   script:
 
-   = 
-
   detect_adapter = params.detect_adapter_for_pe ? "--detect_adapter_for_pe" : ""
 
   if (params.read_type == "SE")

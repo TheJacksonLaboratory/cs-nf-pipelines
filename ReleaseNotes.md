@@ -4,6 +4,8 @@
 
 In this release we have added the mouse version of PTA, and changed the read trimmer for the RNAseq pipeline to Fastp. Additionally, the latest version of Nextflow is now supported.
 
+Note for Jackson Laboratory users on the Sumner cluster: Fastscratch has reached end of life, and is no longer supported. We have updated all example run scripts to point at `/flashscratch` rather than `/fastscratch`. For production analyses all working directories (i.e., `-w <PATH>`) should use `/flashscratch/$USER/...`. 
+
 ### Pipelines Added:
 
 1. Mouse PTA
@@ -71,6 +73,7 @@ In this release we have added the mouse version of PTA, and changed the read tri
 27. svaba/svaba.nf: Adjust Nextflow output streams to caputure index files.
 28. utility_modules/jax_trimmer.nf: Wallclock request adjustment.
 29. xenome/xenome.nf: Wallclock and memory request adjustment. Adjusted temp directory for `fastq-sort` to Nextflow work directory.  
+30. All modules: `${task.memory}` replaced the incorrect `${task.mem}` in the Nextflow error catch statement. 
 
 ### Script Added: 
 

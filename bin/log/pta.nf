@@ -29,6 +29,7 @@ ______________________________________________________
 --read_type                     ${params.read_type}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --xenome_prefix                 ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
@@ -102,6 +103,7 @@ ______________________________________________________
 --read_type                     ${params.read_type}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --xenome_prefix                 ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}

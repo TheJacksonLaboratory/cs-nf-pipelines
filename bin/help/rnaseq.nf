@@ -23,6 +23,7 @@ Parameter | Default | Description
 
 --quality_phred | 15 | The quality value that is required for a base to pass. Default: 15 which is a phred quality score of >=Q15.
 --unqualified_perc | 40 | Percent of bases that are allowed to be unqualified (0~100). Default: 40 which is 40%.
+--detect_adapter_for_pe | false | If true, adapter auto-detection is used for paired end data. By default, paired-end data adapter sequence auto-detection is disabled as the adapters can be trimmed by overlap analysis. However, --detect_adapter_for_pe will enable it. Fastp will run a little slower if you specify the sequence adapters or enable adapter auto-detection, but usually result in a slightly cleaner output, since the overlap analysis may fail due to sequencing errors or adapter dimers.
 
 --strandedness_ref | Mouse: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index'
                    | Human: '/projects/compsci/omics_share/human/GRCh38/transcriptome/indices/ensembl/v104/kallisto/kallisto_index' 
