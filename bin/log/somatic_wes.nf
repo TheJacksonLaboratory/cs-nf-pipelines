@@ -29,7 +29,9 @@ ______________________________________________________
 --xenome_index                  ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --dbSNP                         ${params.dbSNP}
 --target_gatk                   ${params.target_gatk}
 --target_picard                 ${params.target_picard}

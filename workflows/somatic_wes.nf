@@ -2,15 +2,15 @@
 nextflow.enable.dsl=2
 
 // import modules
-include {help} from "${projectDir}/bin/help/pdx_wes.nf"
-include {param_log} from "${projectDir}/bin/log/pdx_wes.nf"
+include {help} from "${projectDir}/bin/help/somatic_wes.nf"
+include {param_log} from "${projectDir}/bin/log/somatic_wes.nf"
 include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
 include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 // include {GZIP} from "${projectDir}/modules/utility_modules/gzip"
@@ -44,7 +44,6 @@ include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsi
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
 include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
-include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -108,7 +107,7 @@ if (params.csv_input) {
 
 }
 
-workflow PDX_WES {
+workflow SOMATIC_WES {
 
     // Step 0: Download data and concat Fastq files if needed. 
     if (params.download_data){
@@ -139,22 +138,30 @@ workflow PDX_WES {
     // ** MAIN workflow starts: 
 
     // Step 1: Qual_Stat
-    JAX_TRIMMER(read_ch)
+    FASTP(read_ch)
 
-    xenome_input = JAX_TRIMMER.out.trimmed_fastq
+    xenome_input = FASTP.out.trimmed_fastq
     
-    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
-
-    // Step 2: Xenome classify and sort. 
-    XENOME_CLASSIFY(xenome_input)
+    FASTQC(FASTP.out.trimmed_fastq)
 
     // Step 3: Get Read Group Information
-    READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
+    READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
+
+    // Step 1a: Xenome if PDX data used.
+    ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+    if (params.pdx){
+        // Xenome Classification
+        XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
+        ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
+
+        // Step 4: BWA-MEM Alignment
+        bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
+
+    } else { 
+        bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+    }
 
     // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
-
-    // Step 4: BWA-MEM Alignment
-    bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
 
     BWA_MEM(bwa_mem_mapping)
 
@@ -222,18 +229,13 @@ workflow PDX_WES {
     
     SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
 
-    agg_stats = JAX_TRIMMER.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
-
-    // Step 11: Aggregate Stats
-    AGGREGATE_STATS(agg_stats)
-
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(GATK_BASERECALIBRATOR.out.table.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(GATK_FILTERMUECTCALLS.out.stats.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (

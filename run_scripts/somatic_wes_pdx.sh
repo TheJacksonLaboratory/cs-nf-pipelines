@@ -16,10 +16,11 @@ module load nextflow
 
 # RUN PIPELINE
 nextflow ../main.nf \
---workflow pdx_wes \
+--workflow somatic_wes \
 -profile sumner \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
+--pdx \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run whole exome sequencing analysis on pdx samples using default hg38"

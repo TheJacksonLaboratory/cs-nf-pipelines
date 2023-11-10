@@ -18,8 +18,8 @@ module load nextflow
 nextflow ../main.nf \
 --workflow pta \
 -profile sumner \
---gen_org human \
---csv_input ../test/csv_samplesheets/hs_test_input.csv \
+--gen_org mouse \
+--csv_input ../test/csv_samplesheets/mm_test_input.csv \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run paired tumor analysis on test data"
