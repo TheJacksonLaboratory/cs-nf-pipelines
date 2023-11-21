@@ -122,7 +122,7 @@ workflow RNASEQ {
 
   } else {
 
-    // Step 1: Qual_Stat
+    // Step 1: Read Trim
     FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)

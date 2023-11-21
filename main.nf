@@ -12,6 +12,9 @@ else if (params.workflow == "wes"){
 else if (params.workflow == "somatic_wes"){
   include {SOMATIC_WES} from './workflows/somatic_wes'
 }
+else if (params.workflow == "somatic_wes_pta"){
+  include {SOMATIC_WES_PTA} from './workflows/somatic_wes_pta'
+}
 else if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
 }
@@ -63,6 +66,9 @@ workflow{
     }
   if (params.workflow == "somatic_wes"){
     SOMATIC_WES()
+  }
+  if (params.workflow == "somatic_wes_pta"){
+    SOMATIC_WES_PTA()
   }
   if (params.workflow == "wgs"){
     WGS()

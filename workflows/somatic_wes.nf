@@ -61,8 +61,12 @@ if (params.download_data && !params.csv_input) {
     exit 1, "Data download was specified with `--download_data`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--download_data` requires a CSV manifest. See `--help` for information."
 }
 
-if (params.gen_org == 'mouse') {
+if (params.gen_org == 'mouse' && params.pdx) {
     exit 1, "PDX workflow was called; however, `--gen_org` was set to: ${params.gen_org}. This is an invalid parameter combination. `--gen_org` must == 'human' for PDX analysis."
+}
+
+if (params.gen_org == 'mouse') {
+    exit 1, "`--gen_org` was set to: ${params.gen_org}. Somatic WES currently supports only human data. `--gen_org` must == 'human' for this analysis."
 }
 
 if (params.csv_input) {
@@ -137,7 +141,7 @@ workflow SOMATIC_WES {
 
     // ** MAIN workflow starts: 
 
-    // Step 1: Qual_Stat
+    // Step 1: Read Trim
     FASTP(read_ch)
 
     xenome_input = FASTP.out.trimmed_fastq
@@ -175,7 +179,7 @@ workflow SOMATIC_WES {
     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
     GATK_APPLYBQSR(apply_bqsr)
 
-    // Step 7: Variant Pre-Processing - Part 3
+    // Step 7: QC Metrics
     collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
     PICARD_COLLECTHSMETRICS(collect_metrics)
 
