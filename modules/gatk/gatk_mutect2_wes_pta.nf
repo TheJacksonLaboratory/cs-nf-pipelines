@@ -22,6 +22,9 @@ process GATK_MUTECT2 {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
 
+  germline_genotype = params.genotype_germline ? '--genotype-germline-sites true' : ''
+  pon_genotype = params.genotype_pon ? '--genotype-pon-sites true' : ''
+
   """
   gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" Mutect2 \
     -R ${params.ref_fa} \
@@ -31,8 +34,8 @@ process GATK_MUTECT2 {
     --germline-resource ${params.gnomad_ref} \
     --panel-of-normals ${params.pon_ref} \
     --f1r2-tar-gz ${sampleID}.f1r2.tar.gz \
-    --genotype-germline-sites true \
-    --genotype-pon-sites true \
+    ${germline_genotype} \
+    ${pon_genotype} \
     --pileup-detection \
     --dont-use-soft-clipped-bases false \
     -L ${params.target_gatk} \

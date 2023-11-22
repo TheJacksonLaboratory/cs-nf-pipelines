@@ -23,13 +23,13 @@ ALT_ALLELE_INDEX = 4
 FILTER_CELL_INDEX = 6
 INFO_CELL_INDEX = 7
 FORMAT_CELL_INDEX = 8
-SAMPLE_DATA_INDEX = 10
+SAMPLE_DATA_INDEX = int(sys.argv[4])
 
 # expecting sys.argv to look something like
-if len(sys.argv) != 4:
+if len(sys.argv) != 5:
     print("Incorrect number of args!")
     print("expected usage:")
-    print("allele_depth_min_and_AF_from_ADs.py inputFile outputFile minDP")
+    print("allele_depth_min_and_AF_from_ADs.py inputFile outputFile minDP sample_column_number")
     raise Exception("Incorrect number of args!")
 
 inp = open(sys.argv[1], 'r')

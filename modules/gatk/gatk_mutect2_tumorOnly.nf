@@ -15,11 +15,15 @@ process GATK_MUTECT2 {
 
   output:
   tuple val(sampleID), file("*_somatic.vcf.gz"), file("*_somatic.vcf.gz.tbi"), file("*.stats"), emit: vcf_tbi_stats
-
+  tuple val(sampleID), file("*f1r2.tar.gz"), emit: f1r2
+  
   script:
   //Estimate somatic variants using Mutect2
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
+
+  germline_genotype = params.genotype_germline ? '--genotype-germline-sites true' : ''
+  pon_genotype = params.genotype_pon ? '--genotype-pon-sites true' : ''
 
   """
   gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" Mutect2 \
@@ -27,9 +31,10 @@ process GATK_MUTECT2 {
     -I ${tumor_bam} \
     --germline-resource ${params.gnomad_ref} \
     --panel-of-normals ${params.pon_ref} \
+    --f1r2-tar-gz ${sampleID}.f1r2.tar.gz \
+    ${germline_genotype} \
+    ${pon_genotype} \
     --pileup-detection \
-    --downsampling-stride 50 \
-    --linked-de-bruijn-graph \
     --dont-use-soft-clipped-bases false \
     -L ${params.target_gatk} \
     --native-pair-hmm-threads 4 \

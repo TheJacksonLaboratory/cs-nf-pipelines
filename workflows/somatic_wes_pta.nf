@@ -36,7 +36,7 @@ include {GATK_CALCULATECONTAMINATION} from "${projectDir}/modules/gatk/gatk_calc
 
 include {GATK_LEARNREADORIENTATIONMODEL} from "${projectDir}/modules/gatk/gatk_learnreadorientationmodel"
 
-include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_withContam"
+include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_wes"
 
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2"
 
@@ -273,7 +273,7 @@ workflow SOMATIC_WES_PTA {
 
     BEDOPS_SORT(params.target_gatk)
     BEDOPS_WINDOW(BEDOPS_SORT.out.sorted_bed, params.hg38_windows)
-    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed)
+    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed, 'pta')
 
     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')

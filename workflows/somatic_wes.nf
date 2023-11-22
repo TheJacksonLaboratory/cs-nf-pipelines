@@ -16,20 +16,35 @@ include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 // include {GZIP} from "${projectDir}/modules/utility_modules/gzip"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
+
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
+
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration_mutect2"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
+
+include {GATK_GETPILEUPSUMMARIES} from "${projectDir}/modules/gatk/gatk_getpileupsummaries_tumorOnly"
+include {GATK_CALCULATECONTAMINATION} from "${projectDir}/modules/gatk/gatk_calculatecontamination_tumorOnly"
+
+include {GATK_LEARNREADORIENTATIONMODEL} from "${projectDir}/modules/gatk/gatk_learnreadorientationmodel"
+
 include {GATK_MUTECT2} from "${projectDir}/modules/gatk/gatk_mutect2_tumorOnly"
-include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_tumorOnly"
+include {GATK_FILTERMUECTCALLS} from "${projectDir}/modules/gatk/gatk_filtermutectcalls_wes"
+
 include {MSISENSOR2_MSI} from "${projectDir}/modules/msisensor2/msisensor2_tumorOnly"
+
 include {GATK_MERGEVCF as GATK_MERGEVCF_UNANNOTATED;
          GATK_MERGEVCF as GATK_MERGEVCF_ANNOTATED} from "${projectDir}/modules/gatk/gatk_mergevcf"
+
+include {BEDOPS_SORT} from "${projectDir}/modules/bedops/bedops_sort"
+include {BEDOPS_WINDOW} from "${projectDir}/modules/bedops/bedops_window"
+include {TMB_SCORE} from "${projectDir}/modules/tumor_mutation_burden/tmb_score"
+
 include {COSMIC_ANNOTATION as COSMIC_ANNOTATION_SNP;
          COSMIC_ANNOTATION as COSMIC_ANNOTATION_INDEL} from "${projectDir}/modules/cosmic/cosmic_annotation"
 include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
@@ -189,12 +204,25 @@ workflow SOMATIC_WES {
     // Step 9: Get sample names
     GATK_GETSAMPLENAME(collect_metrics)
 
+    // Sample Contamination Analysis
+    GATK_GETPILEUPSUMMARIES(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai))
+    GATK_CALCULATECONTAMINATION(GATK_GETPILEUPSUMMARIES.out.pileup_summary)
+
     // ** Variant Calling
     mutect2_caller_input = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai).join(GATK_GETSAMPLENAME.out.sample_name)
     
     // Step 10: Mutect2
     GATK_MUTECT2(mutect2_caller_input)
-    GATK_FILTERMUECTCALLS(GATK_MUTECT2.out.vcf_tbi_stats)
+    
+    if (params.ffpe) {
+        GATK_LEARNREADORIENTATIONMODEL(GATK_MUTECT2.out.f1r2)
+        filtermutectcalls_input = GATK_MUTECT2.out.vcf_tbi_stats.join(GATK_CALCULATECONTAMINATION.out.contam_segments).join(GATK_LEARNREADORIENTATIONMODEL.out.model_file)
+    } else {
+        filtermutectcalls_input = GATK_MUTECT2.out.vcf_tbi_stats.join(GATK_CALCULATECONTAMINATION.out.contam_segments)
+                                  .map{it -> [it[0], it[1], it[2], it[3], it[4], it[5], 'no_read_model']}
+    }
+
+    GATK_FILTERMUECTCALLS(filtermutectcalls_input)
 
     // Step 8: Variant Filtration
     // SNP
@@ -227,6 +255,10 @@ workflow SOMATIC_WES {
     // Step 10: Post Variant Calling Processing - Part 2
     vcf_files_unannotated = SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf)
     GATK_MERGEVCF_UNANNOTATED (vcf_files_unannotated, 'SNP_INDEL_filtered_unannotated_final')
+
+    BEDOPS_SORT(params.target_gatk)
+    BEDOPS_WINDOW(BEDOPS_SORT.out.sorted_bed, params.hg38_windows)
+    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed, 'tumor-only')
 
     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')

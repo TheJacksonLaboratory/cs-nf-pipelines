@@ -13,14 +13,18 @@ process TMB_SCORE {
     input:
     tuple val(sampleID), path(vcf)
     path(hexcoverage)
+    val(type)
 
     output:
     tuple val(sampleID), file("*TMB_Score.txt"), emit: score
     tuple val(sampleID), file("*HM.tab"), emit: tab
  
     shell:
+
+    sample_col = type == 'pta' ? '10' : '9'
+
     '''
-    python3 !{projectDir}/bin/wes/allele_depth_min_and_AF_from_ADs_mutect.py !{vcf} !{vcf.baseName}.pyfiltered.vcf 15
+    python3 !{projectDir}/bin/wes/allele_depth_min_and_AF_from_ADs.py !{vcf} !{vcf.baseName}.pyfiltered.vcf 15 !{sample_col}
 
     java -jar /opt/snpEff/SnpSift.jar filter --addFilter "lowAF" --rmFilter "PASS" 'ALT_AF[ANY] < 5' -f !{vcf.baseName}.pyfiltered.vcf | \
     java -jar /opt/snpEff/SnpSift.jar filter --addFilter "strandBias" --rmFilter "PASS" 'FS > 60' | \
