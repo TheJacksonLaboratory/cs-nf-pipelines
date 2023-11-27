@@ -38,6 +38,8 @@ ______________________________________________________
 --reg_ref              ${params.reg_ref}
 --genes_bed            ${params.genes_bed}
 --exons_bed            ${params.exons_bed}
+--vep_cache_directory  ${params.vep_cache_directory}
+--vep_fasta            ${params.vep_fasta}
 --surv_dist            ${params.surv_dist}
 --surv_supp            ${params.surv_supp}
 --surv_type            ${params.surv_type}
