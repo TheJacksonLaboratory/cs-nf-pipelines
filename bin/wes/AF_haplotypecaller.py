@@ -2,8 +2,7 @@
 """
 
 GOALS of script:
-    recompute the locus depth from the allele-depths, and filter
-    based on a minimumTotalAlleleDepth
+    recompute the locus depth from the allele-depths
 
     Add Estimated Allele Frequency (ALT_AF) to the info cell
 
@@ -12,37 +11,33 @@ sample, column.
 We need to find the AD (allele depth) field in the FORMAT, and
 then process the corresponding field in the sample column.  It will
 be two comma separated integers.
-Add them together and compare to the required minimum depth.
-If greater or equal, output the line as-is.
-If less, change the FILTER column value to MinDP and output the line.
 
 """
 import sys
 
 # expecting sys.argv to look something like
-if len(sys.argv) != 5:
+if len(sys.argv) != 4:
     print("Incorrect number of args!")
     print("expected usage:")
-    print("allele_depth_min_and_AF_from_ADs.py inputFile outputFile minDP sampleID")
+    print("allele_depth_min_and_AF_from_ADs.py inputFile outputFile sample_column_number")
     raise Exception("Incorrect number of args!")
 
 ALT_ALLELE_INDEX = 4
 FILTER_CELL_INDEX = 6
 INFO_CELL_INDEX = 7
 FORMAT_CELL_INDEX = 8
+SAMPLE_DATA_INDEX = int(sys.argv[3])
 
 inp = open(sys.argv[1], 'r')
 out = open(sys.argv[2], 'w')
-minimumTotalAlleleDepth = int(sys.argv[3])
 
 NEW_INFO_HEADERS = ['##INFO=<ID=ALT_AF,Number=A,Type=Float,'
                     'Description="Estimated Allele Frequency, '
                     'for each ALT allele, in the same order as '
                     'listed">',
-                    '##INFO=<ID=DP_HQ,Number=1,Type=Integer,'
+                    '##INFO=<ID=DP_HQ,Number=.,Type=Integer,'
                     'Description="HQ Read depth; sum of allelic '
-                    'depths">',
-                    '##FILTER=<ID=minDP,Description="DP_HQ < %s">' %minimumTotalAlleleDepth]
+                    'depths">']
 vcf_headers = []
 for line in inp:
     line = line.strip()
@@ -50,15 +45,11 @@ for line in inp:
         vcf_headers.append(line)
         # adding new info headers just before the #CHROM line
         if line.startswith("#CHROM"):
-            headerTokens = line.split("\t")
-            SAMPLE_DATA_INDEX = headerTokens.index(sys.argv[4])
             # remove any existing INFO headers for DP_HQ and ALT_AF
             vcf_headers = [e for e in vcf_headers if
                            "##INFO=<ID=DP_HQ" not in e]
             vcf_headers = [e for e in vcf_headers if
                            "##INFO=<ID=ALT_AF" not in e]
-            vcf_headers = [e for e in vcf_headers if
-                           "##FILTER=<ID=minDP" not in e]
             # add the new DP_HQ and ALT_AF INFO headers just before
             # the #CHROM line
             for e in NEW_INFO_HEADERS:
@@ -76,21 +67,6 @@ for line in inp:
     for a, ad in enumerate(ads):
         ads[a] = int(ad)
     totalAlleleDepth = sum(ads)
-    # update filter cell with minDP to fail if the totalAlleleDepth
-    # is less than the specified value
-    if minimumTotalAlleleDepth is not None and \
-            totalAlleleDepth < minimumTotalAlleleDepth:
-        # ignore case when looking for an existing minDP in the
-        # filter cell
-        if "minDP".lower() in (elems[FILTER_CELL_INDEX]).lower():
-            # already contains minDP so don't add another
-            pass
-        elif elems[FILTER_CELL_INDEX] == ".":
-            elems[FILTER_CELL_INDEX] = "minDP"
-        elif elems[FILTER_CELL_INDEX] == "PASS":
-            elems[FILTER_CELL_INDEX] = "minDP"
-        else:
-            elems[FILTER_CELL_INDEX] += ";minDP"
     alternativeAlleles = elems[ALT_ALLELE_INDEX].split(",")
     alternateAlleleFrequencies = []
     for a, ad in enumerate(ads):
@@ -100,7 +76,7 @@ for line in inp:
             alternateAlleleFrequencies.append("0")
         else:
             alternateAlleleFrequencies.append(str(
-                round(ad * (100.0 / totalAlleleDepth))))
+                round((ad / totalAlleleDepth), 2)))
     # update the info cell to have DP_HQ or ALT_AF entries, taking
     # care to remove any existing ones
     info_cell_items = elems[INFO_CELL_INDEX].split(";")
@@ -120,7 +96,5 @@ for line in inp:
         tmp_info_cell_items.append("ALT_AF=" + alternateAlleleFrequencies[a+1])
         tmp_elems[INFO_CELL_INDEX] = ";".join(tmp_info_cell_items)
         tmp_format_cell_items = list(tmp_elems[SAMPLE_DATA_INDEX].split(":"))
-        tmp_format_cell_items[alleleDepthIndex] = "%s,%s" %(ads[0],ads[a+1])
         tmp_elems[SAMPLE_DATA_INDEX] = ":".join(tmp_format_cell_items)
-        tmp_elems[SAMPLE_DATA_INDEX].split(":")[alleleDepthIndex] = "%s,%s" %(ads[0],ads[a+1])
         print("\t".join(tmp_elems), file=out)

@@ -49,7 +49,10 @@ else if (params.workflow == "gbrs"){
   include {GBRS} from './workflows/gbrs'
 }
 else if (params.workflow == "amplicon"){
-  include {AMPLICON} from './workflows/amplicon'
+  include {AMPLICON} from './workflows/amplicon_fingerprint'
+}
+else if (params.workflow == "amplicon_generic"){
+  include {AMPLICON} from './workflows/amplicon_generic'
 }
 else {
   // if workflow name is not supported: 
@@ -103,7 +106,7 @@ workflow{
   if (params.workflow == "prep_do_gbrs_inputs"){
     PREP_DO_GBRS_INPUT()
   }
-  if (params.workflow == "amplicon"){
+  if (params.workflow == "amplicon" || params.workflow == "amplicon_generic"){
     AMPLICON()
   }
 }
