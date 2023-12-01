@@ -258,7 +258,7 @@ workflow SOMATIC_WES {
 
     BEDOPS_SORT(params.target_gatk)
     BEDOPS_WINDOW(BEDOPS_SORT.out.sorted_bed, params.hg38_windows)
-    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed, 'tumor-only')
+    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed)
 
     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')

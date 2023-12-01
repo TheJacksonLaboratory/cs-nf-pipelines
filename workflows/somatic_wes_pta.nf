@@ -113,18 +113,25 @@ workflow SOMATIC_WES_PTA {
     // Step 1a: Xenome if PDX data used.
     ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
     if (params.pdx){
+        FASTP.out.trimmed_fastq.join(meta_ch).branch{
+            normal: it[2].status == 0
+            tumor:  it[2].status == 1
+        }.set{fastq_files}
+
+        normal_fastqs = fastq_files.normal.map{it -> [it[0], it[1]] }
+
         // Xenome Classification
-        XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
+        XENOME_CLASSIFY(fastq_files.tumor.map{it -> [it[0], it[1]] })
         ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
+        // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
+
         // Step 4: BWA-MEM Alignment
-        bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
+        bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.mix(normal_fastqs).join(READ_GROUPS.out.read_groups)
 
     } else { 
         bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
     }
-
-    // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
 
     BWA_MEM(bwa_mem_mapping)
 
@@ -273,7 +280,11 @@ workflow SOMATIC_WES_PTA {
 
     BEDOPS_SORT(params.target_gatk)
     BEDOPS_WINDOW(BEDOPS_SORT.out.sorted_bed, params.hg38_windows)
-    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed, 'pta')
+
+    tmb_input = GATK_MERGEVCF_UNANNOTATED.out.vcf.join(ch_paired_samples)
+                .map{it -> [it[0], it[1], "${it[2].patient}--${it[2].tumor_id}"]}
+
+    TMB_SCORE(tmb_input, BEDOPS_WINDOW.out.window_bed)
 
     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
