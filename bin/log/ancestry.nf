@@ -16,7 +16,6 @@ ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --genome_build                  ${params.genome_build}
---read_type                     ${params.read_type}
 --sample_folder                 ${params.sample_folder}
 --csv_input                     ${params.csv_input}
 -w                              ${workDir}
