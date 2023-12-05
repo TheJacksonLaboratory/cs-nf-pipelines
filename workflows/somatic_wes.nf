@@ -23,6 +23,8 @@ include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecali
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
 
+include {ANCESTRY} from "${projectDir}/workflows/ancestry"
+
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration_mutect2"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
@@ -173,14 +175,14 @@ workflow SOMATIC_WES {
         XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
         ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
+        // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
+
         // Step 4: BWA-MEM Alignment
         bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
 
     } else { 
         bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
     }
-
-    // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
 
     BWA_MEM(bwa_mem_mapping)
 
@@ -193,6 +195,8 @@ workflow SOMATIC_WES {
 
     apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
     GATK_APPLYBQSR(apply_bqsr)
+
+    ANCESTRY(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)) 
 
     // Step 7: QC Metrics
     collect_metrics = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
@@ -258,7 +262,7 @@ workflow SOMATIC_WES {
 
     BEDOPS_SORT(params.target_gatk)
     BEDOPS_WINDOW(BEDOPS_SORT.out.sorted_bed, params.hg38_windows)
-    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf, BEDOPS_WINDOW.out.window_bed)
+    TMB_SCORE(GATK_MERGEVCF_UNANNOTATED.out.vcf.map{it -> [it[0], it[1], it[0]]}, BEDOPS_WINDOW.out.window_bed)
 
     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
