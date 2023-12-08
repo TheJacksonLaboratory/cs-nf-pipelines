@@ -217,7 +217,6 @@ workflow SOMATIC_WES_PTA {
         .map{["${it[1].patient}--${it[1].tumor_id}".toString(), it[1], it[5], it[6], it[7]]}
         .unique{it[0]}
 
-
     // Step: MSI
     MSISENSOR2_MSI(ch_msisensor2_input)
 
@@ -228,14 +227,19 @@ workflow SOMATIC_WES_PTA {
     GATK_GETPILEUPSUMMARIES_NORMAL(ch_normal_samples)
     GATK_GETPILEUPSUMMARIES_TUMOR(ch_tumor_samples)
 
-    contam_input = GATK_GETPILEUPSUMMARIES_NORMAL.out.pileup_summary.join(GATK_GETPILEUPSUMMARIES_TUMOR.out.pileup_summary, by: 1) // join on metadata field
-                        .map{it -> [it[0].id, it[0], it[2], it[1], it[4], it[3]]}
+    contam_input = GATK_GETPILEUPSUMMARIES_NORMAL.out.pileup_summary
+                    .map{it -> [it[1].patient, it[1], it[2]]}
+                    .cross(
+                        tumor_pileups = GATK_GETPILEUPSUMMARIES_TUMOR.out.pileup_summary
+                        .map{it -> [it[1].patient, it[1], it[2]]}
+                    )
+                    .map{normal, tumor -> [tumor[1].id, normal[2], tumor[2]]}
 
     GATK_CALCULATECONTAMINATION(contam_input)
 
     // ** Variant Calling
 
-    // Step: Mutect2
+    // // Step: Mutect2
     GATK_MUTECT2(ch_paired_samples)
 
     if (params.ffpe) {

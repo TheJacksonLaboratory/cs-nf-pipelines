@@ -11,7 +11,7 @@ process GATK_CALCULATECONTAMINATION {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), val(meta), path(normal_pileup_table), val(normal_name), path(tumor_pileup_table), val(tumor_name) 
+    tuple val(sampleID), path(normal_pileup_table), path(tumor_pileup_table)
 
     output:
     tuple val(sampleID), path("*contamination.table"), path("*segments.txt"), emit: contam_segments
