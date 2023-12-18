@@ -12,7 +12,7 @@
     tuple val(sampleID), file(bam_bwa_lumpy_sort), file(bam_bwa_lumpy_sort_bai)
 
     output:
-    tuple val(sampleID), file("${sampleID}*.vcf.gz"), emit: lumpy_vcf
+    tuple val(sampleID), file("${sampleID}*.vcf"), emit: lumpy_vcf
 
     script:
     """
@@ -25,7 +25,10 @@
         --fasta ${params.fasta} \
         --processes ${task.cpus} \
         --support 3 \
+        --duphold \
         --genotype ${bam_bwa_lumpy_sort}
+
+    gunzip ${sampleID}-smoove.genotyped.vcf.gz 
 
     """
 }

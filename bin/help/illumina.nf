@@ -28,6 +28,12 @@ def help(){
   --genes_bed | /ref_data/Mus_musculus.GRCm38.102.gene_symbol.bed | BED file that lists gene symbol IDs and coordinates
   --exons_bed | /ref_data/Mus_musculus.GRCm38.102.exons.bed | BED file that lists exons and coordinates
 
+
+  vep parameters:
+  --vep_cache_directory | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data' | VEP annotation cache. Cache provided is for Ensembl v109.
+--vep_fasta | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/ensembl/GRCm39.p0/Mus_musculus.GRCm39.dna.primary_assembly.fa'  | VEP requires an ensembl based fasta. GRCh38.p13 is used for v97-v109.
+
+
   fastp filtering paramenters:
   Parameter | Default | Description
   --quality_phred | 30 | Quality score threshold.
