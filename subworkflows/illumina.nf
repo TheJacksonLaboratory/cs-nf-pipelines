@@ -16,6 +16,7 @@ include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
+include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -119,6 +120,13 @@ workflow ILLUMINA {
     // Call SV with Delly
     DELLY_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
     REHEAD_SORT_DELLY(DELLY_CALL.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
+
+
+    // * Vep
+
+    //  VepPublicSvnIndel
+        VEP_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index)
+
 
     // * Merge callers and annotate results
 

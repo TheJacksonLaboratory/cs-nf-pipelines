@@ -25,6 +25,7 @@
         --fasta ${params.fasta} \
         --processes ${task.cpus} \
         --support 3 \
+        --duphold \
         --genotype ${bam_bwa_lumpy_sort}
 
     """
