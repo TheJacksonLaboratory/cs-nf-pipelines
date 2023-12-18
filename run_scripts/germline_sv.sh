@@ -20,8 +20,8 @@ nextflow ../main.nf \
   -profile sumner \
   --workflow germline_sv \
   --data_type illumina \
-  --pubdir '/projects/omics_share/.mmrsvd_germline_sv/validation/mmrsvd_germline' \
-  -w '/projects/omics_share/.mmrsvd_germline_sv/validation/mmrsvd_germline/work' \
+  --pubdir "/flashscratch/${USER}/mmrsvd_germline" \
+  -w "/flashscratch/${USER}/work" \
   --genome_build 'GRCm39' \
   --fastq1 /projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/GRCm39.v102.autosomes_simSV_germline.R1.fq.gz \
   --fastq2 /projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/GRCm39.v102.autosomes_simSV_germline.R2.fq.gz  \

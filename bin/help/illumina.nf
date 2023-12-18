@@ -31,7 +31,7 @@ def help(){
 
   vep parameters:
   --vep_cache_directory | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/vep_data' | VEP annotation cache. Cache provided is for Ensembl v109.
---vep_fasta | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/ensembl/GRCm39.p0/Mus_musculus.GRCm39.dna.primary_assembly.fa'  | VEP requires an ensembl based fasta. GRCh38.p13 is used for v97-v109.
+  --vep_fasta | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/ensembl/GRCm39.p0/Mus_musculus.GRCm39.dna.primary_assembly.fa'  | VEP requires an ensembl based fasta. GRCh38.p13 is used for v97-v109.
 
 
   fastp filtering paramenters:
