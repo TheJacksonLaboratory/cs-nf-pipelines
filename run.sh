@@ -3,7 +3,7 @@
 #SBATCH --job-name=CS_nextflow_example
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 01:00:00
+#SBATCH -t 72:00:00
 #SBATCH --mem=2G
 #SBATCH --ntasks=1
 
@@ -19,5 +19,5 @@ nextflow main.nf \
 --workflow rnaseq \
 --gen_org mouse \
 --sample_folder 'test/rna/mouse' \
---pubdir "/fastscratch/${USER}/outputDir" \
--w "/fastscratch/${USER}/outputDir/work"
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w "/flashscratch/${USER}/outputDir/work"

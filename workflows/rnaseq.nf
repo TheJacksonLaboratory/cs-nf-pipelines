@@ -12,7 +12,7 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {PDX_RNASEQ} from "${projectDir}/subworkflows/pdx_rnaseq"
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -21,7 +21,6 @@ include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picar
 include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_COLLECTRNASEQMETRICS} from "${projectDir}/modules/picard/picard_collectrnaseqmetrics"
-include {RNA_SUMMARY_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_rna"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -124,22 +123,22 @@ workflow RNASEQ {
   } else {
 
     // Step 1: Qual_Stat
-    JAX_TRIMMER(read_ch)
+    FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)
     
-    FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+    FASTQC(FASTP.out.trimmed_fastq)
 
     // Check strand setting
-    CHECK_STRANDEDNESS(JAX_TRIMMER.out.trimmed_fastq)
+    CHECK_STRANDEDNESS(FASTP.out.trimmed_fastq)
 
-    rsem_input = JAX_TRIMMER.out.trimmed_fastq.join(CHECK_STRANDEDNESS.out.strand_setting).join(GET_READ_LENGTH.out.read_length)
+    rsem_input = FASTP.out.trimmed_fastq.join(CHECK_STRANDEDNESS.out.strand_setting).join(GET_READ_LENGTH.out.read_length)
 
     // Step 2: RSEM
     RSEM_ALIGNMENT_EXPRESSION(rsem_input, params.rsem_ref_files, params.rsem_star_prefix, params.rsem_ref_prefix)
 
     //Step 3: Get Read Group Information
-    READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "picard")
+    READ_GROUPS(FASTP.out.trimmed_fastq, "picard")
 
     // Step 4: Picard Alignment Metrics
     add_replace_groups = READ_GROUPS.out.read_groups.join(RSEM_ALIGNMENT_EXPRESSION.out.bam)
@@ -153,15 +152,11 @@ workflow RNASEQ {
     PICARD_COLLECTRNASEQMETRICS(PICARD_SORTSAM.out.bam.join(CHECK_STRANDEDNESS.out.strand_setting), params.ref_flat, params.ribo_intervals)
 
     // Step 6: Summary Stats
-
-    agg_stats = RSEM_ALIGNMENT_EXPRESSION.out.rsem_stats.join(JAX_TRIMMER.out.quality_stats).join(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics)
-
-    RNA_SUMMARY_STATS(agg_stats)
-
     ch_multiqc_files = Channel.empty()
-    ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION.out.star_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS.out.picard_metrics.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (

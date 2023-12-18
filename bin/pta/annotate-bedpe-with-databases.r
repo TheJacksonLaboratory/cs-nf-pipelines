@@ -68,10 +68,8 @@ readDB = function(f) {
   
 }
 
-
-
 ## Check overlaps between a breakpointRanges and a GRanges, 
-pairInBed = function(query, subject) {
+pairInBed = function(query, subject, genome) {
   
   overlaps = rep(NA, length(query))
   
@@ -94,9 +92,33 @@ pairInBed = function(query, subject) {
     } else {
       
       bkpt = GRanges(as.character(seqnames(query))[i], IRanges(start(query)[i], end(query)[partner.idx]))  
-      overlap = any(bkpt %^% subject) 
-      
-    } 
+
+      if (genome == 'GRCh38') {
+        overlap = any(bkpt %^% subject) 
+      } else {
+        # MWL NOTE: the original script check for ANY overlap between the database and the range. 
+        #           This was only done for BED files. When BEDPE files are used, 0.8 prop overlap 
+        #           is required to consider an overlap valid. 
+        #           The code below takes the overlap between SV, and subject DB, 
+        #           then for overlapping hits calculates the prop overlap. 
+        #           Overlap = TRUE for hits that overlap, and are greater than 80% size overlap.
+        #           For now, this 80% overlap is only implmented for mouse genomes.
+
+        hits <- findOverlaps(bkpt, subject)
+
+        if (sum(countSubjectHits(hits)) > 0) {
+          hit_overlaps <- pintersect(bkpt[queryHits(hits)], subject[subjectHits(hits)])
+          percent_hit_Overlap <- width(hit_overlaps) / width(bkpt[queryHits(hits)])
+          if (sum(countSubjectHits(hits[percent_hit_Overlap > 0.8])) > 0) {
+            overlap = TRUE
+          } else {
+            overlap = FALSE
+          }
+        } else {
+          overlap = FALSE
+        }
+      }
+    }
     
     overlaps[c(i, partner.idx)] = overlap
     processed = c(processed, i, partner.idx)
@@ -110,7 +132,7 @@ pairInBed = function(query, subject) {
 
 
 ## Annotate breakpointRanges object with breakpointRanges or GRanges
-annotateDB = function(x, db, name, slop, ignore.strand=F) {
+annotateDB = function(x, db, name, slop, ignore.strand=F, genome) {
   
   
   ## Use different overlap method depending on whether DB is BED or BEDPE
@@ -125,7 +147,7 @@ annotateDB = function(x, db, name, slop, ignore.strand=F) {
     
   } else {
     # overlaps = GenomicRanges::findOverlaps(query=x, subject=db)
-    overlaps = pairInBed(query=x, subject=db)
+    overlaps = pairInBed(query=x, subject=db, genome)
   }
   
   ## Annotate with hits if there are any
@@ -204,6 +226,7 @@ option_list = list(
   make_option(c("-f", "--db_files"), type='character', help="Comma-delimited list of database files corresponding to the order in --db_names"),
   make_option(c("-i", "--db_ignore_strand"), type='character', help="Comma-delimited list of database names to ignore strand orientation for when overlapping? Should be present in --db_names"),
   make_option(c("-s", "--slop"),     type='numeric',   help="Padding to use when comparing breakpoints"),
+  make_option(c("-g", "--genome"), type='character', help="Genome being annotated", default = "GRCh38"),
   make_option(c("-o", "--out_file"), type='character', help="Output BEDPE"))
 opt = parse_args(OptionParser(option_list=option_list))
 
@@ -229,6 +252,8 @@ if (!is.null(opt$db_ignore_strand) && !all(opt$db_ignore_strand %in% opt$db_name
 dta = readBEDPE(opt$bedpe)
 dta$db = ''
 
+print(opt$genome)
+
 
 ## Annotate with databases
 for (i in 1:length(opt$db_names)) {
@@ -237,12 +262,15 @@ for (i in 1:length(opt$db_names)) {
   db.file = opt$db_files[i]
   is = !is.null(opt$db_ignore_strand) && db.name %in% opt$db_ignore_strand
   
+  print(db.name)
+
   db = readDB(db.file)
   dta = annotateDB(x=dta, 
                    db=db, 
                    name=db.name, 
                    slop=opt$slop, 
-                   ignore.strand=is)
+                   ignore.strand=is,
+                   genome=opt$genome)
   
 }
 

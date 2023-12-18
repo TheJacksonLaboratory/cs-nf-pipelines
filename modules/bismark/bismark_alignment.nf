@@ -4,7 +4,7 @@ process BISMARK_ALIGNMENT {
   cpus 20
   memory 60.GB
   time 30.hour
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/bismark:0.23.1--hdfd78af_0'
 
@@ -14,13 +14,13 @@ process BISMARK_ALIGNMENT {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignment' : 'bismark_align' }", pattern: "*ambiguous*", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(fq_reads)
+  tuple val(sampleID), path(fq_reads)
 
   output:
-  tuple val(sampleID), file("*.bam"), emit: bam
-  tuple val(sampleID), file("*report.txt"), emit: report
-  tuple val(sampleID), file("*ambiguous*"), emit: ambiguous_reads
-  tuple val(sampleID), file("*unmapped*"), emit: unmapped_reads
+  tuple val(sampleID), path("*.bam"), emit: bam
+  tuple val(sampleID), path("*report.txt"), emit: report
+  tuple val(sampleID), path("*ambiguous*"), emit: ambiguous_reads
+  tuple val(sampleID), path("*unmapped*"), emit: unmapped_reads
 
   script:
 

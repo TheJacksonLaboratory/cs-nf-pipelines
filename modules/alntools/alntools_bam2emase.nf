@@ -4,9 +4,9 @@ process ALNTOOLS_BAM2EMASE {
     cpus 1
     memory 15.GB
     time 10.hour
-    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
   
-    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-547132f'
+    container 'quay.io/jaxcompsci/gbrs_py3:feature_py3-16c7011'
 
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'alntools' }", pattern: "*.h5", mode: 'copy', enabled: params.keep_intermediate
 

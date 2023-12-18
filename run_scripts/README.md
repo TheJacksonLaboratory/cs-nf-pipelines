@@ -27,8 +27,8 @@ nextflow ../main.nf \
 --workflow rnaseq \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
---pubdir '/fastscratch/outputDir' \
--w '/fastscratch/outputDir/work' \
+--pubdir '/flashscratch/outputDir' \
+-w '/flashscratch/outputDir/work' \
 --comment "This script will run rnaseq on human samples using default hg38"
 ```
 
@@ -39,7 +39,7 @@ There are several things a user must change before running these scripts:
 2. `<PATH_TO_YOUR_SEQUENCES>` must be changed to point at the location of your data files. NOTE: The script assumes '_R{1,2}*.fastq.gz' is the default matching string for FASTQ files. 
     See Wiki documentation for parameters to adjust if this is not the case. 
 
-3. `--pubdir '/fastscratch/outputDir'` and `-w '/fastscratch/outputDir/work'` should be changed to relevant directories. The `-w` work directory can be quite large. Use of `/fastscratch/` is recommended. 
+3. `--pubdir '/flashscratch/outputDir'` and `-w '/flashscratch/outputDir/work'` should be changed to relevant directories. The `-w` work directory can be quite large. Use of `/flashscratch/` is recommended. 
 
 
 **NOTE:**  

@@ -19,6 +19,6 @@ nextflow ../main.nf \
 --workflow pta \
 -profile sumner \
 --csv_input ../test/csv_samplesheets/pta_test.csv
---pubdir "/fastscratch/${USER}/outputDir" \
--w "/fastscratch/${USER}/outputDir/work" \
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run paired tumor analysis on test data"

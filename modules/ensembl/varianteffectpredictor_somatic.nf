@@ -4,7 +4,7 @@ process VEP_SOMATIC {
   cpus = 4
   memory = 15.GB
   time = '10:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'ensemblorg/ensembl-vep:release_109.3'
 
@@ -82,9 +82,8 @@ process VEP_SOMATIC {
 
 // VEP Cache setup: 
 
-// singularity pull --name vep.sif docker://ensemblorg/ensembl-vep:release_108.2
+// singularity pull --name vep.sif docker://ensemblorg/ensembl-vep:release_109.3
 // singularity exec vep.sif INSTALL.pl -c /PATH_TO_VEP/vep -a cfp -s homo_sapiens_refseq -y GRCh38 -g dbNSFP,dbscSNV,MaxEntScan
-// ln -sf homo_sapiens homo_sapiens_refseq
 
 // In the plugin directory: 
 

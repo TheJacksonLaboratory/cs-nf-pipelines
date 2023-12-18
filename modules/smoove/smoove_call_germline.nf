@@ -9,10 +9,10 @@
     container 'brentp/smoove:v0.2.7'
 
     input:
-    tuple val(sampleID), file(bam_bwa_lumpy_sort), file(bam_bwa_lumpy_sort_bai)
+    tuple val(sampleID), path(bam), path(bai)
 
     output:
-    tuple val(sampleID), file("${sampleID}*.vcf"), emit: lumpy_vcf
+    tuple val(sampleID), path("${sampleID}*.vcf"), emit: lumpy_vcf
 
     script:
     """
