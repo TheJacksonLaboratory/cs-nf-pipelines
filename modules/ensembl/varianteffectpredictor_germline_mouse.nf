@@ -6,15 +6,18 @@ process VEP_GERMLINE {
   time = '10:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
+  //container 'ensemblorg/ensembl-vep:release_109.3'
   container 'ensemblorg/ensembl-vep:release_110.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(vcf), file(idx)
+  tuple val(sampleID), file(vcf)
+  tuple val(sampleID), file(idx)
 
   output:
-  tuple val(sampleID), file("*_vep_annotated.vcf"), emit: vcf
+  tuple val(sampleID), file("*_vep_annotated.vcf.gz"), emit: vcf
+  tuple val(sampleID), file("*_vep_annotated.vcf.gz.tbi"), emit: tbi
 
   script:
 
@@ -40,6 +43,10 @@ process VEP_GERMLINE {
   --check_existing \
   --vcf \
   --pick_allele_gene
+
+  bgzip ${sampleID}_germline_vep_annotated.vcf
+  tabix ${sampleID}_germline_vep_annotated.vcf.gz
+
   """
 }
 

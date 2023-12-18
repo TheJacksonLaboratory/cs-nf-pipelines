@@ -1,4 +1,4 @@
-process DELLY_CALL {
+process DELLY_CALL_GERMLINE {
     tag "$sampleID"
     
     cpus = 1
@@ -13,7 +13,7 @@ process DELLY_CALL {
     tuple file(fasta), file(fai)
     
     output:
-    tuple val(sampleID), file("${sampleID}_Delly.bcf"), emit: delly_bcf
+    tuple val(sampleID), file("${sampleID}_Delly_geno.bcf"), emit: delly_bcf
 
     script:
     """
@@ -23,5 +23,14 @@ process DELLY_CALL {
         -s 500 \
         -o ${sampleID}_Delly.bcf \
         -g ${fasta} ${bam}
-    """
+
+    delly call \
+        -q 40 \
+        -x ${params.exclude_regions} \
+        -s 500 \
+        -v ${sampleID}_Delly.bcf \
+        -o ${sampleID}_Delly_geno.bcf \
+        -g ${fasta} ${bam}
+
+   """
 }
