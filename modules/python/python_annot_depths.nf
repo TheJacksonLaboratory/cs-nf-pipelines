@@ -15,7 +15,7 @@ process PYTHON_ANNOT_DEPTHS {
         tuple val(sampleID), file("${sampleID}_ONT_NS_merged_variants_depths.vcf"), emit: vcf
     script:
 
-    if (params.workflow == "ont")
+    if (params.data_type == "ont")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_depths.py \
         -v ${vcf} \

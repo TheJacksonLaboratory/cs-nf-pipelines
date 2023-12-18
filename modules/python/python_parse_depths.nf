@@ -16,7 +16,7 @@ process PYTHON_PARSE_DEPTHS {
         tuple val(sampleID), path("${sampleID}_${caller}_depths.csv"), emit: csv
     script:
 
-    if (params.workflow == "ont")
+    if (params.data_type == "ont")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/parse_caller_depths.py \
         -v ${vcf} \
