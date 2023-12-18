@@ -9,14 +9,23 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups_mm
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem_mmrsvd"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort_mmrsvd"
 include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
+include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
 include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats_mmrsvd"
 include {SMOOVE_CALL} from "${projectDir}/modules/smoove/smoove_call_germline"
 include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_DELLY;
+         BCFTOOLS_REHEAD_SORT as REHEAD_SORT_CNV;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
-include {DELLY_CALL} from "${projectDir}/modules/delly/delly_call"
-include {VEP_GERMLINE} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+//include {DELLY_GERMLINE_CALL} from "${projectDir}/modules/delly/delly_germline_call"
+include {DELLY_CALL_GERMLINE} from "${projectDir}/modules/delly/delly_call_germline"
+include {DELLY_CNV_GERMLINE} from "${projectDir}/modules/delly/delly_cnv_germline"
+include {GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline_mouse"
+include {VEP_GERMLINE as VEP_GERMLINE_GATK;
+         VEP_GERMLINE as VEP_GERMLINE_CNV} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+include {DUPHOLD as DUPHOLD_DELLY;
+         DUPHOLD as DUPHOLD_LUMPY;
+         DUPHOLD as DUPHOLD_MANTA} from "${projectDir}/modules/duphold/duphold"
 include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
@@ -118,21 +127,42 @@ workflow ILLUMINA {
     // * Delly
 
     // Call SV with Delly
-    DELLY_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
-    REHEAD_SORT_DELLY(DELLY_CALL.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
+    DELLY_CALL_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
+    REHEAD_SORT_DELLY(DELLY_CALL_GERMLINE.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
+   
+    // Call CNV with Delly
+    DELLY_CNV_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
+    REHEAD_SORT_CNV(DELLY_CNV_GERMLINE.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
+
+
+    // * GATK
+
+    // GATK INDEXFEATUREFILE
+    GATK_INDEXFEATUREFILE(REHEAD_SORT_CNV.out.vcf_sort)
+    
+    // GATK HAPLOTYPECALLER
+    GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, params.target_gatk, 'gatk') 
 
 
     // * Vep
 
     //  VepPublicSvnIndel
-        VEP_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index)
+    VEP_GERMLINE_GATK(GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.vcf, GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.idx)
+    VEP_GERMLINE_CNV(REHEAD_SORT_CNV.out.vcf_sort, GATK_INDEXFEATUREFILE.out.idx)
+
+
+    // Duphold
+    DUPHOLD_DELLY(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_DELLY.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_MANTA(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_MANTA.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_LUMPY(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_LUMPY.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
+
 
 
     // * Merge callers and annotate results
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
-    survivor_input = REHEAD_SORT_DELLY.out.vcf_sort.join(REHEAD_SORT_LUMPY.out.vcf_sort).join(REHEAD_SORT_MANTA.out.vcf_sort)
+    survivor_input = DUPHOLD_DELLY.out.vcf.join(DUPHOLD_LUMPY.out.vcf).join(DUPHOLD_MANTA.out.vcf)
                      .map { it -> tuple(it[0], tuple(it[1], it[2], it[3]))}
     SURVIVOR_MERGE(survivor_input)
     SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
