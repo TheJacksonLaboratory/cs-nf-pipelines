@@ -10,12 +10,7 @@ include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem_mmrsvd"
 include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort_mmrsvd"
 include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
 include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats_mmrsvd"
-include {LUMPY_PREP} from "${projectDir}/modules/lumpy/lumpy_prep"
-include {PICARD_SORTSAM as LUMPY_SORTSAM;
-         PICARD_SORTSAM as LUMPY_SORTSAM_DISCORDANT;
-         PICARD_SORTSAM as LUMPY_SORTSAM_SPLIT} from "${projectDir}/modules/picard/picard_sortsam_mmrsvd"
-include {LUMPY_EXTRACT_SPLITS} from "${projectDir}/modules/lumpy/lumpy_extract_splits"
-include {LUMPY_CALL_SV} from "${projectDir}/modules/lumpy/lumpy_call_sv"
+include {SMOOVE_CALL} from "${projectDir}/modules/smoove/smoove_call_germline"
 include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_DELLY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
@@ -109,21 +104,9 @@ workflow ILLUMINA {
     // Quantify insert sizes
     SAMTOOLS_STATS(GATK_MARK_DUPLICATES.out.bam_and_index)
 
-    // Prep BAM for Lumpy (Map clipped reads, read group info, extract discordant alignments)
-    LUMPY_PREP(GATK_MARK_DUPLICATES.out.bam_and_index)
-
-    // Sort prepped LUMPY bams
-    LUMPY_SORTSAM(LUMPY_PREP.out.bam_bwa_lumpy, "alignBWA_lumpySort")
-    LUMPY_SORTSAM_DISCORDANT(LUMPY_PREP.out.dis_unsorted_bam, "alignBWA_lumpySort_discordant")
-
-    // Extract split reads
-    LUMPY_EXTRACT_SPLITS(LUMPY_PREP.out.bam_bwa_lumpy)
-    LUMPY_SORTSAM_SPLIT(LUMPY_EXTRACT_SPLITS.out.bam_bwa_lumpy, "alignBWA_lumpySort_splits")
-
-    // Call SV with Lumpy
-    lumpy_input = LUMPY_SORTSAM.out.sorted_bam.join(LUMPY_SORTSAM_SPLIT.out.sorted_bam).join(LUMPY_SORTSAM_DISCORDANT.out.sorted_bam)
-    LUMPY_CALL_SV(lumpy_input)
-    REHEAD_SORT_LUMPY(LUMPY_CALL_SV.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fasta_fai)
+    // Call SV with SMOOVE
+    SMOOVE_CALL(GATK_MARK_DUPLICATES.out.bam_and_index)
+    REHEAD_SORT_LUMPY(SMOOVE_CALL.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fasta_fai)
 
     // * Manta
 

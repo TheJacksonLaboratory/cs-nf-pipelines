@@ -14,20 +14,20 @@ process SURVIVOR_MERGE {
     output:
         tuple val(sampleID), file("${sampleID}_mergedCall.*.vcf"), emit: vcf
     script:
-        if (params.workflow == "pacbio")
+        if (params.data_type == "pacbio")
             """
             ls ${vcf_tuple[0]} > vcf_list.txt
             ls ${vcf_tuple[1]} >> vcf_list.txt
             SURVIVOR merge vcf_list.txt ${params.surv_dist} ${params.surv_supp} ${params.surv_type} ${params.surv_strand} 0 ${params.surv_min} ${sampleID}_mergedCall.PS.vcf
             """
-        else if (params.workflow == "illumina")
+        else if (params.data_type == "illumina")
             """
             ls ${vcf_tuple[0]} > vcf_list.txt
             ls ${vcf_tuple[1]} >> vcf_list.txt
             ls ${vcf_tuple[2]} >> vcf_list.txt
             SURVIVOR merge vcf_list.txt ${params.surv_dist} ${params.surv_supp} ${params.surv_type} ${params.surv_strand} 0 ${params.surv_min} ${sampleID}_mergedCall.DLM.vcf
             """
-        else if (params.workflow == "ont")
+        else if (params.data_type == "ont")
             """
             ls ${vcf_tuple[0]} > vcf_list.txt
             ls ${vcf_tuple[1]} >> vcf_list.txt

@@ -14,15 +14,15 @@ process SURVIVOR_VCF_TO_TABLE {
     output:
         tuple val(sampleID), file("${sampleID}.merged.overlap.annotated.txt"), emit: annotation
     script:
-        if (params.workflow == "pacbio")
+        if (params.data_type == "pacbio")
             """
             /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} pacbio
             """
-        else if (params.workflow == "illumina")
+        else if (params.data_type == "illumina")
             """
             /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} illumina
             """
-        else if (params.workflow == "ont")
+        else if (params.data_type == "ont")
             """
             /usr/bin/env bash ${projectDir}/bin/germline_sv/surv_annot.sh ${sampleID} ${vcf} ont
             """            

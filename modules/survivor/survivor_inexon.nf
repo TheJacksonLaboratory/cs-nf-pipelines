@@ -9,7 +9,7 @@ process SURVIVOR_INEXON {
 
     container 'quay.io/biocontainers/pysam:0.15.2--py36h02877da_7'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : '' }", mode:'copy', enabled: params.workflow == 'ont' ? false : true
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : '' }", mode:'copy', enabled: params.data_type == 'ont' ? false : true
 
     input:
         tuple val(sampleID), file(survivor_vcf), file("ins.exons.bed"), file("del.exons.bed"), file("dup.exons.bed"), file("tra.exons.bed"), file("inv.exons.bed")
@@ -17,21 +17,21 @@ process SURVIVOR_INEXON {
         tuple val(sampleID), file("${sampleID}_*_struct_var.vcf"), emit: vcf
     script:
 
-    if (params.workflow == "pacbio")
+    if (params.data_type == "pacbio")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
             -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
             -o ${sampleID}_PACBIO_PS_struct_var.vcf
         """
-    else if (params.workflow == "illumina")
+    else if (params.data_type == "illumina")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
             -u dup.exons.bed -t tra.exons.bed -n inv.exons.bed \
             -o ${sampleID}_ILLUMINA_DLM_struct_var.vcf
         """
-    else if (params.workflow == "ont")
+    else if (params.data_type == "ont")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/annot_vcf_with_exon.py -v ${survivor_vcf} \
             -i ins.exons.bed -d del.exons.bed \
