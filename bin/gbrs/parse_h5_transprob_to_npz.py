@@ -51,8 +51,6 @@ def male_file_parse():
     gen = str(options.generation)
     tprob = dict()
     tprob_out = dict()
-    
-    print('here we are')
 
     for c in chrs_m:
         keystr = "%s:%s:%s" % (c, gen, sex)
@@ -68,7 +66,7 @@ def male_file_parse():
             for gid in range(tprob_c.shape[0]):
                 # Expand each gene matrix. 
                 # For X, and Y this can take awhile. 
-                # For MT is is fairly quick. 
+                # For MT it is fairly quick. 
                 
                 for h1id in range(num_haps):
                     for h2id in range(num_haps):

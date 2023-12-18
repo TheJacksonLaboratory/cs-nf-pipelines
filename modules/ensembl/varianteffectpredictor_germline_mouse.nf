@@ -4,20 +4,19 @@ process VEP_GERMLINE {
   cpus = 4
   memory = 15.GB
   time = '10:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  //container 'ensemblorg/ensembl-vep:release_109.3'
   container 'ensemblorg/ensembl-vep:release_110.1'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(vcf)
-  tuple val(sampleID), file(idx)
+  tuple val(sampleID), file(vcf), file(idx)
 
   output:
-  tuple val(sampleID), file("*_vep_annotated.vcf.gz"), emit: vcf
+  tuple val(sampleID), file("*_vep_annotated.vcf.gz"), emit: vcf_gz
   tuple val(sampleID), file("*_vep_annotated.vcf.gz.tbi"), emit: tbi
+  tuple val(sampleID), file("*_vep_annotated.vcf"), emit: vcf
 
   script:
 
@@ -44,7 +43,7 @@ process VEP_GERMLINE {
   --vcf \
   --pick_allele_gene
 
-  bgzip ${sampleID}_germline_vep_annotated.vcf
+  bgzip -c ${sampleID}_germline_vep_annotated.vcf > ${sampleID}_germline_vep_annotated.vcf.gz
   tabix ${sampleID}_germline_vep_annotated.vcf.gz
 
   """

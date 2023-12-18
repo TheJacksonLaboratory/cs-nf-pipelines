@@ -4,7 +4,7 @@ process SOMATIC_VCF_FINALIZATION {
     cpus 1
     memory 50.GB
     time 1.hour
-    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
@@ -39,12 +39,14 @@ process SOMATIC_VCF_FINALIZATION {
     python \
     ${projectDir}/bin/pta/make_main_vcf.py \
     ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_supplemental.vcf \
-    ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_final.vcf
+    ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_final.vcf \
+    GRCh38
 
     python \
     ${projectDir}/bin/pta/make_txt.py \
     --vcf ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_final.vcf \
     --txt ${sampleID}_somatic_snv_indel_annotated_${output_suffix}_final.txt \
+    --vep-version GRCh38 \
     --tumor ${tumor_name} \
     --normal ${normal_name} 
 

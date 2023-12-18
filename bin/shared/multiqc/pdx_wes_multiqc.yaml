@@ -22,6 +22,8 @@ extra_fn_clean_exts:
   - "_sortsam"
   - "_realigned_BQSR"
   - "_FilterTrim"
+  - "_R1"
+  - "_R2"
   - type: "truncate"
     pattern: ".fastq"
 

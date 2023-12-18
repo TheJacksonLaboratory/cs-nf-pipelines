@@ -4,8 +4,8 @@ process JAX_TRIMMER {
 
   cpus 1
   memory 30.GB
-  time '24:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  time '30:00:00'
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
@@ -15,8 +15,8 @@ process JAX_TRIMMER {
   tuple val(sampleID), path(fq_reads)
 
   output:
-  tuple val(sampleID), file("*_stat"), emit: quality_stats
-  tuple val(sampleID), file("*filtered_trimmed"), emit: trimmed_fastq
+  tuple val(sampleID), path("*_stat"), emit: quality_stats
+  tuple val(sampleID), path("*filtered_trimmed"), emit: trimmed_fastq
 
   script:
 

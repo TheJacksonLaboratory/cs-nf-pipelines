@@ -3,7 +3,7 @@ def help(){
 Parameter | Type | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
--w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
+-w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 --snp_vcf | /<PATH> | VCF containing only SNPs for patching into primary reference fasta. 
 --indel_vcf | /<PATH> | VCF containing only InDELs for transforming into primary reference fasta. 
 --primary_reference_fasta | /<PATH> | The primary reference fasta file, where patched SNPs and transformed InDELs are applied.

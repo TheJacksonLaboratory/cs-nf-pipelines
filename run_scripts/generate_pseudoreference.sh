@@ -18,7 +18,7 @@ module load nextflow
 nextflow ../main.nf \
 -profile sumner \
 --workflow generate_pseudoreference \
---pubdir "/fastscratch/${USER}/outputDir" \
--w /fastscratch/${USER}/outputDir/work \
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w /flashscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --comment "This script will generate_pseudoreference using default parameters"

@@ -18,8 +18,8 @@ module load nextflow
 nextflow ../main.nf \
 -profile sumner \
 --workflow gbrs \
---pubdir "/fastscratch/${USER}/outputDir" \
--w /fastscratch/${USER}/outputDir/work \
+--pubdir "/flashscratch/${USER}/outputDir" \
+-w /flashscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --sample_generation 42 \
 --sample_sex F \

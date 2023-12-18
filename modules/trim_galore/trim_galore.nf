@@ -4,7 +4,7 @@ process TRIM_GALORE {
   cpus 8
   memory 16.GB
   time '06:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/trim-galore:0.6.7--hdfd78af_0'
 
@@ -25,12 +25,12 @@ process TRIM_GALORE {
 
 
   input:
-  tuple val(sampleID), file(fq_reads)
+  tuple val(sampleID), path(fq_reads)
 
   output:
-  tuple val(sampleID), file("*_fastqc.{zip,html}"), emit: trimmed_fastqc
-  tuple val(sampleID), file("*.fq.gz"), emit: trimmed_fastq
-  tuple val(sampleID), file("*trimming_report.txt"), emit: trim_stats
+  tuple val(sampleID), path("*_fastqc.{zip,html}"), emit: trimmed_fastqc
+  tuple val(sampleID), path("*.fq.gz"), emit: trimmed_fastq
+  tuple val(sampleID), path("*trimming_report.txt"), emit: trim_stats
 
   script:
 

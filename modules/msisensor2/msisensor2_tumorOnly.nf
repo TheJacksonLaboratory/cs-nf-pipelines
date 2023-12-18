@@ -4,7 +4,7 @@ process MSISENSOR2_MSI {
   cpus = 1
   memory = 6.GB
   time = '03:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/biocontainers/msisensor2:0.1--hd03093a_0'
 
@@ -23,7 +23,7 @@ process MSISENSOR2_MSI {
   """
   mkdir models
 
-  cp -r ${params.msisensor_model} models
+  cp -rf ${params.msisensor_model} models
 
   msisensor2 msi -M models/models_hg38 -t ${bam} -o ${sampleID}_msisensor
 
