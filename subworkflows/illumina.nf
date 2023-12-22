@@ -152,11 +152,9 @@ workflow ILLUMINA {
 
 
     // Duphold
-    DUPHOLD_DELLY(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_DELLY.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf_gz, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
-    DUPHOLD_MANTA(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_MANTA.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf_gz, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
-    DUPHOLD_LUMPY(GATK_MARK_DUPLICATES.out.bam_and_index, REHEAD_SORT_LUMPY.out.vcf_sort, VEP_GERMLINE_GATK.out.vcf_gz, VEP_GERMLINE_GATK.out.tbi, SAMTOOLS_FAIDX.out.fasta_fai) 
-
-
+    DUPHOLD_DELLY(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_DELLY.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_MANTA(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_MANTA.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_LUMPY(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_LUMPY.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
 
     // * Merge callers and annotate results
 

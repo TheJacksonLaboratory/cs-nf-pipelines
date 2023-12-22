@@ -9,10 +9,7 @@ process DUPHOLD {
     container 'quay.io/biocontainers/duphold:0.2.1--h516909a_1'
 
     input:
-    tuple val(sampleID), path(alignment_file), path(alignement_index)
-    tuple val(sampleID), path(sv_variants)
-    tuple val(sampleID), path(snp_variants)
-    tuple val(sampleID), path(snp_variants_index)
+    tuple val(sampleID), path(alignment_file), path(alignement_index), path(sv_variants), path(snp_variants), path(snp_variants_index)
     tuple path(fasta), path(fasta_fai)
 
     output:

@@ -26,7 +26,7 @@
         --processes ${task.cpus} \
         --support 3 \
         --duphold \
-        --genotype ${bam_bwa_lumpy_sort}
+        --genotype ${bam}
 
     gunzip ${sampleID}-smoove.genotyped.vcf.gz 
 

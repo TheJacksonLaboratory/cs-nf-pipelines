@@ -20,6 +20,7 @@ process MANTA_CALL {
 
     script:
         """
+        rm -rf mantaSVOut
         python /usr/local/bin/configManta.py \
             --runDir mantaSVOut \
             --bam ${bam} \

@@ -15,7 +15,7 @@ if(length(args) == 1) {
 
 sv_summary_fh <- paste(sample_name, "survivor_summary.csv", sep = ".")
 sv_olap_fh <- paste(sample_name, "merged.overlap.annotated.txt", sep = ".")
-surv_out_fh <- paste(sample_name, "survivor_joined_results.csv", sep = ".")
+surv_out_fh <- paste(sample_name, "survivor_joined_results.csv", sep = "_")
 
 
 sv_summary <- read_csv(sv_summary_fh,
