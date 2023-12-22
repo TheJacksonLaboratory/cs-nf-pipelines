@@ -15,7 +15,7 @@ process PYTHON_PARSE_SURVIVOR_IDS {
         tuple val(sampleID), path("${sampleID}_survivor_depths.csv"), emit: csv
     script:
 
-    if (params.workflow == "ont")
+    if (params.data_type == "ont")
         """
         /usr/bin/env python ${projectDir}/bin/germline_sv/parse_survivor_ids.py \
         -v ${vcf} \
