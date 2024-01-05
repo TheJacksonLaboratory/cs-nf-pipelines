@@ -17,7 +17,6 @@ include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_CNV;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
-//include {DELLY_GERMLINE_CALL} from "${projectDir}/modules/delly/delly_germline_call"
 include {DELLY_CALL_GERMLINE} from "${projectDir}/modules/delly/delly_call_germline"
 include {DELLY_CNV_GERMLINE} from "${projectDir}/modules/delly/delly_cnv_germline"
 include {GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline_mouse"
@@ -71,6 +70,8 @@ workflow ILLUMINA {
         pre_bam = ch_sampleID.concat(ch_bam)
                              .collect()
                              .map { it -> tuple(it[0], it[1])}
+    } else {
+        exit 1, "Both FASTQ and BAM inputs were specified. Use either FASTQ or BAM as workflow input."
     }
 
     // Index reference fasta
