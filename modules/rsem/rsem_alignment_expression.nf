@@ -58,7 +58,8 @@ process RSEM_ALIGNMENT_EXPRESSION {
   }
   if (params.rsem_aligner == "bowtie2"){
     
-    rsem_ref_files = file("${rsem_ref_path}/bowtie2/*").collect { "$it" }.join(' ')
+    //rsem_ref_files = file("${rsem_ref_path}/bowtie2/*").collect { "$it" }.join(' ')
+    rsem_ref_files_path = "/bowtie2/*"
 
     outbam="--output-genome-bam --sort-bam-by-coordinate"
     seed_length="--seed-length ${params.seed_length}"
@@ -80,13 +81,17 @@ process RSEM_ALIGNMENT_EXPRESSION {
     read_length = read_length.toInteger()
 
     if( read_length >= 65 && read_length <= 85) {
-        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_75/*").collect { "$it" }.join(' ')
+        // rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_75/*").collect { "$it" }.join(' ')
+        rsem_ref_files_path = "/STAR/${rsem_star_prefix}_75/*"
     } else if( read_length >= 90 && read_length <= 110 ) {
-        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_100/*").collect { "$it" }.join(' ')
+        // rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_100/*").collect { "$it" }.join(' ')
+        rsem_ref_files_path = "/STAR/${rsem_star_prefix}_100/*"
     } else if( read_length >= 115 && read_length <= 135 ) {
-        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_125/*").collect { "$it" }.join(' ')
+        // rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_125/*").collect { "$it" }.join(' ')
+        rsem_ref_files_path = "/STAR/${rsem_star_prefix}_125/*"
     } else if( read_length >= 140 && read_length <= 160 ) {
-        rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_150/*").collect { "$it" }.join(' ')
+        // rsem_ref_files = file("${rsem_ref_path}/STAR/${rsem_star_prefix}_150/*").collect { "$it" }.join(' ')
+        rsem_ref_files_path = "/STAR/${rsem_star_prefix}_150/*"
     } else {
         log.info("\nUnsupported read length " + read_length + " in RSEM with STAR. RSEM will now fail gracefully.\n\n")
         rsem_ref_files = 'error'
@@ -95,9 +100,9 @@ process RSEM_ALIGNMENT_EXPRESSION {
   }
 
   """
-  if [ "${rsem_ref_files}" = "error" ]; then exit 1; fi
+  if [ ${rsem_ref_path}$rsem_ref_files_path = "error" ]; then exit 1; fi
 
-  ln -s -f ${rsem_ref_files} . 
+  ln -s -f ${rsem_ref_path}$rsem_ref_files_path . 
 
   rsem-calculate-expression -p $task.cpus \
   ${prob} \
