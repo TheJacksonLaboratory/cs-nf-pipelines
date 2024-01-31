@@ -42,7 +42,7 @@ process SNPEFF{
   }
   
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
+  java -Djava.io.tmpdir=./ -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
   ${params.gen_ver} \
   -c ${params.snpEff_config} \
   -o ${output_format} \

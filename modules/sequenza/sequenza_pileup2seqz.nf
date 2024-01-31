@@ -9,7 +9,7 @@ process SEQUENZA_PILEUP2SEQZ {
     container 'quay.io/jaxcompsci/sequenza:v1'
 
     input:
-    tuple val(sampleID), val(meta), path(normal_pileup), val(normal_name), path(tumor_pileup), val(tumor_name)
+    tuple val(sampleID), val(meta), path(normal_pileup), path(tumor_pileup)
 
     output:
     tuple val(sampleID), val(meta), path("*.clean.seqz"), emit: seqz

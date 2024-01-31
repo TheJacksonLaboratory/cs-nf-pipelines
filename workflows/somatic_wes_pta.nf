@@ -7,7 +7,6 @@ include {param_log} from "${projectDir}/bin/log/somatic_wes.nf"
 
 include {CONCATENATE_PTA_FASTQ} from "${projectDir}/subworkflows/concatenate_pta_fastq"
 
-
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
@@ -18,6 +17,8 @@ include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
+include {ANCESTRY} from "${projectDir}/workflows/ancestry"
 
 include {GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_NORMAL;
          GATK_GETSAMPLENAME as GATK_GETSAMPLENAME_TUMOR} from "${projectDir}/modules/gatk/gatk_getsamplename"
@@ -159,6 +160,7 @@ workflow SOMATIC_WES_PTA {
     // re-join the sampleID to metadata information. Split normal and tumor samples into 2 different paths. 
     // Process tumor and normal BAMs seperately as needed. For calling, use mapped and crossed data. 
 
+    ANCESTRY(ch_final_bam.normal.map{ it -> [it[0], it[1], it[2]]})
 
     // get sample names, and join to bams. 
     GATK_GETSAMPLENAME_NORMAL(ch_final_bam.normal.map{ id, bam, bai, meta -> [id, meta, bam, bai] })
@@ -215,7 +217,6 @@ workflow SOMATIC_WES_PTA {
         .map{["${it[1].patient}--${it[1].tumor_id}".toString(), it[1], it[5], it[6], it[7]]}
         .unique{it[0]}
 
-
     // Step: MSI
     MSISENSOR2_MSI(ch_msisensor2_input)
 
@@ -226,14 +227,19 @@ workflow SOMATIC_WES_PTA {
     GATK_GETPILEUPSUMMARIES_NORMAL(ch_normal_samples)
     GATK_GETPILEUPSUMMARIES_TUMOR(ch_tumor_samples)
 
-    contam_input = GATK_GETPILEUPSUMMARIES_NORMAL.out.pileup_summary.join(GATK_GETPILEUPSUMMARIES_TUMOR.out.pileup_summary, by: 1) // join on metadata field
-                        .map{it -> [it[0].id, it[0], it[2], it[1], it[4], it[3]]}
+    contam_input = GATK_GETPILEUPSUMMARIES_NORMAL.out.pileup_summary
+                    .map{it -> [it[1].patient, it[1], it[2]]}
+                    .cross(
+                        tumor_pileups = GATK_GETPILEUPSUMMARIES_TUMOR.out.pileup_summary
+                        .map{it -> [it[1].patient, it[1], it[2]]}
+                    )
+                    .map{normal, tumor -> [tumor[1].id, normal[2], tumor[2]]}
 
     GATK_CALCULATECONTAMINATION(contam_input)
 
     // ** Variant Calling
 
-    // Step: Mutect2
+    // // Step: Mutect2
     GATK_MUTECT2(ch_paired_samples)
 
     if (params.ffpe) {

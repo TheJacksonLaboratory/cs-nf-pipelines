@@ -32,8 +32,13 @@ workflow CNV {
         SAMTOOLS_MPILEUP_NORMAL(GATK_PRINTREADS_NORMAL.out.bam_bai)
         SAMTOOLS_MPILEUP_TUMOR(GATK_PRINTREADS_TUMOR.out.bam_bai)
 
-        sequenza_input = SAMTOOLS_MPILEUP_NORMAL.out.pileup.join(SAMTOOLS_MPILEUP_TUMOR.out.pileup, by: 1) // join on metadata field
-                         .map{it -> [it[0].id, it[0], it[2], it[1], it[4], it[3]]}
+        sequenza_input = SAMTOOLS_MPILEUP_NORMAL.out.pileup
+                        .map{it -> [it[1].patient, it[1], it[2]]}
+                        .cross(
+                            tumor_pileups = SAMTOOLS_MPILEUP_TUMOR.out.pileup
+                            .map{it -> [it[1].patient, it[1], it[2]]}
+                        )
+                        .map{normal, tumor -> [tumor[1].id, tumor[1], normal[2], tumor[2]]}
 
         SEQUENZA_PILEUP2SEQZ(sequenza_input)
 

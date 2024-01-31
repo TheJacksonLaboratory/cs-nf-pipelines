@@ -54,6 +54,9 @@ else if (params.workflow == "amplicon"){
 else if (params.workflow == "amplicon_generic"){
   include {AMPLICON} from './workflows/amplicon_generic'
 }
+else if (params.workflow == "ancestry"){
+  include {ANCESTRY_RUN} from './workflows/ancestry'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -108,5 +111,8 @@ workflow{
   }
   if (params.workflow == "amplicon" || params.workflow == "amplicon_generic"){
     AMPLICON()
+  }
+  if (params.workflow == "ancestry"){
+    ANCESTRY_RUN()
   }
 }
