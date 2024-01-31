@@ -11,7 +11,7 @@ process GATK_MUTECT2 {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), file(tumor_bam), file(tumor_bai), val(tumor_name)
+  tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 
   output:
   tuple val(sampleID), file("*_somatic.vcf.gz"), file("*_somatic.vcf.gz.tbi"), file("*.stats"), emit: vcf_tbi_stats
@@ -29,6 +29,8 @@ process GATK_MUTECT2 {
   gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" Mutect2 \
     -R ${params.ref_fa} \
     -I ${tumor_bam} \
+    -I ${normal_bam} \
+    -normal ${normal_name} \
     --germline-resource ${params.gnomad_ref} \
     --panel-of-normals ${params.pon_ref} \
     --f1r2-tar-gz ${sampleID}.f1r2.tar.gz \
@@ -57,4 +59,5 @@ For previous versions, the default was 0.001, the average heterozygosity of huma
 For other organisms, change --af-of-alleles-not-in-resource to 1/(ploidy*samples in resource).
 
 https://console.cloud.google.com/storage/browser/gatk-best-practices/somatic-hg38;tab=objects?prefix=&forceOnObjectsSortingFiltering=false
+
 */

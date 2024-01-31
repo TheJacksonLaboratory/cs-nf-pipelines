@@ -36,9 +36,12 @@ process GATK_HAPLOTYPECALLER {
   gatk --java-options "-Xmx${my_mem}G" HaplotypeCaller  \
   -R ${params.ref_fa} \
   -I ${bam} \
-  -O ${sampleID}_variants_raw.${output_suffix} \
+  -O ${sampleID}_haplotypecaller_raw.${output_suffix} \
   -L ${params.target_gatk} \
   ${params.ploidy_val} \
-  ${delta}
+  ${delta} \
+  --max-reads-per-alignment-start 0 \
+  --recover-all-dangling-branches \
+  --linked-de-bruijn-graph
   """
 }

@@ -30,7 +30,7 @@ workflow PDX_RNASEQ {
         read_ch
 
     main:
-    // Step 1: Qual_Stat, Get read group information, Run Xenome
+    // Step 1: Read trim, Get read group information, Run Xenome
     FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)

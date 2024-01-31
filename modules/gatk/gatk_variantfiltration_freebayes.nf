@@ -8,11 +8,9 @@ process GATK_VARIANTFILTRATION {
 
   container 'broadinstitute/gatk:4.2.4.1'
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
-
   input:
   tuple val(sampleID), file(vcf), file(idx)
-  val(indel_snp)
+  val(output_suffix)
 
   output:
   tuple val(sampleID), file("*.vcf"), emit: vcf
@@ -21,18 +19,6 @@ process GATK_VARIANTFILTRATION {
   script:
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
-  if (indel_snp == 'INDEL'){
-    fs='200.0'
-    output_suffix = 'INDEL_filtered.vcf'
-  }
-  if (indel_snp =='SNP'){
-    fs ='60.0'
-    output_suffix = 'SNP_filtered.vcf'
-  }
-  if (indel_snp == 'BOTH'){
-    fs = '60.0'
-    output_suffix = 'snp_indel_filtered.vcf'
-  }
 
   """
   gatk --java-options "-Xmx${my_mem}G" VariantFiltration \
@@ -41,7 +27,7 @@ process GATK_VARIANTFILTRATION {
   -O ${sampleID}_${output_suffix} \
   --cluster-window-size 10 \
   --filter-name "LowCoverage" --filter-expression "DP < 25" \
-  --filter-name "StrandBias" --filter-expression "FS > ${fs}"
+  --filter-name "LowQual" --filter-expression "QUAL < 20.0"
   """
 }
 

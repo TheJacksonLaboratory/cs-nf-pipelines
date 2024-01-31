@@ -140,11 +140,19 @@ workflow HS_PTA {
         // ** Step 2a: Xenome if PDX data used.
         ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
         if (params.pdx){
+
+            FASTP.out.trimmed_fastq.join(meta_ch).branch{
+                normal: it[2].status == 0
+                tumor:  it[2].status == 1
+            }.set{fastq_files}
+
+            normal_fastqs = fastq_files.normal.map{it -> [it[0], it[1]] }
+
             // Xenome Classification
-            XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
+            XENOME_CLASSIFY(fastq_files.tumor.map{it -> [it[0], it[1]] })
             ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats // set log file for multiqc
 
-            bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
+            bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.mix(normal_fastqs).join(READ_GROUPS.out.read_groups)
 
         } else { 
             bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)

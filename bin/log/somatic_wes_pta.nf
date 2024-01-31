@@ -15,12 +15,7 @@ ______________________________________________________
 --workflow                      ${params.workflow}
 --gen_org                       ${params.gen_org}
 --read_type                     ${params.read_type}
---sample_folder                 ${params.sample_folder}
---pattern                       ${params.pattern}
---extension                     ${params.extension}
---concat_lanes                  ${params.concat_lanes}
 --csv_input                     ${params.csv_input}
---download_data                 ${params.download_data}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
@@ -29,7 +24,9 @@ ______________________________________________________
 --xenome_index                  ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
---min_pct_hq_reads              ${params.min_pct_hq_reads}
+--quality_phred                 ${params.quality_phred}
+--unqualified_perc              ${params.unqualified_perc}
+--detect_adapter_for_pe         ${params.detect_adapter_for_pe}
 --dbSNP                         ${params.dbSNP}
 --target_gatk                   ${params.target_gatk}
 --target_picard                 ${params.target_picard}
