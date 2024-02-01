@@ -11,7 +11,7 @@ process GATK_UPDATEVCFSEQUENCEDICTIONARY {
 
     input:
     tuple val(sampleID), path(vcf), path(tbi), val(meta), val(normal_name), val(tumor_name), val(tool)
-    val(tool)
+    val(input_tool)
 
     output:
     tuple val(sampleID), file("*.vcf.gz"), file("*.tbi"), val(meta), val(normal_name), val(tumor_name), val(tool), emit: vcf_tbi
@@ -20,7 +20,7 @@ process GATK_UPDATEVCFSEQUENCEDICTIONARY {
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
 
-    replace_gq_string = tool == 'svaba' ? "sed -i 's/GQ,Number=1,Type=Integer/GQ,Number=1,Type=String/g' ${vcf.baseName}.reheaded.vcf && sed -i 's/PL,Number=G,Type=Integer/PL,Number=.,Type=Float/g' ${vcf.baseName}.reheaded.vcf" : ''
+    replace_gq_string = input_tool == 'svaba' ? "sed -i 's/GQ,Number=1,Type=Integer/GQ,Number=1,Type=String/g' ${vcf.baseName}.reheaded.vcf && sed -i 's/PL,Number=G,Type=Integer/PL,Number=.,Type=Float/g' ${vcf.baseName}.reheaded.vcf" : ''
 
     """
     gatk --java-options "-Xmx${my_mem}G" UpdateVCFSequenceDictionary  \
