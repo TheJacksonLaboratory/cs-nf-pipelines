@@ -2,6 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {CLUMPIFY} from "${projectDir}/modules/bbmap/bbmap_clumpify"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -126,9 +127,11 @@ workflow HS_PTA {
         concat_ch.map{it -> [it[0], it[2]]}.set{read_ch}
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
 
+        CLUMPIFY(read_ch)
+
         // ** Step 1: Trimmer
-        FASTP(read_ch)
-        
+        FASTP(CLUMPIFY.out.clumpy_fastq)
+
         FASTQC(FASTP.out.trimmed_fastq)
 
         // ** Step 2: Get Read Group Information
