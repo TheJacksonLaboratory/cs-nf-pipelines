@@ -2,6 +2,7 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {CLUMPIFY} from "${projectDir}/modules/bbmap/bbmap_clumpify"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -112,9 +113,11 @@ workflow MM_PTA {
     main:
         concat_ch.map{it -> [it[0], it[2]]}.set{read_ch}
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+        
+        CLUMPIFY(read_ch)
 
         // ** Trimmer
-        FASTP(read_ch)
+        FASTP(CLUMPIFY.out.clumpy_fastq)
         
         FASTQC(FASTP.out.trimmed_fastq)
         
@@ -404,8 +407,8 @@ workflow MM_PTA {
         PLOT_DELLY_CNV(r_plot_input)
 
         SVABA(ch_paired_samples)
-        SVABA_SV_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_sv_vcf_tbi) 
-        SVABA_INDEL_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_indel_vcf_tbi)
+        SVABA_SV_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_sv_vcf_tbi, 'svaba') 
+        SVABA_INDEL_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_indel_vcf_tbi, 'svaba')
         // Note: SVABA jumbles the dict header in the VCF, and must be adjusted prior to use in GATK tools.
 
         /*
