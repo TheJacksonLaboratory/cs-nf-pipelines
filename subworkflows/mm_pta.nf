@@ -121,8 +121,9 @@ workflow MM_PTA {
         } else {
             trimmer_input = read_ch
         }
+        
         // ** Trimmer
-        FASTP(CLUMPIFY.out.clumpy_fastq)
+        FASTP(trimmer_input)
         
         FASTQC(FASTP.out.trimmed_fastq)
         
