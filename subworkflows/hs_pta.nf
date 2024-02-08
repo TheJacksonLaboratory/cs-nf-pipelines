@@ -127,10 +127,16 @@ workflow HS_PTA {
         concat_ch.map{it -> [it[0], it[2]]}.set{read_ch}
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
 
-        CLUMPIFY(read_ch)
-
+        // Optional Step -- Clumpify
+        if (params.deduplicate_reads) {
+            CLUMPIFY(read_ch)
+            trimmer_input = CLUMPIFY.out.clumpy_fastq
+        } else {
+            trimmer_input = read_ch
+        }
+        
         // ** Step 1: Trimmer
-        FASTP(CLUMPIFY.out.clumpy_fastq)
+        FASTP(trimmer_input)
 
         FASTQC(FASTP.out.trimmed_fastq)
 
