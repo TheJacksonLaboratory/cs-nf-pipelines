@@ -9,7 +9,7 @@ def help(){
   --pbmode | <STRING> | Specify whether input data are CCS or CLR.
   --pbsv_tandem | true | Controls whether PBSV uses tandem repeat annotations during the "discover" methods.
 
-  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, --sample_folder, OR, --bam
+  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, OR, --bam
 
   Parameter | Default | Description
   --fastq1 | /<PATH> | The path to a single FASTQ file.

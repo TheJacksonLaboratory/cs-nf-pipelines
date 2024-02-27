@@ -21,10 +21,11 @@ ______________________________________________________
 --genome_build         ${params.genome_build}
 --fasta                ${params.fasta}
 --bwa_index            ${params.bwa_index}
---sample_folder        ${params.sample_folder}
+--read_type            ${params.read_type}
 --fastq1               ${params.fastq1}
 --fastq2               ${params.fastq2}
 --bam                  ${params.bam}
+--csv_input            ${params.csv_input}
 --sampleID             ${params.sampleID}
 --pubdir               ${params.pubdir}
 -w                     ${workDir}

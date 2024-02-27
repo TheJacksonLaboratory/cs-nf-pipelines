@@ -28,7 +28,7 @@ process GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE {
     -R ${params.fasta} \
     -I ${normal_bam} \
     -O ${sampleID}_${index}_variants_raw.gvcf \
-    -L 1 \
+    -L ${interval} \
     -XL ${params.exclude_regions} \
     -stand-call-conf ${params.call_val} \
     -G StandardAnnotation \
