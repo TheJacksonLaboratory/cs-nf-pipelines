@@ -3,13 +3,11 @@ nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/illumina"
 include {PARAM_LOG} from "${projectDir}/bin/log/illumina"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
-include {BWA_INDEX} from "${projectDir}/modules/bwa/bwa_index"
-include {SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx_mmrsvd"
-include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups_mmrsvd"
-include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem_mmrsvd"
-include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort_mmrsvd"
-include {GATK_MARK_DUPLICATES} from "${projectDir}/modules/gatk/gatk_mark_duplicates"
-include {GATK_INDEXFEATUREFILE} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
+include {SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
+include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
+include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
+include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
+include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates_removedup"
 include {SAMTOOLS_STATS} from "${projectDir}/modules/samtools/samtools_stats_mmrsvd"
 include {SMOOVE_CALL} from "${projectDir}/modules/smoove/smoove_call_germline"
 include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
@@ -19,13 +17,33 @@ include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
 include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
 include {DELLY_CALL_GERMLINE} from "${projectDir}/modules/delly/delly_call_germline"
 include {DELLY_CNV_GERMLINE} from "${projectDir}/modules/delly/delly_cnv_germline"
-include {GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE} from "${projectDir}/modules/gatk/gatk_haplotypecaller_sv_germline_mouse"
+
+include {GATK_INDEXFEATUREFILE;
+         GATK_INDEXFEATUREFILE as GATK_INDEXFEATUREFILE_SNV} from "${projectDir}/modules/gatk/gatk_indexfeaturefile"
+
+include {GATK_HAPLOTYPECALLER_INTERVAL} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
+include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
+include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
+include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
+include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
+         GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
+include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
+         GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
+include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
+
 include {VEP_GERMLINE as VEP_GERMLINE_GATK;
          VEP_GERMLINE as VEP_GERMLINE_CNV} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+
+include {BCFTOOLS_VCF_TO_BCF} from "${projectDir}/modules/bcftools/bcftools_vcf_to_bcf"
 include {DUPHOLD as DUPHOLD_DELLY;
          DUPHOLD as DUPHOLD_LUMPY;
          DUPHOLD as DUPHOLD_MANTA} from "${projectDir}/modules/duphold/duphold"
-include {SURVIVOR_MERGE} from "${projectDir}/modules/survivor/survivor_merge"
+include {BCFTOOLS_DUPHOLD_FILTER as BCFTOOLS_DUPHOLD_FILTER_DELLY;
+         BCFTOOLS_DUPHOLD_FILTER as BCFTOOLS_DUPHOLD_FILTER_LUMPY;
+         BCFTOOLS_DUPHOLD_FILTER as BCFTOOLS_DUPHOLD_FILTER_MANTA;} from "${projectDir}/modules/bcftools/bcftools_duphold_filter"
+
+include {SV_MERGE} from "${projectDir}/modules/r/illumina_sv_merge"
+include {PYTHON_BEDPE_TO_VCF} from "${projectDir}/modules/python/python_bedpe_to_vcf"
 include {SURVIVOR_VCF_TO_TABLE} from "${projectDir}/modules/survivor/survivor_vcf_to_table"
 include {SURVIVOR_SUMMARY} from "${projectDir}/modules/survivor/survivor_summary"
 include {SURVIVOR_TO_BED} from "${projectDir}/modules/survivor/survivor_to_bed"
@@ -43,13 +61,10 @@ workflow ILLUMINA {
         exit 0
     }
  
-    ch_fasta = params.fasta ? Channel.fromPath(params.fasta) : null
-    ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_fastq2 = params.fastq2 ? Channel.fromPath(params.fastq2) : null
     ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
-    ch_bwa_index = params.bwa_index ? Channel.fromPath(params.bwa_index) : null
 
     // Prepare reads channel
 
@@ -75,103 +90,83 @@ workflow ILLUMINA {
     }
 
     // Index reference fasta
-    SAMTOOLS_FAIDX(ch_fasta)
+    faidx_input = ['primary_strain', params.ref_fa]
+    SAMTOOLS_FAIDX(faidx_input)
     
     // ** Optional mapping steps when input are FASTQ files
     if (params.fastq1) {
-        
-        // Generate reference index if neccesary
-        if(!params.bwa_index) {
-            BWA_INDEX(ch_fasta)
-            ch_bwa_index = BWA_INDEX.out.bwa_index
-        }
-        else {
-            ch_bwa_index = file("${params.bwa_index}.*")
-        }
-
         // Filter and trim reads
         FASTP(fq_reads)
         
         // Get read groups ID from FASTQ file
-        READ_GROUPS(FASTP.out.trimmed_fastq)
+        READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
         // Map reads to reference
-        //bwa_mem_input = FILTER_TRIM.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         bwa_mem_input = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
-        BWA_MEM(bwa_mem_input, SAMTOOLS_FAIDX.out.fasta_fai, ch_bwa_index)
+        BWA_MEM(bwa_mem_input)
 
         // Sort and compress to BAM
-        SAMTOOLS_SORT(BWA_MEM.out.sam)
+        SAMTOOLS_SORT(BWA_MEM.out.sam, '-O bam', 'bam')
 
-        ch_bam_undup = SAMTOOLS_SORT.out.bam
+        ch_bam_undup = SAMTOOLS_SORT.out.sorted_file
     }
     else {
         ch_bam_undup = pre_bam
     }
 
     // Remove optical duplicates from alignment
-    GATK_MARK_DUPLICATES(ch_bam_undup)
+    PICARD_MARKDUPLICATES(ch_bam_undup)
 
     // Quantify insert sizes
-    SAMTOOLS_STATS(GATK_MARK_DUPLICATES.out.bam_and_index)
+    SAMTOOLS_STATS(PICARD_MARKDUPLICATES.out.bam_and_index)
 
     // Call SV with SMOOVE
-    SMOOVE_CALL(GATK_MARK_DUPLICATES.out.bam_and_index)
-    REHEAD_SORT_LUMPY(SMOOVE_CALL.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fasta_fai)
+    SMOOVE_CALL(PICARD_MARKDUPLICATES.out.bam_and_index)
+    REHEAD_SORT_LUMPY(SMOOVE_CALL.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fai)
 
     // * Manta
 
     // Call SV with Manta
-    MANTA_CALL(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
-    REHEAD_SORT_MANTA(MANTA_CALL.out.manta_sv, "manta", SAMTOOLS_FAIDX.out.fasta_fai)
+    MANTA_CALL(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
+    REHEAD_SORT_MANTA(MANTA_CALL.out.manta_sv, "manta", SAMTOOLS_FAIDX.out.fai)
 
     // * Delly
 
     // Call SV with Delly
-    DELLY_CALL_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
-    REHEAD_SORT_DELLY(DELLY_CALL_GERMLINE.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
+    DELLY_CALL_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
+    REHEAD_SORT_DELLY(DELLY_CALL_GERMLINE.out.delly_bcf, "delly_sv", SAMTOOLS_FAIDX.out.fai)
    
     // Call CNV with Delly
-    DELLY_CNV_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fasta_fai)
-    REHEAD_SORT_CNV(DELLY_CNV_GERMLINE.out.delly_bcf, "delly", SAMTOOLS_FAIDX.out.fasta_fai)
-
-
-    // * GATK
-
-    // GATK INDEXFEATUREFILE
+    DELLY_CNV_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
+    REHEAD_SORT_CNV(DELLY_CNV_GERMLINE.out.delly_bcf, "delly_cnv", SAMTOOLS_FAIDX.out.fai)
     GATK_INDEXFEATUREFILE(REHEAD_SORT_CNV.out.vcf_sort)
-    
-    // GATK HAPLOTYPECALLER
-    GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE(GATK_MARK_DUPLICATES.out.bam_and_index, params.target_gatk, 'gatk') 
-
-
-    // * Vep
-
-    //  VepPublicSvnIndel
-    VEP_GERMLINE_GATK(GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.vcf.join(GATK_HAPLOTYPECALLER_SV_MOUSE_GERMLINE.out.idx))
-    VEP_GERMLINE_CNV(REHEAD_SORT_CNV.out.vcf_sort.join(GATK_INDEXFEATUREFILE.out.idx))
-
+    VEP_GERMLINE_CNV(REHEAD_SORT_CNV.out.vcf_sort.join(GATK_INDEXFEATUREFILE.out.idx)) // THE OUTPUTS FROM THESE SHOULD BE SAVED AND ARE CURRENTLY NOT
 
     // Duphold
-    DUPHOLD_DELLY(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_DELLY.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
-    DUPHOLD_MANTA(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_MANTA.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
-    DUPHOLD_LUMPY(GATK_MARK_DUPLICATES.out.bam_and_index.join(REHEAD_SORT_LUMPY.out.vcf_sort).join(VEP_GERMLINE_GATK.out.vcf_gz).join(VEP_GERMLINE_GATK.out.tbi), SAMTOOLS_FAIDX.out.fasta_fai) 
+    DUPHOLD_DELLY(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_DELLY.out.vcf_sort), SAMTOOLS_FAIDX.out.fai, 'delly_sv') 
+    DUPHOLD_MANTA(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_MANTA.out.vcf_sort), SAMTOOLS_FAIDX.out.fai, 'manta')
+
+    // Duphold Filter
+    BCFTOOLS_DUPHOLD_FILTER_DELLY(DUPHOLD_DELLY.out.vcf, 'delly_sv')
+    BCFTOOLS_DUPHOLD_FILTER_MANTA(DUPHOLD_MANTA.out.vcf, 'manta')
+    BCFTOOLS_DUPHOLD_FILTER_LUMPY(REHEAD_SORT_LUMPY.out.vcf_sort, 'lumpy')
 
     // * Merge callers and annotate results
 
     // Join VCFs together by sampleID and run SURVIVOR merge
 
-    survivor_input = DUPHOLD_DELLY.out.vcf.join(DUPHOLD_LUMPY.out.vcf).join(DUPHOLD_MANTA.out.vcf)
+    survivor_input = BCFTOOLS_DUPHOLD_FILTER_DELLY.out.vcf.join(BCFTOOLS_DUPHOLD_FILTER_LUMPY.out.vcf).join(BCFTOOLS_DUPHOLD_FILTER_MANTA.out.vcf)
                      .map { it -> tuple(it[0], tuple(it[1], it[2], it[3]))}
-    SURVIVOR_MERGE(survivor_input)
-    SURVIVOR_VCF_TO_TABLE(SURVIVOR_MERGE.out.vcf)
-    SURVIVOR_SUMMARY(SURVIVOR_MERGE.out.vcf)
+    SV_MERGE(survivor_input)
+    PYTHON_BEDPE_TO_VCF(SV_MERGE.out.bedpe)
 
+    SURVIVOR_VCF_TO_TABLE(PYTHON_BEDPE_TO_VCF.out.vcf)
+    SURVIVOR_SUMMARY(PYTHON_BEDPE_TO_VCF.out.vcf)
     bed_prep_input = SURVIVOR_VCF_TO_TABLE.out.annotation.join(SURVIVOR_SUMMARY.out.csv)
     SURVIVOR_TO_BED(bed_prep_input)
     SURVIVOR_BED_INTERSECT(SURVIVOR_TO_BED.out.sv_beds)
     surv_annot_input = SURVIVOR_TO_BED.out.sv_beds.join(SURVIVOR_BED_INTERSECT.out.intersected_beds).join(SURVIVOR_SUMMARY.out.csv).join(SURVIVOR_VCF_TO_TABLE.out.annotation)
     SURVIVOR_ANNOTATION(surv_annot_input)
-    surv_inexon_input = SURVIVOR_MERGE.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
+    surv_inexon_input = PYTHON_BEDPE_TO_VCF.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
     SURVIVOR_INEXON(surv_inexon_input)
 }

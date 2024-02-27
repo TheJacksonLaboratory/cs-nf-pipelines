@@ -50,7 +50,7 @@ else if (params.workflow == "amplicon"){
 }
 else if (params.workflow == "germline_sv") {
   // mmrsvd    
-  include {GERMLINE_SV} from "./workflows/germline_sv.nf"
+  include {GERMLINE_SV} from "./workflows/germline_sv"
 }
 else {
   // if workflow name is not supported: 
