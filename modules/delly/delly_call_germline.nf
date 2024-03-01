@@ -9,11 +9,11 @@ process DELLY_CALL_GERMLINE {
     container 'quay.io/jaxcompsci/delly-ref_data:1.1.6--refv0.2.0'
     
     input:
-    tuple val(sampleID), file(bam), file(bai)
-    tuple file(fasta), file(fai)
+    tuple val(sampleID), path(bam), path(bai)
+    tuple path(fasta), path(fai)
     
     output:
-    tuple val(sampleID), file("${sampleID}_Delly_geno.bcf"), emit: delly_bcf
+    tuple val(sampleID), path("${sampleID}_Delly_geno.bcf"), emit: delly_bcf
 
     script:
     """

@@ -6,7 +6,7 @@ process BCFTOOLS_REHEAD_SORT {
     time '00:30:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.mem} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls' }", pattern: "${sampleID}_${caller}Sort.vcf", mode: 'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls' }", pattern: "${sampleID}_${caller}_sorted.vcf", mode: 'copy'
 
     container "quay.io/biocontainers/bcftools:1.15--h0ea216a_2"
 
@@ -16,7 +16,7 @@ process BCFTOOLS_REHEAD_SORT {
         tuple file(fasta), file(fai)
 
     output:
-        tuple val(sampleID), file("${sampleID}_${caller}Sort.vcf"), emit: vcf_sort
+        tuple val(sampleID), file("${sampleID}_${caller}_sorted.vcf"), emit: vcf_sort
 
     script:
 
@@ -33,10 +33,10 @@ process BCFTOOLS_REHEAD_SORT {
 
             bcftools sort ${sampleID}_${caller}Reheader.vcf \
                 -O v \
-                -o ${sampleID}_${caller}Sort.vcf
+                -o ${sampleID}_${caller}_sorted.vcf
             """
 
-        else if (caller == "delly")
+        else if (caller == "delly_sv" | caller == "delly_cnv" | caller == "manta")
             """
             printf "${sampleID}_${caller}\n" > rehead.txt
             bcftools reheader --samples rehead.txt \
@@ -44,14 +44,6 @@ process BCFTOOLS_REHEAD_SORT {
                 ${variants}
             bcftools sort ${sampleID}_${caller}Reheader.bcf \
                 -O v \
-                -o ${sampleID}_${caller}Sort.vcf
+                -o ${sampleID}_${caller}_sorted.vcf
             """
-
-        else if (caller == "manta")
-            // Note: the Manta variants don't have FORMAT fields so there is no sample name reheader
-            """
-            bcftools sort ${variants} \
-                -O v \
-                -o ${sampleID}_${caller}Sort.vcf                
-            """	
 }
