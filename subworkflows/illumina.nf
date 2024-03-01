@@ -56,7 +56,6 @@ include {SURVIVOR_BED_INTERSECT} from "${projectDir}/modules/survivor/survivor_b
 include {SURVIVOR_ANNOTATION} from "${projectDir}/modules/survivor/survivor_annotation"
 include {SURVIVOR_INEXON} from "${projectDir}/modules/survivor/survivor_inexon"
 
-
 // log parameter info
 PARAM_LOG()
 
@@ -85,45 +84,43 @@ workflow ILLUMINA {
                             .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     }
     else if (params.csv_input && !params.bam && !params.fastq1) {
+        sample_count = Channel.empty()
+        // If csv input, check sample quantity in csv, if more than one sample in csv, then exit
+        Channel.fromPath(params.csv_input).splitCsv(header: true)
+              .map { row -> tuple( row.sampleID ) }
+              .unique()
+              .count()
+              .branch{
+                 pass: it == 1
+                       return it
+              }
+              .set { sample_count }
 
-       sample_count = Channel.empty()
+        // if channel is empty give error message and exit
+        sample_count.ifEmpty{ exit 1, "\nERROR: Samplesheet csv had more than one sample. This workflow supports single sample analysis. CSV file must have only one sample with single, or multiple lane fastq inputs."}
 
-       // If csv input, check sample quantity in csv, if more than one sample in csv, then exit
-       Channel.fromPath(params.csv_input).splitCsv(header: true)
-             .map { row -> tuple( row.sampleID ) }
-             .unique()
-             .count()
-             .branch{
-                pass: it == 1
-                      return it
-             }
-             .set { sample_count }
+        ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
 
-       // if channel is empty give error message and exit
-       sample_count.ifEmpty{ exit 1, "\nERROR: Samplesheet csv had more than one sample. The csv file must have only one sample with single or, multiple lanes fastq inputs."}
+        if (params.read_type == 'PE'){
+            ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+            ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        } else if (params.read_type == 'SE') {
+            ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
+            ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        }
 
-       ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
+        CONCATENATE_LOCAL_FILES(ch_input_sample)
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
 
-       if (params.read_type == 'PE'){
-           ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
-           ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
-       } else if (params.read_type == 'SE') {
-           ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
-           ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
-       }
-
-       CONCATENATE_LOCAL_FILES(ch_input_sample)
-       CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
-       CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
-
-       fq_reads = read_ch
+        fq_reads = read_ch
 
     }
     else if (params.bam && !params.csv_input && !params.fastq1 && !params.fastq2 ) {
-       fq_reads = null
-       pre_bam = ch_sampleID.concat(ch_bam)
-                             .collect()
-                             .map { it -> tuple(it[0], it[1])}
+        fq_reads = null
+        pre_bam = ch_sampleID.concat(ch_bam)
+                            .collect()
+                            .map { it -> tuple(it[0], it[1])}
     } else {
         exit 1, "Both FASTQ and BAM inputs were specified. Use either FASTQ or BAM as workflow input."
     }
@@ -134,7 +131,7 @@ workflow ILLUMINA {
     fasta_index = SAMTOOLS_FAIDX.out.fai.map{it -> [params.ref_fa, it[1]]}
 
     // ** Optional mapping steps when input are FASTQ files
-    if (params.fastq1) {
+    if (params.csv_input || params.fastq1) {
         // Filter and trim reads
         FASTP(fq_reads)
 
@@ -210,6 +207,3 @@ workflow ILLUMINA {
     surv_inexon_input = PYTHON_BEDPE_TO_VCF.out.vcf.join(SURVIVOR_BED_INTERSECT.out.intersected_exons)
     SURVIVOR_INEXON(surv_inexon_input)
 }
-
-
-   
