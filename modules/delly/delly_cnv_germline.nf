@@ -9,13 +9,13 @@ process DELLY_CNV_GERMLINE {
     container 'quay.io/biocontainers/delly:1.1.6--h6b1aa3f_2'
     
     input:
-    tuple val(sampleID), file(bam), file(bai)
-    tuple file(fasta), file(fai)
+    tuple val(sampleID), path(bam), path(bai)
+    tuple path(fasta), path(fai)
 
     output:
-    tuple val(sampleID), file("${sampleID}_Delly.bcf"), emit: delly_bcf
-    tuple val(sampleID), file("${sampleID}_Delly.bcf.csi"), emit: delly_csi
-    tuple val(sampleID), file("${sampleID}_Delly.cov.gz"), emit: delly_cov
+    tuple val(sampleID), path("${sampleID}_Delly.bcf"), emit: delly_bcf
+    tuple val(sampleID), path("${sampleID}_Delly.bcf.csi"), emit: delly_csi
+    tuple val(sampleID), path("${sampleID}_Delly.cov.gz"), emit: delly_cov
 
 
     script:

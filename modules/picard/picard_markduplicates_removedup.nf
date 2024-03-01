@@ -21,7 +21,7 @@ process PICARD_MARKDUPLICATES {
         String my_mem = (task.memory-1.GB).toString()
         my_mem =  my_mem[0..-4]
         """
-        gatk --java-options -Xmx${my_mem}G \
+        picard -Xmx${my_mem}G \
             MarkDuplicates \
             --MAX_RECORDS_IN_RAM 50000 \
             --INPUT ${bam} \

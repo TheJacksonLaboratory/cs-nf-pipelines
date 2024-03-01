@@ -9,10 +9,10 @@ process LUMPY_CALL_SV {
     container 'quay.io/jaxcompsci/lumpy-ref_data:0.3.1--refv0.2.0'
     
     input:
-        tuple val(sampleID), file(bam_bwa_lumpy_sort), file(bam_bwa_lumpy_sort_bai), file(split_sorted_bam), file(split_sorted_bai), file(dis_sorted_bam), file(dis_sorted_bai)
+        tuple val(sampleID), path(bam_bwa_lumpy_sort), path(bam_bwa_lumpy_sort_bai), path(split_sorted_bam), path(split_sorted_bai), path(dis_sorted_bam), path(dis_sorted_bai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_lumpyOut.vcf"), emit: lumpy_vcf
+        tuple val(sampleID), path("${sampleID}_lumpyOut.vcf"), emit: lumpy_vcf
 
     shell:
         pairend_distro = "pairend_distro.py"

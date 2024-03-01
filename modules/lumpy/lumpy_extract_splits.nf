@@ -9,10 +9,10 @@ process LUMPY_EXTRACT_SPLITS {
     container 'quay.io/jaxcompsci/lumpy-ref_data:0.3.1--refv0.2.0'
     
     input:
-        tuple val(sampleID), file(bam)
+        tuple val(sampleID), path(bam)
     
     output:
-        tuple val(sampleID), file("${sampleID}_splitreads.bam"), emit: bam_bwa_lumpy
+        tuple val(sampleID), path("${sampleID}_splitreads.bam"), emit: bam_bwa_lumpy
 
     script:
     """

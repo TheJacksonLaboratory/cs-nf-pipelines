@@ -11,11 +11,11 @@ process LUMPY_PREP {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments/mapped_lumpy' : 'alignments/mapped_lumpy'}", pattern: "*_alignBWA_lumpy.bam", mode: 'copy'
     
     input:
-        tuple val(sampleID), file(bam), file(bai)
+        tuple val(sampleID), path(bam), path(bai)
     
     output:
-        tuple val(sampleID), file("${sampleID}_alignBWA_lumpy.bam"), emit: bam_bwa_lumpy
-        tuple val(sampleID), file("${sampleID}_discordants.unsorted.bam"), emit: dis_unsorted_bam
+        tuple val(sampleID), path("${sampleID}_alignBWA_lumpy.bam"), emit: bam_bwa_lumpy
+        tuple val(sampleID), path("${sampleID}_discordants.unsorted.bam"), emit: dis_unsorted_bam
 
     script:
     """

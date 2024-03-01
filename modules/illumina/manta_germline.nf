@@ -11,12 +11,11 @@ process MANTA_CALL {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls' }", pattern: "${sampleID}_mantaSort.vcf", mode: 'copy'
     
     input:
-        tuple val(sampleID), file(bam), file(bai)
-        tuple file(fasta), file(fai)
+        tuple val(sampleID), path(bam), path(bai)
+        tuple path(fasta), path(fai)
     
     output:
-        //tuple val(sampleID), file("${sampleID}_mantaCandidate.vcf"), emit: manta_sv
-        tuple val(sampleID), file("${sampleID}_mantaDiploidSV.vcf"), emit: manta_sv
+        tuple val(sampleID), path("${sampleID}_mantaDiploidSV.vcf"), emit: manta_sv
 
     script:
         """

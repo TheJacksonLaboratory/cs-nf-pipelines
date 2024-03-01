@@ -14,7 +14,7 @@ include {BCFTOOLS_REHEAD_SORT as REHEAD_SORT_LUMPY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_DELLY;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_CNV;
          BCFTOOLS_REHEAD_SORT as REHEAD_SORT_MANTA} from "${projectDir}/modules/bcftools/bcftools_rehead_sort"
-include {MANTA_CALL} from "${projectDir}/modules/manta/manta_call"
+include {MANTA_CALL} from "${projectDir}/modules/illumina/manta_germline"
 include {DELLY_CALL_GERMLINE} from "${projectDir}/modules/delly/delly_call_germline"
 include {DELLY_CNV_GERMLINE} from "${projectDir}/modules/delly/delly_cnv_germline"
 
@@ -92,7 +92,8 @@ workflow ILLUMINA {
     // Index reference fasta
     faidx_input = ['primary_strain', params.ref_fa]
     SAMTOOLS_FAIDX(faidx_input)
-    
+    fasta_index = SAMTOOLS_FAIDX.out.fai.map{it -> [params.ref_fa, it[1]]}
+
     // ** Optional mapping steps when input are FASTQ files
     if (params.fastq1) {
         // Filter and trim reads
@@ -122,29 +123,29 @@ workflow ILLUMINA {
 
     // Call SV with SMOOVE
     SMOOVE_CALL(PICARD_MARKDUPLICATES.out.bam_and_index)
-    REHEAD_SORT_LUMPY(SMOOVE_CALL.out.lumpy_vcf, "lumpy", SAMTOOLS_FAIDX.out.fai)
+    REHEAD_SORT_LUMPY(SMOOVE_CALL.out.lumpy_vcf, "lumpy", fasta_index)
 
     // * Manta
 
     // Call SV with Manta
-    MANTA_CALL(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
-    REHEAD_SORT_MANTA(MANTA_CALL.out.manta_sv, "manta", SAMTOOLS_FAIDX.out.fai)
+    MANTA_CALL(PICARD_MARKDUPLICATES.out.bam_and_index, fasta_index)
+    REHEAD_SORT_MANTA(MANTA_CALL.out.manta_sv, "manta", fasta_index)
 
     // * Delly
 
     // Call SV with Delly
-    DELLY_CALL_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
-    REHEAD_SORT_DELLY(DELLY_CALL_GERMLINE.out.delly_bcf, "delly_sv", SAMTOOLS_FAIDX.out.fai)
+    DELLY_CALL_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, fasta_index)
+    REHEAD_SORT_DELLY(DELLY_CALL_GERMLINE.out.delly_bcf, "delly_sv", fasta_index)
    
     // Call CNV with Delly
-    DELLY_CNV_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, SAMTOOLS_FAIDX.out.fai)
-    REHEAD_SORT_CNV(DELLY_CNV_GERMLINE.out.delly_bcf, "delly_cnv", SAMTOOLS_FAIDX.out.fai)
+    DELLY_CNV_GERMLINE(PICARD_MARKDUPLICATES.out.bam_and_index, fasta_index)
+    REHEAD_SORT_CNV(DELLY_CNV_GERMLINE.out.delly_bcf, "delly_cnv", fasta_index)
     GATK_INDEXFEATUREFILE(REHEAD_SORT_CNV.out.vcf_sort)
     VEP_GERMLINE_CNV(REHEAD_SORT_CNV.out.vcf_sort.join(GATK_INDEXFEATUREFILE.out.idx)) // THE OUTPUTS FROM THESE SHOULD BE SAVED AND ARE CURRENTLY NOT
 
     // Duphold
-    DUPHOLD_DELLY(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_DELLY.out.vcf_sort), SAMTOOLS_FAIDX.out.fai, 'delly_sv') 
-    DUPHOLD_MANTA(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_MANTA.out.vcf_sort), SAMTOOLS_FAIDX.out.fai, 'manta')
+    DUPHOLD_DELLY(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_DELLY.out.vcf_sort), fasta_index, 'delly_sv') 
+    DUPHOLD_MANTA(PICARD_MARKDUPLICATES.out.bam_and_index.join(REHEAD_SORT_MANTA.out.vcf_sort), fasta_index, 'manta')
 
     // Duphold Filter
     BCFTOOLS_DUPHOLD_FILTER_DELLY(DUPHOLD_DELLY.out.vcf, 'delly_sv')
