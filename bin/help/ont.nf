@@ -7,7 +7,7 @@ def help(){
   --keep_intermediate
   --sampleID | <STRING> | The sample ID for the input data.
 
-  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, --sample_folder, OR, --bam
+  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, OR, --bam
 
   Parameter | Default | Description
   --fastq1 | /<PATH> | The path to a single FASTQ file.

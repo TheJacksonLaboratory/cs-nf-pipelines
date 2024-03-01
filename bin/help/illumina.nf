@@ -7,12 +7,14 @@ def help(){
   --keep_intermediate
   --sampleID | <STRING> | The sample ID for the input data.
 
-  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, --sample_folder, OR, --bam
+  The following parameters include mutually exclusive options for specifying input data, including --fastq1/--fastq2, --csv_input, OR, --bam
 
   Parameter | Default | Description
   --fastq1 | /<PATH> | The path to a single FASTQ file, or one of a pair of FASTQs for paired-end data.
   --fastq2 | /<PATH> | The path to the second of a pair of FASTQs for paired-end data.
   --bam | /<PATH> | The path to a BAM input data if alignment has already been performed outside this pipeline.
+  --read_type | PE | Options: PE and SE. Default: PE. Type of reads: paired end (PE) or single end (SE).
+  --csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files.
 
   Reference data parameters:
   Parameter | Default | Description

@@ -2,6 +2,11 @@
 nextflow.enable.dsl=2
 include {help} from "${projectDir}/bin/help/illumina"
 include {PARAM_LOG} from "${projectDir}/bin/log/illumina"
+include {getLibraryId} from "${projectDir}/bin/shared/getLibraryId.nf"
+include {extract_csv} from "${projectDir}/bin/shared/extract_csv.nf"
+include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
+include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
+include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
@@ -66,25 +71,56 @@ workflow ILLUMINA {
     ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
 
-    // Prepare reads channel
 
-    if (params.fastq1 && !params.fastq2 && !params.bam) {
+    // Prepare reads channel
+    if (params.fastq1 && !params.fastq2 && !params.bam && !params.csv_input) {  
         fq_reads = ch_sampleID.concat(ch_fastq1)
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
     }
-
-    else if (params.fastq1 && params.fastq2 && !params.bam) {
+    else if (params.fastq1 && params.fastq2 && !params.bam && !params.csv_input) {
         fq_reads = ch_sampleID.concat(ch_fastq1, ch_fastq2)
                             .collect()
                             .map { it -> tuple(it[0], tuple(it[1], it[2]))}
     }
+    else if (params.csv_input && !params.bam && !params.fastq1) {
+        sample_count = Channel.empty()
+        // If csv input, check sample quantity in csv, if more than one sample in csv, then exit
+        Channel.fromPath(params.csv_input).splitCsv(header: true)
+              .map { row -> tuple( row.sampleID ) }
+              .unique()
+              .count()
+              .branch{
+                 pass: it == 1
+                       return it
+              }
+              .set { sample_count }
 
-    else if (params.bam && !params.fastq1 && !params.fastq2) {
+        // if channel is empty give error message and exit
+        sample_count.ifEmpty{ exit 1, "\nERROR: Samplesheet csv had more than one sample. This workflow supports single sample analysis. CSV file must have only one sample with single, or multiple lane fastq inputs."}
+
+        ch_input_sample = extract_csv(file(params.csv_input, checkIfExists: true))
+
+        if (params.read_type == 'PE'){
+            ch_input_sample.map{it -> [it[0], [it[2], it[3]]]}.set{read_ch}
+            ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        } else if (params.read_type == 'SE') {
+            ch_input_sample.map{it -> [it[0], it[2]]}.set{read_ch}
+            ch_input_sample.map{it -> [it[0], it[1]]}.set{meta_ch}
+        }
+
+        CONCATENATE_LOCAL_FILES(ch_input_sample)
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[2]]}.set{read_ch}
+        CONCATENATE_LOCAL_FILES.out.read_meta_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
+
+        fq_reads = read_ch
+
+    }
+    else if (params.bam && !params.csv_input && !params.fastq1 && !params.fastq2 ) {
         fq_reads = null
         pre_bam = ch_sampleID.concat(ch_bam)
-                             .collect()
-                             .map { it -> tuple(it[0], it[1])}
+                            .collect()
+                            .map { it -> tuple(it[0], it[1])}
     } else {
         exit 1, "Both FASTQ and BAM inputs were specified. Use either FASTQ or BAM as workflow input."
     }
@@ -95,10 +131,10 @@ workflow ILLUMINA {
     fasta_index = SAMTOOLS_FAIDX.out.fai.map{it -> [params.ref_fa, it[1]]}
 
     // ** Optional mapping steps when input are FASTQ files
-    if (params.fastq1) {
+    if (params.csv_input || params.fastq1) {
         // Filter and trim reads
         FASTP(fq_reads)
-        
+
         // Get read groups ID from FASTQ file
         READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
@@ -113,7 +149,7 @@ workflow ILLUMINA {
     }
     else {
         ch_bam_undup = pre_bam
-    }
+     }
 
     // Remove optical duplicates from alignment
     PICARD_MARKDUPLICATES(ch_bam_undup)
