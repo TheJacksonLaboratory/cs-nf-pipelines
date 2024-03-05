@@ -10,7 +10,7 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -46,7 +46,6 @@ include {SNPEFF_ONEPERLINE;
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
-include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wgs"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 // help if needed
@@ -133,14 +132,14 @@ workflow WGS {
   }
 
   // Step 1: Qual_Stat
-  JAX_TRIMMER(read_ch)
-
-  FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+  FASTP(read_ch)
+    
+  FASTQC(FASTP.out.trimmed_fastq)
 
   // Step 2: Get Read Group Information
-  READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
+  READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-  bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
 
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
@@ -291,12 +290,8 @@ workflow WGS {
     SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
   }
 
-  agg_stats = JAX_TRIMMER.out.quality_stats.join(PICARD_MARKDUPLICATES.out.dedup_metrics).join(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt).join(PICARD_COLLECTWGSMETRICS.out.txt)
-
-  AGGREGATE_STATS(agg_stats)
-
   ch_multiqc_files = Channel.empty()
-  ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
