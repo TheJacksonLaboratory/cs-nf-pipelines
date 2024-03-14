@@ -7,14 +7,18 @@ include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
-include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
+include {BWA_MEM2} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {SHORT_ALIGNMENT_MARKING} from "${projectDir}/modules/nygc-short-alignment-marking/short_alignment_marking"
 include {PICARD_CLEANSAM} from "${projectDir}/modules/picard/picard_cleansam"
 include {PICARD_FIX_MATE_INFORMATION} from "${projectDir}/modules/picard/picard_fix_mate_information"
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
+include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
@@ -185,17 +189,36 @@ workflow HS_PTA {
         // ** Step 8: Markduplicates
         PICARD_MARKDUPLICATES(PICARD_FIX_MATE_INFORMATION.out.fixed_mate_bam)
 
-        // ** Step 9: Calculate BQSR
-        GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+        // Read a list of contigs from parameters to provide to GATK as intervals
+        chroms = Channel
+            .fromPath("${params.chrom_contigs}")
+            .splitText()
+            .map{it -> it.trim()}
+        num_chroms = file(params.chrom_contigs).countLines().toInteger()
+
+        // ** Step 9: Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+        GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+        GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
 
         // ** Step 10: Apply BQSR
-        apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+        apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
         GATK_APPLYBQSR(apply_bqsr)
 
+        if (params.coverage_cap) {
+            JVARKIT_COVERAGE_CAP(GATK_APPLYBQSR.out.bam)
+            SAMTOOLS_INDEX(JVARKIT_COVERAGE_CAP.out.bam)
+
+            bam_file = JVARKIT_COVERAGE_CAP.out.bam
+            index_file = SAMTOOLS_INDEX.out.bai
+        } else {
+            bam_file = GATK_APPLYBQSR.out.bam
+            index_file = GATK_APPLYBQSR.out.bai
+        }
+        
         // Step 12: Nextflow channel processing
         // https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L854
 
-        GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai).join(meta_ch).branch{
+        bam_file.join(index_file).join(meta_ch).branch{
             normal: it[3].status == 0
             tumor:  it[3].status == 1
         }.set{ch_final_bam}
@@ -203,8 +226,8 @@ workflow HS_PTA {
         // Process tumor and normal BAMs seperately for conpair. For calling, use mapped and crossed data. 
 
         // ** Get alignment and WGS metrics
-        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
-        PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
+        PICARD_COLLECTWGSMETRICS(bam_file)
 
         // ** NEXTFLOW OPERATORS::: Establish channels with sample pairs and individual input objects for downstream calling
 
@@ -369,17 +392,11 @@ workflow HS_PTA {
         // Applies scatter intervals from above to the BAM file channel prior to variant calling. 
         chrom_channel = ch_normal_samples.combine(intervals).filter{it[4] != params.na12878_sampleName}
 
-        // Read a list of chromosome names from a parameter. These are provided to several tools. 
-        chroms = Channel
-            .fromPath("${params.chrom_contigs}")
-            .splitText()
-            .map{it -> it.trim()}
-
-        // Get a list of primary chromosomes and exclude chrM (dropRight(1))
+        // Use the list of chroms from above to get a list of primary chromosomes and exclude chrM (dropRight(1))
+        // The 'chroms' object and those made below are provided to several tools. 
         chrom_list = chroms.collect().dropRight(1)
         chrom_list_noY = chrom_list.dropRight(1)
         
-
         // Variant calling. 
         GATK_HAPLOTYPECALLER_SV_GERMLINE(chrom_channel)
 
@@ -417,8 +434,6 @@ workflow HS_PTA {
         // 6. AnnotateId & RenameCsqVcf
         GERMLINE_VCF_FINALIZATION(SNPSIFT_ANNOTATE_DBSNP_GERMLINE.out.vcf, 'filtered')
     
-
-
         // ** Step 15: Somatic Calling
 
         // Applies scatter intervals from above to the BQSR bam file
