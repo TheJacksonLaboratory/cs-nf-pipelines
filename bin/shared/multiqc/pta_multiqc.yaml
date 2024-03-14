@@ -27,6 +27,8 @@ extra_fn_clean_exts:
   - "_contamination"
   - ".final_sorted"
   - ".R1"
+  - "_coverageCap"
+  - ".clumpy"
   - type: "truncate"
     pattern: ".fastq"
 

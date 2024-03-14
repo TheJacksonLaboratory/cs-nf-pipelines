@@ -28,6 +28,8 @@ ______________________________________________________
 --pdx                           ${params.pdx}
 --read_type                     ${params.read_type}
 --deduplicate_reads             ${params.deduplicate_reads}
+--coverage_cap                  ${params.coverage_cap}
+--primary_chrom_bed             ${params.primary_chrom_bed}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
@@ -103,6 +105,8 @@ ______________________________________________________
 --gen_org                       ${params.gen_org}
 --read_type                     ${params.read_type}
 --deduplicate_reads             ${params.deduplicate_reads}
+--coverage_cap                  ${params.coverage_cap}
+--primary_chrom_bed             ${params.primary_chrom_bed}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
