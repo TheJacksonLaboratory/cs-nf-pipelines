@@ -25,7 +25,7 @@ process SV_MERGE {
         --slop=1000 \
         --allowed_chr=1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,X,Y \
         --min_sv_length=200 \
-        --out_file=${sampleID}.mergedCall.bedpe \
+        --out_file=${sampleID}.mergedCall.DLM.bedpe \
         --out_file_supplemental=${sampleID}.mergedCall.DLM.supplemental.bedpe
     """
 }

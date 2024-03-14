@@ -11,7 +11,7 @@ include {NANOQC} from "${projectDir}/modules/nanoqc/nanoqc"
 include {NANOFILT} from "${projectDir}/modules/nanofilt/nanofilt"
 include {MINIMAP2_INDEX} from "${projectDir}/modules/minimap/minimap2_index"
 include {MINIMAP2_MAP_ONT} from "${projectDir}/modules/minimap/minimap2_map_ont"
-include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort_mmrsvd"
+include {SAMTOOLS_SORT} from "${projectDir}/modules/samtools/samtools_sort"
 include {SAMTOOLS_FILTER} from "${projectDir}/modules/samtools/samtools_filter_mmrsvd"
 include {SNIFFLES} from "${projectDir}/modules/sniffles/sniffles"
 include {NANOSV} from "${projectDir}/modules/nanosv/nanosv"
@@ -40,7 +40,7 @@ workflow ONT {
        exit 0
     }
 
-    ch_fasta = params.fasta ? Channel.fromPath(params.fasta): null
+    ch_fasta = params.ref_fa ? Channel.fromPath(params.ref_fa): null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
@@ -71,24 +71,14 @@ workflow ONT {
 
         NANOSTAT_POSTFILT(NANOFILT.out.porechop_nanofilt_fastq)
 
-        // Prepare index
-        
-
-        // Generate reference index if neccesary
-        if(!params.minimap2_index) {
-            MINIMAP2_INDEX(ch_fasta)
-            ch_minimap2_index = MINIMAP2_INDEX.out.minimap2_index
-        }
-        else {
-            ch_minimap2_index = file("${params.minimap2_index}")
-        }        
+        ch_minimap2_index = file("${params.minimap2_index}")
 
         // Map reads to indexed genome
         MINIMAP2_MAP_ONT(NANOFILT.out.porechop_nanofilt_fastq, ch_minimap2_index)
 
-        SAMTOOLS_SORT(MINIMAP2_MAP_ONT.out.minimap_sam)
+        SAMTOOLS_SORT(MINIMAP2_MAP_ONT.out.minimap_sam, '-O bam', 'bam')
         
-        ch_mm2_bam =  SAMTOOLS_SORT.out.bam
+        ch_mm2_bam =  SAMTOOLS_SORT.out.sorted_file
     }
 
     else {

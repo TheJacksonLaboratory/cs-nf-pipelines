@@ -3,11 +3,11 @@ def PARAM_LOG(){
         error "'--pbmode': \"${params.pbmode}\" is not valid, supported options are 'CCS' or 'CLR'" 
     }
 
-    if (!params.fasta || params.fasta == "<PATH>" || params.fasta == "/<PATH>") {
-        error "'--fasta': \"${params.fasta}\" is not valid, specify path to reference FASTA" 
+    if (!params.ref_fa || params.ref_fa == "<PATH>" || params.ref_fa == "/<PATH>") {
+        error "'--ref_fa': \"${params.ref_fa}\" is not valid, specify path to reference FASTA" 
     }
 
-    if (!params.sampleID || params.fasta == "<STRING>") {
+    if (!params.sampleID || params.ref_fa == "<STRING>") {
         error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
     }
     log.info """
@@ -22,7 +22,7 @@ ______________________________________________________
 --workflow             ${params.workflow}
 --genome_build         ${params.genome_build}
 --pbmode               ${params.pbmode}
---fasta                ${params.fasta}
+--ref_fa               ${params.ref_fa}
 --fastq1               ${params.fastq1}
 --bam                  ${params.bam}
 --sampleID             ${params.sampleID}

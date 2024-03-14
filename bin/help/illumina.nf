@@ -19,7 +19,7 @@ def help(){
   Reference data parameters:
   Parameter | Default | Description
   --genome_build | "GRCm38" | Parameter that controls reference data used for alignment and annotation. GRCm38 is the default value, GRCm39 is an accepted alternate value.
-  --fasta | /<PATH> | Path to the reference genome in FASTA format.
+  --ref_fa | /<PATH> | Path to the reference genome in FASTA format.
   --fasta_index | /<PATH> | Optional paramter to specify index for reference genome. If not provided, pipeline will generate an index.
   --bwa_index | /<PATH> | Optional paramter to specify BWA indices for alignment. If not provided, pipeline will generate these indices.
   --exclude_regions | /ref_data/ucsc_mm10_gap_chr_sorted.bed | BED file that lists the coordinates of centromeres and telomeres to exclude as alignment targets

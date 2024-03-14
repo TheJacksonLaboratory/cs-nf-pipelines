@@ -27,7 +27,7 @@ workflow PACBIO {
         exit 0
     }
 
-    ch_fasta = params.fasta ? Channel.fromPath(params.fasta): null
+    ch_fasta = params.ref_fa ? Channel.fromPath(params.ref_fa): null
     ch_fastq1 = params.fastq1 ? Channel.fromPath(params.fastq1) : null
     ch_sampleID = params.sampleID ? Channel.value(params.sampleID) : null
     ch_bam = params.bam ? Channel.fromPath(params.bam) : null
@@ -47,15 +47,7 @@ workflow PACBIO {
 
     // ** Optional mapping steps when input is a FASTQ file
     if (params.fastq1) {
-        
-        // Generate reference index if neccesary
-        if(!params.minimap2_index) {
-            PBMM2_INDEX(ch_fasta)
-            ch_minimap2_index = PBMM2_INDEX.out.pbmm2_index
-        }
-        else {
-            ch_minimap2_index = file("${params.minimap2_index}")
-        }
+        ch_minimap2_index = file("${params.minimap2_index}")
 
         // Map reads to indexed genome
         PBMM2_CALL(fq_reads, ch_minimap2_index)

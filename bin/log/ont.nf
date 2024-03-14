@@ -1,10 +1,10 @@
 def PARAM_LOG(){
 
-    if (!params.fasta || params.fasta == "<PATH>" || params.fasta == "/<PATH>") {
-        error "'--fasta': \"${params.fasta}\" is not valid, specify path to reference FASTA" 
+    if (!params.ref_fa || params.ref_fa == "<PATH>" || params.ref_fa == "/<PATH>") {
+        error "'--ref_fa': \"${params.ref_fa}\" is not valid, specify path to reference FASTA" 
     }
 
-    if (!params.sampleID || params.fasta == "<STRING>") {
+    if (!params.sampleID || params.ref_fa == "<STRING>") {
         error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
     }
     
@@ -19,8 +19,7 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow             ${params.workflow}
 --genome_build         ${params.genome_build}
---fasta                ${params.fasta}
---fasta_index          ${params.fasta_index}
+--ref_fa               ${params.ref_fa}
 --fastq1               ${params.fastq1}
 --bam                  ${params.bam}
 --sampleID             ${params.sampleID}
