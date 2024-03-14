@@ -9,6 +9,7 @@ process SNPEFF{
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy', enabled: params.workflow=='amplicon_generic' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID),file(vcf)
@@ -36,9 +37,12 @@ process SNPEFF{
   if (indel_snp == 'BOTH'){
     output_suffix = 'SNP_INDEL_filtered_annotated_final.vcf'
   }  
-
+  if (indel_snp == 'BOTH' && params.workflow == 'amplicon_generic' ){
+    output_suffix = 'mergedCallers_filtered_annotated.vcf'
+  }
+  
   """
-  java -Djava.io.tmpdir=$TMPDIR -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
+  java -Djava.io.tmpdir=./ -Xmx${my_mem}G -jar /opt/snpEff/snpEff.jar \
   ${params.gen_ver} \
   -c ${params.snpEff_config} \
   -o ${output_format} \

@@ -44,3 +44,5 @@ process GATK_VARIANTFILTRATION {
   --filter-name "StrandBias" --filter-expression "FS > ${fs}"
   """
 }
+
+// https://gatk.broadinstitute.org/hc/en-us/articles/360035890471-Hard-filtering-germline-short-variants

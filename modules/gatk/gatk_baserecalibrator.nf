@@ -26,6 +26,6 @@ process GATK_BASERECALIBRATOR {
   --known-sites ${params.dbSNP} \
   --known-sites ${params.gold_std_indels} \
   --known-sites ${params.phase1_1000G} \
-  -O ${sampleID}_recal_data.table \
+  -O ${sampleID}_recal_data.table
   """
 }

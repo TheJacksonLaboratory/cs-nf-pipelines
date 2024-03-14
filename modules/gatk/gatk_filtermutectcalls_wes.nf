@@ -12,7 +12,7 @@ process GATK_FILTERMUECTCALLS {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats'  : 'gatk' }", pattern: "*.filteringStats.tsv", mode:'copy'
 
   input:
-  tuple val(sampleID), path(vcf), path(tbi), path(stats)
+  tuple val(sampleID), path(vcf), path(tbi), path(stats), path(contam_table), path(segments), file(read_orientation_model) //note: file() is used here on purpose. This is an optional input. 
 
   output:
   tuple val(sampleID), file("*_mutect2_somatic.filtered.vcf.gz"), file("*_mutect2_somatic.filtered.vcf.gz.tbi"), emit: mutect2_vcf_tbi
@@ -22,11 +22,17 @@ process GATK_FILTERMUECTCALLS {
   //Estimate somatic variants using Mutect2
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
+
+  read_model_setting = params.ffpe ? "--orientation-bias-artifact-priors ${read_orientation_model}" : ""
+
   """
   gatk --java-options "-Xmx${my_mem}G" FilterMutectCalls \
     -R ${params.ref_fa} \
     -V ${vcf} \
     --stats ${stats} \
+    --contamination-table ${contam_table} \
+    --tumor-segmentation ${segments} \
+    ${read_model_setting} \
     -O ${sampleID}_mutect2_somatic.filtered.vcf.gz
   """
 }

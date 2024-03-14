@@ -39,6 +39,6 @@ process GATK_HAPLOTYPECALLER {
   -O ${sampleID}_variants_raw.${output_suffix} \
   -L ${params.target_gatk} \
   ${params.ploidy_val} \
-  ${delta} \
+  ${delta}
   """
 }
