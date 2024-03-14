@@ -1,16 +1,10 @@
-## BJS Note: this script was located in the root path of the Docker container
-## gcr.io/nygc-public/sv_cnv@sha256:1c14a50d131323a2a4bab323cf224879776af8de37f93df79292fd2e63269274
-## It is reproduced below as it exists there without modification
-
 ## Merge arbitrary number of VCFs, annotate with simple event type 
 libs = c('optparse', 'StructuralVariantAnnotation', 'VariantAnnotation', 'rtracklayer', 'stringr')
 invisible(suppressPackageStartupMessages(sapply(libs, require, character.only=T, quietly=T)))
 options(width=200, scipen=999)
 
 
-SUPPORTED_CALLERS = c('manta', 'lumpy', 'svaba', 'gridss', 'delly')     ## Update this flag when adding support for new callers
-SVABA_MIN_LENGTH = 1001                                        ## Svaba-unique calls shorter than this appear to be artifactual
-
+SUPPORTED_CALLERS = c('manta', 'lumpy', 'delly')     ## Update this flag when adding support for new callers
 
 ## Callers have different names for the same pieces of evidence,
 ## For now handle each case separately
@@ -20,17 +14,10 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
   if (!caller %in% supported_callers) {
     stop('Caller ', caller, ' is not currently supported. Supported callers: ', paste(supported_callers, collapse=','))
   }
-  
-  ## It's a possibility that the sample names in the VCF will be 
-  ## the full path to the BAM used instead of just the sample ID
-  ## Just grab the index of the correct column
-  if (!sample_id %in% colnames(geno(vcf)[[1]])) {
-    sample_id = which(gsub('_dedup.bam','',basename(colnames(geno(vcf)[[1]]))) %in% sample_id)
-  }
-  
+    
+  sample_id = colnames(geno(vcf)[[1]])
   
   if (caller == 'manta') {
-    
     ## Common info
     sr = geno(vcf)$SR[, sample_id]
     sr = sapply(sr, `[`, 2)
@@ -38,20 +25,13 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
     pe = sapply(pe, `[`, 2)
     
     ## Supplementary info
-    supp_string = paste0(caller,'_SOMATICSCORE=', info(vcf)$SOMATICSCORE) 
-    
-  } else if (caller == 'svaba') {
-    
-    ## Common info
-    sr = geno(vcf)$SR[, sample_id]
-    pe = geno(vcf)$DR[, sample_id]
-    
-    ## Supplementary info
-    ad = paste0(caller,'_AD=', geno(vcf)$AD[, sample_id])
-    dp = paste0(caller,'_DP=', geno(vcf)$DP[, sample_id])
-    lo = paste0(caller,'_LO=', geno(vcf)$LO[, sample_id])
+    type = paste0(caller,'_SVTYPE=', info(vcf)$SVTYPE) 
+    ft = paste0(caller,'_FT=', geno(vcf)$FT[, sample_id])
+    gq = paste0(caller,'_GQ=', geno(vcf)$GQ[, sample_id])
+    pl = paste0(caller,'_PL=', geno(vcf)$PL[, sample_id])
     gt = paste0(caller,'_GT=', geno(vcf)$GT[, sample_id])
-    supp_string = paste(ad, dp, lo, gt, sep=',')
+
+    supp_string = paste(type, ft, gq, pl, gt, sep=',')
     
   } else if (caller == 'lumpy') {
     
@@ -59,25 +39,13 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
     sr = info(vcf)$SR
     pe = info(vcf)$PE
     ## Supplementary info
+    type = paste0(caller,'_SVTYPE=', info(vcf)$SVTYPE) 
     ro = paste0(caller,'_RO=', geno(vcf)$RO[, sample_id])
     ao = paste0(caller,'_AO=', geno(vcf)$AO[, sample_id])
     dp = paste0(caller,'_DP=', geno(vcf)$DP[, sample_id])
     gt = paste0(caller,'_GT=', geno(vcf)$GT[, sample_id])
-    supp_string = paste(ro, ao, dp, gt, sep=',')
-    
-    
-  } else if (caller == 'gridss') {
-    
-    ## Common info
-    sr = geno(vcf)$SR[, sample_id]
-    pe = geno(vcf)$RP[, sample_id]
-    
-    ## Supplementary info
-    vf = paste0(caller,'_VF=', geno(vcf)$VF[, sample_id])
-    asq = paste0(caller,'_ASQ=', geno(vcf)$ASQ[, sample_id])
-    qual = paste0(caller,'_QUAL=', geno(vcf)$QUAL[, sample_id])
-    supp_string = paste(vf, asq, qual, sep=',')
-    
+    supp_string = paste(type, ro, ao, dp, gt, sep=',')
+
   } else if (caller == 'delly') {
     ## Common info
     sr = info(vcf)$SR
@@ -85,12 +53,13 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
     pe = info(vcf)$PE
     # pe = sapply(pe, `[`, 2)
     ## Supplementary info
+    type = paste0(caller,'_SVTYPE=', info(vcf)$SVTYPE) 
     dr = paste0(caller,'_DR=', geno(vcf)$DR[, sample_id])
     dv = paste0(caller,'_DV=', geno(vcf)$DV[, sample_id])
     rr = paste0(caller,'_RR=', geno(vcf)$RR[, sample_id])
     rv = paste0(caller,'_RV=', geno(vcf)$RV[, sample_id])
     gt = paste0(caller,'_GT=', geno(vcf)$GT[, sample_id])
-    supp_string = paste(dr, dv, rr, rv, gt, sep=',')
+    supp_string = paste(type, dr, dv, rr, rv, gt, sep=',')
   }
   
   ## Set NA to 0
@@ -109,13 +78,9 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
   
 }
 
-
-
 sumSupport = function(x) {
   sapply(str_extract_all(x, '(?<=\\=)[0-9]+(?=,|\\])'), function(y) sum(as.numeric(y)))
 }
-
-
 
 removeRedundantBreakpoints = function(x) {
   
@@ -143,15 +108,12 @@ removeRedundantBreakpoints = function(x) {
     xi$read.support = sumSupport(xi$support)
     xi$multicaller.support = grepl('],[',xi$support,fixed=T)
     
-    
-    
     ## Automatically keep breakends with multi-caller support
     idx.multi = which(xi$multicaller.support)
     if (length(idx.multi) > 0) {
       x.idx.rm = c(x.idx.rm, x.idx[-idx.multi])
       next
     }
-    
     
     ## Automatically discard breakends with the lowest support
     idx.max = which(xi$read.support %in% max(xi$read.support))
@@ -160,7 +122,6 @@ removeRedundantBreakpoints = function(x) {
       x.idx = x.idx[idx.max]
       xi = xi[idx.max]
     }
-    
     
     ## If there are multiple breakends tied for highest read support
     if (length(xi) > 1) {
@@ -180,7 +141,7 @@ removeRedundantBreakpoints = function(x) {
       }
       
       ## Otherwise, just keep tied SVs
-
+      
     }
     
   }
@@ -274,13 +235,24 @@ mergeCallsets = function(a, b, slop) {
   
 }
 
-
+sup_vector <- function(x) {
+  sup_string = ''
+  for (caller in opt$callers) {
+    if (stringr::str_detect(x, caller)) {
+      sup_string <- paste0(sup_string, 1)
+    } else {
+      sup_string <- paste0(sup_string, 0)
+    }
+  }
+  return(sup_string)
+}
 
 ## Convert breakpointRanges to BEDPE
 vcfToBedpe = function(vcf, supplemental=F) {
   
   sqn = as.character(seqnames(vcf))
   strand = as.character(strand(vcf))
+
   res = c()
   processed = c()
   
@@ -302,16 +274,15 @@ vcfToBedpe = function(vcf, supplemental=F) {
     
     ## Which support column should we use? 
     if (supplemental) {
-      support = vcf$supplemental[i] 
+      support = vcf$supplemental[i]
     } else {
       support = vcf$support[i] 
     }
-    
-    
+
     ## Combine breakends in single line
     res.i = c(sqn[i], start(vcf)[i], end(vcf)[i],                                  ## chr1, start1, end1
               sqn[partner.idx], start(vcf)[partner.idx], end(vcf)[partner.idx],    ## chr2, start2, end 2
-              'BND', '.', strand[i], strand[partner.idx], support)                 ## type, score, strand1, strand2, support
+              vcf$svtype[i], '.', strand[i], strand[partner.idx], support)                 ## type, score, strand1, strand2, support
     
     ## Add to result, keep track of processed breakends
     res = rbind(res, res.i)
@@ -323,10 +294,10 @@ vcfToBedpe = function(vcf, supplemental=F) {
   colnames(res) = c('chr1', 'start1', 'end1', 'chr2', 'start2', 'end2', 'type', 'score', 'strand1', 'strand2', 'evidence')
   res = as.data.frame(res, stringsAsFactors=F)
   
-  res$type[res$strand1 == '+' & res$strand2 == '-'] = 'DEL'
-  res$type[res$strand1 == '-' & res$strand2 == '+'] = 'DUP'
-  res$type[res$strand1 == '-' & res$strand2 == '-'] = 'INV'
-  res$type[res$strand1 == '+' & res$strand2 == '+'] = 'INV'
+  # res$type[res$strand1 == '+' & res$strand2 == '-'] = 'DEL'
+  # res$type[res$strand1 == '-' & res$strand2 == '+'] = 'DUP'
+  # res$type[res$strand1 == '-' & res$strand2 == '-'] = 'INV'
+  # res$type[res$strand1 == '+' & res$strand2 == '+'] = 'INV'
   res$type[res$chr1 != res$chr2] = 'TRA'
   
   ## Sort by chromosome 
@@ -339,7 +310,9 @@ vcfToBedpe = function(vcf, supplemental=F) {
   
   ## Extract tool info from read support column
   res$tools = sapply(res$evidence, function(x) paste(unlist(stringr::str_extract_all(x, '(?<=\\[)[a-z]+(?=_)')), collapse=','))
-  
+  res$SUPP = nchar(gsub('[^,]', '', res$tools)) + 1
+  res$SUPP_VEC = unlist(lapply(res$tools, sup_vector))
+
   colnames(res)[1] = paste0('#', colnames(res)[1])
   
   return(res)
@@ -352,8 +325,7 @@ vcfToBedpe = function(vcf, supplemental=F) {
 option_list = list(
   make_option(c("-v", "--vcf"),                   type='character', help="Comma-delimited list of breakend notation VCFs"),
   make_option(c("-c", "--callers"),               type='character', help="Comma-delimited list of SV caller names corresponding to the order of VCFs given in --vcf"),
-  make_option(c("-t", "--tumor"),                 type='character', help="Tumor sample ID"),
-  make_option(c("-n", "--normal"),                type='character', help="Normal sample ID"),
+  make_option(c("-n", "--sample_name"),           type='character', help="Sample name"),
   make_option(c("-b", "--build"),                 type='character', help="Genome build"),
   make_option(c("-s", "--slop"),                  type='numeric',   help="Padding to use when comparing breakpoints"),
   make_option(c("-l", "--min_sv_length"),         type='numeric',   help="Filter SVs shorter than this length"),
@@ -362,14 +334,10 @@ option_list = list(
   make_option(c("-p", "--out_file_supplemental"), type='character', help="Output supplemental BEDPE"))
 opt = parse_args(OptionParser(option_list=option_list))
 
-
-
 ## Unpack arguments
 opt$vcf = unlist(strsplit(opt$vcf, ',', fixed=T))
 opt$callers = unlist(strsplit(opt$callers, ',', fixed=T))
 opt$allowed_chr = unlist(strsplit(opt$allowed_chr, ',', fixed=T))
-
-
 
 ## Iteratively merge VCFs
 res = NULL
@@ -377,16 +345,16 @@ for (i in 1:length(opt$vcf)) {
   ## Read VCF
   caller = opt$caller[i]
   vcf = VariantAnnotation::readVcf(opt$vcf[i], genome=opt$build)
-  
   ## Get read support
-  rowRanges(vcf)$support = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor)
-  rowRanges(vcf)$supplemental = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor, supplementary=T )
-  
+  rowRanges(vcf)$support = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$sample_name)
+  rowRanges(vcf)$supplemental = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$sample_name, supplementary=T )
+
   ## Convert to breakpointRanges object, don't adjust for CIPOS uncertainty (i.e. keep nominalPosition). 
   ## For Manta, infer missing breakpoint is required as the caller does not insert the recip call in the VCF as the other calls do. 
   vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T, inferMissingBreakends=T)
   ## Add breakendPosID for later redundancy checks
   vcf$breakendPosID = paste0('[',caller,'=',as.character(seqnames(vcf)),':',start(vcf),':',strand(vcf),']')
+
   ## Overlap if this isn't the first callset
   if (i == 1) {
     res = vcf
@@ -398,6 +366,7 @@ for (i in 1:length(opt$vcf)) {
 ## Handle breakpoints with duplicate start or end positions
 res = removeRedundantBreakpoints(res)
 
+
 ## Convert to bedpe, apply some filters 
 for (i in c('main','supplemental')) {
   
@@ -405,15 +374,11 @@ for (i in c('main','supplemental')) {
   
   ## Convert to BEDPE format
   res.i = vcfToBedpe(res, supplemental=i=='supplemental')
-  res.i$`tumor--normal` = paste0(opt$tumor,'--',opt$normal)
+  res.i$sampleID = opt$sample_name
   
-  ## Filter non-TRA variants for minimum length opt$min_sv_length
+  ## Filter non-TRA and non-INS variants for minimum length opt$min_sv_length
   sv.lengths = abs(as.numeric(res.i$start2) - as.numeric(res.i$start1))
-  res.i = res.i[res.i$type == 'TRA' | sv.lengths >= opt$min_sv_length, ]
-  
-  ## Filter non-TRA svaba-unique variants less than SVABA_MIN_LENGTH
-  sv.lengths = abs(as.numeric(res.i$start2) - as.numeric(res.i$start1))
-  res.i = res.i[(res.i$tools != 'svaba' | res.i$type == 'TRA') | (res.i$tools == 'svaba' & sv.lengths >= SVABA_MIN_LENGTH), ]
+  res.i = res.i[res.i$type == 'TRA' | res.i$type == 'INS' | sv.lengths >= opt$min_sv_length, ]
   
   ## Filter SVs not occurring in allowed chromosomes (i.e. autosomes and sex chromosomes)
   res.i = res.i[res.i$`#chr1` %in% opt$allowed_chr & res.i$chr2 %in% opt$allowed_chr, ]

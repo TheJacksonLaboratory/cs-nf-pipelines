@@ -23,7 +23,7 @@ process FASTP {
 
   detect_adapter = params.detect_adapter_for_pe ? "--detect_adapter_for_pe" : ""
 
-  if (params.read_type == "SE")
+  if (params.read_type == "SE" || !params.fastq2)
     """
     fastp -i ${fq_reads[0]} \
           -o ${sampleID}.trimmed.R1.fastq \

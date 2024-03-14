@@ -9,7 +9,7 @@ include {G2GTOOLS_VCF2VCI} from "${projectDir}/modules/g2gtools/g2gtools_vcf2vci
 include {G2GTOOLS_PATCH} from "${projectDir}/modules/g2gtools/g2gtools_patch"
 include {G2GTOOLS_TRANSFORM} from "${projectDir}/modules/g2gtools/g2gtools_transform"
 include {SAMTOOLS_FAIDX as SAMTOOLS_FAIDX_G2GTOOLS;
-         SAMTOOLS_FAIDX as SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx_g2gtool"
+         SAMTOOLS_FAIDX as SAMTOOLS_FAIDX} from "${projectDir}/modules/samtools/samtools_faidx"
 include {G2GTOOLS_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_convert"
 include {APPEND_DROPPED_CHROMS} from "${projectDir}/modules/python/append_dropped_chroms"
 include {G2GTOOLS_GTF2DB} from "${projectDir}/modules/g2gtools/g2gtools_gtf2db"

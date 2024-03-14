@@ -34,7 +34,7 @@ include {DEEPTOOLS_COMPUTEMATRIX} from "${projectDir}/modules/deeptools/deeptool
 include {DEEPTOOLS_PLOTPROFILE} from "${projectDir}/modules/deeptools/deeptools_plotprofile"
 include {DEEPTOOLS_PLOTHEATMAP} from "${projectDir}/modules/deeptools/deeptools_plotheatmap"
 include {PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/phantompeakqualtools/phantompeakqualtools"
-include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/multiqc/multiqc_custom_phantompeakqualtools"
+include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/r/multiqc_custom_phantompeakqualtools"
 include {DEEPTOOLS_PLOTFINGERPRINT} from "${projectDir}/modules/deeptools/deeptools_plotfingerprint"
 include {PEAK_CALLING_CHIPSEQ} from "${projectDir}/modules/macs2/macs2_peak_calling_chipseq"
 include {FRIP_SCORE} from "${projectDir}/modules/utility_modules/frip_score"
@@ -105,8 +105,9 @@ workflow CHIPSEQ {
   if (params.gene_bed)  { ch_gene_bed = file(params.gene_bed, checkIfExists: true) }
 
   // Step 2: Make genome filter
-  SAMTOOLS_FAIDX(ch_fasta)
-  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out, params.blacklist)
+  faidx_input = ['primary_ref_fasta', ch_fasta]
+  SAMTOOLS_FAIDX(faidx_input)
+  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out.fai, params.blacklist)
 
   // Step 3: Fastqc
   FASTQC(read_ch)
