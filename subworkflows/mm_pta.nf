@@ -10,6 +10,9 @@ include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
 
+include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
+
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
 
@@ -141,6 +144,17 @@ workflow MM_PTA {
         // ** Markduplicates
         PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
+        if (params.coverage_cap) {
+            JVARKIT_COVERAGE_CAP(PICARD_MARKDUPLICATES.out.dedup_bam)
+            SAMTOOLS_INDEX(JVARKIT_COVERAGE_CAP.out.bam)
+
+            bam_file = JVARKIT_COVERAGE_CAP.out.bam
+            index_file = SAMTOOLS_INDEX.out.bai
+        } else {
+            bam_file = PICARD_MARKDUPLICATES.out.dedup_bam
+            index_file = PICARD_MARKDUPLICATES.out.dedup_bai
+        }
+
         PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai).join(meta_ch).branch{
             normal: it[3].status == 0
             tumor:  it[3].status == 1
@@ -149,8 +163,8 @@ workflow MM_PTA {
         // Process tumor and normal BAMs seperately for conpair. For calling, use mapped and crossed data. 
 
         // ** Get alignment and WGS metrics
-        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
-        PICARD_COLLECTWGSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
+        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
+        PICARD_COLLECTWGSMETRICS(bam_file)
 
 
         // ** NEXTFLOW OPERATORS::: Establish channels with sample pairs and individual input objects for downstream calling
