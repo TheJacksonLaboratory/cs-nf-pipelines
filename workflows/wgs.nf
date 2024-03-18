@@ -10,22 +10,33 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+
+include {CLUMPIFY} from "${projectDir}/modules/bbmap/bbmap_clumpify"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
+
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
+include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
+
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
+
 include {GATK_HAPLOTYPECALLER_INTERVAL;
          GATK_HAPLOTYPECALLER_INTERVAL as GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
 include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
+
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
@@ -33,6 +44,7 @@ include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
 include {GATK_MERGEVCF;
          GATK_MERGEVCF as GATK_MERGEVCF_UNANNOTATED;
          GATK_MERGEVCF as GATK_MERGEVCF_ANNOTATED} from "${projectDir}/modules/gatk/gatk_mergevcf"
+
 include {SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_INDEL_COSMIC;
          SNPSIFT_ANNOTATE as SNPSIFT_ANNOTATE_SNP_DBSNP;
@@ -131,8 +143,16 @@ workflow WGS {
       }
   }
 
-  // Step 1: Qual_Stat
-  FASTP(read_ch)
+  // Optional Step -- Clumpify
+  if (params.deduplicate_reads) {
+      CLUMPIFY(read_ch)
+      trimmer_input = CLUMPIFY.out.clumpy_fastq
+  } else {
+      trimmer_input = read_ch
+  }
+
+  // Step 1: Read quality and adapter trimming
+  FASTP(trimmer_input)
     
   FASTQC(FASTP.out.trimmed_fastq)
 
@@ -157,31 +177,40 @@ workflow WGS {
   // If Human
   ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
   if (params.gen_org=='human'){
-    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-    ch_GATK_BASERECALIBRATOR_multiqc = GATK_BASERECALIBRATOR.out.table // set log file for multiqc
 
-    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+    // Read a list of contigs from parameters to provide to GATK as intervals
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
+    // Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+    GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
+    ch_GATK_BASERECALIBRATOR_multiqc = GATK_GATHERBQSRREPORTS.out.table // set log file for multiqc
+
+    // Apply BQSR
+    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
     GATK_APPLYBQSR(apply_bqsr)
 
-    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(GATK_APPLYBQSR.out.bam)
-    PICARD_COLLECTWGSMETRICS(GATK_APPLYBQSR.out.bam)
+    if (params.coverage_cap) {
+        JVARKIT_COVERAGE_CAP(GATK_APPLYBQSR.out.bam)
+        SAMTOOLS_INDEX(JVARKIT_COVERAGE_CAP.out.bam)
 
-    // Create a chromosome channel. HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
-    data = GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)
-    
-    // Read a list of contigs from parameters to provide to GATK as intervals
-    // for HaplotypeCaller variant regions
-    chroms = Channel
-     .fromPath("${params.chrom_contigs}")
-     .splitText()
-     .map{it -> it.trim()}
-    
-    num_chroms = file(params.chrom_contigs).countLines().toInteger()
-    // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
+        bam_file = JVARKIT_COVERAGE_CAP.out.bam
+        index_file = SAMTOOLS_INDEX.out.bai
+    } else {
+        bam_file = GATK_APPLYBQSR.out.bam
+        index_file = GATK_APPLYBQSR.out.bai
+    }
 
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
+    PICARD_COLLECTWGSMETRICS(bam_file)
+
+    // HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
     // Applies scatter intervals from above to the BQSR bam file
-    chrom_channel = data.combine(chroms)
+    chrom_channel = bam_file.join(index_file).combine(chroms)
     
     // Use the Channel in HaplotypeCaller
     GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
@@ -200,12 +229,21 @@ workflow WGS {
 
   // If Mouse
   if (params.gen_org=='mouse'){
-    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
-    PICARD_COLLECTWGSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
 
-    // create a chromosome channel. HaplotypeCaller runs faster when individual chromosomes called instead of Whole Genome
-    data = PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai)
-    
+    if (params.coverage_cap) {
+        JVARKIT_COVERAGE_CAP(PICARD_MARKDUPLICATES.out.dedup_bam)
+        SAMTOOLS_INDEX(JVARKIT_COVERAGE_CAP.out.bam)
+
+        bam_file = JVARKIT_COVERAGE_CAP.out.bam
+        index_file = SAMTOOLS_INDEX.out.bai
+    } else {
+        bam_file = PICARD_MARKDUPLICATES.out.dedup_bam
+        index_file = PICARD_MARKDUPLICATES.out.dedup_bai
+    }
+
+    PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
+    PICARD_COLLECTWGSMETRICS(bam_file)
+
     // Read a list of contigs from parameters to provide to GATK as intervals
     // for HaplotypeCaller variant regions
     chroms = Channel
@@ -216,15 +254,14 @@ workflow WGS {
     num_chroms = file(params.chrom_contigs).countLines().toInteger()
     // number of intervals split on during calling. A 'value' variable used in groupTuple size statement. 
 
-    // Applies scatter intervals from above to the BQSR bam file
-    chrom_channel = data.combine(chroms)
+    // Applies scatter intervals from above to the markdup bam file
+    chrom_channel = bam_file.join(index_file).combine(chroms)
 
     // Use the Channel in HaplotypeCaller
     GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
     // Gather intervals from scattered HaplotypeCaller operations into one
     // common stream for output
   
-
     MAKE_VCF_LIST(GATK_HAPLOTYPECALLER_INTERVAL.out.vcf.groupTuple(size: num_chroms), chroms.toList())
     // Sort VCF within MAKE_VCF_LIST
     GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
