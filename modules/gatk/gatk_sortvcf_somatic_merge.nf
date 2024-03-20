@@ -1,5 +1,4 @@
 process GATK_SORTVCF_SOMATIC {
-
     tag "$sampleID"
 
     cpus = 1
@@ -22,9 +21,10 @@ process GATK_SORTVCF_SOMATIC {
     inputs = list.collect { "-I $it" }.join(' ')
 
     """
-    gatk --java-options "-Xmx${my_mem}G" SortVcf  \
-        -SD ${params.ref_fa_dict} \
-        ${inputs} \
-        -O ${sampleID}_mnv_final_filtered_merged.vcf
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" SortVcf  \
+    -SD ${params.ref_fa_dict} \
+    ${inputs} \
+    -O ${sampleID}_mnv_final_filtered_merged.vcf
     """
 }

@@ -21,7 +21,8 @@ process GATK_APPLYBQSR {
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
     """
-    gatk --java-options "-Xmx${my_mem}G" ApplyBQSR \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" ApplyBQSR \
     -R ${params.ref_fa} \
     -I ${bam} \
     --bqsr-recal-file ${table} \

@@ -1,5 +1,4 @@
 process GATK_UPDATEVCFSEQUENCEDICTIONARY {
-
     tag "$sampleID"
 
     cpus = 1
@@ -23,16 +22,16 @@ process GATK_UPDATEVCFSEQUENCEDICTIONARY {
     replace_gq_string = input_tool == 'svaba' ? "sed -i 's/GQ,Number=1,Type=Integer/GQ,Number=1,Type=String/g' ${vcf.baseName}.reheaded.vcf && sed -i 's/PL,Number=G,Type=Integer/PL,Number=.,Type=Float/g' ${vcf.baseName}.reheaded.vcf" : ''
 
     """
-    gatk --java-options "-Xmx${my_mem}G" UpdateVCFSequenceDictionary  \
-        --source-dictionary ${params.ref_fa_dict} \
-        -V ${vcf} \
-        --replace true \
-        -O ${vcf.baseName}.reheaded.vcf
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" UpdateVCFSequenceDictionary  \
+    --source-dictionary ${params.ref_fa_dict} \
+    -V ${vcf} \
+    --replace true \
+    -O ${vcf.baseName}.reheaded.vcf
 
     ${replace_gq_string}
 
     bgzip -f -c ${vcf.baseName}.reheaded.vcf > ${vcf.baseName}.reheaded.vcf.gz
     tabix ${vcf.baseName}.reheaded.vcf.gz
-    
     """
 }

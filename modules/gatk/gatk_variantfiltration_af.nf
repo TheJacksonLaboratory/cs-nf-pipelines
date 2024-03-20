@@ -24,7 +24,8 @@ process GATK_VARIANTFILTRATION_AF {
     my_mem =  my_mem[0..-4]
     """
     ## Annotate FORMAT/AF
-    gatk --java-options "-Xmx${my_mem}G" VariantAnnotator \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp"  VariantAnnotator \
     -R ${params.ref_fa} \
     -V ${vcf} \
     -O ${sampleID}_haplotypecaller.gatk.af.vcf.gz \
@@ -36,7 +37,7 @@ process GATK_VARIANTFILTRATION_AF {
     > ${sampleID}.biallellic.vcf
 
     ## Variant filtration
-    gatk --java-options "-Xmx${my_mem}G" VariantFiltration \
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" VariantFiltration \
     -R ${params.ref_fa} \
     -V ${sampleID}.biallellic.vcf \
     -O ${sampleID}.haplotypecaller.af-gq-filtered.vcf.gz \
@@ -49,6 +50,5 @@ process GATK_VARIANTFILTRATION_AF {
     zcat ${sampleID}.haplotypecaller.af-gq-filtered.vcf.gz \
     | grep -v "AlleleFraction" \
     > ${sampleID}_haplotypecaller.gatk.af-gq-filtered.vcf
-
     """
 }
