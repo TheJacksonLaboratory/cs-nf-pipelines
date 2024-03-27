@@ -1,0 +1,112 @@
+nextflow_workflow {
+
+    name "Test Workflow WGS"
+    script "workflows/wgs.nf"
+    workflow "WGS"
+
+    test("Full Workflow -- Mouse -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                sample_folder = "${baseDir}/test/wgs/mouse"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- GRCm38 -- Deduplicate, Coverage Cap, Split Fastq") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                sample_folder = "${baseDir}/test/wgs/mouse"
+                pubdir = "tests/results"
+                split_fastq = true
+                split_fastq_bin_size = 1000
+                deduplicate_reads
+                coverage_cap = 50
+                pipeline = 'wgs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                genome_build = "GRCm39"
+                sample_folder = "${baseDir}/test/wgs/mouse"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/wgs/human"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+    test("Full Workflow -- Human -- Deduplicate, Coverage Cap, Split Fastq") {
+        tag "GRCh38"
+        tag "options"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/wgs/human"
+                pubdir = "tests/results"
+                split_fastq = true
+                split_fastq_bin_size = 1000
+                deduplicate_reads
+                coverage_cap = 50
+                pipeline = 'wgs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

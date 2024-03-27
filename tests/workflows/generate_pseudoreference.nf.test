@@ -1,0 +1,24 @@
+nextflow_workflow {
+
+    name "Test Workflow GENERATE_PSEUDOREFERENCE"
+    script "workflows/generate_pseudoreference.nf"
+    workflow "GENERATE_PSEUDOREFERENCE"
+
+    test("Full Workflow -- Mouse") {
+        tag "GRCm39"
+        tag "secondary"
+        tag "emase_gbrs"
+        when {
+            params {
+                outdir = "tests/results"
+                pipeline = 'generate_pseudoreference'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

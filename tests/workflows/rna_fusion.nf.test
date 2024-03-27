@@ -1,0 +1,46 @@
+nextflow_workflow {
+
+    name "Test Workflow RNA_FUSION"
+    script "workflows/rna_fusion.nf"
+    workflow "RNA_FUSION"
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/fusion/human"
+                pubdir = "tests/results"
+                pipeline = 'rna_fusion'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- PDX") {
+        tag "GRCh38"
+        tag "pdx"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/fusion/human/pdx"
+                pubdir = "tests/results"
+                pdx
+                pipeline = 'rna_fusion'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}
