@@ -23,6 +23,10 @@ extra_fn_clean_exts:
   - "_sortsam"
   - "_R1"
   - ".STAR"
+  - "_strandedness"
+
+section_comments:
+  rseqc: "Note: strandedness was determined with '[how_are_we_stranded_here](https://github.com/signalbash/how_are_we_stranded_here/tree/master)' which uses `infer_experiment.py` from RSeQC."
 
 custom_logo: "./JAX_logo_rgb_transparentback.png"
 custom_logo_url: "https://github.com/TheJacksonLaboratory/cs-nf-pipelines"

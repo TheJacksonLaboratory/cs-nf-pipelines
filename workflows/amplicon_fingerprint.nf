@@ -119,6 +119,8 @@ workflow AMPLICON {
 
   // Step 3: BWA-MEM Alignment
   bwa_mem_mapping = CUTADAPT.out.paired_trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
+                      
   BWA_MEM(bwa_mem_mapping)
 
   SAMTOOLS_SORT_PRIMERCLIP(BWA_MEM.out.sam, '-O sam -n', 'sam')

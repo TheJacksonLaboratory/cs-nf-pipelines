@@ -152,9 +152,11 @@ workflow AMPLICON {
 
   // Step 3: BWA-MEM Alignment
   bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
+
   BWA_MEM(bwa_mem_mapping)
 
-  PICARD_SORTSAM(BWA_MEM.out.sam)
+  PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
   
   if (params.markduplicates) {
     PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)

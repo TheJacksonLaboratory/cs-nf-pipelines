@@ -9,6 +9,7 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {SAMTOOLS_MERGE} from "${projectDir}/modules/samtools/samtools_merge"
 include {SHORT_ALIGNMENT_MARKING} from "${projectDir}/modules/nygc-short-alignment-marking/short_alignment_marking"
 include {PICARD_CLEANSAM} from "${projectDir}/modules/picard/picard_cleansam"
 include {PICARD_FIX_MATE_INFORMATION} from "${projectDir}/modules/picard/picard_fix_mate_information"
@@ -166,28 +167,73 @@ workflow HS_PTA {
             ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats // set log file for multiqc
 
             bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.mix(normal_fastqs).join(READ_GROUPS.out.read_groups)
+                              .map{it -> [it[0], it[1], 'aln', it[2]]}
 
         } else { 
+            
             bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                              .map{it -> [it[0], it[1], 'aln', it[2]]}
+
+        }
+
+        if (params.split_fastq) {
+            if (params.read_type == 'PE') {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1][0], it[1][1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true, pe: true)
+                                .map{it -> [it[0], [it[1], it[2]], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique. 
+            } else {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true)
+                                .map{it -> [it[0], it[1], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique.
+            }
+            split_fastq_count = split_fastq_files
+                            .groupTuple()
+                            .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
+                        
+            bwa_mem_mapping = split_fastq_count
+                        .combine(split_fastq_files, by:0)
+                        .map{it -> [it[1], it[2], it[3], it[4]] }
+        } else {
+            bwa_mem_mapping = bwa_mem_mapping
         }
 
         // ** Step 3: BWA-MEM Alignment
         BWA_MEM(bwa_mem_mapping)
         
         // ** Step 4: Sort mapped reads
-        PICARD_SORTSAM(BWA_MEM.out.sam)
+        PICARD_SORTSAM(BWA_MEM.out.sam, 'queryname')
 
         // ** Step 5: Remove short mapping 'artifacts': https://github.com/nygenome/nygc-short-alignment-marking
+        //            Requires query name sorted bam, done in sortsam above. 
         SHORT_ALIGNMENT_MARKING(PICARD_SORTSAM.out.bam)
 
-        // ** Step 6: Clean BAM to set MAPQ = 0 when read is unmapped (issue introduced in step 5)
-        PICARD_CLEANSAM(PICARD_SORTSAM.out.bam)
+        // ** Step 6: Clean BAM to set MAPQ = 0 when read is unmapped (issue introduced in step 5)]
+        //            Requires coordinate sorted bam.
+        PICARD_CLEANSAM(SHORT_ALIGNMENT_MARKING.out.marked_bam)
 
         // ** Step 7: Fix mate information (fix pair flags due to mapping adjustment in step 5)
         PICARD_FIX_MATE_INFORMATION(PICARD_CLEANSAM.out.cleaned_bam)
 
+        if (params.split_fastq) {
+            SAMTOOLS_MERGE(PICARD_FIX_MATE_INFORMATION.out.fixed_mate_bam.groupTuple(), 'merged_file')
+            bam_file = SAMTOOLS_MERGE.out.bam
+        } else {
+            bam_file = PICARD_FIX_MATE_INFORMATION.out.fixed_mate_bam
+        }
+
+
         // ** Step 8: Markduplicates
-        PICARD_MARKDUPLICATES(PICARD_FIX_MATE_INFORMATION.out.fixed_mate_bam)
+        PICARD_MARKDUPLICATES(bam_file)
 
         // Read a list of contigs from parameters to provide to GATK as intervals
         chroms = Channel

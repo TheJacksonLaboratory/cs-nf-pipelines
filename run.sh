@@ -11,7 +11,7 @@ cd $SLURM_SUBMIT_DIR
 
 # LOAD NEXTFLOW
 module use --append /projects/omics_share/meta/modules
-module load nextflow
+module load nextflow/23.10.1
 
 # RUN TEST PIPELINE
 nextflow main.nf \

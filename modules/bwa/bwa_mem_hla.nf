@@ -11,7 +11,7 @@ process BWA_MEM_HLA {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), path(fq_reads), file(read_groups)
+  tuple val(sampleID), path(fq_reads), val(index), path(read_groups)
 
   output:
   tuple val(sampleID), path("*.bam"), emit: bam

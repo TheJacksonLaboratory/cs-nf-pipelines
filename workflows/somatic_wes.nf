@@ -179,15 +179,17 @@ workflow SOMATIC_WES {
 
         // Step 4: BWA-MEM Alignment
         bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
+                          .map{it -> [it[0], it[1], 'aln', it[2]]}
 
     } else { 
         bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                          .map{it -> [it[0], it[1], 'aln', it[2]]}
     }
 
     BWA_MEM(bwa_mem_mapping)
 
     // Step 5: Variant Preprocessing - Part 1
-    PICARD_SORTSAM(BWA_MEM.out.sam)
+    PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
     PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
     // Step 6: Variant Pre-Processing - Part 2

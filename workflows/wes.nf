@@ -139,11 +139,12 @@ workflow WES {
 
   // Step 3: BWA-MEM Alignment
   bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
 
   BWA_MEM(bwa_mem_mapping)
 
   // Step 4: Variant Preprocessing - Part 1
-  PICARD_SORTSAM(BWA_MEM.out.sam)
+  PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // If Human: Step 5-10

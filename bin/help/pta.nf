@@ -17,6 +17,9 @@ The following are human specific parameters. To see help for mouse, add `--gen_o
 
 --deduplicate_reads | false | Options: false, true. If specified, run bbmap clumpify on input reads. Clumpify will deduplicate reads prior to trimming. This can help with mapping and downstream steps when analyzing high coverage WGS data. 
 
+--split_fastq | false | Options false, true. If specified, FASTQ files will be split into chunks sized based on split_fastq_bin_size prior to mapping. This option is recommended for high coverage data. 
+--split_fastq_bin_size | 10000000 | If split_fastq is specified, FASTQ files will splint into chunks of this size prior to mapping. 
+
 --coverage_cap | null | If an integer value is specified, jvarkit 'Biostar154220' is used to cap coverage at the that value. See: http://lindenb.github.io/jvarkit/Biostar154220.html
 --primary_chrom_bed | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/intervals/Homo_sapiens_assembly38.primary_chrom.bed' | A bed file containing the primary chromsomes with positions. Used in limiting jvarkit 'Biostar154220' to those regions with expected coverage.
 
