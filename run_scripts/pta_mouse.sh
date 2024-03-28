@@ -17,7 +17,7 @@ module load nextflow/23.10.1
 # RUN PIPELINE
 nextflow ../main.nf \
 --workflow pta \
--profile sumner \
+-profile sumner2 \
 --gen_org mouse \
 --csv_input ../test/csv_samplesheets/mm_test_input.csv \
 --pubdir "/flashscratch/${USER}/outputDir" \

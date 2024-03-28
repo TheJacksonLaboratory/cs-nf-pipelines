@@ -15,7 +15,7 @@ module load nextflow/23.10.1
 
 # RUN TEST PIPELINE
 nextflow main.nf \
--profile sumner \
+-profile sumner2 \
 --workflow rnaseq \
 --gen_org mouse \
 --sample_folder 'test/rna/mouse' \

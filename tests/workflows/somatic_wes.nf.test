@@ -32,7 +32,7 @@ nextflow_workflow {
                 gen_org = "human"
                 sample_folder = "${baseDir}/test/wes/human/pdx"
                 pubdir = "tests/results"
-                pdx
+                pdx = true
                 pipeline = 'somatic_wes'
             }
         }

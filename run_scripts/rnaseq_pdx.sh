@@ -18,7 +18,7 @@ module load nextflow/23.10.1
 nextflow ../main.nf \
 --workflow rnaseq \
 --pdx \
--profile sumner \
+-profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
 --pubdir "/flashscratch/${USER}/outputDir" \

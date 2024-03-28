@@ -17,7 +17,7 @@ module load nextflow/23.10.1
 # RUN PIPELINE
 nextflow ../main.nf \
 --workflow rrbs \
--profile sumner \
+-profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
 --pubdir "/flashscratch/${USER}/outputDir" \

@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mail-user=first.last@jax.org
-#SBATCH --job-name=wes_human
+#SBATCH --job-name=rnaseq_human
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
 #SBATCH -q batch
@@ -16,10 +16,11 @@ module load nextflow/23.10.1
 
 # RUN PIPELINE
 nextflow ../main.nf \
---workflow wes \
+--workflow chipseq \
 -profile sumner2 \
---sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
+--input '<PATH_TO_YOUR_SEQUENCES/CSV_input.csv' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \
---comment "This script will run whole exome sequencing analysis on human samples using default hg38"
+--narrow_peak \
+--comment "This script will run ChIP-sequencing analysis on human samples using default hg38"

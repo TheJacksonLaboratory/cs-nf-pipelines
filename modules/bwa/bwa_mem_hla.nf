@@ -28,7 +28,7 @@ process BWA_MEM_HLA {
   """
   rg=\$(cat $read_groups)
 
-  run-bwamem -t $task.cpus -R \${rg} -o ${sampleID} -H ${params.ref_fa_indices} $inputfq | sh
+  run-bwamem -t $task.cpus -R \${rg} -o ${sampleID}_${index} -H ${params.ref_fa_indices} $inputfq | sh
 
   """
 }
