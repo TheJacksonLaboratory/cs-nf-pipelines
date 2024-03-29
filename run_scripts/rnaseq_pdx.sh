@@ -21,6 +21,7 @@ nextflow ../main.nf \
 -profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
+--genome_build 'GRCh38' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run rna sequencing analysis on pdx samples using default hg38 and mm10"

@@ -20,6 +20,7 @@ nextflow ../main.nf \
 -profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
+--genome_build 'GRCm38' \
 --effective_genome_size 2652783500 \
 --bowtie2Index '/projects/omics_share/mouse/GRCm38/genome/indices/ensembl/v102/bowtie2/Mus_musculus.GRCm38.dna.primary_assembly.fa' \
 --chain '' \

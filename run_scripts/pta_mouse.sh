@@ -19,6 +19,7 @@ nextflow ../main.nf \
 --workflow pta \
 -profile sumner2 \
 --gen_org mouse \
+--genome_build 'GRCm39' \
 --csv_input ../test/csv_samplesheets/mm_test_input.csv \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \

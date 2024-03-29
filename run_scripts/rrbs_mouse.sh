@@ -20,6 +20,7 @@ nextflow ../main.nf \
 -profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org mouse \
+--genome_build 'GRCm38' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \
 --comment "This script will run the reduced-representation bisulfite sequencing analysis pipeline on mouse samples using default mm10"

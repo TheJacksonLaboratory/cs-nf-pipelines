@@ -19,6 +19,7 @@ nextflow ../main.nf \
 --workflow chipseq \
 -profile sumner2 \
 --gen_org mouse \
+--genome_build 'GRCm38' \
 --input '<PATH_TO_YOUR_SEQUENCES/CSV_input.csv' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \

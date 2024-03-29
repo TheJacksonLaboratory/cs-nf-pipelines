@@ -20,6 +20,7 @@ nextflow ../main.nf \
 -profile sumner2 \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
 --gen_org human \
+--genome_build 'GRCh38' \
 --pdx \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w "/flashscratch/${USER}/outputDir/work" \

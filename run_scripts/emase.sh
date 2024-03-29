@@ -18,6 +18,7 @@ module load nextflow/23.10.1
 nextflow ../main.nf \
 -profile sumner2 \
 --workflow emase \
+--genome_build 'GRCm39' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w /flashscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \
