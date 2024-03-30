@@ -13,6 +13,6 @@ cd $SLURM_SUBMIT_DIR
 module use --append /projects/omics_share/meta/modules
 module load nextflow/23.10.1
 
-nf-test test --tap nf-test-report-$SLURM_JOB_ID.out --verbose
+nf-test test --tap nf-test-report-$SLURM_JOB_ID.txt
 
 nf-test clean

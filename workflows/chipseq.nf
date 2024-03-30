@@ -54,6 +54,9 @@ if (params.help){
     exit 0
 }
 
+ANSI_RED = "\u001B[31m";
+ANSI_RESET = "\u001B[0m";
+
 // log params
 param_log()
 
@@ -70,13 +73,35 @@ workflow CHIPSEQ {
   */
 
   if (params.read_type == 'SE'){
-      read_ch = CHECK_DESIGN.out.sample_reads
-                   .splitCsv(header:true, sep:',')
-                   .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true) ] ] }
+    read_ch = CHECK_DESIGN.out.sample_reads
+                  .splitCsv(header:true, sep:',')
+                  .map { row -> if (row.fastq_2){
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.err.println(ANSI_RED + "ERROR: Param: `--read_type = SE` was specified, but the csv input contains `fastq_2`. Adjust input csv or parameter and restart." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.exit(1)
+                  } else if (!(row.fastq_1)) {
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.err.println(ANSI_RED + "ERROR: Missing field in csv file header. Param: `--read_type = SE` was specified. The csv input file must have field: 'fastq_1'." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.exit(1)
+                  }
+                  row}
+                  .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true) ] ] }
   } else {
       read_ch = CHECK_DESIGN.out.sample_reads
-                   .splitCsv(header:true, sep:',')
-                   .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ] ] }
+              .splitCsv(header:true, sep:',')
+              .map { row -> if (!(row.fastq_1) | !(row.fastq_2)){
+                System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "ERROR: Missing field in csv file header. Param: `--read_type = PE` was specified. The csv input file must have fields: 'fastq_1', fastq_2'." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+              }
+              row}
+            .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ] ] }
   }
 
   /*
