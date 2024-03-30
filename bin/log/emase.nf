@@ -29,7 +29,6 @@ ______________________________________________________
 --gene2transcript_csv           ${params.gene2transcript_csv}
 --full_transcript_info          ${params.full_transcript_info}
 --emase_model                   ${params.emase_model}
-
 --keep_intermediate             ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
@@ -63,7 +62,6 @@ ______________________________________________________
 --gene2transcript_csv           ${params.gene2transcript_csv}
 --full_transcript_info          ${params.full_transcript_info}
 --emase_model                   ${params.emase_model}
-
 --keep_intermediate             ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
@@ -96,7 +94,6 @@ ______________________________________________________
 --gene2transcript_csv           ${params.gene2transcript_csv}
 --full_transcript_info          ${params.full_transcript_info}
 --emase_model                   ${params.emase_model}
-
 --keep_intermediate             ${params.keep_intermediate}
 
 Project Directory: ${projectDir}
