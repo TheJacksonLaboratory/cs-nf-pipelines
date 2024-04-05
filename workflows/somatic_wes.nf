@@ -19,7 +19,8 @@ include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 include {GATK_GETSAMPLENAME} from "${projectDir}/modules/gatk/gatk_getsamplename_noMeta"
 
@@ -193,9 +194,19 @@ workflow SOMATIC_WES {
     PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
     // Step 6: Variant Pre-Processing - Part 2
-    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+    // Read a list of contigs from parameters to provide to GATK as intervals
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
-    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+    // Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+    GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
+
+    // Apply BQSR
+    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
     GATK_APPLYBQSR(apply_bqsr)
 
     ANCESTRY(GATK_APPLYBQSR.out.bam.join(GATK_APPLYBQSR.out.bai)) 

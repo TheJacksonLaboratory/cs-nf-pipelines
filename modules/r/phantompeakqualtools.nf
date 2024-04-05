@@ -1,7 +1,7 @@
 process PHANTOMPEAKQUALTOOLS {
     tag "$sampleID"
     cpus 8
-    memory 10.GB
+    memory 50.GB
     time '04:00:00'
 
     container 'quay.io/biocontainers/phantompeakqualtools:1.2.2--0'

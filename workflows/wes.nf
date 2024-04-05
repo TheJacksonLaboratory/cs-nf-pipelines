@@ -11,14 +11,18 @@ include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_l
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
-include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
 include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
+
 include {GATK_HAPLOTYPECALLER;
          GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
 include {GATK_VARIANTFILTRATION;
@@ -151,11 +155,20 @@ workflow WES {
   ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
   if (params.gen_org=='human'){
 
-    // Step 5: Variant Pre-Processing - Part 2
-      GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-      ch_GATK_BASERECALIBRATOR_multiqc = GATK_BASERECALIBRATOR.out.table // set log file for multiqc
+      // Read a list of contigs from parameters to provide to GATK as intervals
+      chroms = Channel
+          .fromPath("${params.chrom_contigs}")
+          .splitText()
+          .map{it -> it.trim()}
+      num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
-      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+      // Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+      GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+      GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
+      ch_GATK_BASERECALIBRATOR_multiqc = GATK_GATHERBQSRREPORTS.out.table // set log file for multiqc
+
+      // Apply BQSR
+      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
       GATK_APPLYBQSR(apply_bqsr)
 
     // Step 6: Variant Pre-Processing - Part 3
