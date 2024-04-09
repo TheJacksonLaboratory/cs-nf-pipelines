@@ -29,6 +29,7 @@
         --support 5 \
         --duphold \
         --genotype ${tumor_bam} ${normal_bam}
-
     """
 }
+
+// NOTE: support: 5 was set following testing. Support 3 produced a large number of spurious calls in a t/n context. 

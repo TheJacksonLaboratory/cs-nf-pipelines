@@ -130,8 +130,9 @@ workflow CHIPSEQ {
   if (params.gene_bed)  { ch_gene_bed = file(params.gene_bed, checkIfExists: true) }
 
   // Step 2: Make genome filter
-  SAMTOOLS_FAIDX(ch_fasta)
-  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out, params.blacklist)
+  faidx_input = ['primary_ref_fasta', ch_fasta]
+  SAMTOOLS_FAIDX(faidx_input)
+  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out.fai, params.blacklist)
 
   // Step 3: Fastqc
   FASTQC(read_ch)

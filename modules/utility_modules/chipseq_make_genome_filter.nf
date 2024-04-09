@@ -1,9 +1,9 @@
 process MAKE_GENOME_FILTER {
-    tag "$fai"
+    tag "$sampleID"
     publishDir "${params.pubdir}/genome_info", mode: 'copy'
 
     input:
-    file(fai)
+    tuple val(sampleID), path(fai)
     file(blacklist)
 
     output:
