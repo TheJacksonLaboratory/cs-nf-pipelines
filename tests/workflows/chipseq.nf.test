@@ -1,0 +1,72 @@
+nextflow_workflow {
+
+    name "Test Workflow CHIPSEQ"
+    script "workflows/chipseq.nf"
+    workflow "CHIPSEQ"
+
+    test("Full Workflow -- Mouse -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                input = '/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/mouse_chipseq_validation_input.csv'
+                narrow_peak
+                macs_fdr = 0.01
+                read_type = 'SE'
+                pubdir = "tests/results"
+                pipeline = 'chipseq'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- GRCm39") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                genome_build = 'GRCm39'
+                input = '/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/mouse_chipseq_validation_input.csv'
+                narrow_peak
+                macs_fdr = 0.01
+                read_type = 'SE'
+                pubdir = "tests/results"
+                pipeline = 'chipseq'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                input = '/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/human_chipseq_validation_input.csv'
+                narrow_peak
+                pubdir = "tests/results"
+                pipeline = 'chipseq'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

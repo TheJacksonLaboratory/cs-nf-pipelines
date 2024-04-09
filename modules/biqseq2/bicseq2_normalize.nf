@@ -30,13 +30,15 @@ process BICSEQ2_NORMALIZE {
 
     fasta_files = fasta_file_list.collect { "$it" }.join(' ')
     
-    if( read_length == '100' || read_length == '101') {
+    read_length = read_length.toInteger()
+
+    if( read_length >= 90 && read_length <= 110) {
         mappability_path = params.mappability_directory + '/100'
-    } else if( read_length == '125') {
+    } else if( read_length >= 115 && read_length <= 135) {
         mappability_path = params.mappability_directory + '/125'
-    } else if( read_length == '150' || read_length == '151' ) {
+    } else if( read_length >= 140 && read_length <= 160 ) {
         mappability_path = params.mappability_directory + '/151'
-    } else if( read_length == '250') {
+    } else if( read_length >= 240 && read_length <= 260) {
         mappability_path = params.mappability_directory + '/250'
     } else {
         log.info("\nUnsupported read length " + read_length + " in BicSeq2 normalization. This step is about to fail gracefully.\n\n")

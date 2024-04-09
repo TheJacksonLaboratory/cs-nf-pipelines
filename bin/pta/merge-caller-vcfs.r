@@ -110,11 +110,9 @@ getReadSupport = function(vcf, caller, sample_id, supplementary=FALSE, supported
 }
 
 
-
 sumSupport = function(x) {
   sapply(str_extract_all(x, '(?<=\\=)[0-9]+(?=,|\\])'), function(y) sum(as.numeric(y)))
 }
-
 
 
 removeRedundantBreakpoints = function(x) {
@@ -197,7 +195,6 @@ removeRedundantBreakpoints = function(x) {
 }
 
 
-
 ## Compute error between query and subject for a hits object
 computeError = function(query, subject, hits) {
   
@@ -222,7 +219,6 @@ computeError = function(query, subject, hits) {
 }
 
 
-
 ## Take the union of callsets a and b, both breakpointRanges objects
 ## If multiple hits found in b for a, choose the closest match, measured
 ## as the mean distance between breakends
@@ -234,8 +230,7 @@ mergeCallsets = function(a, b, slop) {
                                                                 maxgap=slop, 
                                                                 sizemargin=0.8, 
                                                                 restrictMarginToSizeMultiple=0.8)
-  
-  
+
   ## If we have any duplicate query hits, choose hit based on match quality
   if(anyDuplicated(queryHits(overlaps))) {
     
@@ -261,7 +256,7 @@ mergeCallsets = function(a, b, slop) {
     
     overlaps = overlaps[-idx.hits.rm]   
   }
-  
+
   ## For matching SVs, merge caller support
   a$support[queryHits(overlaps)] = paste0(a$support[queryHits(overlaps)],',',b$support[subjectHits(overlaps)])
   a$supplemental[queryHits(overlaps)] = paste0(a$supplemental[queryHits(overlaps)],',',b$supplemental[subjectHits(overlaps)])
@@ -273,7 +268,6 @@ mergeCallsets = function(a, b, slop) {
   return(res)
   
 }
-
 
 
 ## Convert breakpointRanges to BEDPE
@@ -347,7 +341,6 @@ vcfToBedpe = function(vcf, supplemental=F) {
 }
 
 
-
 ## Collect arguments
 option_list = list(
   make_option(c("-v", "--vcf"),                   type='character', help="Comma-delimited list of breakend notation VCFs"),
@@ -363,12 +356,10 @@ option_list = list(
 opt = parse_args(OptionParser(option_list=option_list))
 
 
-
 ## Unpack arguments
 opt$vcf = unlist(strsplit(opt$vcf, ',', fixed=T))
 opt$callers = unlist(strsplit(opt$callers, ',', fixed=T))
 opt$allowed_chr = unlist(strsplit(opt$allowed_chr, ',', fixed=T))
-
 
 
 ## Iteratively merge VCFs
@@ -377,21 +368,30 @@ for (i in 1:length(opt$vcf)) {
   ## Read VCF
   caller = opt$caller[i]
   vcf = VariantAnnotation::readVcf(opt$vcf[i], genome=opt$build)
-  
+
   ## Get read support
   rowRanges(vcf)$support = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor)
   rowRanges(vcf)$supplemental = getReadSupport(vcf=vcf, caller=caller, sample_id=opt$tumor, supplementary=T )
-  
   ## Convert to breakpointRanges object, don't adjust for CIPOS uncertainty (i.e. keep nominalPosition). 
   ## For Manta, infer missing breakpoint is required as the caller does not insert the recip call in the VCF as the other calls do. 
-  vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T, inferMissingBreakends=T)
-  ## Add breakendPosID for later redundancy checks
-  vcf$breakendPosID = paste0('[',caller,'=',as.character(seqnames(vcf)),':',start(vcf),':',strand(vcf),']')
-  ## Overlap if this isn't the first callset
-  if (i == 1) {
-    res = vcf
+
+  vcf = StructuralVariantAnnotation::breakpointRanges(vcf, nominalPosition=T, inferMissingBreakends=T, placeholderName = 'test')
+  ## Add breakendPosID for later redundancy checks. Note for GRIDSS / GRIPSS ambigious calls are not passed here. 
+  ## e.g., REF: T	  ALT: .GGCGC 
+  ## The breakpoint must be defined. e.g., REF: T   ALT: ]chr5:109221475]TGA
+
+
+  if (nrow(as.data.frame(vcf)) == 0) {
+    vcf[1,]=GRanges(seqnames = 'chr1', ranges = (1))    # ad a temporary new row of NA values
+    vcf$breakendPosID = NA # adding new column, called for example 'new_column'
   } else {
-    res = mergeCallsets(a=res, b=vcf, slop=opt$slop)
+    ## Overlap if this isn't the first callset
+    vcf$breakendPosID = paste0('[',caller,'=',as.character(seqnames(vcf)),':',start(vcf),':',strand(vcf),']')
+    if (i == 1) {
+      res = vcf
+    } else {
+      res = mergeCallsets(a=res, b=vcf, slop=opt$slop)
+    }
   }
 }
 

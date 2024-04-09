@@ -1,0 +1,86 @@
+nextflow_workflow {
+
+    name "Test Workflow ATAC"
+    script "workflows/atac.nf"
+    workflow "ATAC"
+
+    test("Full Workflow -- Mouse B6 Strain -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                sample_folder = "${baseDir}/test/atac/mouse"
+                pubdir = "tests/results"
+                pipeline = 'atac'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse B6 Strain -- GRCm39") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                genome_build = 'GRCm39'
+                sample_folder = "${baseDir}/test/atac/mouse"
+                pubdir = "tests/results"
+                pipeline = 'atac'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse Non-B6 Strain") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                sample_folder = "${baseDir}/test/atac/mouse"
+                pubdir = "tests/results"
+                chain = '/projects/omics_share/mouse/GRCm38/supporting_files/imputed_genomes/REF-to-CAST_EiJ.chain'
+                bowtie2Index = '/projects/omics_share/mouse/GRCm38/genome/indices/imputed/bowtie2/CAST_EiJ/CAST_EiJ_unplaced_unloc'
+                pipeline = 'atac'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+    
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/atac/human"
+                pubdir = "tests/results"
+                pipeline = 'atac'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

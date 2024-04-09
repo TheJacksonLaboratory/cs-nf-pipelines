@@ -1,0 +1,26 @@
+nextflow_workflow {
+
+    name "Test Workflow AMPLICON"
+    script "workflows/amplicon_fingerprint.nf"
+    workflow "AMPLICON"
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                sample_folder = "${baseDir}/test/amplicon/human"
+                pubdir = "tests/results"
+                pipeline = 'amplicon'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

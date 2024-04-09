@@ -1,0 +1,117 @@
+nextflow_workflow {
+
+    name "Test Workflow PTA"
+    script "workflows/pta.nf"
+    workflow "PTA"
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                pubdir = "tests/results"
+                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                bicseq2_no_scaling
+                pipeline = 'pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- PDX") {
+        tag "GRCh38"
+        tag "pdx"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                pubdir = "tests/results"
+                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                bicseq2_no_scaling
+                pdx = true
+                pipeline = 'pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+    
+    test("Full Workflow -- Human -- Deduplicate and Coverage Cap") {
+        tag "GRCh38"
+        tag "pdx"
+        tag "options"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                pubdir = "tests/results"
+                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                split_fastq = true
+                split_fastq_bin_size = 1000000
+                bicseq2_no_scaling
+                deduplicate_reads
+                coverage_cap = 50
+                pipeline = 'pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse") {
+        tag "GRCm39"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                pubdir = "tests/results"
+                csv_input = '${baseDir}/test/pta/mm_test_input.csv'
+                cnv_germline_prob = 1
+                pipeline = 'pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- Deduplicate and Coverage Cap") {
+        tag "GRCm39"
+        tag "options"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                pubdir = "tests/results"
+                csv_input = '${baseDir}/test/pta/mm_test_input.csv'
+                cnv_germline_prob = 1
+                split_fastq = true
+                split_fastq_bin_size = 10000000
+                deduplicate_reads
+                coverage_cap = 50
+                pipeline = 'pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

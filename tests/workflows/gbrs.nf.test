@@ -1,0 +1,51 @@
+nextflow_workflow {
+
+    name "Test Workflow GBRS"
+    script "workflows/gbrs.nf"
+    workflow "GBRS"
+
+    test("Full Workflow -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        tag "emase_gbrs"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                sample_folder = "${baseDir}/test/rna/mouse"
+                sample_generation = 18
+                sample_sex = 'M'
+                pubdir = "tests/results"
+                pipeline = 'gbrs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- GRCm38") {
+        tag "GRCm39"
+        tag "primary"
+        tag "emase_gbrs"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "mouse"
+                genome_build = "GRCm38"
+                sample_folder = "${baseDir}/test/rna/mouse"
+                sample_generation = 18
+                sample_sex = 'M'
+                pubdir = "tests/results"
+                pipeline = 'gbrs'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+}

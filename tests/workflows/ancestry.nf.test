@@ -1,0 +1,26 @@
+nextflow_workflow {
+
+    name "Test Workflow ANCESTRY_RUN"
+    script "workflows/ancestry.nf"
+    workflow "ANCESTRY_RUN"
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                csv_input = "${baseDir}/test/csv_samplesheets/ancestry.csv"
+                pubdir = "tests/results"
+                pipeline = 'ancestry'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

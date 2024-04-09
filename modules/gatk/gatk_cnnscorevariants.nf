@@ -22,7 +22,8 @@ process GATK_CNNSCORE_VARIANTS {
     my_mem =  my_mem[0..-4]
 
     """
-    gatk --java-options "-Xmx${my_mem}G" CNNScoreVariants  \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" CNNScoreVariants  \
     -R ${params.ref_fa} \
     -V ${vcf} \
     -O ${sampleID}_${index}_haplotypecaller.annotated.vcf \

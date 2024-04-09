@@ -20,7 +20,8 @@ process GATK_BASERECALIBRATOR {
   String my_mem = (task.memory-1.GB).toString()
   my_mem =  my_mem[0..-4]
   """
-  gatk --java-options "-Xmx${my_mem}G" BaseRecalibrator \
+  mkdir tmp
+  gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" BaseRecalibrator \
   -I ${bam} \
   -R ${params.ref_fa} \
   --known-sites ${params.dbSNP} \

@@ -16,20 +16,23 @@ process JAX_TRIMMER {
 
   output:
   tuple val(sampleID), path("*_stat"), emit: quality_stats
-  tuple val(sampleID), path("*filtered_trimmed"), emit: trimmed_fastq
+  tuple val(sampleID), path("*.trimmed.R*.fastq"), emit: trimmed_fastq
 
   script:
 
   if (params.read_type == "SE"){
     mode_HQ="-S -M"
     inputfq="${fq_reads[0]}"
+    rename="mv ${fq_reads[0]}_filtered_trimmed ${sampleID}.trimmed.R1.fastq"
   }
   if (params.read_type == "PE"){
     mode_HQ="-M"
     inputfq="${fq_reads[0]} ${fq_reads[1]}"
+    rename="mv ${fq_reads[0]}_filtered_trimmed ${sampleID}.trimmed.R1.fastq && mv ${fq_reads[1]}_filtered_trimmed ${sampleID}.trimmed.R2.fastq"
   }
 
   """
-  python ${projectDir}/bin/shared/filter_trim.py $mode_HQ ${params.min_pct_hq_reads} -p ${params.hq_pct} $inputfq
+  python ${projectDir}/bin/shared/filter_trim.py $mode_HQ ${params.min_pct_hq_reads} -p ${params.hq_pct} -f ${params.filter_hq} -t ${params.trim_hq} $inputfq 
+  ${rename}
   """
 }
