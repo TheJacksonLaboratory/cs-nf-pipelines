@@ -31,6 +31,8 @@ ________________________________________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
+--split_fastq                   ${params.split_fastq}
+--split_fastq_bin_size          ${params.split_fastq_bin_size}
 --coverage_cap                  ${params.coverage_cap}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
@@ -80,6 +82,8 @@ ________________________________________________________________________________
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
+--split_fastq                   ${params.split_fastq}
+--split_fastq_bin_size          ${params.split_fastq_bin_size}
 --coverage_cap                  ${params.coverage_cap}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}

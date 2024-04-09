@@ -12,12 +12,13 @@ cd $SLURM_SUBMIT_DIR
 
 # LOAD NEXTFLOW
 module use --append /projects/omics_share/meta/modules
-module load nextflow
+module load nextflow/23.10.1
 
 # RUN PIPELINE
 nextflow ../main.nf \
--profile sumner \
+-profile sumner2 \
 --workflow emase \
+--genome_build 'GRCm39' \
 --pubdir "/flashscratch/${USER}/outputDir" \
 -w /flashscratch/${USER}/outputDir/work \
 --sample_folder <PATH_TO_YOUR_SEQUENCES> \

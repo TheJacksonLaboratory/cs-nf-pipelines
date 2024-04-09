@@ -14,7 +14,7 @@ process PICARD_FIX_MATE_INFORMATION {
     tuple val(sampleID), file(bam)
 
     output:
-    tuple val(sampleID), file("*_fixed_mate.bam"), emit: fixed_mate_bam
+    tuple val(sampleID), file("*.fixed_mate.bam"), emit: fixed_mate_bam
 
     script:
 
@@ -24,8 +24,9 @@ process PICARD_FIX_MATE_INFORMATION {
     """
     picard -Xmx${my_mem}G FixMateInformation \
     I=${bam} \
-    O=${sampleID}_fixed_mate.bam \
+    O=${bam.baseName}.fixed_mate.bam \
     TMP_DIR=${workDir}/temp \
-    ADD_MATE_CIGAR=true
+    ADD_MATE_CIGAR=true \
+    SORT_ORDER=coordinate
     """
 }

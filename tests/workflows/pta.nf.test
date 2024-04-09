@@ -13,7 +13,7 @@ nextflow_workflow {
                 gen_org = "human"
                 pubdir = "tests/results"
                 csv_input = '${baseDir}/test/pta/hs_test_input.csv'
-                bicseq2_no_scaling
+                bicseq2_no_scaling = true
                 pipeline = 'pta'
             }
         }
@@ -33,7 +33,7 @@ nextflow_workflow {
                 gen_org = "human"
                 pubdir = "tests/results"
                 csv_input = '${baseDir}/test/pta/hs_test_input.csv'
-                bicseq2_no_scaling
+                bicseq2_no_scaling = true
                 pdx = true
                 pipeline = 'pta'
             }

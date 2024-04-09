@@ -1,6 +1,6 @@
 #!/bin/bash
 #SBATCH --mail-user=first.last@jax.org
-#SBATCH --job-name=gbrs_mouse
+#SBATCH --job-name=rnaseq_human
 #SBATCH --mail-type=END,FAIL
 #SBATCH -p compute
 #SBATCH -q batch
@@ -16,11 +16,12 @@ module load nextflow/23.10.1
 
 # RUN PIPELINE
 nextflow ../main.nf \
+--workflow chipseq \
 -profile sumner2 \
---workflow prepare_emase \
+--gen_org human \
+--genome_build 'GRCh38' \
+--input '<PATH_TO_YOUR_SEQUENCES/CSV_input.csv' \
 --pubdir "/flashscratch/${USER}/outputDir" \
--w /flashscratch/${USER}/outputDir/work \
---genome_file_list "/path/to/genome/A.fa,/path/to/genome/B.fa,..." \
---gtf_file_list "/path/to/gtf/A.gtf,/path/to/gtf/B.gtf,..." \
---haplotype_list "A,B,..." \
---comment "This script will run prepare_emase to generate multiway references based on default parameters"
+-w "/flashscratch/${USER}/outputDir/work" \
+--narrow_peak \
+--comment "This script will run ChIP-sequencing analysis on human samples using default hg38"

@@ -71,7 +71,7 @@ nextflow_workflow {
                 gen_org = "human"
                 sample_folder = "${baseDir}/test/rna/human"
                 pubdir = "tests/results"
-                pdx
+                pdx = true
                 pipeline = 'rnaseq'
             }
         }

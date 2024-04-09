@@ -11,7 +11,7 @@ process BWA_MEM_HLA {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
-  tuple val(sampleID), path(fq_reads), file(read_groups)
+  tuple val(sampleID), path(fq_reads), val(index), path(read_groups)
 
   output:
   tuple val(sampleID), path("*.bam"), emit: bam
@@ -28,7 +28,7 @@ process BWA_MEM_HLA {
   """
   rg=\$(cat $read_groups)
 
-  run-bwamem -t $task.cpus -R \${rg} -o ${sampleID} -H ${params.ref_fa_indices} $inputfq | sh
+  run-bwamem -t $task.cpus -R \${rg} -o ${sampleID}_${index} -H ${params.ref_fa_indices} $inputfq | sh
 
   """
 }

@@ -15,7 +15,8 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 
 include {ANCESTRY} from "${projectDir}/workflows/ancestry"
@@ -144,9 +145,19 @@ workflow SOMATIC_WES_PTA {
     PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
     // Step 6: Variant Pre-Processing - Part 2
-    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
+    // Read a list of contigs from parameters to provide to GATK as intervals
+    chroms = Channel
+        .fromPath("${params.chrom_contigs}")
+        .splitText()
+        .map{it -> it.trim()}
+    num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
-    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+    // Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+    GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+    GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
+
+    // Apply BQSR
+    apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
     GATK_APPLYBQSR(apply_bqsr)
 
     // Step 7: QC Metrics
@@ -362,7 +373,7 @@ def extract_csv(csv_file) {
             sample_count_all++
             if (!(row.patient && row.sampleID)){
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have a fields: 'patient', 'sampleID', 'lane', 'fastq_1', 'fastq_2'." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'patient', 'sampleID', 'lane', 'fastq_1', 'fastq_2'." + ANSI_RESET)
                 System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)

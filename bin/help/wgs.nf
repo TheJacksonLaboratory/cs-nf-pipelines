@@ -15,7 +15,11 @@ Parameter | Default | Description
 --csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
---deduplicate_reads | false | Options: false, true. If specified, run bbmap clumpify on input reads. Clumpify will deduplicate reads prior to trimming. This can help with mapping and downstream steps when analyzing high coverage WGS data. 
+--deduplicate_reads | false | Options: false, true. If specified, run bbmap clumpify on input reads. Clumpify will deduplicate reads prior to trimming. This can help with mapping and downstream steps when analyzing high coverage WGS data.
+
+--split_fastq | false | Options false, true. If specified, FASTQ files will be split into chunks sized based on split_fastq_bin_size prior to mapping. This option is recommended for high coverage data. 
+--split_fastq_bin_size | 10000000 | If split_fastq is specified, FASTQ files will splint into chunks of this size prior to mapping. 
+
 --coverage_cap | null | If an integer value is specified, jvarkit 'Biostar154220' is used to cap coverage at the that value. See: http://lindenb.github.io/jvarkit/Biostar154220.html
 --primary_chrom_bed | '/projects/compsci/omics_share/mouse/GRCm38/genome/annotation/intervals/Mus_musculus.GRCm38.dna.primary_assembly.bed' | A bed file containing the primary chromsomes with positions. Used in limiting jvarkit 'Biostar154220' to those regions with expected coverage.
 

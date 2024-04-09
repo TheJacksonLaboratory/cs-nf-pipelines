@@ -8,6 +8,7 @@ include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {SAMTOOLS_MERGE} from "${projectDir}/modules/samtools/samtools_merge"
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
 
 include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
@@ -133,16 +134,55 @@ workflow MM_PTA {
         // ** Get Read Group Information
         READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-        bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         
+        if (params.split_fastq) {
+            if (params.read_type == 'PE') {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1][0], it[1][1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true, pe: true)
+                                .map{it -> [it[0], [it[1], it[2]], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique. 
+            } else {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true)
+                                .map{it -> [it[0], it[1], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique.
+            }
+            split_fastq_count = split_fastq_files
+                            .groupTuple()
+                            .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
+                        
+            bwa_mem_mapping = split_fastq_count
+                        .combine(split_fastq_files, by:0)
+                        .map{it -> [it[1], it[2], it[3], it[4]] }
+        } else {
+            bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                              .map{it -> [it[0], it[1], 'aln', it[2]]}
+        }
+        
+
         // ** BWA-MEM Alignment
         BWA_MEM(bwa_mem_mapping)
 
         // ** Sort mapped reads
-        PICARD_SORTSAM(BWA_MEM.out.sam)
+        PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
+
+        if (params.split_fastq) {
+            SAMTOOLS_MERGE(PICARD_SORTSAM.out.bam.groupTuple(), 'merged_file')
+            bam_file = SAMTOOLS_MERGE.out.bam
+        } else {
+            bam_file = PICARD_SORTSAM.out.bam
+        }
 
         // ** Markduplicates
-        PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+        PICARD_MARKDUPLICATES(bam_file)
 
         if (params.coverage_cap) {
             JVARKIT_COVERAGE_CAP(PICARD_MARKDUPLICATES.out.dedup_bam)

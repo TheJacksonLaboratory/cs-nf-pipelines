@@ -21,7 +21,7 @@ def extract_csv(csv_file) {
         .map{ row ->
             if (!(row.sampleID) | !(row.fastq_1)){
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have a fields: 'sampleID', 'fastq_1', {fastq_2}'. Where fastq_2 is optional." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'sampleID', 'fastq_1', {fastq_2}'. Where fastq_2 is optional." + ANSI_RESET)
                 System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)

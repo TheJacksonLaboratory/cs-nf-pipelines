@@ -31,7 +31,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "human"
                 csv_input = "${baseDir}/test/csv_samplesheets/somatic_wes_pta.csv"
-                pdx
+                pdx = true
                 pubdir = "tests/results"
                 pipeline = 'somatic_wes_pta'
             }

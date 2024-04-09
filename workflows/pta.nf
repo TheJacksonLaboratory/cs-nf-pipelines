@@ -88,7 +88,7 @@ def extract_csv(csv_file) {
             sample_count_all++
             if (!(row.patient && row.sampleID)){
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have a fields: 'patient', 'sampleID', 'lane', 'fastq_1', 'fastq_2'." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'patient', 'sampleID', 'lane', 'fastq_1', 'fastq_2'." + ANSI_RESET)
                 System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)

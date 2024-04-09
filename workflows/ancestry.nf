@@ -61,7 +61,7 @@ def extract_csv(csv_file) {
     Channel.from(csv_file).splitCsv(header: true)
         .map{ row ->
             if (!(row.sampleID && row.bam)){
-                log.error "Error in CSV file: Missing field in csv file header. The csv file must have a fields named 'sampleID, bam"
+                log.error "Error in CSV file: Missing field in csv file header. The csv file must have fields named: 'sampleID, bam"
                 System.exit(1)
             }
             [row.sampleID.toString(), row.bam]

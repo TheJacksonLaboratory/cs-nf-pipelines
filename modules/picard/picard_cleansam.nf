@@ -8,13 +8,13 @@ process PICARD_CLEANSAM {
 
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*_cleaned.bam", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'picard' }", pattern: "*.cleaned.bam", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), file(bam)
 
     output:
-    tuple val(sampleID), file("*_cleaned.bam"), emit: cleaned_bam
+    tuple val(sampleID), file("*.cleaned.bam"), emit: cleaned_bam
 
     script:
 
@@ -25,6 +25,7 @@ process PICARD_CLEANSAM {
     picard -Xmx${my_mem}G CleanSam \
     I=${bam} \
     TMP_DIR=${workDir}/temp \
-    O=${sampleID}_cleaned.bam
+    VALIDATION_STRINGENCY=SILENT \
+    O=${bam.baseName}.cleaned.bam
     """
 }

@@ -19,6 +19,7 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {SAMTOOLS_MERGE} from "${projectDir}/modules/samtools/samtools_merge"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 
 include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
@@ -159,20 +160,57 @@ workflow WGS {
   // Step 2: Get Read Group Information
   READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-  bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  if (params.split_fastq) {
+    if (params.read_type == 'PE') {
+      split_fastq_files = FASTP.out.trimmed_fastq
+                         .map{it -> [it[0], it[1][0], it[1][1]]}
+                         .splitFastq(by: params.split_fastq_bin_size, file: true, pe: true)
+                         .map{it -> [it[0], [it[1], it[2]], it[1].name.split('\\.')[-2]]}
+                         .combine(READ_GROUPS.out.read_groups, by: 0)
+                         // from fastp the naming convention will always be *R*.fastq. 
+                         // splitFastq adds an increment between *R* and .fastq. 
+                         // This can be used to set an 'index' value to make file names unique. 
+    } else {
+      split_fastq_files = FASTP.out.trimmed_fastq
+                         .map{it -> [it[0], it[1]]}
+                         .splitFastq(by: params.split_fastq_bin_size, file: true)
+                         .map{it -> [it[0], it[1], it[1].name.split('\\.')[-2]]}
+                         .combine(READ_GROUPS.out.read_groups, by: 0)
+                         // from fastp the naming convention will always be *R*.fastq. 
+                         // splitFastq adds an increment between *R* and .fastq. 
+                         // This can be used to set an 'index' value to make file names unique.
+    }
+    split_fastq_count = split_fastq_files
+                    .groupTuple()
+                    .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
+                  
+    bwa_mem_mapping = split_fastq_count
+                .combine(split_fastq_files, by:0)
+                .map{it -> [it[1], it[2], it[3], it[4]] }
+  } else {
+    bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                      .map{it -> [it[0], it[1], 'aln', it[2]]}
+  }
 
   // Step 3: BWA-MEM Alignment
   if (params.gen_org=='mouse'){
     BWA_MEM(bwa_mem_mapping)
-    PICARD_SORTSAM(BWA_MEM.out.sam)
+    PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
   }
   if (params.gen_org=='human'){ 
   	BWA_MEM_HLA(bwa_mem_mapping)
-  	PICARD_SORTSAM(BWA_MEM_HLA.out.bam)
+  	PICARD_SORTSAM(BWA_MEM_HLA.out.bam, 'coordinate')
+  }
+
+  if (params.split_fastq) {
+    SAMTOOLS_MERGE(PICARD_SORTSAM.out.bam.groupTuple(), 'merged_file')
+    bam_file = SAMTOOLS_MERGE.out.bam
+  } else {
+    bam_file = PICARD_SORTSAM.out.bam
   }
 
   // Step 4: Variant Preprocessing - Part 1
-  PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+  PICARD_MARKDUPLICATES(bam_file)
 
   // If Human
   ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
@@ -338,6 +376,5 @@ workflow WGS {
   MULTIQC (
       ch_multiqc_files.collect()
   )
-
 
 }

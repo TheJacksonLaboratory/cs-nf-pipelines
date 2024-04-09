@@ -12,6 +12,9 @@ module_order:
   - gatk
   - picard
 
+fastp:
+  s_name_filenames: true
+
 table_columns_visible:
   FastQC:
     percent_duplicates: False
@@ -24,6 +27,7 @@ extra_fn_clean_exts:
   - "_FilterTrim"
   - "_R1"
   - "_R2"
+  - "_fastp"
   - type: "truncate"
     pattern: ".fastq"
 

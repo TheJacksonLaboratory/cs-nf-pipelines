@@ -12,22 +12,24 @@ process PICARD_SORTSAM {
 
     input:
     tuple val(sampleID), file(sam)
+    val(sort_order)
 
     output:
     tuple val(sampleID), file("*_sortsam.bam"), emit: bam
-    tuple val(sampleID), file("*_sortsam.bai"), emit: bai
+    tuple val(sampleID), file("*_sortsam.bai"), emit: bai, optional: true
 
     script:
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
+    index_creation = sort_order == 'coordinate' ? 'CREATE_INDEX=true' : ''
 
     """
     picard -Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp SortSam \
-    SO=coordinate \
+    SO=${sort_order} \
     INPUT=${sam} \
-    OUTPUT=${sampleID}_sortsam.bam  \
+    OUTPUT=${sam.baseName}_sortsam.bam \
     TMP_DIR=`pwd`/tmp \
     VALIDATION_STRINGENCY=SILENT \
-    CREATE_INDEX=true
+    ${index_creation}
     """
 }

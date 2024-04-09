@@ -32,7 +32,7 @@ nextflow_workflow {
                 gen_org = "human"
                 sample_folder = "${baseDir}/test/fusion/human/pdx"
                 pubdir = "tests/results"
-                pdx
+                pdx = true
                 pipeline = 'rna_fusion'
             }
         }
