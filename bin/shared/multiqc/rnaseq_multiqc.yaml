@@ -13,6 +13,9 @@ module_order:
   - rsem
   - picard
 
+fastp:
+  s_name_filenames: true
+
 table_columns_visible:
   FastQC:
     percent_duplicates: False
@@ -24,6 +27,8 @@ extra_fn_clean_exts:
   - "_R1"
   - ".STAR"
   - "_strandedness"
+  - "_genome_bam_with_read_group_reorder"
+  - "_fastp"
 
 section_comments:
   rseqc: "Note: strandedness was determined with '[how_are_we_stranded_here](https://github.com/signalbash/how_are_we_stranded_here/tree/master)' which uses `infer_experiment.py` from RSeQC."
