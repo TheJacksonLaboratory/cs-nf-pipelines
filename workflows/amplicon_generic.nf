@@ -143,6 +143,10 @@ workflow AMPLICON {
   
   // ** MAIN workflow starts: 
 
+  println(params.fastq2)
+  params.fastq2 = 'fizzbang'
+  println(params.fastq2)
+  
   FASTP(read_ch)
 
   FASTQC(FASTP.out.trimmed_fastq)
