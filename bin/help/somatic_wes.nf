@@ -39,6 +39,12 @@ Parameter | Default | Description
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
 --ploidy_val | '-ploidy 2' | Sample ploidy
 
+--gnomad_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/af-only-gnomad.hg38.vcf.gz' | GnomAD germline reference from GATK resource pack. 
+--pon_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/1000g_pon.hg38.vcf.gz' | 1000 genome germline panel of normals from GATK resource pack.
+--genotype_pon | true | Call sites in the PoN even though they will ultimately be filtered.
+--genotype_germline | true | Call all apparent germline site even though they will ultimately be filtered.
+--contam_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/small_exac_common_3.hg38.vcf.gz' | File used in GetPileupSummaries and CalculateContaminationcommon. A germline variant sites VCF, e.g. derived from the gnomAD resource, with population allele frequencies (AF) in the INFO field is used from GATK resource bundle.
+
 --dbSNP | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz' | The dbSNP database contains known single nucleotide polymorphisms, and is used in the annotation of known variants. Points to human dbSNP when --gen_org human. JAX users should not change this parameter.
 
 --gen_ver | 'hg38' | snpEff genome version. Sets to 'hg38' when --gen_org human JAX users should not change this parameter.
