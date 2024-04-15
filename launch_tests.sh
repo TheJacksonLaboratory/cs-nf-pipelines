@@ -3,8 +3,8 @@
 #SBATCH --job-name=EndTest_CS_nextflow
 #SBATCH -p compute
 #SBATCH -q batch
-#SBATCH -t 48:00:00
-#SBATCH --mem=10G
+#SBATCH -t 72:00:00
+#SBATCH --mem=15G
 #SBATCH --ntasks=1
 #SBATCH --output=log_nf_test_%j.out
 
