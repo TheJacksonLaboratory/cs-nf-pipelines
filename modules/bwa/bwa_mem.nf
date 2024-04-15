@@ -37,3 +37,5 @@ process BWA_MEM {
   -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}_${index}.sam
   """
 }
+
+// Input: "val(index)" refers to an index value for scattered input, not the required BWA mapping index. 

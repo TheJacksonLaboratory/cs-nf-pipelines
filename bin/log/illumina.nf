@@ -20,7 +20,6 @@ ______________________________________________________
 --data_type            ${params.data_type}
 --genome_build         ${params.genome_build}
 --ref_fa               ${params.ref_fa}
---bwa_index            ${params.bwa_index}
 --read_type            ${params.read_type}
 --fastq1               ${params.fastq1}
 --fastq2               ${params.fastq2}

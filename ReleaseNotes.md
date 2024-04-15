@@ -24,7 +24,7 @@ Finally, we added testing modules for all workflows to be used with (nf-test)[ht
 ### Pipelines Added:
 
 1. Amplicon Sequencing (supporting human only at this time): General PCR / Targeted Sequencing
-1. Genetic Ancestry (See https://www.biorxiv.org/content/10.1101/2022.10.24.513591v1 for details methods)
+1. Genetic Ancestry (See https://www.biorxiv.org/content/10.1101/2022.10.24.513591v1 for details and methods)
 1. Germline Structural Variant Calling
     1. Illumina short-read data
     1. Pacific Biosciences (PacBio) long-read data: CCS and CLR modes
