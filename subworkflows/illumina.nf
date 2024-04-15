@@ -36,8 +36,15 @@ include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
          GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_INDEL} from "${projectDir}/modules/gatk/gatk_variantfiltration"
 include {GATK_MERGEVCF} from "${projectDir}/modules/gatk/gatk_mergevcf"
 
-include {VEP_GERMLINE as VEP_GERMLINE_GATK;
-         VEP_GERMLINE as VEP_GERMLINE_CNV} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+if (params.genome_build == 'GRCm39'){
+    include {VEP_GERMLINE as VEP_GERMLINE_GATK;
+            VEP_GERMLINE as VEP_GERMLINE_CNV} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_mouse"
+} 
+
+if (params.genome_build == 'GRCm38'){
+    include {VEP_GERMLINE as VEP_GERMLINE_GATK;
+            VEP_GERMLINE as VEP_GERMLINE_CNV} from "${projectDir}/modules/ensembl/varianteffectpredictor_germline_GRCm38"
+} 
 
 include {BCFTOOLS_VCF_TO_BCF} from "${projectDir}/modules/bcftools/bcftools_vcf_to_bcf"
 include {DUPHOLD as DUPHOLD_DELLY;
@@ -140,6 +147,8 @@ workflow ILLUMINA {
 
         // Map reads to reference
         bwa_mem_input = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
+
         BWA_MEM(bwa_mem_input)
 
         // Sort and compress to BAM

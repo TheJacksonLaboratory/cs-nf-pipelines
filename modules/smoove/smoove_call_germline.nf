@@ -22,7 +22,7 @@
         -x \
         --name ${sampleID} \
         --exclude ${params.exclude_regions} \
-        --fasta ${params.fasta} \
+        --fasta ${params.ref_fa} \
         --processes ${task.cpus} \
         --support 3 \
         --duphold \
