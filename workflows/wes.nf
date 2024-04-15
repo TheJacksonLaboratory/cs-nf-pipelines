@@ -10,15 +10,19 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
-include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
+include {FASTP} from "${projectDir}/modules/fastp/fastp"
+include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
-include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
-include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator"
+
+include {GATK_BASERECALIBRATOR} from "${projectDir}/modules/gatk/gatk_baserecalibrator_interval"
+include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqsrreports"
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
+
 include {PICARD_COLLECTHSMETRICS} from "${projectDir}/modules/picard/picard_collecthsmetrics"
+
 include {GATK_HAPLOTYPECALLER;
          GATK_HAPLOTYPECALLER as GATK_HAPLOTYPECALLER_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller"
 include {GATK_VARIANTFILTRATION;
@@ -43,7 +47,6 @@ include {SNPEFF_ONEPERLINE;
 include {SNPSIFT_EXTRACTFIELDS} from "${projectDir}/modules/snpeff_snpsift/snpsift_extractfields"
 include {SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_SNP;
          SNPSIFT_DBNSFP as SNPSIFT_DBNSFP_INDEL} from "${projectDir}/modules/snpeff_snpsift/snpsift_dbnsfp"
-include {AGGREGATE_STATS} from "${projectDir}/modules/utility_modules/aggregate_stats_wes"
 include {MULTIQC} from "${projectDir}/modules/multiqc/multiqc"
 
 
@@ -131,31 +134,41 @@ workflow WES {
   }
 
   // Step 1: Qual_Stat
-  JAX_TRIMMER(read_ch)
+  FASTP(read_ch)
 
-  FASTQC(JAX_TRIMMER.out.trimmed_fastq)
+  FASTQC(FASTP.out.trimmed_fastq)
 
   // Step 2: Get Read Group Information
-  READ_GROUPS(JAX_TRIMMER.out.trimmed_fastq, "gatk")
+  READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
   // Step 3: BWA-MEM Alignment
-  bwa_mem_mapping = JAX_TRIMMER.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+  bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
 
   BWA_MEM(bwa_mem_mapping)
 
   // Step 4: Variant Preprocessing - Part 1
-  PICARD_SORTSAM(BWA_MEM.out.sam)
+  PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
   PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
 
   // If Human: Step 5-10
   ch_GATK_BASERECALIBRATOR_multiqc = Channel.empty() //optional log file for human only.
   if (params.gen_org=='human'){
 
-    // Step 5: Variant Pre-Processing - Part 2
-      GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam)
-      ch_GATK_BASERECALIBRATOR_multiqc = GATK_BASERECALIBRATOR.out.table // set log file for multiqc
+      // Read a list of contigs from parameters to provide to GATK as intervals
+      chroms = Channel
+          .fromPath("${params.chrom_contigs}")
+          .splitText()
+          .map{it -> it.trim()}
+      num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
-      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_BASERECALIBRATOR.out.table)
+      // Calculate BQSR, scattered by chrom. gather reports and pass to applyBQSR
+      GATK_BASERECALIBRATOR(PICARD_MARKDUPLICATES.out.dedup_bam.combine(chroms))
+      GATK_GATHERBQSRREPORTS(GATK_BASERECALIBRATOR.out.table.groupTuple(size: num_chroms))
+      ch_GATK_BASERECALIBRATOR_multiqc = GATK_GATHERBQSRREPORTS.out.table // set log file for multiqc
+
+      // Apply BQSR
+      apply_bqsr = PICARD_MARKDUPLICATES.out.dedup_bam.join(GATK_GATHERBQSRREPORTS.out.table)
       GATK_APPLYBQSR(apply_bqsr)
 
     // Step 6: Variant Pre-Processing - Part 3
@@ -251,14 +264,9 @@ workflow WES {
       SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
 
   }
-
-  agg_stats = JAX_TRIMMER.out.quality_stats.join(PICARD_COLLECTHSMETRICS.out.hsmetrics).join(PICARD_MARKDUPLICATES.out.dedup_metrics)
-
-  // Step 11: Aggregate Stats
-  AGGREGATE_STATS(agg_stats)
   
   ch_multiqc_files = Channel.empty()
-  ch_multiqc_files = ch_multiqc_files.mix(JAX_TRIMMER.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
   ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))

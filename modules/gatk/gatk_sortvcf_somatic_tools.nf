@@ -1,5 +1,4 @@
 process GATK_SORTVCF {
-
     tag "$sampleID"
 
     cpus = 1
@@ -42,14 +41,13 @@ process GATK_SORTVCF {
     }
 
     """
-    gatk --java-options "-Xmx${my_mem}G" SortVcf  \
-        -SD ${params.ref_fa_dict} \
-        ${inputs} \
-        -O ${sampleID}_${tool_name}_merged.vcf
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" SortVcf  \
+    -SD ${params.ref_fa_dict} \
+    ${inputs} \
+    -O ${sampleID}_${tool_name}_merged.vcf
         
     bgzip -f -c ${sampleID}_${tool_name}_merged.vcf > ${sampleID}_${tool_name}_merged.vcf.gz
     tabix ${sampleID}_${tool_name}_merged.vcf.gz  
-    
     """
 }
-

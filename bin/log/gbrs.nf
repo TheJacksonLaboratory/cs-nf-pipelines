@@ -48,7 +48,6 @@ def param_log(){
     --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
-
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}
@@ -99,7 +98,6 @@ def param_log(){
     --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
-
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}
@@ -150,7 +148,6 @@ def param_log(){
     --founder_hex_colors            ${params.founder_hex_colors}
     --gbrs_expression_threshold     ${params.gbrs_expression_threshold}
     --gbrs_sigma                    ${params.gbrs_sigma}
-
     --keep_intermediate             ${params.keep_intermediate}
 
     Project Directory: ${projectDir}

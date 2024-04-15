@@ -11,7 +11,7 @@ process SHORT_ALIGNMENT_MARKING {
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'short_alignment_marking' }", pattern:"*.marked.bam", mode:'copy', enabled: params.keep_intermediate
   
   input:
-  tuple val(sampleID), file(aligned_bam)
+  tuple val(sampleID), file(bam)
 
   output:
   tuple val(sampleID), file("*.marked.bam"), emit: marked_bam
@@ -19,7 +19,7 @@ process SHORT_ALIGNMENT_MARKING {
   script:
   // parses the bam file and marks as unmapped a read with alignment length below a user-defined threshold. Reads are not filtered from the bam file but kept as unmapped.
   """
-  ${projectDir}/bin/pta/filter_bam -I ${aligned_bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools view -b -o ${sampleID}.marked.bam
+  ${projectDir}/bin/pta/filter_bam -I ${bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools sort -O BAM -o ${bam.baseName}.marked.bam
   """
 }
 

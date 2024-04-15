@@ -24,7 +24,8 @@ process GATK_FILTER_VARIANT_TRANCHES {
     my_mem =  my_mem[0..-4]
 
     """
-    gatk --java-options "-Xmx${my_mem}G" FilterVariantTranches  \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" FilterVariantTranches  \
     -V ${vcf} \
     -O ${sampleID}_haplotypecaller.gatk.filtered.genotypedGVCFs.vcf \
     --snp-tranche 99.9 --snp-tranche 99.95 \

@@ -1,0 +1,47 @@
+nextflow_workflow {
+
+    name "Test Workflow SOMATIC_WES_PTA"
+    script "workflows/somatic_wes_pta.nf"
+    workflow "SOMATIC_WES_PTA"
+
+    test("Full Workflow -- Human") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                csv_input = "${baseDir}/test/csv_samplesheets/somatic_wes_pta.csv"
+                pubdir = "tests/results"
+                pipeline = 'somatic_wes_pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- PDX") {
+        tag "GRCh38"
+        tag "primary"
+        when {
+            params {
+                outdir = "tests/results"
+                gen_org = "human"
+                csv_input = "${baseDir}/test/csv_samplesheets/somatic_wes_pta.csv"
+                pdx = true
+                pubdir = "tests/results"
+                pipeline = 'somatic_wes_pta'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+}

@@ -1,0 +1,1 @@
+chromosome  start.pos   end.pos Bf  N.BAF   sd.BAF  depth.ratio N.ratio sd.ratio    CNt A   B   LPP

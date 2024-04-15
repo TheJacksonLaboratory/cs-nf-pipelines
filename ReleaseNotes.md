@@ -1,5 +1,262 @@
 # RELEASE NOTES
 
+## Release 0.6.0
+
+In this major release we add seven new workflows, and make numerous changes to existing workflows. Specific changes are discussed below.  
+
+For Jackson Laboratory users this release now supports the new Sumner2 cluster. To use workflows on sumner, simply specify: `-profile sumner2`. Note that Sumner has reached end of life, and will no longer be supported going forward. We have updated all example run scripts to use `-profile sumner2`.  
+
+**Note** Sumner2 enforces strict Linux cgroups, which holds jobs to the memory and cpu limits requested by each Nextflow module. In our release testing, we increased many memory reservation steps; however, additional memory issues are to be expected. If you encounter `OOM` (out of memory) issues and experience workflow steps failing with `killed` reported in the error log, please either email us: (ngsOps@jax.org) or submit an [issue](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/issues) with details on which module failed and the size of the dataset you were running. 
+
+Related to memory and time restrictions, we made signficiant changes to the PTA, WGS, and WES workflows:    
+
+1. For human PTA, WGS and WES analyses GATK BaseRecalibrator is now scattered by chromosome.   
+1. For PTA and WGS, options were added to allow users to:  
+    1. Deduplicate reads with [`Clumpify`](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/clumpify-guide/) prior to mapping steps. 
+    1. Split FASTQ files into batched chunks for subsequent mapping. Mapped batches are merged prior to the GATK MarkDuplicates step.  
+    1. Cap coverage at a user defined threshold using [JVARKIT Biostar154220](http://lindenb.github.io/jvarkit/Biostar154220.html) prior to variant calling. This can help reduce computational load when calling variants in higher coverage areas of the genome. 
+1. For PTA, WGS and WES FASTP is now used for read and adapter trimming. 
+
+We have included an option to specify the root location of the omics_share reference file set. For Jax users on Sumner2, this option should not be changed and defaults to `/projects/omics_share`. For external users, or those on Elion, specify the root directory of reference files with `--reference_cache </path/to/omics_share>`.   
+
+Finally, we added testing modules for all workflows to be used with (nf-test)[https://www.nf-test.com/].  
+
+### Pipelines Added:
+
+1. Amplicon Sequencing (supporting human only at this time): General PCR / Targeted Sequencing
+1. Genetic Ancestry (See https://www.biorxiv.org/content/10.1101/2022.10.24.513591v1 for details methods)
+1. Germline Structural Variant Calling
+    1. Illumina short-read data
+    1. Pacific Biosciences (PacBio) long-read data: CCS and CLR modes
+    1. Oxford Nanopore Technologies long-read data (ONT)
+1. Somatic Whole Exome Sequencing for tumor-only samples (with option for PDX)
+1. Somatic Whole Exome Sequencing for Paired Tumor Analysis (PTA; with option for PDX)
+
+### Modules Added:
+
+1. modules/abra2/abra2.nf
+1. modules/bbmap/bbmap_clumpify.nf
+1. modules/bcftools/bcftools_annotate.nf
+1. modules/bcftools/bcftools_call.nf
+1. modules/bcftools/bcftools_duphold_filter.nf
+1. modules/bcftools/bcftools_filter.nf
+1. modules/bcftools/bcftools_merge_amplicon.nf
+1. modules/bcftools/bcftools_mpileup.nf
+1. modules/bcftools/bcftools_norm.nf
+1. modules/bcftools/bcftools_rehead_sort.nf
+1. modules/bcftools/bcftools_vcf_to_bcf.nf
+1. modules/bedops/bedops_sort.nf
+1. modules/bedops/bedops_window.nf
+1. modules/bedtools/bedtools_sequenza_subtract.nf
+1. modules/bwa/bwa_index.nf
+1. modules/bwa/bwa_mem2.nf
+1. modules/delly/delly_call.nf
+1. modules/delly/delly_call_germline.nf
+1. modules/delly/delly_cnv_germline.nf
+1. modules/duphold/duphold.nf
+1. modules/freebayes/freebayes.nf
+1. modules/gatk/gatk_baserecalibrator_interval.nf
+1. modules/gatk/gatk_calculatecontamination.nf
+1. modules/gatk/gatk_calculatecontamination_tumorOnly.nf
+1. modules/gatk/gatk_filtermutectcalls_wes.nf
+1. modules/gatk/gatk_gatherbqsrreports.nf
+1. modules/gatk/gatk_getpileupsummaries.nf
+1. modules/gatk/gatk_getpileupsummaries_tumorOnly.nf
+1. modules/gatk/gatk_haplotypecaller_amplicon.nf
+1. modules/gatk/gatk_learnreadorientationmodel.nf
+1. modules/gatk/gatk_mutect2_wes_pta.nf
+1. modules/gatk/gatk_printreads.nf
+1. modules/gatk/gatk_variantfiltration_freebayes.nf
+1. modules/illumina/manta_germline.nf
+1. modules/jvarkit/jvarkit_biostar154220.nf
+1. modules/lumpy/lumpy_call_sv.nf
+1. modules/lumpy/lumpy_extract_splits.nf
+1. modules/lumpy/lumpy_prep.nf
+1. modules/minimap/minimap2_index.nf
+1. modules/minimap/minimap2_map_ont.nf
+1. modules/nanofilt/nanofilt.nf
+1. modules/nanoqc/nanoqc.nf
+1. modules/nanostat/nanostat.nf
+1. modules/nanosv/nanosv.nf
+1. modules/pbmm2/pbmm2_call.nf
+1. modules/pbmm2/pbmm2_index.nf
+1. modules/pbsv/pbsv_call.nf
+1. modules/pbsv/pbsv_discover.nf
+1. modules/picard/picard_markduplicates_removedup.nf
+1. modules/picard/picard_sortsam_mmrsvd.nf
+1. modules/porechop/porechop.nf
+1. modules/python/python_add_AF_freebayes.nf
+1. modules/python/python_add_AF_haplotypecaller.nf
+1. modules/python/python_annot_depths.nf
+1. modules/python/python_annot_on_target.nf
+1. modules/python/python_bedpe_to_vcf.nf
+1. modules/python/python_parse_depths.nf
+1. modules/python/python_parse_survivor_ids.nf
+1. modules/r/illumina_sv_merge.nf
+1. modules/r/r_merge_depths.nf
+1. modules/samtools/samtools_cat.nf
+1. modules/samtools/samtools_filter_mmrsvd.nf
+1. modules/samtools/samtools_merge.nf
+1. modules/samtools/samtools_mpileup.nf
+1. modules/samtools/samtools_stats_mmrsvd.nf
+1. modules/scarhrd/scarhrd.nf
+1. modules/sequenza/sequenza_annotate.nf
+1. modules/sequenza/sequenza_na_window.nf
+1. modules/sequenza/sequenza_pileup2seqz.nf
+1. modules/sequenza/sequenza_run.nf
+1. modules/smoove/smoove_call_germline.nf
+1. modules/sniffles/sniffles.nf
+1. modules/snpweights/snpweights_inferanc.nf
+1. modules/snpweights/snpweights_vcf2eigenstrat.nf
+1. modules/survivor/survivor_annotation.nf
+1. modules/survivor/survivor_bed_intersect.nf
+1. modules/survivor/survivor_inexon.nf
+1. modules/survivor/survivor_merge.nf
+1. modules/survivor/survivor_to_bed.nf
+1. modules/survivor/survivor_vcf_to_table.nf
+1. modules/tumor_mutation_burden/tmb_score.nf
+1. modules/utility_modules/filter_trim.nf
+1. modules/vcftools/vcftools_filter.nf
+
+### NF-Test Modules Added: 
+
+1. tests/workflows/amplicon_fingerprint.nf.test
+1. tests/workflows/amplicon_generic.nf.test
+1. tests/workflows/ancestry.nf.test
+1. tests/workflows/atac.nf.test
+1. tests/workflows/chipseq.nf.test
+1. tests/workflows/emase.nf.test
+1. tests/workflows/gbrs.nf.test
+1. tests/workflows/generate_pseudoreference.nf.test
+1. tests/workflows/prep_do_gbrs_inputs.nf.test
+1. tests/workflows/prepare_emase.nf.test
+1. tests/workflows/pta.nf.test
+1. tests/workflows/rna_fusion.nf.test
+1. tests/workflows/rnaseq.nf.test
+1. tests/workflows/rrbs.nf.test
+1. tests/workflows/somatic_wes.nf.test
+1. tests/workflows/somatic_wes_pta.nf.test
+1. tests/workflows/wes.nf.test
+1. tests/workflows/wgs.nf.test
+
+### Pipeline Changes:
+
+1. chipseq.nf: Error reporting added for malformed CSV input files  
+1. pta.nf: Error reporting added for malformed CSV input files  
+1. subworkflows/hs_pta.nf: `JAX_TRIMMER` replaced with `FASTP`. GATK Baserecalibration is now scattered by chromosome. Options added to: 1. deduplicate reads with [`Clumpify`](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/clumpify-guide/) prior to mapping steps, 2. Split FASTQ files into batched chunks for subsequent mapping. 3. Cap coverage at a user defined threshold using [JVARKIT Biostar154220](http://lindenb.github.io/jvarkit/Biostar154220.html) prior to variant calling. Additionally, short_alignment_marking following mapping was previously disconnected for the workflow. This step has been included.  
+1. subworkflows/mm_pta.nf: `JAX_TRIMMER` replaced with `FASTP`. Options added to: 1. deduplicate reads with [`Clumpify`](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/clumpify-guide/) prior to mapping steps, 2. Split FASTQ files into batched chunks for subsequent mapping. 3. Cap coverage at a user defined threshold using [JVARKIT Biostar154220](http://lindenb.github.io/jvarkit/Biostar154220.html) prior to variant calling.
+1. rnaseq.nf: `Check Strandedness` log data added to MultiQC report.  
+1. wes.nf: `JAX_TRIMMER` replaced with `FASTP`. For human analysis, GATK Baserecalibration is now scattered by chromosome.  
+1. wgs.nf: `JAX_TRIMMER` replaced with `FASTP`. For human analysis, GATK Baserecalibration is now scattered by chromosome. Options added to: 1. deduplicate reads with [`Clumpify`](https://jgi.doe.gov/data-and-tools/software-tools/bbtools/bb-tools-user-guide/clumpify-guide/) prior to mapping steps, 2. Split FASTQ files into batched chunks for subsequent mapping. 3. Cap coverage at a user defined threshold using [JVARKIT Biostar154220](http://lindenb.github.io/jvarkit/Biostar154220.html) prior to variant calling.  
+
+
+### Module Changes:
+
+1. alntools/alntools_bam2emase.nf: Bump docker container version.  
+1. bedtools/bedtools_genomecov.nf: Memory request increase.  
+1. biqseq2/bicseq2_normalize.nf: Adjustment to read length parsing logic.  
+1. bowtie/bowtie.nf: Memory request increase.  
+1. bwa/bwa_mem.nf: Input tuple adjustment.  
+1. bwa/bwa_mem_hla.nf: Input tuple adjustment. 
+1. deeptools/deeptools_filter_remove_multi_sieve.nf
+1. emase/emase_create_hybrid.nf: Bump docker container version.  
+1. emase/emase_get_common_alignment.nf: Bump docker container version. Memory request increase.  
+1. emase/emase_prepare_emase.nf: Bump docker container version.  
+1. emase/emase_run.nf: Bump docker container version.  
+1. ensembl/varianteffectpredictor_germline_mouse.nf: Input tuple adjustment. Add BGZIP and indexing to final VCF output.  
+1. fastp/fastp.nf: Memory request increase.  
+1. gatk/gatk_applybqsr.nf: Added tmp dir to command.  
+1. gatk/gatk_baserecalibrator.nf: Added tmp dir to command.  
+1. gatk/gatk_chain_extract_badreads.nf: Added tmp dir to command.  
+1. gatk/gatk_chain_filter_reads.nf: Added tmp dir to command.  
+1. gatk/gatk_cnnscorevariants.nf: Added tmp dir to command.  
+1. gatk/gatk_combinegvcfs.nf: Added tmp dir to command.  
+1. gatk/gatk_depthofcoverage.nf: Added tmp dir to command.  
+1. gatk/gatk_filtermutectcalls.nf: Added tmp dir to command.  
+1. gatk/gatk_filtervarianttranches.nf: Added tmp dir to command.  
+1. gatk/gatk_genotype_gvcf.nf: Added tmp dir to command.  
+1. gatk/gatk_getsamplename.nf: Added tmp dir to command.  
+1. gatk/gatk_getsamplename_noMeta.nf: Added tmp dir to command.  
+1. gatk/gatk_haplotypecaller.nf: Added tmp dir to command.  
+1. gatk/gatk_haplotypecaller_interval.nf: Added tmp dir to command.  
+1. gatk/gatk_haplotypecaller_sv_germline.nf: Added tmp dir to command.  
+1. gatk/gatk_indexfeaturefile.nf: Added tmp dir to command.  
+1. gatk/gatk_mergemutectstats.nf: Added tmp dir to command.  
+1. gatk/gatk_mergevcf.nf: Added tmp dir to command.  
+1. gatk/gatk_mergevcf_list.nf: Added tmp dir to command.  
+1. gatk/gatk_mutect2.nf: Added tmp dir to command.  
+1. gatk/gatk_mutect2_tumorOnly.nf: Added tmp dir to command.  
+1. gatk/gatk_selectvariants.nf: Added tmp dir to command.  
+1. gatk/gatk_sortvcf_germline.nf: Added tmp dir to command.  
+1. gatk/gatk_sortvcf_somatic_merge.nf: Added tmp dir to command.  
+1. gatk/gatk_sortvcf_somatic_tools.nf: Added tmp dir to command.  
+1. gatk/gatk_updatevcfsequencedictionary.nf: Added tmp dir to command.  
+1. gatk/gatk_variantfiltration.nf: Added tmp dir to command.  
+1. gatk/gatk_variantfiltration_af.nf: Added tmp dir to command.  
+1. gatk/gatk_variantfiltration_mutect2.nf: Added tmp dir to command.  
+1. gbrs/gbrs_bam2emase.nf: Bump docker container version. Memory request increase.  
+1. gbrs/gbrs_compress.nf: Bump docker container version. Memory request increase.  
+1. gbrs/gbrs_export.nf: Bump docker container version. 
+1. gbrs/gbrs_interpolate.nf: Bump docker container version. 
+1. gbrs/gbrs_plot.nf: Bump docker container version. 
+1. gbrs/gbrs_quantify.nf: Bump docker container version. 
+1. gbrs/gbrs_quantify_genotype.nf: Bump docker container version. 
+1. gbrs/gbrs_reconstruct.nf: Bump docker container version. 
+1. gridss/gridss_assemble.nf: Memory request increase.  
+1. illumina/strelka2.nf: Wallclock request increase.  
+1. multiqc/multiqc.nf: Tool version updated to v1.21
+1. nygc-short-alignment-marking/short_alignment_marking.nf: Bug correction in original module script.  
+1. picard/picard_cleansam.nf: Output naming adjustment. 
+1. picard/picard_collectalignmentsummarymetrics.nf: Added tmp dir to command.  
+1. picard/picard_collecttargetpcrmetrics.nf: Added tmp dir to command.  
+1. picard/picard_collectwgsmetrics.nf: Added tmp dir to command.  
+1. picard/picard_fix_mate_information.nf: Corrected BAM sort order of output to coordinate.  
+1. picard/picard_sortsam.nf: Added index creation option.  
+1. samtools/samtools_calc_mtdna_filter_chrm.nf: Memory request increase.  
+1. samtools/samtools_faidx.nf: Input tuple adjustment, and output reorganization.  
+1. snpeff_snpsift/snpeff_snpeff.nf: Memory request increase. Tmp dir adjustment.  
+1. snpeff_snpsift/snpsift_extractfields.nf: Added support for amplicon_generic, somatic_wes, and somatic_wes_pta workflows.  
+1. squid/squid_call.nf: Memory request increase.  
+1. utility_modules/chipseq_make_genome_filter.nf: Input tuple adjustment.  
+1. utility_modules/jax_trimmer.nf: File output naming adjusted.  
+
+### Script Added: 
+
+ancestry/vcf2eigenstrat.py: Convert VCF to EigenStrat format.  
+germline_sv/annot_vcf_with_depths.py: Add info fields for depths from individual caller to VCF files.  
+germline_sv/annot_vcf_with_exon.py: Apply 'InExon' INFO fields to original SV VCF files.  
+germline_sv/annot_vcf_with_on_target.py: Apply 'OnTarget' tINFO fields to original SV VCF files.  
+germline_sv/bedpetovcf.py: Convert BEDPE format back to `SURVIVOR` like VCF.  
+germline_sv/clean_sniffles.sh: Adjust `Sniffles` calls.  
+germline_sv/cnvnator2VCF.pl: Convert `CNVnator` formatted files to VCF.  
+germline_sv/hydra_to_vcf.py: Convert Hydra BEDPE output into VCF 4.1 format.  
+germline_sv/merge_depths.R: Merge nanoSV and Sniffles read/support depths.  
+germline_sv/merge_sv.r: Merge an arbitrary number of VCFs, and annotate with simple event type.  
+germline_sv/parse_caller_depths.py: Parse SV caller VCFs to extract IDs and depth information.  
+germline_sv/parse_survivor_ids.py: Parse SURVIVOR merged VCFs to extract IDs.  
+germline_sv/sed_unquote.sh: script to remove double-quotes from files, which is used avoid issues with unescaped quotes in Nextflow script blocks.  
+germline_sv/summarize_intersections.R: Intersect SV calls by type with known structural variant databases.  
+germline_sv/surv_annot.sh: Adjust `SURVIVOR` output to txt.   
+germline_sv/surv_annot_process.R: Adjust surv_annot output by SV type.  
+germline_sv/sv_to_table.py: Parse SURVIVOR merged VCF to output a summary table for each variant that lists the position, type, and size.  
+wes/AF_freebayes.py: Add Estimated Allele Frequency (ALT_AF) to the INFO field of FreeBayes VCF output.  
+wes/AF_haplotypecaller.py: Add Estimated Allele Frequency (ALT_AF) to the INFO field of HaplotypeCaller VCF output.  
+wes/TMB_calc.R: Compute tumor mutation burden. See Somatic WES wiki for details.  
+wes/allele_depth_min_and_AF_from_ADs.py: ecompute the locus depth from the allele-depths, and filter based on a minimum total allele depth. 
+wes/ensembl_annotation.pl: Annotates Ensembl transcripts and genes with copy number and breakpoints.  
+wes/scarHRD.R: Compute homologous recombination deficiency (HRD) with scarHRD.  
+wes/sequenza_run.R: Compute copy number variantion with Sequenza.  
+wes/sequenza_seg_na_window.R: Filter Sequenza CNV segments with `NA` calls within 1Mb windows. 
+
+### Script Changes: 
+
+gbrs/gene_bp_to_cM_to_transprob.R: Added local BIOMART_CACHE location.  
+pta/make_main_vcf.py: Adjusted genomic build check logic blocks.  
+pta/make_txt.py: Adjusted genomic build check logic blocks.  
+pta/merge-caller-vcfs.r: Added logic to catch edge case where no variants were within a VCF for merging.  
+shared/extract_csv.nf: Added error reporting for malformed CSV input files.  
+shared/extract_gbrs_csv.nf: Added error reporting for malformed CSV input files.  
+
 ## Release 0.5.0
 
 In this release we have added the mouse version of PTA, and changed the read trimmer for the RNAseq pipeline to Fastp. Additionally, the latest version of Nextflow is now supported.

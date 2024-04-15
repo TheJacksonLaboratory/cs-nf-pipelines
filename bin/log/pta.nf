@@ -27,6 +27,10 @@ ______________________________________________________
 --gen_org                       ${params.gen_org}
 --pdx                           ${params.pdx}
 --read_type                     ${params.read_type}
+--deduplicate_reads             ${params.deduplicate_reads}
+--split_fastq                   ${params.split_fastq}
+--split_fastq_bin_size          ${params.split_fastq_bin_size}
+--coverage_cap                  ${params.coverage_cap}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
@@ -101,6 +105,10 @@ ______________________________________________________
 -c                              ${params.config}
 --gen_org                       ${params.gen_org}
 --read_type                     ${params.read_type}
+--deduplicate_reads             ${params.deduplicate_reads}
+--split_fastq                   ${params.split_fastq}
+--split_fastq_bin_size          ${params.split_fastq_bin_size}
+--coverage_cap                  ${params.coverage_cap}
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}

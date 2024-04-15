@@ -9,8 +9,11 @@ if (params.workflow == "rnaseq"){
 else if (params.workflow == "wes"){
   include {WES} from './workflows/wes'
 }
-else if (params.workflow == "pdx_wes"){
-  include {PDX_WES} from './workflows/pdx_wes'
+else if (params.workflow == "somatic_wes"){
+  include {SOMATIC_WES} from './workflows/somatic_wes'
+}
+else if (params.workflow == "somatic_wes_pta"){
+  include {SOMATIC_WES_PTA} from './workflows/somatic_wes_pta'
 }
 else if (params.workflow == "wgs"){
   include {WGS} from './workflows/wgs'
@@ -46,7 +49,17 @@ else if (params.workflow == "gbrs"){
   include {GBRS} from './workflows/gbrs'
 }
 else if (params.workflow == "amplicon"){
-  include {AMPLICON} from './workflows/amplicon'
+  include {AMPLICON} from './workflows/amplicon_fingerprint'
+}
+else if (params.workflow == "amplicon_generic"){
+  include {AMPLICON} from './workflows/amplicon_generic'
+}
+else if (params.workflow == "ancestry"){
+  include {ANCESTRY_RUN} from './workflows/ancestry'
+}
+else if (params.workflow == "germline_sv") {
+  // mmrsvd    
+  include {GERMLINE_SV} from "./workflows/germline_sv"
 }
 else {
   // if workflow name is not supported: 
@@ -61,8 +74,11 @@ workflow{
   if (params.workflow == "wes"){
     WES()
     }
-  if (params.workflow == "pdx_wes"){
-    PDX_WES()
+  if (params.workflow == "somatic_wes"){
+    SOMATIC_WES()
+  }
+  if (params.workflow == "somatic_wes_pta"){
+    SOMATIC_WES_PTA()
   }
   if (params.workflow == "wgs"){
     WGS()
@@ -97,7 +113,13 @@ workflow{
   if (params.workflow == "prep_do_gbrs_inputs"){
     PREP_DO_GBRS_INPUT()
   }
-  if (params.workflow == "amplicon"){
+  if (params.workflow == "amplicon" || params.workflow == "amplicon_generic"){
     AMPLICON()
+  }
+  if (params.workflow == "ancestry"){
+    ANCESTRY_RUN()
+  }
+  if (params.workflow == "germline_sv") {
+    GERMLINE_SV()
   }
 }

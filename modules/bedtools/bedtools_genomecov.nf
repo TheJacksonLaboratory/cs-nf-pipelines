@@ -2,7 +2,7 @@ process BEDTOOLS_GENOMECOV {
   tag "$sampleID"
 
   cpus 2
-  memory 4.GB 
+  memory 30.GB 
   time '04:00:00'
 
   publishDir {

@@ -11,3 +11,6 @@ design.csv
 sv_input.csv
 test.csv
 test2.csv
+.nf-test
+.nf-test.log
+nf-test-report.tap

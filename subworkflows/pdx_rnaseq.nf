@@ -30,7 +30,7 @@ workflow PDX_RNASEQ {
         read_ch
 
     main:
-    // Step 1: Qual_Stat, Get read group information, Run Xenome
+    // Step 1: Read trim, Get read group information, Run Xenome
     FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)
@@ -77,7 +77,7 @@ workflow PDX_RNASEQ {
     PICARD_REORDERSAM_HUMAN(PICARD_ADDORREPLACEREADGROUPS_HUMAN.out.bam, params.picard_dict_human)
 
     // Picard Alignment Metrics
-    PICARD_SORTSAM_HUMAN(PICARD_REORDERSAM_HUMAN.out.bam)
+    PICARD_SORTSAM_HUMAN(PICARD_REORDERSAM_HUMAN.out.bam, 'coordinate')
 
     human_qc_input = PICARD_SORTSAM_HUMAN.out.bam.join(human_reads)
                      .map{it -> [it[0], it[1], it[3]]}
@@ -97,7 +97,7 @@ workflow PDX_RNASEQ {
     PICARD_REORDERSAM_MOUSE(PICARD_ADDORREPLACEREADGROUPS_MOUSE.out.bam, params.picard_dict_mouse)
 
     // Step 5: Picard Alignment Metrics
-    PICARD_SORTSAM_MOUSE(PICARD_REORDERSAM_MOUSE.out.bam)
+    PICARD_SORTSAM_MOUSE(PICARD_REORDERSAM_MOUSE.out.bam, 'coordinate')
 
     mouse_qc_input = PICARD_SORTSAM_MOUSE.out.bam.join(mouse_reads)
                      .map{it -> [it[0], it[1], it[3]]}
