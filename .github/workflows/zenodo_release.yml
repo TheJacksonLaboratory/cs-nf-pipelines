@@ -25,3 +25,4 @@ jobs:
         version: ${{ github.event.release.tag_name }}
         zenodo_json: .zenodo.json  # required
         archive: ${{ env.archive }}
+        doi: '10.5281/zenodo.11068736'
