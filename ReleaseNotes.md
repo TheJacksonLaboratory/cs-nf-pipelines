@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.6.1
+
+In this minor release we added support for automatic Zenodo releases via github actions. There are no changes or additions to workflows.
+
 ## Release 0.6.0
 
 In this major release we add seven new workflows, and make numerous changes to existing workflows. Specific changes are discussed below.  
