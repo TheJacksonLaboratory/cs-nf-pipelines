@@ -41,6 +41,6 @@
             "name": "Anuj Srivastava"
         }
     ],
-    "keywords": ["zenodo", "release", "archive"],
+    "keywords": ["zenodo", "release", "archive", "nextflow"],
     "license": "MIT"
   }
