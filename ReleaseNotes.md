@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.6.2
+
+In this minor release we adjust memory and wall clock statements, and modified `bin/pta/merge-caller-vcfs.r` to correct for an edge case related bug.
+
 ## Release 0.6.1
 
 In this minor release we added support for automatic Zenodo releases via github actions. There are no changes or additions to workflows.

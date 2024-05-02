@@ -1,6 +1,6 @@
 ## BJS Note: this script was located in the root path of the Docker container
 ## gcr.io/nygc-public/sv_cnv@sha256:1c14a50d131323a2a4bab323cf224879776af8de37f93df79292fd2e63269274
-## It is reproduced below as it exists there without modification
+## It is reproduced below with modification
 
 ## Merge arbitrary number of VCFs, annotate with simple event type 
 libs = c('optparse', 'StructuralVariantAnnotation', 'VariantAnnotation', 'rtracklayer', 'stringr')
@@ -264,7 +264,8 @@ mergeCallsets = function(a, b, slop) {
   
   ## Pull in non-matching SVs from b
   res = c(a, b[-subjectHits(overlaps)])
-
+  res = subset(res, (names(res) %in% res$partner) & (res$partner %in% names(res)))
+  
   return(res)
   
 }
