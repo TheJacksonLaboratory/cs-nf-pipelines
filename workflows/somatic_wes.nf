@@ -12,7 +12,8 @@ include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/conca
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
-include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {XENGSORT_INDEX} from "${projectDir}/modules/xengsort/xengsort_index"
+include {XENGSORT_CLASSIFY} from "${projectDir}/modules/xengsort/xengsort_classify"
 // include {GZIP} from "${projectDir}/modules/utility_modules/gzip"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
@@ -160,25 +161,24 @@ workflow SOMATIC_WES {
 
     // Step 1: Read Trim
     FASTP(read_ch)
-
-    xenome_input = FASTP.out.trimmed_fastq
     
     FASTQC(FASTP.out.trimmed_fastq)
 
     // Step 3: Get Read Group Information
     READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-    // Step 1a: Xenome if PDX data used.
-    ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+    // Step 1a: Run Xengsort if PDX data used.
+    ch_XENGSORT_CLASSIFY_multiqc = Channel.empty() //optional log file. 
     if (params.pdx){
-        // Xenome Classification
-        XENOME_CLASSIFY(FASTP.out.trimmed_fastq)
-        ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
-        // GZIP(XENOME_CLASSIFY.out.xenome_human_fastq)
+        // Generate Xengsort Index
+        XENGSORT_INDEX(params.host_fasta, params.ref_fa)
+
+        // Xengsort Classification
+        XENGSORT_CLASSIFY(XENGSORT_INDEX.out.xengsort_index, XENGSORT_INDEX.out.xengsort_index_info, FASTP.out.trimmed_fastq) 
 
         // Step 4: BWA-MEM Alignment
-        bwa_mem_mapping = XENOME_CLASSIFY.out.xenome_human_fastq.join(READ_GROUPS.out.read_groups)
+        bwa_mem_mapping = XENGSORT_CLASSIFY.out.xengsort_human_fastq.join(READ_GROUPS.out.read_groups)
 
     } else { 
         bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
@@ -275,7 +275,6 @@ workflow SOMATIC_WES {
     ch_multiqc_files = ch_multiqc_files.mix(GATK_BASERECALIBRATOR.out.table.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(GATK_FILTERMUECTCALLS.out.stats.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (

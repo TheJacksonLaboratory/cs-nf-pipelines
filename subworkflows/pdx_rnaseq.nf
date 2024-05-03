@@ -8,7 +8,8 @@ include {READ_GROUPS as READ_GROUPS_HUMAN;
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {GET_READ_LENGTH} from "${projectDir}/modules/utility_modules/get_read_length"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
-include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {XENGSORT_INDEX} from "${projectDir}/modules/xengsort/xengsort_index"
+include {XENGSORT_CLASSIFY} from "${projectDir}/modules/xengsort/xengsort_classify"
 // include {GZIP as GZIP_HUMAN;
 //          GZIP as GZIP_MOUSE} from "${projectDir}/modules/utility_modules/gzip"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
@@ -36,9 +37,9 @@ workflow PDX_RNASEQ {
     GET_READ_LENGTH(read_ch)
     
     if (params.read_type == 'PE') {
-      xenome_input = FASTP.out.trimmed_fastq
+      xengsort_input = FASTP.out.trimmed_fastq
     } else {
-      xenome_input = FASTP.out.trimmed_fastq
+      xengsort_input = FASTP.out.trimmed_fastq
     }
 
     // QC is assess on all reads. Mouse/human is irrelevant here. 
@@ -46,21 +47,21 @@ workflow PDX_RNASEQ {
 
     CHECK_STRANDEDNESS(FASTP.out.trimmed_fastq)
 
-    // Xenome Classification
-    XENOME_CLASSIFY(xenome_input)
+    // Generate Xengsort Index
+    XENGSORT_INDEX(params.host_fasta, params.ref_fa)
 
-    human_reads = XENOME_CLASSIFY.out.xenome_human_fastq
+    // Xengsort Classification
+    XENGSORT_CLASSIFY(XENGSORT_INDEX.out.xengsort_index, XENGSORT_INDEX.out.xengsort_index_info, xengsort_input) 
+
+    human_reads = XENGSORT_CLASSIFY.out.xengsort_human_fastq
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_human', it[1], it[2], it[3])}
 
-    mouse_reads = XENOME_CLASSIFY.out.xenome_mouse_fastq
+    mouse_reads = XENGSORT_CLASSIFY.out.xengsort_mouse_fastq
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
                   .join(GET_READ_LENGTH.out.read_length)
                   .map{it -> tuple(it[0]+'_mouse', it[1], it[2], it[3])}
-
-    // GZIP_HUMAN(XENOME_CLASSIFY.out.xenome_human_fastq)
-    // GZIP_MOUSE(XENOME_CLASSIFY.out.xenome_mouse_fastq)
 
     // Step 2: RSEM Human and Stats: 
 
@@ -107,7 +108,6 @@ workflow PDX_RNASEQ {
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(XENOME_CLASSIFY.out.xenome_stats.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.star_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS_HUMAN.out.picard_metrics.collect{it[1]}.ifEmpty([]))
