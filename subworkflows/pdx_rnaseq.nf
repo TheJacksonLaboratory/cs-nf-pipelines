@@ -31,7 +31,7 @@ workflow PDX_RNASEQ {
         read_ch
 
     main:
-    // Step 1: Read trim, Get read group information, Run Xenome
+    // Step 1: Read trim, Get read group information, Run xengsort
     FASTP(read_ch)
     
     GET_READ_LENGTH(read_ch)
@@ -47,11 +47,16 @@ workflow PDX_RNASEQ {
 
     CHECK_STRANDEDNESS(FASTP.out.trimmed_fastq)
 
-    // Generate Xengsort Index
-    XENGSORT_INDEX(params.host_fasta, params.ref_fa)
+    // Generate Xengsort Index if needed
+    if (params.xengsort_idx_path) {
+        xengsort_index = params.xengsort_idx_path
+    } else {
+        XENGSORT_INDEX(params.xengsort_host_fasta, params.ref_fa)
+        xengsort_index = XENGSORT_INDEX.out.xengsort_index
+    }
 
     // Xengsort Classification
-    XENGSORT_CLASSIFY(XENGSORT_INDEX.out.xengsort_index, XENGSORT_INDEX.out.xengsort_index_info, xengsort_input) 
+    XENGSORT_CLASSIFY(xengsort_index, xengsort_input) 
 
     human_reads = XENGSORT_CLASSIFY.out.xengsort_human_fastq
                   .join(CHECK_STRANDEDNESS.out.strand_setting)
@@ -108,6 +113,7 @@ workflow PDX_RNASEQ {
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(XENGSORT_CLASSIFY.out.xengsort_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_cnt.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.star_log.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTRNASEQMETRICS_HUMAN.out.picard_metrics.collect{it[1]}.ifEmpty([]))

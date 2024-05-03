@@ -10,26 +10,28 @@ process XENGSORT_INDEX {
     container 'quay.io/biocontainers/xengsort:2.0.5--pyhdfd78af_0'
 
     // output directory
-    publishDir "${params.pubdir}/xengsort/xengsort_index", mode: 'copy'
+    publishDir "${params.pubdir}/xengsort/", mode: 'copy'
 
     // inputs
     input:
-    path(host_fasta)
+    path(xengsort_host_fasta)
     path(graft_fasta)
 
     output:
     // index output
-    path("${params.idx_name}.hash"), emit: xengsort_index
-    path("${params.idx_name}.info"), emit: xengsort_index_info
+    path("xengsort_index/"), emit: xengsort_index
 
     script:
     """
     xengsort index \
-    --index ${params.idx_name} \
-    -H ${host_fasta} \
+    --index ${params.xengsort_idx_name} \
+    -H ${xengsort_host_fasta} \
     -G ${graft_fasta} \
     -k 25 \
     -n 4_500_000_000 \
     -W ${task.cpus}
+
+    mkdir xengsort_index
+    mv *.info *.hash xengsort_index/
     """
 }

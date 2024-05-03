@@ -47,7 +47,10 @@ ______________________________________________________
 --detect_adapter_for_pe      ${params.detect_adapter_for_pe}
 
 --pdx                        ${params.pdx}
---xenome_prefix              ${params.xenome_prefix}
+--ref_fa                     ${params.ref_fa}
+--xengsort_host_fasta        ${params.xengsort_host_fasta}
+--xengsort_idx_path          ${params.xengsort_idx_path}
+--xengsort_idx_name          ${params.xengsort_idx_name}
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}

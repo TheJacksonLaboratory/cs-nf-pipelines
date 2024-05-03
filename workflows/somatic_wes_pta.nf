@@ -114,7 +114,7 @@ workflow SOMATIC_WES_PTA {
     READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
     // Step 1a: Xengsort if PDX data used.
-
+    ch_XENGSORT_CLASSIFY_multiqc = Channel.empty() //optional log file.
     if (params.pdx){
         FASTP.out.trimmed_fastq.join(meta_ch).branch{
             normal: it[2].status == 0
@@ -123,11 +123,17 @@ workflow SOMATIC_WES_PTA {
 
         normal_fastqs = fastq_files.normal.map{it -> [it[0], it[1]] }
 
-        // Generate Xengsort Index
-        XENGSORT_INDEX(params.host_fasta, params.ref_fa)
+        // Generate Xengsort Index if needed
+        if (params.xengsort_idx_path) {
+            xengsort_index = params.xengsort_idx_path
+        } else {
+            XENGSORT_INDEX(params.xengsort_host_fasta, params.ref_fa)
+            xengsort_index = XENGSORT_INDEX.out.xengsort_index
+        }
 
         // Xengsort Classification
-        XENGSORT_CLASSIFY(XENGSORT_INDEX.out.xengsort_index, XENGSORT_INDEX.out.xengsort_index_info, fastq_files.tumor.map{it -> [it[0], it[1]] }) 
+        XENGSORT_CLASSIFY(xengsort_index, fastq_files.tumor.map{it -> [it[0], it[1]] }) 
+        ch_XENGSORT_CLASSIFY_multiqc = XENGSORT_CLASSIFY.out.xengsort_log
 
         // Step 4: BWA-MEM Alignment
         bwa_mem_mapping = XENGSORT_CLASSIFY.out.xengsort_human_fastq.mix(normal_fastqs).join(READ_GROUPS.out.read_groups)
@@ -314,6 +320,7 @@ workflow SOMATIC_WES_PTA {
     ch_multiqc_files = Channel.empty()
     ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENGSORT_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(GATK_BASERECALIBRATOR.out.table.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTHSMETRICS.out.hsmetrics.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))

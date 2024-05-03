@@ -27,7 +27,10 @@ ______________________________________________________
 --keep_intermediate                 ${params.keep_intermediate}
 -c                                  ${params.config}
 --multiqc_config                    ${params.multiqc_config}
---xenome_prefix                     ${params.xenome_prefix}
+--ref_fa                            ${params.ref_fa}
+--xengsort_host_fasta               ${params.xengsort_host_fasta}
+--xengsort_idx_path                 ${params.xengsort_idx_path}
+--xengsort_idx_name                 ${params.xengsort_idx_name}
 --read_length                       ${params.read_length}
 --star_index                        ${params.star_index}
 --star_fusion_star_index            ${params.star_fusion_star_index}

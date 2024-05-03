@@ -8,7 +8,7 @@ export_plots: true
 module_order:
   - fastp
   - fastqc
-  - xenome
+  - xengsort
   - conpair
   - gatk
   - picard
