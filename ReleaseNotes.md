@@ -1,5 +1,30 @@
 # RELEASE NOTES
 
+## Release 0.6.3
+
+In this release we change the read disambiguation tool Xenome for Xengsort. Extensive benchmarking shows high concordance among results obtained from both tools.  
+
+Additionally, we correct an issue with the human PTA workflow when running the combination of the `--pdx` and `--split_fastq` options. Data run with this combination of options from version 0.6.0-0.6.2 should be re-run. 
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+1. xengsort/xengsort_classify.nf
+1. xengsort/xengsort_index.nf
+
+### Pipeline Changes:
+
+1. Xengsort replaces Xenome for all PDX based workflows (RNAseq, RNA fusion, Hs PTA, Somatic WES, Somatic WES PTA)
+1. Correction made for the Human PTA when running the combination of the `--pdx` and `--split_fastq` options.
+
+### Module Changes:
+
+None
+
+
 ## Release 0.6.2
 
 In this minor release we adjust memory and wall clock statements, and modified `bin/pta/merge-caller-vcfs.r` to correct for an edge case related bug.

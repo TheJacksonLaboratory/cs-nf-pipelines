@@ -179,7 +179,7 @@ workflow HS_PTA {
 
         if (params.split_fastq) {
             if (params.read_type == 'PE') {
-            split_fastq_files = FASTP.out.trimmed_fastq
+            split_fastq_files = bwa_mem_mapping
                                 .map{it -> [it[0], it[1][0], it[1][1]]}
                                 .splitFastq(by: params.split_fastq_bin_size, file: true, pe: true)
                                 .map{it -> [it[0], [it[1], it[2]], it[1].name.split('\\.')[-2]]}
@@ -188,7 +188,7 @@ workflow HS_PTA {
                                 // splitFastq adds an increment between *R* and .fastq. 
                                 // This can be used to set an 'index' value to make file names unique. 
             } else {
-            split_fastq_files = FASTP.out.trimmed_fastq
+            split_fastq_files = bwa_mem_mapping
                                 .map{it -> [it[0], it[1]]}
                                 .splitFastq(by: params.split_fastq_bin_size, file: true)
                                 .map{it -> [it[0], it[1], it[1].name.split('\\.')[-2]]}

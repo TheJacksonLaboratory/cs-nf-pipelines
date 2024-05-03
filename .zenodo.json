@@ -1,6 +1,6 @@
 {
     "upload_type": "software", 
-    "description": "v0.6.1 Release. See https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki",
+    "description": "See https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki",
     "title": "cs-nf-pipelines",
     "creators": [
         {
@@ -35,6 +35,10 @@
         {
             "affiliation": "The Jackson Laboratory",
             "name": "Gabriel Rech"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Ardian Ferraj"
         },
         {
             "affiliation": "The Jackson Laboratory",
