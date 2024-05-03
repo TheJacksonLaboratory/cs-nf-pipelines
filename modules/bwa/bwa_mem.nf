@@ -15,7 +15,7 @@ process BWA_MEM {
 
 
   input:
-  tuple val(sampleID), path(fq_reads), file(read_groups)
+  tuple val(sampleID), path(fq_reads), val(index), file(read_groups)
 
   output:
   tuple val(sampleID), path("*.sam"), emit: sam
@@ -34,6 +34,8 @@ process BWA_MEM {
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}_${index}.sam
   """
 }
+
+// Input: "val(index)" refers to an index value for scattered input, not the required BWA mapping index. 

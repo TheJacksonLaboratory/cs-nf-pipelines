@@ -3,7 +3,7 @@ process FASTP {
   tag "$sampleID"
 
   cpus 6
-  memory 64.GB
+  memory 85.GB
   time '24:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
   
@@ -23,7 +23,7 @@ process FASTP {
 
   detect_adapter = params.detect_adapter_for_pe ? "--detect_adapter_for_pe" : ""
 
-  if (params.read_type == "SE")
+  if (params.read_type == "SE" || !params.fastq2)
     """
     fastp -i ${fq_reads[0]} \
           -o ${sampleID}.trimmed.R1.fastq \

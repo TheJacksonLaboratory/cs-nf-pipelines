@@ -1,0 +1,46 @@
+{
+    "upload_type": "software", 
+    "description": "v0.6.1 Release. See https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki",
+    "title": "cs-nf-pipelines",
+    "creators": [
+        {
+            "affiliation": "The Jackson Laboratory",
+            "orcid": "0000-0003-1021-8129",
+            "name": "Michael Lloyd"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Brian Sanderson"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Barry Guglielmo"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Sai Lek"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Peter Fields"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Harshpreet Chandok"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Carolyn Paisie"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Gabriel Rech"
+        },
+        {
+            "affiliation": "The Jackson Laboratory",
+            "name": "Anuj Srivastava"
+        }
+    ],
+    "keywords": ["zenodo", "release", "archive", "nextflow"],
+    "license": "MIT"
+  }

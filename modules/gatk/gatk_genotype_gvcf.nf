@@ -21,7 +21,8 @@ process GATK_GENOTYPE_GVCF {
     my_mem =  my_mem[0..-4]
 
     """
-    gatk --java-options "-Xmx${my_mem}G" GenotypeGVCFs  \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" GenotypeGVCFs  \
     -R ${params.ref_fa} \
     -V ${vcf} \
     -O ${sampleID}_${index}_genotypedGVCFs.vcf \

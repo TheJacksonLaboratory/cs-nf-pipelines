@@ -47,13 +47,17 @@ workflow PTA {
 // Function to extract information (meta data + file(s)) from csv file(s)
 // https://github.com/nf-core/sarek/blob/master/workflows/sarek.nf#L1084
 def extract_csv(csv_file) {
+    ANSI_RED = "\u001B[31m";
+    ANSI_RESET = "\u001B[0m";
 
     // check that the sample sheet is not 1 line or less, because it'll skip all subsequent checks if so.
     file(csv_file).withReader('UTF-8') { reader ->
         def line, numberOfLinesInSampleSheet = 0;
         while ((line = reader.readLine()) != null) {numberOfLinesInSampleSheet++}
         if (numberOfLinesInSampleSheet < 2) {
-            log.error "Samplesheet had less than two lines. The sample sheet must be a csv file with a header, so at least two lines."
+            System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+            System.err.println(ANSI_RED + "Samplesheet had less than two lines. The sample sheet must be a csv file with a header, so at least two lines." + ANSI_RESET)
+            System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
             System.exit(1)
         }
     }
@@ -69,7 +73,7 @@ def extract_csv(csv_file) {
             if (!sample2patient.containsKey(row.sampleID.toString())) {
                 sample2patient[row.sampleID.toString()] = row.patient.toString()
             } else if (sample2patient[row.sampleID.toString()] != row.patient.toString()) {
-                log.error('The sample "' + row.sampleID.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sampleID.toString()] + '" in the sample sheet.')
+                System.err.println(ANSI_RED + 'The sample "' + row.sampleID.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sampleID.toString()] + '" in the sample sheet.' + ANSI_RESET)
                 System.exit(1)
             }
         }
@@ -83,7 +87,10 @@ def extract_csv(csv_file) {
         .map{ row ->
             sample_count_all++
             if (!(row.patient && row.sampleID)){
-                log.error "Missing field in csv file header. The csv file must have fields named 'patient' and 'sampleID'."
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'patient', 'sampleID', 'lane', 'fastq_1', 'fastq_2'." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)
             }
             [[row.patient.toString(), row.sampleID.toString()], row]
@@ -117,6 +124,34 @@ def extract_csv(csv_file) {
 
         // join meta to fastq
         if (row.fastq_2) {
+            if (params.read_type == 'SE') {
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "fastq_2 found in CSV manifest, but `--read_type` set to 'SE'. Set `--read_type PE` and restart run." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+            }
+            try {
+                file(row.fastq_1, checkIfExists: true)
+            }
+            catch (Exception e) {
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "The file: " + row.fastq_1 + " does not exist. Use absolute paths, and check for correctness." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+            }
+            try {
+                file(row.fastq_2, checkIfExists: true)
+            }
+            catch (Exception e) {
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "The file: " + row.fastq_2 + " does not exist. Use absolute paths, and check for correctness." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+            }
+
             meta.id         = "${row.patient}--${row.sampleID}".toString()
             def fastq_1     = file(row.fastq_1, checkIfExists: true)
             def fastq_2     = file(row.fastq_2, checkIfExists: true)
@@ -126,7 +161,10 @@ def extract_csv(csv_file) {
             return [meta.id, meta, [fastq_1, fastq_2]]
 
         } else {
-            log.error "Missing or unknown field in csv file header. Please check your samplesheet"
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+            System.err.println(ANSI_RED + "Missing or unknown field in csv file header. Please check your samplesheet" + ANSI_RESET)
+            System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
             System.exit(1)
         }
     }

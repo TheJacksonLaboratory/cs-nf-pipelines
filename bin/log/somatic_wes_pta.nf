@@ -21,6 +21,7 @@ ______________________________________________________
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
+--pdx                           ${params.pdx}
 --xenome_index                  ${params.xenome_prefix}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
@@ -31,6 +32,13 @@ ______________________________________________________
 --snpID_list                    ${params.snpID_list}
 --snp_annotations               ${params.snp_annotations}
 --snpweights_panel              ${params.snpweights_panel}
+--gnomad_ref                    ${params.gnomad_ref}
+--pon_ref                       ${params.pon_ref}
+--genotype_pon                  ${params.genotype_pon}
+--genotype_germline             ${params.genotype_germline}
+--sequenza_gc                   ${params.sequenza_gc}
+--ensembl_database              ${params.ensembl_database}
+--contam_ref                    ${params.contam_ref}
 --dbSNP                         ${params.dbSNP}
 --target_gatk                   ${params.target_gatk}
 --target_picard                 ${params.target_picard}
@@ -44,6 +52,10 @@ ______________________________________________________
 --dbNSFP                        ${params.dbNSFP}
 --cosmic                        ${params.cosmic}
 --snpEff_config                 ${params.snpEff_config}
+
+
+
+
 
 
 Project Directory: ${projectDir}

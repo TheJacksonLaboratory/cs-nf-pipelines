@@ -64,19 +64,6 @@ def read_vcf(vcf_file):
     bcf_in = pysam.VariantFile(vcf_file)  # auto-detect input format
     return bcf_in
 
-
-def check_build(bcf_in, genome_build):
-        '''
-            Check if genome is in a list of supprted non-human genomes.
-        '''
-        VEP_line = [metadata.value for metadata in bcf_in.header.records if metadata.key == 'VEP'][0]
-        vep_info  = {entry.split('=')[0] : entry.split('=')[-1]  for entry in VEP_line.split(' ')}
-        if genome_build in vep_info['assembly']:
-            return False
-        else:
-            return True
-
-
 def make_row(record, csq_columns, bcf_in,
              normal, tumor, human=True):
     '''
@@ -224,7 +211,12 @@ def main():
     args = parser.parse_args()
     assert os.path.isfile(args.vcf_file), 'Failed to find caller VCF call file :' + args.vcf_file
     bcf_in = read_vcf(args.vcf_file)
-    human = check_build(bcf_in, args.genome_build)
+    
+    if args.genome_build == 'GRCh38':
+        human = True
+    else:
+        human = False
+
     csq_columns = get_csq_columns(bcf_in)
     write_file(bcf_in, args.txt, csq_columns,
                args.normal, args.tumor, human=human)

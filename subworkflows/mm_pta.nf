@@ -2,12 +2,17 @@
 nextflow.enable.dsl=2
 
 // import modules
+include {CLUMPIFY} from "${projectDir}/modules/bbmap/bbmap_clumpify"
 include {FASTP} from "${projectDir}/modules/fastp/fastp"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
+include {SAMTOOLS_MERGE} from "${projectDir}/modules/samtools/samtools_merge"
 include {PICARD_MARKDUPLICATES}	from "${projectDir}/modules/picard/picard_markduplicates"
+
+include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
+include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
 
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
@@ -112,25 +117,83 @@ workflow MM_PTA {
     main:
         concat_ch.map{it -> [it[0], it[2]]}.set{read_ch}
         concat_ch.map{it -> [it[0], it[1]]}.set{meta_ch}
-
+        
+        // Optional Step -- Clumpify
+        if (params.deduplicate_reads) {
+            CLUMPIFY(read_ch)
+            trimmer_input = CLUMPIFY.out.clumpy_fastq
+        } else {
+            trimmer_input = read_ch
+        }
+        
         // ** Trimmer
-        FASTP(read_ch)
+        FASTP(trimmer_input)
         
         FASTQC(FASTP.out.trimmed_fastq)
         
         // ** Get Read Group Information
         READ_GROUPS(FASTP.out.trimmed_fastq, "gatk")
 
-        bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
         
+        if (params.split_fastq) {
+            if (params.read_type == 'PE') {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1][0], it[1][1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true, pe: true)
+                                .map{it -> [it[0], [it[1], it[2]], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique. 
+            } else {
+            split_fastq_files = FASTP.out.trimmed_fastq
+                                .map{it -> [it[0], it[1]]}
+                                .splitFastq(by: params.split_fastq_bin_size, file: true)
+                                .map{it -> [it[0], it[1], it[1].name.split('\\.')[-2]]}
+                                .combine(READ_GROUPS.out.read_groups, by: 0)
+                                // from fastp the naming convention will always be *R*.fastq. 
+                                // splitFastq adds an increment between *R* and .fastq. 
+                                // This can be used to set an 'index' value to make file names unique.
+            }
+            split_fastq_count = split_fastq_files
+                            .groupTuple()
+                            .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
+                        
+            bwa_mem_mapping = split_fastq_count
+                        .combine(split_fastq_files, by:0)
+                        .map{it -> [it[1], it[2], it[3], it[4]] }
+        } else {
+            bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                              .map{it -> [it[0], it[1], 'aln', it[2]]}
+        }
+        
+
         // ** BWA-MEM Alignment
         BWA_MEM(bwa_mem_mapping)
 
         // ** Sort mapped reads
-        PICARD_SORTSAM(BWA_MEM.out.sam)
+        PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
+
+        if (params.split_fastq) {
+            SAMTOOLS_MERGE(PICARD_SORTSAM.out.bam.groupTuple(), 'merged_file')
+            bam_file = SAMTOOLS_MERGE.out.bam
+        } else {
+            bam_file = PICARD_SORTSAM.out.bam
+        }
 
         // ** Markduplicates
-        PICARD_MARKDUPLICATES(PICARD_SORTSAM.out.bam)
+        PICARD_MARKDUPLICATES(bam_file)
+
+        if (params.coverage_cap) {
+            JVARKIT_COVERAGE_CAP(PICARD_MARKDUPLICATES.out.dedup_bam)
+            SAMTOOLS_INDEX(JVARKIT_COVERAGE_CAP.out.bam)
+
+            bam_file = JVARKIT_COVERAGE_CAP.out.bam
+            index_file = SAMTOOLS_INDEX.out.bai
+        } else {
+            bam_file = PICARD_MARKDUPLICATES.out.dedup_bam
+            index_file = PICARD_MARKDUPLICATES.out.dedup_bai
+        }
 
         PICARD_MARKDUPLICATES.out.dedup_bam.join(PICARD_MARKDUPLICATES.out.dedup_bai).join(meta_ch).branch{
             normal: it[3].status == 0
@@ -140,8 +203,8 @@ workflow MM_PTA {
         // Process tumor and normal BAMs seperately for conpair. For calling, use mapped and crossed data. 
 
         // ** Get alignment and WGS metrics
-        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
-        PICARD_COLLECTWGSMETRICS(PICARD_MARKDUPLICATES.out.dedup_bam)
+        PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
+        PICARD_COLLECTWGSMETRICS(bam_file)
 
 
         // ** NEXTFLOW OPERATORS::: Establish channels with sample pairs and individual input objects for downstream calling
@@ -404,8 +467,8 @@ workflow MM_PTA {
         PLOT_DELLY_CNV(r_plot_input)
 
         SVABA(ch_paired_samples)
-        SVABA_SV_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_sv_vcf_tbi) 
-        SVABA_INDEL_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_indel_vcf_tbi)
+        SVABA_SV_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_sv_vcf_tbi, 'svaba') 
+        SVABA_INDEL_UPDATE_DICTIONARY(SVABA.out.svaba_somatic_indel_vcf_tbi, 'svaba')
         // Note: SVABA jumbles the dict header in the VCF, and must be adjusted prior to use in GATK tools.
 
         /*

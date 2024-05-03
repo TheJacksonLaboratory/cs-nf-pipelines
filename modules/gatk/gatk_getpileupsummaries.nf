@@ -21,7 +21,8 @@ process GATK_GETPILEUPSUMMARIES {
     my_mem =  my_mem[0..-4]
 
     """
-    gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" GetPileupSummaries \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus} -Djava.io.tmpdir=`pwd`/tmp" GetPileupSummaries \
     -I ${bam} \
     -V ${params.contam_ref} \
     -L ${params.contam_ref} \

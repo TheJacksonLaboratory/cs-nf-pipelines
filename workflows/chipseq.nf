@@ -33,8 +33,8 @@ include {UCSC_BEDGRAPHTOBIGWIG} from "${projectDir}/modules/ucsc/ucsc_bedgraphto
 include {DEEPTOOLS_COMPUTEMATRIX} from "${projectDir}/modules/deeptools/deeptools_computematrix"
 include {DEEPTOOLS_PLOTPROFILE} from "${projectDir}/modules/deeptools/deeptools_plotprofile"
 include {DEEPTOOLS_PLOTHEATMAP} from "${projectDir}/modules/deeptools/deeptools_plotheatmap"
-include {PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/phantompeakqualtools/phantompeakqualtools"
-include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/multiqc/multiqc_custom_phantompeakqualtools"
+include {PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/r/phantompeakqualtools"
+include {MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS} from "${projectDir}/modules/r/multiqc_custom_phantompeakqualtools"
 include {DEEPTOOLS_PLOTFINGERPRINT} from "${projectDir}/modules/deeptools/deeptools_plotfingerprint"
 include {PEAK_CALLING_CHIPSEQ} from "${projectDir}/modules/macs2/macs2_peak_calling_chipseq"
 include {FRIP_SCORE} from "${projectDir}/modules/utility_modules/frip_score"
@@ -54,6 +54,9 @@ if (params.help){
     exit 0
 }
 
+ANSI_RED = "\u001B[31m";
+ANSI_RESET = "\u001B[0m";
+
 // log params
 param_log()
 
@@ -70,13 +73,35 @@ workflow CHIPSEQ {
   */
 
   if (params.read_type == 'SE'){
-      read_ch = CHECK_DESIGN.out.sample_reads
-                   .splitCsv(header:true, sep:',')
-                   .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true) ] ] }
+    read_ch = CHECK_DESIGN.out.sample_reads
+                  .splitCsv(header:true, sep:',')
+                  .map { row -> if (row.fastq_2){
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.err.println(ANSI_RED + "ERROR: Param: `--read_type = SE` was specified, but the csv input contains `fastq_2`. Adjust input csv or parameter and restart." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.exit(1)
+                  } else if (!(row.fastq_1)) {
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.err.println(ANSI_RED + "ERROR: Missing field in csv file header. Param: `--read_type = SE` was specified. The csv input file must have field: 'fastq_1'." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                    System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                    System.exit(1)
+                  }
+                  row}
+                  .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true) ] ] }
   } else {
       read_ch = CHECK_DESIGN.out.sample_reads
-                   .splitCsv(header:true, sep:',')
-                   .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ] ] }
+              .splitCsv(header:true, sep:',')
+              .map { row -> if (!(row.fastq_1) | !(row.fastq_2)){
+                System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "ERROR: Missing field in csv file header. Param: `--read_type = PE` was specified. The csv input file must have fields: 'fastq_1', fastq_2'." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "---------------------------------------------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+              }
+              row}
+            .map { row -> [ row.sample_id, [ file(row.fastq_1, checkIfExists: true), file(row.fastq_2, checkIfExists: true) ] ] }
   }
 
   /*
@@ -105,8 +130,9 @@ workflow CHIPSEQ {
   if (params.gene_bed)  { ch_gene_bed = file(params.gene_bed, checkIfExists: true) }
 
   // Step 2: Make genome filter
-  SAMTOOLS_FAIDX(ch_fasta)
-  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out, params.blacklist)
+  faidx_input = ['primary_ref_fasta', ch_fasta]
+  SAMTOOLS_FAIDX(faidx_input)
+  MAKE_GENOME_FILTER(SAMTOOLS_FAIDX.out.fai, params.blacklist)
 
   // Step 3: Fastqc
   FASTQC(read_ch)
@@ -119,6 +145,8 @@ workflow CHIPSEQ {
 
   // Step 6: BWA-MEM
   bwa_mem_mapping = TRIM_GALORE.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
+                    .map{it -> [it[0], it[1], 'aln', it[2]]}
+
   BWA_MEM(bwa_mem_mapping)
 
   // Step 7: Samtools Removing Unmapped

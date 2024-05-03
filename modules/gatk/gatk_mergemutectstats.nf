@@ -1,4 +1,4 @@
-    process GATK_MERGEMUTECTSTATS {
+process GATK_MERGEMUTECTSTATS {
     tag "$sampleID"
 
     cpus = 1
@@ -22,8 +22,9 @@
     stats = list.collect { "-stats $it" }.join(' ')
 
     """
-    gatk --java-options "-Xmx${my_mem}G" MergeMutectStats \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" MergeMutectStats \
     ${stats} \
     -O ${sampleID}_merged.stats
     """
-    }
+}

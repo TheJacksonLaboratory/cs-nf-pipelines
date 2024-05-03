@@ -20,7 +20,8 @@ process GATK_PRINTREADS {
     my_mem =  my_mem[0..-4]
 
     """
-    gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus}" PrintReads \
+    mkdir tmp
+    gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus} -Djava.io.tmpdir=`pwd`/tmp" PrintReads \
     -L ${params.target_gatk} \
     -I ${bam} \
     -O ${bam.baseName}.targetOnly.bam

@@ -8,7 +8,10 @@ process SEQUENZA_RUN {
 
     container 'quay.io/jaxcompsci/sequenza:v1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv' : 'sequenza' }", pattern:"{*.txt,*.pdf,*.RData}", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/txt' : 'sequenza' }", pattern:"*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv' : 'sequenza' }", pattern:"*segments.txt", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/Rdata' : 'sequenza' }", pattern:"*.RData", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/pdfs' : 'sequenza' }", pattern:"*.pdf", mode:'copy'
 
     input:
     tuple val(sampleID), val(meta), path(seqz)
@@ -17,7 +20,7 @@ process SEQUENZA_RUN {
     tuple val(sampleID), val(meta), path("*extract.RData"), emit: extract_rdata
     tuple val(sampleID), val(meta), path("*table.RData"), emit: table_rdata
     tuple val(sampleID), val(meta), path("*segments.txt"), emit: segments
-    tuple val(sampleID), path("*_segments.tmp.txt"), emit: segments_tmp
+    tuple val(sampleID), path("*_segments.tmp"), emit: segments_tmp
     tuple val(sampleID), path("*.pdf"), emit: pdf
     tuple val(sampleID), path("*.txt"), emit: txt
     
@@ -28,7 +31,7 @@ process SEQUENZA_RUN {
     """
     Rscript ${projectDir}/bin/wes/sequenza_run.R ${seqz} ${sampleID} ./ ${female}
 
-    cat ${sampleID}_segments.txt | tr -d "\\"" | awk 'NR>1' > ${sampleID}_segments.tmp.txt
+    cat ${sampleID}_segments.txt | tr -d "\\"" | awk 'NR>1' > ${sampleID}_segments.tmp
     """
 }
 // NOTE: If sample is XX, female, else if XY or NA run sample as male. 

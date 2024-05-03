@@ -14,6 +14,8 @@ process VEP_GERMLINE {
   tuple val(sampleID), file(vcf), file(idx)
 
   output:
+  tuple val(sampleID), file("*_vep_annotated.vcf.gz"), emit: vcf_gz
+  tuple val(sampleID), file("*_vep_annotated.vcf.gz.tbi"), emit: tbi
   tuple val(sampleID), file("*_vep_annotated.vcf"), emit: vcf
 
   script:
@@ -40,6 +42,10 @@ process VEP_GERMLINE {
   --check_existing \
   --vcf \
   --pick_allele_gene
+
+  bgzip -c ${sampleID}_germline_vep_annotated.vcf > ${sampleID}_germline_vep_annotated.vcf.gz
+  tabix ${sampleID}_germline_vep_annotated.vcf.gz
+
   """
 }
 
