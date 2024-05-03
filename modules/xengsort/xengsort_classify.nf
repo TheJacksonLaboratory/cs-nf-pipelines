@@ -12,7 +12,8 @@ process XENGSORT_CLASSIFY {
     container 'quay.io/biocontainers/xengsort:2.0.5--pyhdfd78af_0'
 
     // output directory
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/xengsort/xengsort_classify' : 'xengsort'}", pattern: "*.fq", mode: "copy"
+    // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/xengsort/xengsort_classify' : 'xengsort'}", pattern: "*.fq", mode: "copy"
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats': 'xengsort' }", pattern: "*.txt", mode:'copy'
 
     // inputs
     input:
