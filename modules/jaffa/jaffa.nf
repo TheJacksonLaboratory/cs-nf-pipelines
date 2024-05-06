@@ -26,7 +26,7 @@ process JAFFA {
 
     bpipe run -v \
     -n ${task.cpus} \
-    -p fastqInputFormat='%_*.${ext}' \
+    -p fastqInputFormat='*.${ext}' \
     -p refBase=${params.jaffa_ref_dir} \
     -p genome=hg38 \
     -p annotation=genCode22 \

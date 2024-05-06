@@ -26,6 +26,7 @@ nextflow_workflow {
     test("Full Workflow -- PDX") {
         tag "GRCh38"
         tag "primary"
+        tag "pdx"
         when {
             params {
                 outdir = "tests/results"

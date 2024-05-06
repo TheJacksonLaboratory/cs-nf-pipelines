@@ -47,7 +47,6 @@ nextflow_workflow {
     
     test("Full Workflow -- Human -- Deduplicate and Coverage Cap") {
         tag "GRCh38"
-        tag "pdx"
         tag "options"
         when {
             params {

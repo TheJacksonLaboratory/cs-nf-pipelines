@@ -110,11 +110,16 @@ workflow RNA_FUSION {
     ch_XENGSORT_CLASSIFY_multiqc = Channel.empty() //optional log file.
     if (params.pdx){
 
-        // Generate Xengsort Index
-        XENGSORT_INDEX(params.xengsort_host_fasta, params.ref_fa)
+        // Generate Xengsort Index if needed
+        if (params.xengsort_idx_path) {
+            xengsort_index = params.xengsort_idx_path
+        } else {
+            XENGSORT_INDEX(params.xengsort_host_fasta, params.ref_fa)
+            xengsort_index = XENGSORT_INDEX.out.xengsort_index
+        }
 
         // Xengsort Classification
-        XENGSORT_CLASSIFY(XENGSORT_INDEX.out.xengsort_index, XENGSORT_INDEX.out.xengsort_index_info, GUNZIP.out.gunzip_fastq)
+        XENGSORT_CLASSIFY(xengsort_index, GUNZIP.out.gunzip_fastq)
         ch_XENGSORT_CLASSIFY_multiqc = XENGSORT_CLASSIFY.out.xengsort_log
 
         fusion_tool_input = XENGSORT_CLASSIFY.out.xengsort_human_fastq
