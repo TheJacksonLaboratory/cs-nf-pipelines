@@ -10,7 +10,8 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {GUNZIP} from "${projectDir}/modules/utility_modules/gunzip"
-include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
+include {XENGSORT_INDEX} from "${projectDir}/modules/xengsort/xengsort_index"
+include {XENGSORT_CLASSIFY} from "${projectDir}/modules/xengsort/xengsort_classify"
 include {STAR_ALIGN as STAR_ARRIBA;
          STAR_ALIGN as STAR_SQUID;
          STAR_ALIGN as STAR_STARFUSION} from "${projectDir}/modules/star/star_align"
@@ -105,14 +106,23 @@ workflow RNA_FUSION {
 
     FASTQC(GUNZIP.out.gunzip_fastq)
 
-    // Step 1a: Xenome if PDX data used.
-    ch_XENOME_CLASSIFY_multiqc = Channel.empty() //optional log file. 
+    // Step 1a: Xengsort if PDX data used.
+    ch_XENGSORT_CLASSIFY_multiqc = Channel.empty() //optional log file.
     if (params.pdx){
-        // Xenome Classification
-        XENOME_CLASSIFY(GUNZIP.out.gunzip_fastq)
-        ch_XENOME_CLASSIFY_multiqc = XENOME_CLASSIFY.out.xenome_stats //set log file for multiqc
 
-        fusion_tool_input = XENOME_CLASSIFY.out.xenome_human_fastq
+        // Generate Xengsort Index if needed
+        if (params.xengsort_idx_path) {
+            xengsort_index = params.xengsort_idx_path
+        } else {
+            XENGSORT_INDEX(params.xengsort_host_fasta, params.ref_fa)
+            xengsort_index = XENGSORT_INDEX.out.xengsort_index
+        }
+
+        // Xengsort Classification
+        XENGSORT_CLASSIFY(xengsort_index, GUNZIP.out.gunzip_fastq)
+        ch_XENGSORT_CLASSIFY_multiqc = XENGSORT_CLASSIFY.out.xengsort_log
+
+        fusion_tool_input = XENGSORT_CLASSIFY.out.xengsort_human_fastq
 
     } else { 
         fusion_tool_input = GUNZIP.out.gunzip_fastq
@@ -155,9 +165,9 @@ workflow RNA_FUSION {
 
     // Step 5: MultiQC
     ch_multiqc_files = Channel.empty()
+    ch_multiqc_files = ch_multiqc_files.mix(ch_XENGSORT_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FUSION_REPORT.out.summary_fusions_mq.collect{it[1]}.ifEmpty([]))
     ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-    ch_multiqc_files = ch_multiqc_files.mix(ch_XENOME_CLASSIFY_multiqc.collect{it[1]}.ifEmpty([]))
 
     MULTIQC (
         ch_multiqc_files.collect()

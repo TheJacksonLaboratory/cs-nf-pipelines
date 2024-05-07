@@ -17,7 +17,6 @@ Parameter | Default | Description
 
 --gen_org | mouse | Options: mouse and human.
 
---xenome_prefix | /projects/compsci/omics_share/human/GRCh38/supporting_files/xenome/trans_human_GRCh38_84_NOD_based_on_mm10_k25| Xenome index for deconvolution of human and mouse reads. Used when `--pdx` is run. 
 --read_length | 150 | Options: 75, 100, 150. Changed relative to sample read length.
 --star_index | /projects/omics_share/human/GRCh38/transcriptome/indices/rna_fusion/star/star-2.7.4a-150bp | STAR index used by several tools. Change the index relative to sample read length. Read length options: 75, 100, 150. 
 --star_fusion_star_index | /projects/omics_share/human/GRCh38/transcriptome/indices/rna_fusion/starfusion/star-150 | STAR-fusion index. Change the index relative to sample read length. Read length options: 75, 100, 150. 
@@ -47,7 +46,11 @@ Parameter | Default | Description
 --fusion_report_opt | null | Additional fusion-report options can be provided. 
 --databases | /projects/compsci/omics_share/human/GRCh38/supporting_files/rna_fusion_dbs | Fusion-report databases of known fusion events. Used in report generation only. 
 
---pdx | false | Options: false, true. If specified, 'Xenome' is run on reads to deconvolute human and mouse reads. Human only reads are used in analysis. 
+--pdx | false | Options: false, true. If specified, 'Xengsort' is run on reads to deconvolute human and mouse reads. Human only reads are used in analysis. 
+--ref_fa | '/projects/compsci/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta'| Xengsort graft fasta file. Used by Xengsort Index when `--pdx` is run, and xengsort_idx_path is `null` or false.  
+--xengsort_host_fasta | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/imputed/rel_2112_v8/NOD_ShiLtJ.39.fa' | Xengsort host fasta file. Used by Xengsort Index when `--pdx` is run, and xengsort_idx_path is `null` or false.  
+--xengsort_idx_path | '/projects/compsci/omics_share/human/GRCh38/supporting_files/xengsort' | Xengsort index for deconvolution of human and mouse reads. Used when `--pdx` is run. If `null`, Xengsort Index is run using ref_fa and host_fa.  
+--xengsort_idx_name | 'hg38_GRCm39-NOD_ShiLtJ' | Xengsort index name associated with files located in `xengsort_idx_path` or name given to outputs produced by Xengsort Index
 
 '''
 }

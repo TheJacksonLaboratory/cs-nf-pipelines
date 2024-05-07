@@ -22,7 +22,9 @@ ______________________________________________________
 --pubdir                        ${params.pubdir}
 --organize_by                   ${params.organize_by}
 --pdx                           ${params.pdx}
---xenome_index                  ${params.xenome_prefix}
+--xengsort_host_fasta           ${params.xengsort_host_fasta}
+--xengsort_idx_path             ${params.xengsort_idx_path}
+--xengsort_idx_name             ${params.xengsort_idx_name}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --quality_phred                 ${params.quality_phred}

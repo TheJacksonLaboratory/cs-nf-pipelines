@@ -1,4 +1,4 @@
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11068737.svg)](https://doi.org/10.5281/zenodo.11068737)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11068736.svg)](https://doi.org/10.5281/zenodo.11068736)
 
 # JAX NGS Operations Nextflow DSL2 Pipelines
 

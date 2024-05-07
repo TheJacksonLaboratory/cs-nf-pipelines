@@ -34,7 +34,9 @@ ______________________________________________________
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
---xenome_prefix                 ${params.xenome_prefix}
+--xengsort_host_fasta           ${params.xengsort_host_fasta}
+--xengsort_idx_path             ${params.xengsort_idx_path}
+--xengsort_idx_name             ${params.xengsort_idx_name}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --ref_fa_dict                   ${params.ref_fa_dict}

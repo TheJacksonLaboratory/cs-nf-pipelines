@@ -9,7 +9,7 @@ process GZIP {
 
   container "quay.io/jaxcompsci/py3_perl_pylibs:v2"
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/processed_reads' : 'xenome' }", pattern: "*.gz", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/processed_reads' : 'xengsort' }", pattern: "*.gz", mode:'copy'
 
   input:
   tuple val(sampleID), path(reads)
