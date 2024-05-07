@@ -69,7 +69,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/rna/human"
+                sample_folder = "${baseDir}/test/rna/human/pdx"
                 pubdir = "tests/results"
                 pdx = true
                 pipeline = 'rnaseq'

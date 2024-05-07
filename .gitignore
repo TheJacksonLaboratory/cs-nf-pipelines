@@ -13,4 +13,4 @@ test.csv
 test2.csv
 .nf-test
 .nf-test.log
-nf-test-report.tap
+nf-test-report*
