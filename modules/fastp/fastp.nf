@@ -9,7 +9,7 @@ process FASTP {
   
   container 'quay.io/biocontainers/fastp:0.23.2--h5f740d0_3'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "${sampleID}_fastp_report.*", mode:'copy'
+  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "${sampleID}_fastp*.*", mode:'copy'
 
   input:
     tuple val(sampleID), path(fq_reads)
