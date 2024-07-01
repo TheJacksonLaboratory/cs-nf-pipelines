@@ -109,7 +109,9 @@ ______________________________________________________
 --seed_length                ${params.seed_length}
 
 --pdx                        ${params.pdx}
---xenome_prefix              ${params.xenome_prefix}
+--xengsort_host_fasta           ${params.xengsort_host_fasta}
+--xengsort_idx_path             ${params.xengsort_idx_path}
+--xengsort_idx_name             ${params.xengsort_idx_name}
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}

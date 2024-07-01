@@ -32,7 +32,7 @@ except ImportError:
 
 
 def parse_args():
-    parser = argparse.ArgumentParser(version='V2.0')
+    parser = argparse.ArgumentParser()
     parser.add_argument('-p', '--picard', action='store_true',
                         help="Use Picard format for read group line")
     parser.add_argument('-t', '--tumor', action='store_true',
@@ -64,11 +64,14 @@ def parse_args():
 def multi_open(name):
     if name.endswith('.gz'):
         f = gzip.open(name)
+        line = f.readline().decode()
     elif name.endswith('.bz2'):
         f = bz2.BZ2File(name)
+        line = f.readline().decode()
     else:
         f = open(name)
-    return f
+        line = f.readline()
+    return line
 
 
 def make_fake(args):
@@ -153,11 +156,9 @@ def main():
     # - the ID in the first four fields.
     # Note: the leading '@' needs to be stripped.
     try:
-        inf = multi_open(args.fastq[0])
-        line = inf.readline()
-    except IOError, e:
-        print >> sys.stderr, "Couldn't read the file: {0}\n    {1}". \
-            format(fn, e.message)
+        line = multi_open(args.fastq[0])
+    except (IOError, e):
+        sys.stderr.write("Couldn't read the file: {0}\n    {1}". format(fn, e.message))
         make_fake(args)
         # Does not return
 
@@ -200,7 +201,7 @@ def output(id, ges_id, cust_id, bar_code, args):
         line = '@RG\\tID:{0}{1}\\tLB:{0}{2}\\tSM:{3}\\tPL:ILLUMINA'.\
             format(args.sample_type, id, ges_id, cust_id)
     # This needs to be a single line file; no terminating \n
-    print >> of, line,
+    print(line, file=of)
     if of != sys.stdout:
         of.close()
 

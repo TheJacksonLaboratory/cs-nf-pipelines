@@ -35,6 +35,5 @@ def help(){
   --surv_type | 1 | Boolean (0/1) that requires SVs to be the same type for merging.
   --surv_strand | 1 | Boolean (0/1) that requires SVs to be on the same strand for merging.
   --surv_min | 30 | Minimum length (bp) to output SVs.
-
 '''
 }
