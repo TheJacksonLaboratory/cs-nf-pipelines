@@ -19,7 +19,11 @@ process BOWTIE {
 
     script:
     """
-    zcat ${fq_read} | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -x ${params.bowtie_index} - 2> ${sampleID}.bowtie_${paired_read_num}.log | samtools view -bS - > ${sampleID}_mapped_${paired_read_num}.bam
+    set -o pipefail
+    
+    zcat ${fq_read} \\
+    | bowtie -p ${task.cpus} -q -a --best --strata --sam -v 3 -x ${params.bowtie_index} - 2> ${sampleID}.bowtie_${paired_read_num}.log \\
+    | samtools view -bS - > ${sampleID}_mapped_${paired_read_num}.bam
     """
     // NOTE: This is hard coded to .gz input files. 
 
