@@ -1,5 +1,40 @@
 # RELEASE NOTES
 
+## Release 0.6.4
+
+In this release, we adjust memory and wallclock requirements for a number of modules, update `read_group_from_fastq.py` from python2 to python3, and incorporate PRs #4 and #5.  
+
+* PR #4 (contributed by @BrianSanderson) adds an optional gene and transcript count merge across samples in the RNA and PDX RNA workflows (merge accessed via including the `--merge_rna_counts` flag).  
+* PR #5 (contributed by @alanhoyle) adds a catch for corrupt gzip files in the Bowtie module as used by EMASE/GRBS analyses.  
+
+### Pipelines Added:
+
+None
+
+### Modules Added:
+
+1. utility_modules/merge_rsem_counts.nf
+
+### Pipeline Changes:
+
+1. workflows/rnaseq.nf module added to merge gene and transcript expression when `--merge_rna_counts` is used.  
+1. workflows/pdx_rnaseq.nf module added to merge gene and transcript expression when `--merge_rna_counts` is used.  
+
+### Module Changes:
+
+1. bowtie/bowtie.nf pipefail catch added for corrupt gzip files, per #5. 
+1. fastp/fastp.nf save json report as well as html report.  
+1. nygenome/lancet.nf wallclock request increase.  
+1. picard/picard_markduplicates.nf memory adjustment, and accounting for MarkDuplicates not fully respecting -Xmx memory limits imposed by Java.  
+1. picard/picard_reordersam.nf memory request increase.  
+1. picard/picard_sortsam.nf memory request increase.  
+1. utility_modules/read_groups.nf container changed to py3.  
+
+### Script Changes:
+
+1. bin/shared/read_group_from_fastq.py update from py2 to py3. 
+
+
 ## Release 0.6.3
 
 In this release we change the read disambiguation tool Xenome for Xengsort. Extensive benchmarking shows high concordance among results obtained from both tools.  

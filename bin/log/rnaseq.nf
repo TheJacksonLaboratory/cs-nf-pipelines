@@ -57,6 +57,7 @@ ______________________________________________________
 --stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
+--merge_rna_counts           ${params.merge_rna_counts}
 
 Human specific files: 
 --rsem_ref_prefix_human      ${params.rsem_ref_prefix_human}
@@ -109,13 +110,16 @@ ______________________________________________________
 --seed_length                ${params.seed_length}
 
 --pdx                        ${params.pdx}
---xenome_prefix              ${params.xenome_prefix}
+--xengsort_host_fasta           ${params.xengsort_host_fasta}
+--xengsort_idx_path             ${params.xengsort_idx_path}
+--xengsort_idx_name             ${params.xengsort_idx_name}
 
 --strandedness_ref           ${params.strandedness_ref}
 --strandedness_gtf           ${params.strandedness_gtf}
 --stradedness                ${params.strandedness}
 
 --rsem_aligner               ${params.rsem_aligner}
+--merge_rna_counts           ${params.merge_rna_counts}
 
 Human specific files: 
 --rsem_ref_prefix_human      ${params.rsem_ref_prefix_human}
@@ -174,6 +178,7 @@ ______________________________________________________
 --rsem_ref_prefix         ${params.rsem_ref_prefix}
 --rsem_ref_files          ${params.rsem_ref_files}
 --rsem_aligner            ${params.rsem_aligner}
+--merge_rna_counts        ${params.merge_rna_counts}
 --picard_dict             ${params.picard_dict}
 --ref_flat                ${params.ref_flat}
 --ribo_intervals          ${params.ribo_intervals}
@@ -218,6 +223,7 @@ ______________________________________________________
 --rsem_ref_prefix         ${params.rsem_ref_prefix}
 --rsem_ref_files          ${params.rsem_ref_files}
 --rsem_aligner            ${params.rsem_aligner}
+--merge_rna_counts        ${params.merge_rna_counts}
 --rsem_star_prefix        ${params.rsem_star_prefix}
 --picard_dict             ${params.picard_dict}
 --ref_flat                ${params.ref_flat}
@@ -263,6 +269,7 @@ ______________________________________________________
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
 --rsem_aligner                  ${params.rsem_aligner}
+--merge_rna_counts              ${params.merge_rna_counts}
 --picard_dict                   ${params.picard_dict}
 
 Project Directory: ${projectDir}
@@ -305,6 +312,7 @@ ______________________________________________________
 --rsem_ref_prefix               ${params.rsem_ref_prefix}
 --rsem_ref_files                ${params.rsem_ref_files}
 --rsem_aligner                  ${params.rsem_aligner}
+--merge_rna_counts              ${params.merge_rna_counts}
 --rsem_star_prefix              ${params.rsem_star_prefix}
 --picard_dict                   ${params.picard_dict}
 

@@ -105,8 +105,6 @@ workflow SOMATIC_WES_PTA {
 
     // Step 1: Read Trim
     FASTP(read_ch)
-
-    xenome_input = FASTP.out.trimmed_fastq
     
     FASTQC(FASTP.out.trimmed_fastq)
 
