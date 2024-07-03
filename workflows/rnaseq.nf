@@ -138,8 +138,12 @@ workflow RNASEQ {
     // Step 2: RSEM
     RSEM_ALIGNMENT_EXPRESSION(rsem_input, params.rsem_ref_files, params.rsem_star_prefix, params.rsem_ref_prefix)
 
-    MERGE_RSEM_COUNTS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes.collect{it[1]},
-                      RSEM_ALIGNMENT_EXPRESSION.out.rsem_isoforms.collect{it[1]})
+    if (params.merge_rna_counts) {
+      MERGE_RSEM_COUNTS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes.collect{it[1]},
+                        RSEM_ALIGNMENT_EXPRESSION.out.rsem_isoforms.collect{it[1]},
+                        'allSamples')
+    }
+
     //Step 3: Get Read Group Information
     READ_GROUPS(FASTP.out.trimmed_fastq, "picard")
 
@@ -168,3 +172,4 @@ workflow RNASEQ {
     )
   }
 }
+

@@ -1,7 +1,7 @@
 // adapted from https://github.com/nf-core/rnaseq/blob/3.14.0/modules/local/rsem_merge_counts/main.nf
 process MERGE_RSEM_COUNTS {
 
-  tag ""
+  tag "Merge RSEM counts"
 
   cpus 1  
   memory 24.GB
@@ -10,17 +10,19 @@ process MERGE_RSEM_COUNTS {
 
   container "quay.io/jaxcompsci/py3_perl_pylibs:v2"
 
-  publishDir "${params.pubdir}", pattern: "rsem.merged.*.tsv", mode:'copy'
+  publishDir "${params.pubdir}", pattern: "*rsem.merged.*.tsv", mode:'copy'
 
   input:
   path("genes/*")
   path("isoforms/*")
+  val(prefix)
 
   output:
-  path "rsem.merged.gene_counts.tsv", emit: gene_counts
-  path "rsem.merged.gene_tpm.tsv", emit: gene_tpm
-  path "rsem.merged.transcript_counts.tsv", emit: transcript_counts
-  path "rsem.merged.transcript_tpm.tsv", emit: transcript_tpm
+  path "*rsem.merged.gene_counts.tsv", emit: gene_counts
+  path "*rsem.merged.gene_tpm.tsv", emit: gene_tpm
+  path "*rsem.merged.transcript_counts.tsv", emit: transcript_counts
+  path "*rsem.merged.transcript_tpm.tsv", emit: transcript_tpm
+
   script:
   """
   mkdir -p tmp/genes
@@ -43,9 +45,9 @@ process MERGE_RSEM_COUNTS {
     cut -f 6 \${fileid} | tail -n+2 >> tmp/isoforms/\${samplename}.tpm.txt
   done
 
-  paste gene_ids.txt tmp/genes/*.counts.txt > rsem.merged.gene_counts.tsv
-  paste gene_ids.txt tmp/genes/*.tpm.txt > rsem.merged.gene_tpm.tsv
-  paste transcript_ids.txt tmp/isoforms/*.counts.txt > rsem.merged.transcript_counts.tsv
-  paste transcript_ids.txt tmp/isoforms/*.tpm.txt > rsem.merged.transcript_tpm.tsv  
+  paste gene_ids.txt tmp/genes/*.counts.txt > ${prefix}.rsem.merged.gene_counts.tsv
+  paste gene_ids.txt tmp/genes/*.tpm.txt > ${prefix}.rsem.merged.gene_tpm.tsv
+  paste transcript_ids.txt tmp/isoforms/*.counts.txt > ${prefix}.rsem.merged.transcript_counts.tsv
+  paste transcript_ids.txt tmp/isoforms/*.tpm.txt > ${prefix}.rsem.merged.transcript_tpm.tsv  
   """
 }
