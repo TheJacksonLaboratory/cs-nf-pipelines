@@ -8,7 +8,7 @@ file <- get(load(args[1]))
 
 win=data.frame(matrix(ncol=0,nrow=0))
 
-for (i in 1:24) {
+for (i in 1:length(file$ratio)) {
     tmp=file$ratio[[i]][file$ratio[[i]]$N==0,]
     if (nrow(tmp)>0) {
         if (i==23) i="X"

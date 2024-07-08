@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.6.5
+
+In this minor release, we fix a `subscript out of bounds` bug in `bin/wes/sequenza_seg_na_window.R`.    
+
 ## Release 0.6.4
 
 In this release, we adjust memory and wallclock requirements for a number of modules, update `read_group_from_fastq.py` from python2 to python3, and incorporate PRs #4 and #5.  
