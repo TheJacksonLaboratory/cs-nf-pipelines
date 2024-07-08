@@ -23,7 +23,7 @@ process GATK_GATHERBQSRREPORTS {
     inputs = reports.collect { "-I $it" }.join(' ')
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" GatherBQSRReports \
     ${inputs} \
     -O ${sampleID}_recal_data.table

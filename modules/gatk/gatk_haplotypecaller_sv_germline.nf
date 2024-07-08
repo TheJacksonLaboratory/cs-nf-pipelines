@@ -22,7 +22,7 @@ process GATK_HAPLOTYPECALLER_SV_GERMLINE {
     my_mem =  my_mem[0..-4]
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" HaplotypeCaller  \
     -R ${params.ref_fa} \
     -I ${normal_bam} \

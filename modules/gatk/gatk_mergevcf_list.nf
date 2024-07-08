@@ -23,7 +23,7 @@ process GATK_MERGEVCF_LIST {
     my_mem =  my_mem[0..-4]
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" MergeVcfs \
     -R ${params.ref_fa} \
     -I ${list} \

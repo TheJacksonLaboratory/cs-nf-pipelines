@@ -16,7 +16,7 @@ process GATK_GETSAMPLENAME {
 
     script:
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Djava.io.tmpdir=`pwd`/tmp" GetSampleName \
     -I ${bam} \
     -O sample_name.txt

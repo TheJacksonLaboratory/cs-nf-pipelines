@@ -24,7 +24,7 @@ process GATK_VARIANTFILTRATION_AF {
     my_mem =  my_mem[0..-4]
     """
     ## Annotate FORMAT/AF
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp"  VariantAnnotator \
     -R ${params.ref_fa} \
     -V ${vcf} \
