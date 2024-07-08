@@ -22,7 +22,7 @@ process GATK_MERGEMUTECTSTATS {
     stats = list.collect { "-stats $it" }.join(' ')
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" MergeMutectStats \
     ${stats} \
     -O ${sampleID}_merged.stats

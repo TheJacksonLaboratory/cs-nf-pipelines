@@ -35,7 +35,7 @@ process GATK_VARIANTFILTRATION {
     }
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" VariantFiltration \
     -R ${params.ref_fa} \
     -V ${vcf} \

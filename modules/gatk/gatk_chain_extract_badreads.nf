@@ -22,7 +22,7 @@ process CHAIN_EXTRACT_BADREADS {
 
     script:
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Djava.io.tmpdir=`pwd`/tmp" ValidateSamFile \
     -I ${bam_sort_mm10[0]} \
     -MODE VERBOSE -MO 10000000 \

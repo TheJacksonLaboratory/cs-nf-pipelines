@@ -25,7 +25,7 @@ process GATK_COMBINEGVCFS {
     inputs = gvcf.collect { "--variant $it" }.join(' ')
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" CombineGVCFs \
     -R ${params.ref_fa} \
     ${inputs} \

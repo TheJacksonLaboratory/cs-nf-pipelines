@@ -26,7 +26,7 @@ process GATK_MUTECT2 {
     pon_genotype = params.genotype_pon ? '--genotype-pon-sites true' : ''
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus} -Djava.io.tmpdir=`pwd`/tmp" Mutect2 \
     -R ${params.ref_fa} \
     -I ${tumor_bam} \

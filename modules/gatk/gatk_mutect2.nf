@@ -24,7 +24,7 @@ process GATK_MUTECT2 {
     my_mem =  my_mem[0..-4]
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -XX:ParallelGCThreads=${task.cpus} -Djava.io.tmpdir=`pwd`/tmp" Mutect2 \
     -R ${params.ref_fa} \
     -I ${tumor_bam} \

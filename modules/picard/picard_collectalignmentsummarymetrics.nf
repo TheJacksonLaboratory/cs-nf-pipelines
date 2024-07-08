@@ -21,7 +21,7 @@ process PICARD_COLLECTALIGNMENTSUMMARYMETRICS{
     my_mem =  my_mem[0..-4]
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp"  CollectAlignmentSummaryMetrics \
     --INPUT ${bam} \
     --OUTPUT ${sampleID}_AlignmentMetrics.txt \

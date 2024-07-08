@@ -22,7 +22,7 @@ process GATK_UPDATEVCFSEQUENCEDICTIONARY {
     replace_gq_string = input_tool == 'svaba' ? "sed -i 's/GQ,Number=1,Type=Integer/GQ,Number=1,Type=String/g' ${vcf.baseName}.reheaded.vcf && sed -i 's/PL,Number=G,Type=Integer/PL,Number=.,Type=Float/g' ${vcf.baseName}.reheaded.vcf" : ''
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" UpdateVCFSequenceDictionary  \
     --source-dictionary ${params.ref_fa_dict} \
     -V ${vcf} \

@@ -29,7 +29,7 @@ process GATK_SORTVCF_GERMLINE {
     }
 
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" SortVcf  \
     -SD ${params.ref_fa_dict} \
     ${inputs} \

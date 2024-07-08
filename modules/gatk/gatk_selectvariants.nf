@@ -24,7 +24,7 @@ process GATK_SELECTVARIANTS {
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" SelectVariants \
     -R ${params.ref_fa} \
     -V ${vcf} \

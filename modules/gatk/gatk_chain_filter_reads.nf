@@ -21,7 +21,7 @@ process CHAIN_FILTER_READS {
 
     script:
     """
-    mkdir tmp
+    mkdir -p tmp
     gatk --java-options "-Djava.io.tmpdir=`pwd`/tmp" FilterSamReads \
     -I ${bam_sort_mm10[0]} \
     -RLF ReadName_unique \
