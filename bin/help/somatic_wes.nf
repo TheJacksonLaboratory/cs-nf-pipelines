@@ -38,8 +38,6 @@ Parameter | Default | Description
 --bait_picard | '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.picard.interval_list' | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. This file can be the same as the interval file,  NOTE: This file MUST reflect the capture array used to generate your data.
 
 --mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
---call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
---ploidy_val | '-ploidy 2' | Sample ploidy
 
 --gnomad_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/af-only-gnomad.hg38.vcf.gz' | GnomAD germline reference from GATK resource pack. 
 --pon_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/1000g_pon.hg38.vcf.gz' | 1000 genome germline panel of normals from GATK resource pack.
