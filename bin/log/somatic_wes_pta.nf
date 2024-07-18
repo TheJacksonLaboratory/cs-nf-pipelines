@@ -47,7 +47,6 @@ ______________________________________________________
 --bait_picard                   ${params.bait_picard}
 --snpEff_config                 ${params.snpEff_config}
 --mismatch_penalty              ${params.mismatch_penalty}
---call_val                      ${params.call_val}
 --gen_ver                       ${params.gen_ver}
 --gold_std_indels               ${params.gold_std_indels}
 --phase1_1000G                  ${params.phase1_1000G}

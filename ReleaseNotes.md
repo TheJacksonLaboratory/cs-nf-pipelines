@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.6.6
+
+In this release, we add a FASTQ sorting function to the Xengsort module. Due to asynchronous multi-threading in the classification step, Xengsort produces FASTQ output with non-deterministic sort order. BWA produces subtly different mapping results when reads in otherwise identical FASTQ inputs are shuffled ([see note from BWA developer here](https://github.com/lh3/bwa/issues/192#issuecomment-380612006)). The slight mapping differences are not enough to impact overall results, but do prevent fully reproducible results when Xengsort is used and reads are not sorted. The addition of the sorting function allows for fully reproducible results, with no additional user action required.    
+
 ## Release 0.6.5
 
 In this minor release, we fix a `subscript out of bounds` bug in `bin/wes/sequenza_seg_na_window.R`.    

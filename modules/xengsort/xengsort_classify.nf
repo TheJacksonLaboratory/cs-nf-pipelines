@@ -21,8 +21,8 @@ process XENGSORT_CLASSIFY {
     tuple val(sampleID), path(trimmed)
 
     output:
-    tuple val(sampleID), path("fastq-graft.*.fq"), emit: xengsort_human_fastq
-    tuple val(sampleID), path("fastq-host.*.fq"), emit: xengsort_mouse_fastq
+    tuple val(sampleID), path("*fastq-graft_sorted.*.fq"), emit: xengsort_human_fastq
+    tuple val(sampleID), path("*fastq-host_sorted.*.fq"), emit: xengsort_mouse_fastq
     tuple val(sampleID), path("*.txt"), emit: xengsort_log
     
     script:
@@ -42,6 +42,9 @@ process XENGSORT_CLASSIFY {
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
+        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.1.fq
+        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.1.fq
+
         """
 
     else if (params.read_type == "PE")
@@ -58,6 +61,12 @@ process XENGSORT_CLASSIFY {
         --out fastq \
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
+
+        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.1.fq
+        cat fastq-host.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.2.fq
+
+        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.1.fq
+        cat fastq-graft.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.2.fq
 
         """
 
