@@ -42,8 +42,8 @@ process XENGSORT_CLASSIFY {
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
-        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${sampleID}_fastq-host_sorted.1.fq
-        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\t" "\n" > ${sampleID}_fastq-graft_sorted.1.fq
+        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.1.fq
+        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.1.fq
 
         """
 
