@@ -49,7 +49,7 @@ else if (params.workflow == "amplicon"){
   include {AMPLICON} from './workflows/amplicon'
 }
 else if (params.workflow == "cnv_array"){
-  include {CNV} from './workflows/cnv_array'
+  include {CNV_ARRAY} from './workflows/cnv_array'
 }
 else {
   // if workflow name is not supported: 
@@ -104,8 +104,6 @@ workflow{
     AMPLICON()
   }
   if (params.workflow == "cnv_array"){
-
     CNV_ARRAY()
-
   }
 }

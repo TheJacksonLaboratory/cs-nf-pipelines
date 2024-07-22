@@ -6,14 +6,6 @@ println logo.show()
 
 def param_log(){
 
-if (!params.idat_folder) {
-  error "'--idat_folder': is not provided, it is a required parameter."
-}
-
-if (!params.output_dir) {
-  error "'--output_dir': is not provided, it is a required parameter."
-}
-
 if (!params.bpm_file) {
   error "'--bpm_file': is not provided, it is a required parameter."
 }
@@ -27,10 +19,9 @@ IAAP_CLI PARAMETER LOG
 
 --comment: ${params.comment}
 
-Results Published to: ${params.output_dir}
+Results Published to: ${params.pubdir}
 ______________________________________________________
---idat_folder               ${params.idat_folder}
---output_dir                ${params.output_dir}
+--csv_input                 ${params.csv_input}
 --bpm_file                  ${params.bpm_file}
 --egt_file                  ${params.egt_file}
 -w                          ${workDir}
