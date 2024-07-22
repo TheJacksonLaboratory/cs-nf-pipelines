@@ -103,4 +103,9 @@ workflow{
   if (params.workflow == "amplicon"){
     AMPLICON()
   }
+  if (params.workflow == "cnv_array"){
+
+    CNV_ARRAY()
+
+  }
 }
