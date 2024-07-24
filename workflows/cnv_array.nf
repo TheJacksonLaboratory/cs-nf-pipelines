@@ -6,7 +6,7 @@ include {help} from "${projectDir}/bin/help/cnv_array.nf"
 include {param_log} from "${projectDir}/bin/log/cnv_array.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_cnv_array_csv.nf"
 include {IAAP_CLI} from "${projectDir}/modules/illumina/iaap_cli"
-include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools_gtc2vcf.nf"
+include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools/bcftools_gtct2vcf.nf"
 
 // Help if needed
 if (params.help) {
