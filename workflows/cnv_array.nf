@@ -33,6 +33,6 @@ ch_input = extract_csv(file(params.csv_input, checkIfExists: true))
 // Main workflow
 workflow CNV_ARRAY {
     IAAP_CLI(ch_input)
-    IAAP_CLI.out.gtc.view()
-    BCFTOOLS_GTC2VCF(prepare_bcftools_inputs)
+    BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
+    BCFTOOLS_GTC2VCF.out.gtc2vcf.view()
 }

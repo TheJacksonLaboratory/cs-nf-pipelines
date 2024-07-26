@@ -8,12 +8,12 @@ def param_log() {
         error "'--egt_file': is not provided, it is a required parameter."
     }
 
-    if (!params.csv_file) {
-        error "'--csv_file': is not provided, it is a required parameter."
+    if (!params.gtc_csv) {
+        error "'--gtc_csv': is not provided, it is a required parameter."
     }
 
-    if (!params.fasta_file) {
-        error "'--fasta_file': is not provided, it is a required parameter."
+    if (!params.ref_fa) {
+        error "'--ref_fa': is not provided, it is a required parameter."
     }
 
     if (!params.tsv_file) {
@@ -31,8 +31,8 @@ def param_log() {
     --idat_folder               ${params.idat_folder ?: 'N/A'}
     --bpm_file                  ${params.bpm_file}
     --egt_file                  ${params.egt_file}
-    --csv_file                  ${params.csv_file}
-    --fasta_file                ${params.fasta_file}
+    --gtc_csv                   ${params.gtc_csv}
+    --ref_fa                    ${params.ref_fa}
     --tsv_file                  ${params.tsv_file}
     -w                          ${workDir}
     --keep_intermediate         ${params.keep_intermediate ?: 'N/A'}

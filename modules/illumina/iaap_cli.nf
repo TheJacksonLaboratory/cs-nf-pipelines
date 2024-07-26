@@ -2,7 +2,7 @@ process IAAP_CLI {
   
   tag "$sampleID"
   
-  cpus = 4
+  cpus = 1
   memory 24.GB
   time '01:30:00'
 
