@@ -1,7 +1,17 @@
-// bcftools_gtc2vcf.nf
+def prepare_bcftools_inputs(ch_input) {
+    bpm_file = file(params.bpm_file)
+    csv_file = file(params.csv_input)
+    egt_file = file(params.egt_file)
+    gtcs_dir = IAAP_CLI.out.gtc
+    fasta_file = file(params.fasta_file)
+    tsv_file = file(params.tsv_file)
 
+    return tuple(bpm_file, csv_file, egt_file, gtcs_dir, fasta_file, tsv_file)
+}
+
+
+// Define BCFTOOLS_GTC2VCF process
 process BCFTOOLS_GTC2VCF {
-      
     cpus = 4
     memory 24.GB
     time '01:30:00'
@@ -11,7 +21,7 @@ process BCFTOOLS_GTC2VCF {
     publishDir "${params.pubdir}", mode: 'copy'
 
     input:
-    tuple path(bpm), path(csv), path(egt), path(gtcs_dir), path(fasta), path(tsv)
+    tuple path(bpm_file), path(csv_file), path(egt_file), path(gtcs_dir), path(fasta_file), path(tsv_file) from prepare_bcftools_inputs
 
     output:
     tuple path('bcftools_convert.bcf'), path('bcftools_convert.bcf.csi'), path('bcftools_convert.vcf'), path('bcftools_convert.tsv')
