@@ -39,9 +39,7 @@ ch_input = extract_csv(file(params.csv_input, checkIfExists: true))
 workflow CNV_ARRAY {
     IAAP_CLI(ch_input)
     BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
-    BCFTOOLS_GTC2VCF.out.gtc2vcf.view()
     BCFTOOLS_QUERY_ASCAT(BCFTOOLS_GTC2VCF.out.gtc2vcf)
-    BCFTOOLS_QUERY_ASCAT.out.bcftools_query.view()
-    ASCAT(IAAP_CLI.out.ascat2r,BCFTOOLS_QUERY_ASCAT.out.bafnlrr, params.platform,GC_file,RT_file)
+    ASCAT(BCFTOOLS_QUERY_ASCAT.out.baf_lrr)
     ASCAT.out.ascat.view()
 }

@@ -11,8 +11,7 @@ process BCFTOOLS_QUERY_ASCAT {
     tuple val(sampleID), val(meta), path(bcf), path(csi), path(vcf), path(tsv)
 
     output:
-    tuple val(sampleID), val(meta), path('*_convert.BAF'), path('*_convert.LRR'), emit: bcftools_query
-    tuple path('*_convert.BAF'), path('*_convert.LRR'), emit: bafnlrr
+    tuple val(sampleID), val(meta), path('*_convert.BAF'), path('*_convert.LRR'), emit: baf_lrr
 
     script:
     """

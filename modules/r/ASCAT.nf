@@ -10,7 +10,7 @@ process ASCAT {
     container 'quay.io/biocontainers/ascat:3.1.1--r43hdfd78af_1'
 
     input:
-         val(sampleID),path(LRR),path(BAF),val(gender),val(platform),path(GC_file),path(RT_file)
+        tuple val(sampleID), val(meta), path(LRR), path(BAF)
 
     output:
         tuple val(sampleID),
@@ -31,7 +31,7 @@ process ASCAT {
             ${BAF} \
             ${meta.gender} \
             ${params.snp_platform} \
-            ${params.GC_file} \
-            ${params.RT_file}
+            ${params.gc_file} \
+            ${params.rt_file}
         """
 }
