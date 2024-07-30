@@ -18,6 +18,7 @@ process IAAP_CLI {
 
   output:
   tuple val(sampleID), val(meta), path("*.gtc"), emit: gtc
+  tuple val(sampleID), val(meta), emit: ascat2r
   path "iaap_cli.log", emit: iaap_cli_log
 
   script:

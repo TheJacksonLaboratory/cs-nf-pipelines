@@ -8,6 +8,7 @@ include {extract_csv} from "${projectDir}/bin/shared/extract_cnv_array_csv.nf"
 include {IAAP_CLI} from "${projectDir}/modules/illumina/iaap_cli.nf"
 include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools/bcftools_gtct2vcf.nf"
 include {BCFTOOLS_QUERY_ASCAT} from "${projectDir}/modules/bcftools/bcftools_query_ascat.nf"
+include {ASCAT} from "${projectDir}/modules/r/ASCAT.nf"
 
 
 // Help if needed
@@ -28,6 +29,8 @@ if (params.csv_input) {
 } else {
     exit 1, "Workflow requires a CSV manifest. See `--help` for information."   
 }
+GC_file = file(params.gc_file, checkIfExists: true)
+RT_file = file(params.rt_file, checkIfExists: true)
 
 // Extract CSV input
 ch_input = extract_csv(file(params.csv_input, checkIfExists: true))
@@ -38,6 +41,7 @@ workflow CNV_ARRAY {
     BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
     BCFTOOLS_GTC2VCF.out.gtc2vcf.view()
     BCFTOOLS_QUERY_ASCAT(BCFTOOLS_GTC2VCF.out.gtc2vcf)
-        BCFTOOLS_QUERY_ASCAT.out.bcftools_query.view()
-
+    BCFTOOLS_QUERY_ASCAT.out.bcftools_query.view()
+    ASCAT(IAAP_CLI.out.ascat2r,BCFTOOLS_QUERY_ASCAT.out.bafnlrr, params.platform,GC_file,RT_file)
+    ASCAT.out.ascat.view()
 }
