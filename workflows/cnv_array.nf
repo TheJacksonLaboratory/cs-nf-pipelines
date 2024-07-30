@@ -7,6 +7,8 @@ include {param_log} from "${projectDir}/bin/log/cnv_array.nf"
 include {extract_csv} from "${projectDir}/bin/shared/extract_cnv_array_csv.nf"
 include {IAAP_CLI} from "${projectDir}/modules/illumina/iaap_cli.nf"
 include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools/bcftools_gtct2vcf.nf"
+include {BCFTOOLS_QUERY_ASCAT} from "${projectDir}/modules/bcftools/bcftools_query_ascat.nf"
+
 
 // Help if needed
 if (params.help) {
@@ -35,4 +37,7 @@ workflow CNV_ARRAY {
     IAAP_CLI(ch_input)
     BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
     BCFTOOLS_GTC2VCF.out.gtc2vcf.view()
+    BCFTOOLS_QUERY_ASCAT(BCFTOOLS_GTC2VCF.out.gtc2vcf)
+        BCFTOOLS_QUERY_ASCAT.out.bcftools_query.view()
+
 }

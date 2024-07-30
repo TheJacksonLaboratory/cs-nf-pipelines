@@ -14,12 +14,5 @@ Parameter        | Default | Description
 --fasta-ref      | /<PATH> | The path to the reference FASTA file.
 --extra          | /<PATH> | The path to the output directory.
 
-// Example usage of BCFTOOLS:
-// ---------------------------
-// bcftools sort -Ou -T ./bcftools. | \\
-// bcftools norm --no-version -Ob -c x -f <fasta> | \\
-// tee bcftools_convert.bcf | \\
-// bcftools index --force --output bcftools_convert.bcf.csi
-// bcftools convert -O v -o bcftools_convert.vcf bcftools_convert.bcf
 '''
 }

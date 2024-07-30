@@ -13,7 +13,7 @@ process BCFTOOLS_GTC2VCF {
 
     output:
     tuple val(sampleID), val(meta), path('*_convert.bcf'), path('*_convert.bcf.csi'), path('*_convert.vcf'), path('*_convert.tsv'), emit: gtc2vcf
-    // tuple val(sampleID), val(meta), path('*.BAF'), path('*.LRR'), emit: baf_lrr
+
     
     script:
     """
