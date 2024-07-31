@@ -11,7 +11,7 @@ process ASCAT {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'ascat' }", mode: 'copy'
 
     input:
-        tuple val(sampleID), val(meta), path(LRR), path(BAF)
+        tuple val(sampleID), val(meta), path(BAF), path(LRR)
 
     output:
         tuple val(sampleID), val(meta), path("*.txt"), emit: all_txt
@@ -23,8 +23,8 @@ process ASCAT {
         """
         Rscript ${projectDir}/bin/cnv_array/ASCAT_run.R \
             ${sampleID} \
-            ${LRR} \
             ${BAF} \
+            ${LRR} \
             ${meta.gender} \
             ${params.snp_platform} \
             ${params.gc_file} \

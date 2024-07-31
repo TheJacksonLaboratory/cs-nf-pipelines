@@ -7,8 +7,8 @@ suppressMessages(library(ASCAT))
 args=(commandArgs(TRUE))
 
 sampleID = args[1]
-LRR_file = args[2]
-BAF_file = args[3]
+BAF_file = args[2]
+LRR_file = args[3]
 gender   = args[4]
 platform = args[5]
 GC_file  = args[6]
