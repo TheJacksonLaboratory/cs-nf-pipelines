@@ -6,22 +6,18 @@ process ASCAT {
     time '01:30:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
+    container 'quay.io/jaxcompsci/ascat:v3.1.3'
 
-    container 'quay.io/biocontainers/ascat:3.1.1--r43hdfd78af_1'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'ascat' }", mode: 'copy'
 
     input:
         tuple val(sampleID), val(meta), path(LRR), path(BAF)
 
     output:
-        tuple val(sampleID),
-             path("${sampleID}_sample.QC.txt"),
-             path("${sampleID}_ASCAT_objects.Rdata"),
-             path("${sampleID}.segments_raw.txt"),
-             path("${sampleID}.segments.txt"),
-             path("${sampleID}.aberrantcellfraction.txt"),
-             path("${sampleID}.ploidy.txt"),
-             path("ASCAT.failedarrays.txt", optional: true),
-             path("ASCAT.nonaberrantarrays.txt", optional: true), emit: ascat
+        tuple val(sampleID), val(meta), path("*.txt"), emit: all_txt
+        tuple val(sampleID), val(meta), path("*.png"), emit: all_png
+        tuple val(sampleID), val(meta), path("*.Rdata"), emit: ascat_rdata
+        tuple val(sampleID), val(meta), path("*segments_raw.txt"), path("*.ploidy.txt"), emit: seg_ploidy
 
     script:
         """

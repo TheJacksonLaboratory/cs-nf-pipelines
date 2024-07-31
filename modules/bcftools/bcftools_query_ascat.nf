@@ -1,4 +1,7 @@
 process BCFTOOLS_QUERY_ASCAT {
+    
+    tag "$sampleID"
+
     cpus 1
     memory 8.GB
     time '01:00:00'

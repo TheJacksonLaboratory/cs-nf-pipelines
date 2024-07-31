@@ -41,5 +41,5 @@ workflow CNV_ARRAY {
     BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
     BCFTOOLS_QUERY_ASCAT(BCFTOOLS_GTC2VCF.out.gtc2vcf)
     ASCAT(BCFTOOLS_QUERY_ASCAT.out.baf_lrr)
-    ASCAT.out.ascat.view()
+    ASCAT.out.seg_ploidy.view()
 }

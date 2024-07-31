@@ -1,5 +1,7 @@
-// Define BCFTOOLS_GTC2VCF process
 process BCFTOOLS_GTC2VCF {
+    
+    tag "$sampleID"
+
     cpus = 1
     memory 24.GB
     time '01:30:00'
