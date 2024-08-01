@@ -9,6 +9,7 @@ include {IAAP_CLI} from "${projectDir}/modules/illumina/iaap_cli.nf"
 include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools/bcftools_gtct2vcf.nf"
 include {BCFTOOLS_QUERY_ASCAT} from "${projectDir}/modules/bcftools/bcftools_query_ascat.nf"
 include {ASCAT} from "${projectDir}/modules/r/ASCAT.nf"
+include {ASCAT_ANNOTATION} from "${projectDir}/modules/utility_modules/ascat_annotation.nf"
 
 
 // Help if needed
@@ -29,6 +30,7 @@ if (params.csv_input) {
 } else {
     exit 1, "Workflow requires a CSV manifest. See `--help` for information."   
 }
+
 GC_file = file(params.gc_file, checkIfExists: true)
 RT_file = file(params.rt_file, checkIfExists: true)
 
@@ -41,5 +43,6 @@ workflow CNV_ARRAY {
     BCFTOOLS_GTC2VCF(IAAP_CLI.out.gtc)
     BCFTOOLS_QUERY_ASCAT(BCFTOOLS_GTC2VCF.out.gtc2vcf)
     ASCAT(BCFTOOLS_QUERY_ASCAT.out.baf_lrr)
-    ASCAT.out.seg_ploidy.view()
+    ASCAT_ANNOTATION(ASCAT.out.seg_ploidy)
+    ASCAT_ANNOTATION.out.ascat_annotated.view()
 }
