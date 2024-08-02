@@ -27,6 +27,10 @@ colnames(SNPpos) <- c('Probe_Set_ID', 'Chromosome', 'Physical_Position')
 
 ##
 
+if (gender == 'NA') {
+  gender = 'XY'
+}
+
 ascat.bc = ascat.loadData(Tumor_LogR_file = LRR_file, Tumor_BAF_file = BAF_file, gender = gender, genomeVersion = "hg38")
 
 ascat.bc$samples[1] <- sampleID
