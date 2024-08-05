@@ -15,6 +15,8 @@ Parameter | Default | Description
 --csv_input | null | Provide a CSV manifest file with the header: "sampleID,lane,fastq_1,fastq_2". See the repository wiki for an example file. Fastq_2 is optional and used only in PE data. Fastq files can either be absolute paths to local files, or URLs to remote files. If remote URLs are provided, `--download_data` must be specified.
 --download_data | null | Requires `--csv_input`. When specified, read data in the CSV manifest will be downloaded from provided URLs. 
 
+--deduplicate_reads | false | Options: false, true. If specified, run bbmap clumpify on input reads. Clumpify will deduplicate reads prior to trimming. This can help with mapping and downstream steps when analyzing high coverage WES data.
+
 --gen_org | human | Options: human only.
 
 --ref_fa | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta' | The reference fasta to be used throughout the process for alignment as well as any downstream analysis. JAX users should not change this parameter.
