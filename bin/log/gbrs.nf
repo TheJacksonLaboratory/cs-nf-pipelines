@@ -35,6 +35,7 @@ def param_log(){
     --read_type                     ${params.read_type}
     --csv_input                     ${params.csv_input}
     --download_data                 ${params.download_data}
+    --genome_build                  ${params.genome_build}
     --bowtie_index                  ${params.bowtie_index}
     --transcripts_info              ${params.transcripts_info}
     --gbrs_strain_list              ${params.gbrs_strain_list}

@@ -24,6 +24,8 @@ Examples:
     Given the input file name "SAMPLE_NAME_1_OTHER_STUFF-WeDont_WANT.txt" if this `concat_sampleID_delim` = '_' and `concat_sampleID_positions` = "3" the sample ID would be assigned as `SAMPLE_NAME_1`
     Given the input file name "SAMPLE_NAME_1_OTHER_STUFF-WeDont_WANT.txt" if this `concat_sampleID_delim` = '-' and `concat_sampleID_positions` = "1" the sample ID would be assigned as `SAMPLE_NAME_1_OTHER_STUFF`
 
+--genome_build | 'GRCm39' | Options: GRCm39 or GRCm38.
+
 --bowtie_index | /<PATH> | Path to the bowtie index. Include the bowtie prefix in this path (e.g., `/path/to/bowtie.transcripts` where bowtie.transcripts.* are the full set of index files in the directory.  
 --transcripts_info | /<PATH> | A file containing all transcript IDs. NOTE: These IDs must not contain haplotype IDs. This file must also have a 'length' column. Note that 'length' is not used in this context. ONLY IDs are used from this file. Can be obtained from `prepare_emase` workflow (emase.fullTranscripts.info)
 --gbrs_strain_list | <comma,delim,list> | A list of haplotype names corresponding to genomes used in hybrid genome contrucution (e.g., 'A,B,C,D,E,F,G,H'). 
