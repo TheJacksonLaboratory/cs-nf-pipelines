@@ -1,5 +1,16 @@
 # RELEASE NOTES
 
+## Release 0.6.7
+
+In this release we make the following minor adjustments:   
+
+1. Correct syntax errors in the Xengsort module when running single-end data.  
+1. Minor adjustments to EMASE and GBRS help and log information to include the `gen_org` param.  
+1. Bump the version of MultiQC to v1.23.  
+1. Increase the memory request for a `PTA` moudles: `python_merge_prep.nf` and `python_reorder_vcf_columns.nf`.  
+1. Add `CHECK_STRANDEDNESS` to multiQC output for PDX RNAseq
+1. Increased job memory request in example run scripts.   
+
 ## Release 0.6.6
 
 In this release, we add a FASTQ sorting function to the Xengsort module. Due to asynchronous multi-threading in the classification step, Xengsort produces FASTQ output with non-deterministic sort order. BWA produces subtly different mapping results when reads in otherwise identical FASTQ inputs are shuffled ([see note from BWA developer here](https://github.com/lh3/bwa/issues/192#issuecomment-380612006)). The slight mapping differences are not enough to impact overall results, but do prevent fully reproducible results when Xengsort is used and reads are not sorted. The addition of the sorting function allows for fully reproducible results, with no additional user action required.    

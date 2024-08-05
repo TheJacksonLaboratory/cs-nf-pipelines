@@ -23,6 +23,7 @@ ______________________________________________________
 --read_type                     ${params.read_type}
 --csv_input                     ${params.csv_input}
 --download_data                 ${params.download_data}
+--genome_build                  ${params.genome_build}
 --bowtie_index                  ${params.bowtie_index}
 --transcripts_info              ${params.transcripts_info}
 --gbrs_strain_list              ${params.gbrs_strain_list}
@@ -56,6 +57,7 @@ ______________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --concat_sampleID_delim         ${params.concat_sampleID_delim}
 --concat_sampleID_positions     ${params.concat_sampleID_positions}
+--genome_build                  ${params.genome_build}
 --bowtie_index                  ${params.bowtie_index}
 --transcripts_info              ${params.transcripts_info}
 --gbrs_strain_list              ${params.gbrs_strain_list}
@@ -88,6 +90,7 @@ ______________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --concat_sampleID_delim         "N/A"
 --concat_sampleID_positions     "N/A"
+--genome_build                  ${params.genome_build}
 --bowtie_index                  ${params.bowtie_index}
 --transcripts_info              ${params.transcripts_info}
 --gbrs_strain_list              ${params.gbrs_strain_list}

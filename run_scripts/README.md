@@ -13,7 +13,7 @@ Example:
 #SBATCH -p compute
 #SBATCH -q batch
 #SBATCH -t 72:00:00
-#SBATCH --mem=1G
+#SBATCH --mem=5G
 #SBATCH --ntasks=1
 
 cd $SLURM_SUBMIT_DIR

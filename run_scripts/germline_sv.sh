@@ -4,7 +4,7 @@
 #SBATCH -p compute
 #SBATCH -q batch
 #SBATCH -t 72:00:00
-#SBATCH --mem=2G
+#SBATCH --mem=5G
 #SBATCH --ntasks=1
 
 # LOAD NEXTFLOW

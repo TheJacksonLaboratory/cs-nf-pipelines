@@ -21,8 +21,8 @@ process XENGSORT_CLASSIFY {
     tuple val(sampleID), path(trimmed)
 
     output:
-    tuple val(sampleID), path("*fastq-graft_sorted.*.fq"), emit: xengsort_human_fastq
-    tuple val(sampleID), path("*fastq-host_sorted.*.fq"), emit: xengsort_mouse_fastq
+    tuple val(sampleID), path("*graft_sorted.*.fq"), emit: xengsort_human_fastq
+    tuple val(sampleID), path("*host_sorted.*.fq"), emit: xengsort_mouse_fastq
     tuple val(sampleID), path("*.txt"), emit: xengsort_log
     
     script:
@@ -33,17 +33,16 @@ process XENGSORT_CLASSIFY {
         """
         
         xengsort classify \
-        --index ${xengsort_index}/${xengsort_index} \
+        --index ${xengsort_index}/${params.xengsort_idx_name} \
         --fastq ${trimmed[0]} \
         --prefix ${sampleID} \
         --mode count \
-        --threads ${task.cpus}
-        --out fastq \
+        --threads ${task.cpus} \
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
-        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.1.fq
-        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.1.fq
+        cat ${sampleID}-host.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
+        cat ${sampleID}-graft.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
 
         """
 
@@ -58,15 +57,14 @@ process XENGSORT_CLASSIFY {
         --prefix ${sampleID} \
         --mode count \
         --threads ${task.cpus} \
-        --out fastq \
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
-        cat fastq-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.1.fq
-        cat fastq-host.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-host_sorted.2.fq
+        cat ${sampleID}-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
+        cat ${sampleID}-host.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.2.fq
 
-        cat fastq-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.1.fq
-        cat fastq-graft.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}_fastq-graft_sorted.2.fq
+        cat ${sampleID}-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
+        cat ${sampleID}-graft.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.2.fq
 
         """
 
