@@ -10,6 +10,7 @@ include {FILE_DOWNLOAD} from "${projectDir}/subworkflows/aria_download_parse"
 include {CONCATENATE_LOCAL_FILES} from "${projectDir}/subworkflows/concatenate_local_files"
 include {CONCATENATE_READS_PE} from "${projectDir}/modules/utility_modules/concatenate_reads_PE"
 include {CONCATENATE_READS_SE} from "${projectDir}/modules/utility_modules/concatenate_reads_SE"
+include {CLUMPIFY} from "${projectDir}/modules/bbmap/bbmap_clumpify"
 include {JAX_TRIMMER} from "${projectDir}/modules/utility_modules/jax_trimmer"
 include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {XENOME_CLASSIFY} from "${projectDir}/modules/xenome/xenome"
@@ -138,8 +139,16 @@ workflow PDX_WES {
 
     // ** MAIN workflow starts: 
 
+    // Optional Step -- Clumpify
+    if (params.deduplicate_reads) {
+        CLUMPIFY(read_ch)
+        trimmer_input = CLUMPIFY.out.clumpy_fastq
+    } else {
+        trimmer_input = read_ch
+    }
+
     // Step 1: Qual_Stat
-    JAX_TRIMMER(read_ch)
+    JAX_TRIMMER(trimmer_input)
 
     xenome_input = JAX_TRIMMER.out.trimmed_fastq
     
