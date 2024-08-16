@@ -16,9 +16,6 @@ def param_log() {
         error "'--ref_fa': is not provided, it is a required parameter."
     }
 
-    if (!params.tsv_file) {
-        error "'--tsv_file': is not provided, it is a required parameter."
-    }
 
     // Log parameter information
     log.info """
@@ -28,12 +25,10 @@ def param_log() {
 
     Results Published to: ${params.pubdir ?: 'N/A'}
     ______________________________________________________
-    --idat_folder               ${params.idat_folder ?: 'N/A'}
     --bpm_file                  ${params.bpm_file}
     --egt_file                  ${params.egt_file}
     --gtc_csv                   ${params.gtc_csv}
     --ref_fa                    ${params.ref_fa}
-    --tsv_file                  ${params.tsv_file}
     -w                          ${workDir}
     --keep_intermediate         ${params.keep_intermediate ?: 'N/A'}
     -c                          ${params.config ?: 'N/A'}

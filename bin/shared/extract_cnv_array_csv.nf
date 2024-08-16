@@ -19,13 +19,13 @@ def extract_csv(csv_file) {
 
     Channel.from(csv_file).splitCsv(header: true)
         .map{ row ->
-            if (!(row.sampleID) || !(row.idat_red || !(row.idat_green))){
+            if (!(row.sampleID) || !(row.idat_red) || !(row.idat_green)) {
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'sampleID', 'idat_red', 'idat_green'." + ANSI_RESET)
                 System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)
-            }
+            } 
             [row.sampleID.toString(), row]
         }.groupTuple()
         .map{ meta, rows ->
@@ -34,6 +34,24 @@ def extract_csv(csv_file) {
         }.transpose()
         .map{ row, numLanes -> //from here do the usual thing for csv parsing
 
+        if (row.idat_red.substring(row.idat_red.lastIndexOf(System.getProperty("file.separator")) + 1).count("_") > 2){
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "The file: " + row.idat_red + " containes more than 2 underscores in the name." + ANSI_RESET)
+                System.err.println(ANSI_RED + "IDAT files must have only 2 underscores (i.e., xxx_xxx_Grn.idat and xxx_xxx_Red.idat)." + ANSI_RESET)
+                System.err.println(ANSI_RED + "GEO (and others) rename files to have more than 2 (i.e., GSMxxx_xxx_xxx_Red.idat). File names must be adjusted prior to running." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+        }
+        if (row.idat_green.substring(row.idat_green.lastIndexOf(System.getProperty("file.separator")) + 1).count("_") > 2){
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+                System.err.println(ANSI_RED + "The file: " + row.idat_green + " containes more than 2 underscores in the name." + ANSI_RESET)
+                System.err.println(ANSI_RED + "IDAT files must have only 2 underscores (i.e., xxx_xxx_Grn.idat and xxx_xxx_Red.idat)." + ANSI_RESET)
+                System.err.println(ANSI_RED + "GEO (and others) rename files to have more than 2 (i.e., GSMxxx_xxx_xxx_Red.idat). File names must be adjusted prior to running." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+                System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+                System.exit(1)
+        }
 
         // Metadata to identify samplesheet
         def meta = [:]
@@ -42,7 +60,7 @@ def extract_csv(csv_file) {
 
         if (row.gender != "XY" && row.gender != "XX" && row.gender != ""){
             System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-            System.err.println(ANSI_RED + "Geneder must be 'XX', 'XY' or empty. " + row.gender + " was provided, and isn't valid." + ANSI_RESET)
+            System.err.println(ANSI_RED + "Gender must be 'XX', 'XY' or empty. " + row.gender + " was provided, and isn't valid." + ANSI_RESET)
             System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
             System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
             System.exit(1)
@@ -77,7 +95,6 @@ def extract_csv(csv_file) {
         }
 
         return [meta.sampleID, meta, row.idat_red, row.idat_green]
-
 
     }
 }

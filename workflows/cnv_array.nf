@@ -22,7 +22,7 @@ if (params.help) {
 param_log()
 // Parameter validation
 if (!params.bpm_file || !params.egt_file) {
-    exit 1, "All parameters (idat_folder, bpm_file, egt_file) are required."
+    exit 1, "All parameters (bpm_file, egt_file) are required."
 }
 
 if (params.csv_input) {
@@ -33,9 +33,6 @@ if (params.csv_input) {
 
 GC_file = file(params.gc_file, checkIfExists: true)
 RT_file = file(params.rt_file, checkIfExists: true)
-
-// Extract CSV input
-ch_input = extract_csv(file(params.csv_input, checkIfExists: true))
 
 // Main workflow
 workflow CNV_ARRAY {
