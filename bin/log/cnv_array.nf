@@ -29,10 +29,14 @@ def param_log() {
     --egt_file                  ${params.egt_file}
     --gtc_csv                   ${params.gtc_csv}
     --ref_fa                    ${params.ref_fa}
+    --snp_platform              ${params.snp_platform}
+    --gc_file                   ${params.gc_file}
+    --rt_file                   ${params.rt_file}
+    --chrArm                    ${params.chrArm}
+    --cnvGeneFile               ${params.cnvGeneFile}
     -w                          ${workDir}
-    --keep_intermediate         ${params.keep_intermediate ?: 'N/A'}
-    -c                          ${params.config ?: 'N/A'}
-    
+    -c                          ${params.config}
+
     Project Directory: ${projectDir}
     Command line call: 
     ${workflow.commandLine}
