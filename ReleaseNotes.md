@@ -1,5 +1,48 @@
 # RELEASE NOTES
 
+## Release 0.7.0
+
+In this release we add a new workflow for calling copy number variation (CNV) from raw Illumina IDAT genotype array files. Currently the Illumina IlluminaCytoSNP v2.1 array is supported, but support for additional arrays is possible.  
+
+We make additional minor changes as described below. 
+
+### Pipelines Added:
+
+1. CNV calling from Illumina genotype array data (--cnv_array)
+
+### Modules Added:
+
+1. modules/bcftools/bcftools_gtct2vcf.nf
+1. modules/bcftools/bcftools_query_ascat.nf
+1. modules/illumina/iaap_cli.nf
+1. modules/ascat/ascat_run.nf
+1. modules/ascat/ascat_annotation.nf
+
+### Pipeline Changes:
+
+None
+
+### Module Changes:
+
+1. Replaced the incorrect `${task.mem}` with `${task.memory}` in the Nextflow error catch statement in modules related to the SV calling workflows.   
+1. utility_modules/gzip.nf: Memory request increase  
+
+### Scripts Added:
+
+1. cnv_array/ASCAT_run.R
+1. cnv_array/annotate_ensembl_genes.pl
+1. cnv_array/seg_plot.R
+1. cnv_array/segment_raw_extend.pl
+
+### Script Changes:
+
+None
+
+### NF-Test Modules Added: 
+
+1. tests/workflows/cnv_array.nf.test
+
+
 ## Release 0.6.7
 
 In this release we make the following minor adjustments:   

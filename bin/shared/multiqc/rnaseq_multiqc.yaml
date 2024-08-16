@@ -29,6 +29,7 @@ extra_fn_clean_exts:
   - "_strandedness"
   - "_genome_bam_with_read_group_reorder"
   - "_fastp"
+  - "_xenome_stats"
 
 section_comments:
   rseqc: "Note: strandedness was determined with '[how_are_we_stranded_here](https://github.com/signalbash/how_are_we_stranded_here/tree/master)' which uses `infer_experiment.py` from RSeQC."
