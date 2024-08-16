@@ -8,8 +8,8 @@ include {extract_csv} from "${projectDir}/bin/shared/extract_cnv_array_csv.nf"
 include {IAAP_CLI} from "${projectDir}/modules/illumina/iaap_cli.nf"
 include {BCFTOOLS_GTC2VCF} from "${projectDir}/modules/bcftools/bcftools_gtct2vcf.nf"
 include {BCFTOOLS_QUERY_ASCAT} from "${projectDir}/modules/bcftools/bcftools_query_ascat.nf"
-include {ASCAT} from "${projectDir}/modules/r/ASCAT.nf"
-include {ASCAT_ANNOTATION} from "${projectDir}/modules/utility_modules/ascat_annotation.nf"
+include {ASCAT} from "${projectDir}/modules/ascat/ascat_run.nf"
+include {ASCAT_ANNOTATION} from "${projectDir}/modules/ascat/ascat_annotation.nf"
 
 
 // Help if needed
