@@ -1,0 +1,2 @@
+sampleID,gender,idat_red,idat_green
+Test_Sample_XY,XY,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CNV_ARRAY/raw_idat/GSM7177504_205848650018_R01C01_Red.idat,/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CNV_ARRAY/raw_idat/GSM7177504_205848650018_R01C01_Grn.idat

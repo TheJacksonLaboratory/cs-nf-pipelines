@@ -48,6 +48,9 @@ else if (params.workflow == "gbrs"){
 else if (params.workflow == "amplicon"){
   include {AMPLICON} from './workflows/amplicon'
 }
+else if (params.workflow == "cnv_array"){
+  include {CNV_ARRAY} from './workflows/cnv_array'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -99,5 +102,8 @@ workflow{
   }
   if (params.workflow == "amplicon"){
     AMPLICON()
+  }
+  if (params.workflow == "cnv_array"){
+    CNV_ARRAY()
   }
 }
