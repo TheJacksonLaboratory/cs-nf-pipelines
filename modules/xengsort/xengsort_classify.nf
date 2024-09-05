@@ -9,7 +9,7 @@ process XENGSORT_CLASSIFY {
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     // load xengsort container
-    container 'quay.io/biocontainers/xengsort:2.0.5--pyhdfd78af_0'
+    container 'quay.io/jaxcompsci/xengsort_gnu_utils:v2.0.5'
 
     // output directory
     // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/xengsort/xengsort_classify' : 'xengsort'}", pattern: "*.fq", mode: "copy"
@@ -41,8 +41,8 @@ process XENGSORT_CLASSIFY {
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
-        cat ${sampleID}-host.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
-        cat ${sampleID}-graft.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
+        cat ${sampleID}-host.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
+        cat ${sampleID}-graft.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
 
         """
 
@@ -60,11 +60,11 @@ process XENGSORT_CLASSIFY {
         --chunksize 32.0 \
         --compression none &> ${sampleID}_xengsort_log.txt
 
-        cat ${sampleID}-host.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
-        cat ${sampleID}-host.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.2.fq
+        cat ${sampleID}-host.1.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.1.fq
+        cat ${sampleID}-host.2.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-host_sorted.2.fq
 
-        cat ${sampleID}-graft.1.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
-        cat ${sampleID}-graft.2.fq | paste - - - - | sort -k1,1 -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.2.fq
+        cat ${sampleID}-graft.1.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.1.fq
+        cat ${sampleID}-graft.2.fq | paste - - - - | sort -k1,1 -T ./ -t " " | tr "\\t" "\\n" > ${sampleID}-graft_sorted.2.fq
 
         """
 
