@@ -1,5 +1,12 @@
 # RELEASE NOTES
 
+## Release 0.7.1
+
+In this minor release we change the Xengsort container to include `GNU sort` rather than `BusyBox sort`. This change was required to process very large FASTQ files.  
+
+In our testing, `BusyBox sort` requires files to be held in memory during sorting, and does not support the use of temporary files. The use of `GNU sort` allows for temporary files to be generated and alleviates the need to hold entire files in memory. This change has no impact on output from Xengsort, or any associated workflow. 
+
+
 ## Release 0.7.0
 
 In this release we add a new workflow for calling copy number variation (CNV) from raw Illumina IDAT genotype array files. Currently the Illumina IlluminaCytoSNP v2.1 array is supported, but support for additional arrays is possible.  
