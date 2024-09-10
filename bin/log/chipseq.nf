@@ -53,7 +53,6 @@ ______________________________________________________
 --min_reps_consensus            ${params.min_reps_consensus}
 --save_macs_pileup              ${params.save_macs_pileup}
 --multiqc_config              	${params.multiqc_config}
---tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
 

@@ -59,7 +59,6 @@ Parameter | Default | Description
 --multiqc_config | /<PATH> | The path to chipseq.yaml
                  | The configuration file used while running MultiQC
 
---tmpdir  | /<PATH> | Temporary directory to store temp files.  
 '''
 }
 
