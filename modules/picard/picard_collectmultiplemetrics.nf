@@ -31,7 +31,6 @@ process PICARD_COLLECTMULTIPLEMETRICS {
     INPUT=${bam[0]} \
     OUTPUT=${prefix}.CollectMultipleMetrics \
     REFERENCE_SEQUENCE=${params.ref_fa} \
-    VALIDATION_STRINGENCY=LENIENT 
-    TMP_DIR=${params.tmpdir} 
+    VALIDATION_STRINGENCY=LENIENT
     """
 }

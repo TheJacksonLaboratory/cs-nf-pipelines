@@ -32,7 +32,6 @@ Parameter | Default | Description
 --cutadaptQualCutoff | 20 | The quality cutoff used to trim low-quality ends from reads.
 --cutadaptAdapterR1 | Specification of a 3’ adapter or a linked adapter.
 --cutadaptAdapterR2 | Specification of a 5’ adapter or a linked adapter.
---tmpdir  | /<PATH> | Temporary directory to store temp files.  
 '''
 }
 

@@ -34,7 +34,6 @@ ______________________________________________________
 --cutadaptQualCutoff            ${params.cutadaptQualCutoff}
 --cutadaptAdapterR1             ${params.cutadaptAdapterR1}
 --cutadaptAdapterR2             ${params.cutadaptAdapterR2}
---tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
 
@@ -73,7 +72,6 @@ ______________________________________________________
 --cutadaptQualCutoff            ${params.cutadaptQualCutoff}
 --cutadaptAdapterR1             ${params.cutadaptAdapterR1}
 --cutadaptAdapterR2             ${params.cutadaptAdapterR2}
---tmpdir                        ${params.tmpdir}
 
 Project Directory: ${projectDir}
 

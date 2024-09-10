@@ -1,5 +1,10 @@
 # RELEASE NOTES
 
+## Release 0.7.2
+
+In this minor release we correct a bug in `--workflow atac`. In this workflow, the `macs2` module was configured to use a user defined parameter `tmpdir` for scratch space. However, if the specified `tmpdir` did not exist, `macs2` would fail silently, and allow the workflow to continue. This behavior has been fixed.   
+
+
 ## Release 0.7.1
 
 In this minor release we change the Xengsort container to include `GNU sort` rather than `BusyBox sort`. This change was required to process very large FASTQ files.  
