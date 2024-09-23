@@ -30,7 +30,7 @@ process PEAK_CALLING {
   -g ${genome} \
   --keep-dup all \
   --cutoff-analysis \
-  --tempdir ${params.tmpdir} \
+  --tempdir ./ \
   -n ${sampleID} \
   -t ${processed_bams[0]} \
   --outdir . \
