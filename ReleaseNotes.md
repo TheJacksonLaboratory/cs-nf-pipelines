@@ -1,5 +1,65 @@
 # RELEASE NOTES
 
+
+## Release 0.7.3
+
+In this release we make a updates to the ATAC workflow, and correct issues related to the PTA workflow.  
+
+ATAC:  
+* Merging of replicate samples is now supported. Use the `--merge_replicates` option, along with a CSV input file. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/ATAC-Pipeline-ReadMe#csv-input-sample-sheet) for details on CSV setup.  
+* GRCm39 pseudo-references generated with G2Gtools are now supported. Previously, GRCm38 was supported via the `--chain` option. For GRCm39, VCI files are required input also specified with `--chain`
+
+PTA:  
+* The mouse PTA workflow would crash when all somatic CNVs were filtered, we have corrected this.  
+* Numerous adjustments to adjustments to memory and wall clock limits were made to support high coverage WGS data.  
+
+### Pipelines Added:
+
+None  
+
+### Modules Added:
+
+1. modules/g2gtools/g2gtools_vci_convert.nf  
+
+### Pipeline Changes:
+
+1. workflows/atac.nf: Replicate merging added. GRCm39 pseudo-reference support added. 
+1. subworkflows/aria_download_parse.nf: Support for replicate merging added. 
+1. subworkflows/concatenate_local_files.nf: Support for replicate merging added. 
+
+### Module Changes:
+
+1. modules/cosmic/cosmic_add_cancer_resistance_mutations_germline.nf: wallclock and memory request increase.  
+1. modules/gridss/gridss_assemble.nf: memory request increase, and java heap adjustment.
+1. modules/gridss/gripss_somatic_filter.nf: memory request increase, and java heap adjustment. 
+1. modules/illumina/manta.nf: memory and wallclock requests were made flat rather than scaled to input file size. 
+1. modules/picard/picard_mergesamfiles.nf: correct `file` vs. `path` nextflow issue.
+1. modules/python/python_somatic_vcf_finalization.nf: wallclock requests increase.
+1. modules/python/python_somatic_vcf_finalization_mouse.nf: wallclock requests increase.
+1. modules/r/plot_delly_cnv.nf: add dynamic plot naming based on `sampleID`
+1. modules/samtools/samtools_chain_sort_fixmate_bam.nf: alter module to re-sort final filtered BAM prior to possible replicate merge.
+1. modules/samtools/samtools_non_chain_reindex.nf: alter module to re-sort final filtered BAM prior to possible replicate merge.
+1. modules/samtools/samtools_stats_insertsize.nf: wallclock request increase.  
+1. modules/svaba/svaba.nf: memory and wallclock requests increase.  
+
+### Scripts Added:
+
+None
+
+### Script Changes:
+
+1. bin/gbrs/generate_emission_prob_avecs.py: Modify for use with non-DO strain IDs and dynamic number of strains.
+1. bin/pta/annotate-bedpe-with-cnv.r: Capture edge case where all somatic CNV are filtered. 
+1. bin/pta/annotate-cnv-delly.r: Capture edge case where all somatic CNV are filtered. 
+1. bin/pta/delly_cnv_plot.r: Capture edge case where all somatic CNV are filtered. 
+
+
+### NF-Test Modules Added: 
+
+None
+
+
+
 ## Release 0.7.2
 
 In this minor release we correct a bug in `--workflow atac`. In this workflow, the `macs2` module was configured to use a user defined parameter `tmpdir` for scratch space. However, if the specified `tmpdir` did not exist, `macs2` would fail silently, and allow the workflow to continue. This behavior has been fixed.   

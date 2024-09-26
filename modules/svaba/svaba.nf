@@ -2,8 +2,8 @@ process SVABA {
   tag "$sampleID"
 
   cpus = 8
-  memory { normal_bam.size() < 60.GB ? 15.GB : 48.GB }
-  time { normal_bam.size() < 60.GB ? '10:00:00' : '24:00:00' }
+  memory { normal_bam.size() < 60.GB ? 30.GB : 48.GB }
+  time { normal_bam.size() < 60.GB ? '18:00:00' : '24:00:00' }
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/jaxcompsci/svaba:v0.2.1'

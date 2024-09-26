@@ -22,12 +22,16 @@ include {REMOVE_DUPLICATE_READS} from "${projectDir}/modules/samtools/samtools_r
 include {CALC_MTDNA_FILTER_CHRM} from "${projectDir}/modules/samtools/samtools_calc_mtdna_filter_chrm"
 include {FILTER_REMOVE_MULTI_SHIFT} from "${projectDir}/modules/samtools/samtools_filter_remove_multi_shift"
 include {FILTER_REMOVE_MULTI_SIEVE} from "${projectDir}/modules/deeptools/deeptools_filter_remove_multi_sieve"
-include {CHAIN_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_chain_convert_peak"
+include {CHAIN_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_chain_convert"
+include {VCI_CONVERT} from "${projectDir}/modules/g2gtools/g2gtools_vci_convert"
 include {CHAIN_EXTRACT_BADREADS} from "${projectDir}/modules/gatk/gatk_chain_extract_badreads"
 include {CHAIN_BAD2UNIQ_READS} from "${projectDir}/modules/samtools/samtools_chain_bad2uniq_reads"
 include {CHAIN_FILTER_READS} from "${projectDir}/modules/gatk/gatk_chain_filter_reads"
 include {CHAIN_SORT_FIXMATE_BAM} from "${projectDir}/modules/samtools/samtools_chain_sort_fixmate_bam"
 include {NON_CHAIN_REINDEX} from "${projectDir}/modules/samtools/samtools_non_chain_reindex"
+include {SAMTOOLS_INDEX;
+         SAMTOOLS_INDEX as SAMTOOLS_INDEX_MERGED} from "${projectDir}/modules/samtools/samtools_index"
+include {PICARD_MERGESAMFILES} from "${projectDir}/modules/picard/picard_mergesamfiles"
 include {PEAK_CALLING} from "${projectDir}/modules/macs2/macs2_peak_calling"
 include {BAM_COVERAGE_BIGWIG} from "${projectDir}/modules/deeptools/deeptools_bam_coverage_bigwig"
 include {FRIP_READS_IN_PEAKS} from "${projectDir}/modules/bedtools/bedtools_frip_reads_in_peaks"
@@ -52,6 +56,18 @@ param_log()
 
 if (params.download_data && !params.csv_input) {
     exit 1, "Data download was specified with `--download_data`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--download_data` requires a CSV manifest. See `--help` for information."
+}
+
+if (params.merge_replicates && !params.csv_input) {
+    exit 1, "Replicate merging was requested with `--merge_replicates`. However, no input CSV file was specified with `--csv_input`. This is an invalid parameter combination. `--merge_replicates` requires a CSV manifest. See `--help` for information."
+}
+
+if (!(params.genome_build in ['GRCm38', 'GRCm39', 'GRCh38'])) {
+  exit 1, "Invalid genome build specified. Please use one of the following: GRCm38, GRCm39, GRCh38."
+}
+
+if (params.gen_org == 'human' && params.genome_build != 'GRCh38') {
+  exit 1, "Invalid genome build specified for human. Please use GRCh38."
 }
 
 // prepare reads channel
@@ -164,11 +180,16 @@ workflow ATAC {
   // If Mouse
   if (params.gen_org=='mouse'){
     // Step 11: Convert peak coordinates
-    //          Step occurs when chain != null || chain != false
-    CHAIN_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
-
+    // Chain and VCI steps occurs when chain != null || chain != false
+    if (params.genome_build == 'GRCm38') {
+      CHAIN_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
+      converted_bam = CHAIN_CONVERT.out.converted_bam
+    } else if (params.genome_build == 'GRCm39') {
+      VCI_CONVERT(SORT_SHIFTED_BAM.out.sorted_file)
+      converted_bam = VCI_CONVERT.out.converted_bam
+    }
     // Step 12: Sort bam by coordinates
-    SORT_LIFTOVER_BAM(CHAIN_CONVERT.out.converted_bam, '-O bam', 'bam')
+    SORT_LIFTOVER_BAM(converted_bam, '-O bam', 'bam')
 
     // Step 13: Extract a list of 'bad reads'
     CHAIN_EXTRACT_BADREADS(SORT_LIFTOVER_BAM.out.sorted_file)
@@ -199,31 +220,59 @@ workflow ATAC {
   
   }
   else if (params.gen_org=='human'){
-    data_ch = SORT_SHIFTED_BAM.out.sorted_file
-  } 
+    SAMTOOLS_INDEX(SORT_SHIFTED_BAM.out.sorted_file)
+    data_ch = SORT_SHIFTED_BAM.out.sorted_file.join(SAMTOOLS_INDEX.out.bai)
+              .map{it -> [it[0], [it[1], it[2]]]}
+  }
+
+  if (params.merge_replicates) {
+    
+    data_ch.join(meta_ch)
+    .map{it -> [it[2].baseSampleID, it[1][0], it[1][1]]}
+    .groupTuple(by: [0])
+    .map { it ->  [ it[0], [it[1], it[2]].flatten() ] }
+    .branch {
+        merge: it[1].size() > 2
+        pass:  it[1].size == 2
+    }
+    .set{merge_ch}
+    // samples with more than 2 replicates will be merged (i.e., [BAM, BAI, BAM, BAI, ...]) 
+    // samples without replicates (i.e., [BAM, BAI]), are passed then merged back to the channel with `mix`
+
+    PICARD_MERGESAMFILES(merge_ch.merge)
+    SAMTOOLS_INDEX_MERGED(PICARD_MERGESAMFILES.out.bam)
+
+    peak_ch = PICARD_MERGESAMFILES.out.bam.join(SAMTOOLS_INDEX_MERGED.out.bai)
+              .map{it -> [it[0], [it[1], it[2]]]}
+              .mix(merge_ch.pass)
+    // samples where merge was not done are added back to the channel with `mix`
+
+  } else {
+      peak_ch = data_ch
+  }
 
   // Step 19: Peak calling
-  PEAK_CALLING(data_ch) 
+  PEAK_CALLING(peak_ch) 
 
   if (params.gen_org=='mouse'){
     // Step 20: deeptools bamCoverage bigwig
-    BAM_COVERAGE_BIGWIG(data_ch)
+    BAM_COVERAGE_BIGWIG(peak_ch)
 
   } 
 
   // Step 21: Fraction of reads in peaks (FRiP)
-  frip_start = data_ch.join(PEAK_CALLING.out.np)
+  frip_start = peak_ch.join(PEAK_CALLING.out.np)
   FRIP_READS_IN_PEAKS(frip_start) 
 
   // Step 22: Final calculate (FRiP)
-  frip_calc = data_ch.join(FRIP_READS_IN_PEAKS.out[0])
+  frip_calc = peak_ch.join(FRIP_READS_IN_PEAKS.out[0])
   FINAL_CALC_FRIP(frip_calc) 
 
   // Step 23: Get coverage in each peak
   PEAK_COVERAGE(PEAK_CALLING.out.np) 
 
   // Step 24: Feature counts
-  feature_counts = data_ch.join(PEAK_COVERAGE.out)
+  feature_counts = peak_ch.join(PEAK_COVERAGE.out)
   FEATURE_COUNTS(feature_counts) 
 
   if (params.gen_org=='mouse'){

@@ -15,9 +15,15 @@ workflow CONCATENATE_LOCAL_FILES {
             temp_map = ch_input_sample
             .multiMap { it ->
                 def meta = [:]
-                meta.sampleID   = it[1].sampleID
-                R1: tuple(it[0], it[1].lane, meta, 'R1', it[2])
-                R2: tuple(it[0], it[1].lane, meta, 'R2', it[3])
+                if (params.merge_replicates) {
+                    meta.sampleID   = it[1].replicate != 'NA' ? it[1].sampleID+'_'+it[1].replicate : it[1].sampleID
+                    meta.replicate  = it[1].replicate
+                    meta.baseSampleID = it[1].sampleID
+                } else {
+                    meta.sampleID   = it[1].sampleID
+                }
+                R1: tuple(meta.sampleID, meta.lane, meta, 'R1', it[2])
+                R2: tuple(meta.sampleID, meta.lane, meta, 'R2', it[3])
             }
             .mix()
             .groupTuple(by: [0,2,3])
@@ -34,8 +40,14 @@ workflow CONCATENATE_LOCAL_FILES {
             temp_map = ch_input_sample
             .multiMap { it ->
                 def meta = [:]
-                meta.sampleID   = it[1].sampleID
-                R1: tuple(it[0], it[1].lane, meta, 'R1', it[2])
+                if (params.merge_replicates) {
+                    meta.sampleID   = it[1].replicate != 'NA' ? it[1].sampleID+'_'+it[1].replicate : it[1].sampleID
+                    meta.replicate  = it[1].replicate
+                    meta.baseSampleID = it[1].sampleID
+                } else {
+                    meta.sampleID   = it[1].sampleID
+                }
+                R1: tuple(meta.sampleID, meta.lane, meta, 'R1', it[2])
             }
             .groupTuple(by: [0,2,3])
             .map{ it -> tuple(it[0], it[1].size(), it[2], it[3], it[4]) } // sampleID, num_lanes, meta, read_ID:[R1], file

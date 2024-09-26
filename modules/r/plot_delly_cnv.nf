@@ -18,6 +18,6 @@ process PLOT_DELLY_CNV {
 
     script:
     """
-    Rscript ${projectDir}/bin/pta/delly_cnv_plot.r ${cov} ${seg_bed}
+    Rscript ${projectDir}/bin/pta/delly_cnv_plot.r ${cov} ${seg_bed} ${sampleID}
     """
 }

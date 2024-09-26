@@ -33,10 +33,18 @@ readBEDPE = function(f) {
 ## Read a headered, tab-delimited CNV file into a GRanges object
 readCNV = function(f) {
   
-  x = read.csv(f, h=F, stringsAsFactors=F, sep='\t', comment.char='#')
-  colnames(x)[1:3] = c('chr','start','end')
-  x = makeGRangesFromDataFrame(x)
-  
+  x <- tryCatch( 
+    {
+        read.csv(f, h=F, stringsAsFactors=F, sep='\t', comment.char='#')
+        colnames(x)[1:3] = c('chr','start','end')
+        x = makeGRangesFromDataFrame(x)
+    },
+    error = function(e) {
+        GRanges()
+    }
+  )
+  # if CNV CSV is empty (i.e., no somatic CNV), return empty GRanges object.
+
   return(x)
   
 }
@@ -126,8 +134,6 @@ option_list = list(
   make_option(c("-c", "--cnv"),      type='character',  help="BED file containing CNV intervals"),
   make_option(c("-o", "--out_file"), type='character',  help="Output BEDPE"))
 opt = parse_args(OptionParser(option_list=option_list))
-
-
 
 ## Read bedpe
 sv = readBEDPE(opt$bedpe)
