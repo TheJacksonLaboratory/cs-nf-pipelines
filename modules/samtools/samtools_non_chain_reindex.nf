@@ -29,9 +29,11 @@ process NON_CHAIN_REINDEX {
   -h 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 X Y \
   | grep -ve 'SN:MT*\\|SN:GL*\\|SN:JH:*' > tmp.sam
 
-  samtools view -b tmp.sam \
+  # Re-sort BAM following MT removal. This is required for PICARD MERGE
+  samtools sort -@ $task.cpus tmp.sam \
   > ${sampleID}.sorted.rmDup.rmChrM.rmMulti.filtered.shifted.mm10.bam
 
+  # Index BAM
   samtools index \
   ${sampleID}.sorted.rmDup.rmChrM.rmMulti.filtered.shifted.mm10.bam
   """

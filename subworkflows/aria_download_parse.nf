@@ -28,15 +28,25 @@ workflow FILE_DOWNLOAD {
         if (params.read_type == 'PE') {
             aria_download_input = ch_input_sample
             .multiMap { it ->
-                R1: tuple(it[0], it[1], 'R1', it[2])
-                R2: tuple(it[0], it[1], 'R2', it[3])
+                if (params.merge_replicates) {
+                    sampleID   = it[1].sampleID+'_'+it[1].replicate
+                } else {
+                    sampleID   = it[1].sampleID
+                }
+                R1: tuple(sampleID, it[1], 'R1', it[2])
+                R2: tuple(sampleID, it[1], 'R2', it[3])
             }
             .mix()
             group_size = 2
         } else {
             aria_download_input = ch_input_sample
             .multiMap { it ->
-                R1: tuple(it[0], it[1], 'R1', it[2])
+                if (params.merge_replicates) {
+                    sampleID   = it[1].sampleID+'_'+it[1].replicate
+                } else {
+                    sampleID   = it[1].sampleID
+                }
+                R1: tuple(sampleID, it[1], 'R1', it[2])
             }
             .mix()
             group_size = 1

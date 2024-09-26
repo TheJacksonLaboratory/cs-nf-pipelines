@@ -43,6 +43,11 @@ def extract_csv(csv_file) {
         if (row.lane) meta.lane = row.lane.toString()
         else meta.lane = 'NA'
 
+        // If no replicate specified, replicate is not considered
+        if (row.replicate) meta.replicate = row.replicate.toString()
+        else meta.replicate = 'NA'
+        
+
         /* 
             NOTE: Additional metadata parsing could be added here. This function is a minimal implimentation of a csv parser. 
         */

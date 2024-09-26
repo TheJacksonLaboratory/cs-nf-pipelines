@@ -12,7 +12,18 @@ minCN = 0
 maxCN = 8
 seg = data.frame()
 if (length(args)>1) {
-   seg = read.table(args[2], header=F, sep="\t")
+   seg <- tryCatch( 
+      {
+         read.table(args[2], header=F, sep="\t")
+      },
+      error = function(e) {
+         p <- ggplot() + 
+            annotate("text", x = 0.5, y = 0.5, label = "No somatic CNV segments", size = 10, hjust = 0.5, vjust = 0.5) + 
+            theme_void()
+         ggsave(p, file=paste0(args[3], ".plot.wholegenome.png"), width=24, height=6)
+         quit(status=0, save='no')
+      }
+   )
    colnames(seg) = c("chr", "start", "end", "id", "cn")
 }
 
@@ -36,7 +47,7 @@ p = p + facet_grid(. ~ chr, scales="free_x", space="free_x")
 p = p + ylim(minCN, maxCN)
 p = p + theme(axis.text.x = element_text(angle=45, hjust=1))
 p = p + ggtitle(args[1])
-ggsave(p, file="plot.wholegenome.png", width=24, height=6)
+ggsave(p, file=paste0(args[3], ".plot.wholegenome.png"), width=24, height=6)
 print(warnings())
 
 # By chromosome
@@ -51,7 +62,7 @@ for(chrname in unique(x$chr)) {
  if (nrow(sl)) { p = p + geom_segment(data=sl, aes(x=start, y=cn, xend=end, yend=cn), color="#3831a3", size=1.2); }
  p = p + ylim(minCN, maxCN)
  p = p + theme(axis.text.x = element_text(angle=45, hjust=1))
- ggsave(p, file=paste0("plot.", chrname, ".png"), width=24, height=6)
+ ggsave(p, file=paste0(args[3], ".plot.", chrname, ".png"), width=24, height=6)
  print(warnings())
 }
 

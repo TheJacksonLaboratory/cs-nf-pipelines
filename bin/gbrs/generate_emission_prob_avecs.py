@@ -20,8 +20,11 @@ parser.add_option("-p", "--output_prefix", dest="output_prefix", default="gbrs_e
 parser.add_option("-g", "--gene2transcripts_file", dest="gene2transcripts",
                   help="the emase gene2transcripts file from the 'prepare_emase' workflow", metavar="emase.gene2transcripts.tsv")
 
-parser.add_option("-m", "--metadata_file", dest="metadata_file", default="A, B, C, D, E, F, G, H",
+parser.add_option("-m", "--metadata_file", dest="metadata_file",
                   help="comma delimited metadata file. File must have headers 'do_id' and 'sampleID' where: do_id is ('A', 'B', ..., 'G', 'H'), and sampleID are the IDs produced and used by 'run_emase' (i.e., output directory names) ", metavar="metadata.csv")
+
+parser.add_option("-s", "--strains", dest="strains", default="A,B,C,D,E,F,G,H",
+                  help="comma delimited list of strains", metavar="A,B,C,D,E,F,G,H")
 
 parser.add_option("-e", "--min_expression", dest="min_expression", default="2",
                   help="minimum expression count to include a gene in Avec computation.", metavar="EXP_MIN")
@@ -64,7 +67,7 @@ with open(options.metadata_file) as fh:
     header = fh.readline().rstrip().split(",")
 
     try:
-        res = [header.index(i) for i in ['do_id', 'sampleID']]
+        res = [header.index(i) for i in ['hap_id', 'sampleID']]
     except Exception as e:
         print('Error processing metadata file:', e)
 
@@ -75,7 +78,7 @@ with open(options.metadata_file) as fh:
 
 sample_id = dict(sample_id)
 
-print('Found the following keys in "do_id": ' + str(sample_id.keys()))
+print('Found the following keys in "hap_id": ' + str(sample_id.keys()))
 
 print('The total number of samples by strain in the metadata file is: ')
 
@@ -84,7 +87,8 @@ for st, slist in sample_id.items():
 
 print('Found the following sample counts matched to sample IDs in the input directory...')
 
-strains = ('A', 'B', 'C', 'D', 'E', 'F', 'G', 'H') ### This line will require generalization for non DO data.
+strains = [i.strip() for i in options.strains.split(',')]
+
 num_strains = len(strains)
 
 dlist = defaultdict(list)
@@ -112,7 +116,7 @@ for st in strains:
             for curline in fh:
                 item = curline.rstrip().split("\t")
                 row = gid[item[0]]
-                dmat_sample[row, :] = list(map(float, item[1:9]))
+                dmat_sample[row, :] = list(map(float, item[1:num_strains+1]))
         dmat_strain += dmat_sample
     dset[st] = dmat_strain / len(dlist[st])
 
@@ -133,9 +137,9 @@ passed_genes = set()
 
 for g in gname:
     all_genes.add(g)
-    axes[g] = np.zeros((8, 8))
-    ases[g] = np.zeros((1, 8))
-    good = np.zeros(8)
+    axes[g] = np.zeros((num_strains, num_strains))
+    ases[g] = np.zeros((1, num_strains))
+    good = np.zeros(num_strains)
     for i, st in enumerate(strains):
         v = dset[st][gid[g], :]
         axes[g][i, :] = v
@@ -143,9 +147,9 @@ for g in gname:
         if sum(v) > min_expr:
             good[i] = 1.0
     if sum(good) > 0:  # At least one strain expresses
-        avecs[g] = np.zeros((8, 8))
+        avecs[g] = np.zeros((num_strains, num_strains))
         passed_genes.add(g)
-        for i in range(8):
+        for i in range(num_strains):
             avecs[g][i, :] = unit_vector(axes[g][i, :])
 
 with open(os.path.join(options.output_directory, options.output_prefix + '.included_genes.txt'), 'w') as f:
