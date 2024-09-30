@@ -14,6 +14,8 @@ include {XENGSORT_CLASSIFY} from "${projectDir}/modules/xengsort/xengsort_classi
 //          GZIP as GZIP_MOUSE} from "${projectDir}/modules/utility_modules/gzip"
 include {RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_HUMAN;
          RSEM_ALIGNMENT_EXPRESSION as RSEM_ALIGNMENT_EXPRESSION_MOUSE} from "${projectDir}/modules/rsem/rsem_alignment_expression"
+include {SEX_DETERMINATION as SEX_DETERMINATION_HUMAN;
+         SEX_DETERMINATION as SEX_DETERMINATION_MOUSE} from "${projectDir}/modules/r/sex_determination"
 include {MERGE_RSEM_COUNTS as MERGE_RSEM_COUNTS_HUMAN;
          MERGE_RSEM_COUNTS as MERGE_RSEM_COUNTS_MOUSE} from "${projectDir}/modules/utility_modules/merge_rsem_counts"
 include {LYMPHOMA_CLASSIFIER} from "${projectDir}/modules/python/python_lymphoma_classifier"
@@ -74,6 +76,8 @@ workflow PDX_RNASEQ {
 
     RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, params.rsem_ref_files_human, params.rsem_star_prefix_human, params.rsem_ref_prefix_human)
     
+    SEX_DETERMINATION_HUMAN(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes)
+
     if (params.merge_rna_counts) {
       MERGE_RSEM_COUNTS_HUMAN(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_genes.collect{it[1]},
                               RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_isoforms.collect{it[1]},
@@ -102,6 +106,8 @@ workflow PDX_RNASEQ {
 
     RSEM_ALIGNMENT_EXPRESSION_MOUSE(mouse_reads, params.rsem_ref_files_mouse, params.rsem_star_prefix_mouse, params.rsem_ref_prefix_mouse)
     
+    SEX_DETERMINATION_MOUSE(RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.rsem_genes)
+
     if (params.merge_rna_counts) {
       MERGE_RSEM_COUNTS_MOUSE(RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.rsem_genes.collect{it[1]},
                               RSEM_ALIGNMENT_EXPRESSION_MOUSE.out.rsem_isoforms.collect{it[1]},

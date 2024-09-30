@@ -17,6 +17,7 @@ include {FASTQC} from "${projectDir}/modules/fastqc/fastqc"
 include {CHECK_STRANDEDNESS} from "${projectDir}/modules/python/python_check_strandedness"
 include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {RSEM_ALIGNMENT_EXPRESSION} from "${projectDir}/modules/rsem/rsem_alignment_expression"
+include {SEX_DETERMINATION} from "${projectDir}/modules/r/sex_determination"
 include {MERGE_RSEM_COUNTS} from "${projectDir}/modules/utility_modules/merge_rsem_counts"
 include {PICARD_ADDORREPLACEREADGROUPS} from "${projectDir}/modules/picard/picard_addorreplacereadgroups"
 include {PICARD_REORDERSAM} from "${projectDir}/modules/picard/picard_reordersam"
@@ -137,6 +138,8 @@ workflow RNASEQ {
 
     // Step 2: RSEM
     RSEM_ALIGNMENT_EXPRESSION(rsem_input, params.rsem_ref_files, params.rsem_star_prefix, params.rsem_ref_prefix)
+
+    SEX_DETERMINATION(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes)
 
     if (params.merge_rna_counts) {
       MERGE_RSEM_COUNTS(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes.collect{it[1]},
