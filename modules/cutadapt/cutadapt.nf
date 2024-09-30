@@ -11,11 +11,11 @@ process CUTADAPT {
     container 'quay.io/biocontainers/cutadapt:2.3--py37h14c3975_0'
 
     input:
-    tuple val(sampleID), file(fq_reads)
+    tuple val(sampleID), path(fq_reads)
 
     output:
-    tuple val(sampleID), file("*paired_trimmed.fq"), emit: paired_trimmed_fastq
-    tuple val(sampleID), file("*.log"), emit: cutadapt_log
+    tuple val(sampleID), path("*paired_trimmed.fq"), emit: paired_trimmed_fastq
+    tuple val(sampleID), path("*.log"), emit: cutadapt_log
 
     script:
 
