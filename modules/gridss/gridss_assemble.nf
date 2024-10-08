@@ -15,9 +15,10 @@ process GRIDSS_ASSEMBLE {
     tuple val(sampleID), path('gridss_assemble/'), emit: gridss_assembly
 
     script:
-    String my_mem = (task.memory-1.GB).toString()
+    String my_mem = (task.memory-5.GB).toString()
+    String my_other_mem = (task.memory-30.GB).toString()
     heap_mem =  my_mem[0..-4]+'g'
-    other_mem = my_mem[0..-30]+'g'
+    other_mem = my_other_mem[0..-4]+'g'
 
     output_dir = 'gridss_assemble/'
 
