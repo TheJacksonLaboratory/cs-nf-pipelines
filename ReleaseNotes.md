@@ -1,5 +1,8 @@
 # RELEASE NOTES
 
+## Release 0.7.4
+
+In this release we correct a nextflow issue in the GRIDSS_ASSEMBLY step used in the human PTA workflow.    
 
 ## Release 0.7.3
 
