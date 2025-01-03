@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.7.5
+
+In this minor release we make minor adjustments to memory reservations for serval modules, provide an explicit sorting statement for RSEM ensure memory limits are respected, and bump the version of multiQC to 1.25.2.  
+
 ## Release 0.7.4
 
 In this release we correct a nextflow issue in the GRIDSS_ASSEMBLY step used in the human PTA workflow.    

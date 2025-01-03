@@ -1,4 +1,4 @@
-process NANOSTAT{
+process NANOSTAT {
     tag "$sampleID"
 
     cpus 16

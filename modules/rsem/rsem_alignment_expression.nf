@@ -60,20 +60,18 @@ process RSEM_ALIGNMENT_EXPRESSION {
     
     rsem_ref_files = file("${rsem_ref_path}/bowtie2/*").collect { "$it" }.join(' ')
 
-    outbam="--output-genome-bam --sort-bam-by-coordinate"
+    outbam="--output-genome-bam"
     seed_length="--seed-length ${params.seed_length}"
-    sort_command=''
-    index_command=''
+    sort_command="samtools sort -@ 6 -m 5G -o ${sampleID}.transcript.sorted.bam ${sampleID}.transcript.bam && samtools sort -@ 6 -m 5G -o ${sampleID}.genome.sorted.bam ${sampleID}.genome.bam"
+    index_command="samtools index ${sampleID}.transcript.sorted.bam && samtools index ${sampleID}.genome.sorted.bam"
     intermediate=''
     star_log=''
   }
   if (params.rsem_aligner == "star") {
-    outbam="--star-output-genome-bam --sort-bam-by-coordinate"
+    outbam="--star-output-genome-bam"
     seed_length=""
-    samtools_mem = (int)(task.memory.giga / task.cpus) 
-    // cast to integer rounding down no matter what. If 'round' is used, memory request will exceed limits. 
-    sort_command="samtools sort -@ 6 -m 5G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
-    index_command="samtools index ${sampleID}.STAR.genome.sorted.bam"
+    sort_command="samtools sort -@ 6 -m 5G -o ${sampleID}.transcript.sorted.bam ${sampleID}.transcript.bam && samtools sort -@ 6 -m 5G -o ${sampleID}.STAR.genome.sorted.bam ${sampleID}.STAR.genome.bam"
+    index_command="samtools index ${sampleID}.transcript.sorted.bam && samtools index ${sampleID}.STAR.genome.sorted.bam"
     intermediate='--keep-intermediate-files'
     star_log="cp ${sampleID}.temp/*.final.out ./${sampleID}.STAR.Log.final.out && rm -r ${sampleID}.temp"
 
@@ -111,7 +109,6 @@ process RSEM_ALIGNMENT_EXPRESSION {
   ${rsem_ref_prefix} \
   ${sampleID} \
   ${intermediate} \
-  --sort-bam-memory-per-thread 5G \
   2> rsem_aln_${sampleID}.stats
 
   ${star_log}
