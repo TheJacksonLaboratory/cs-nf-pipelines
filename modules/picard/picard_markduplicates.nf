@@ -8,11 +8,11 @@ process PICARD_MARKDUPLICATES {
 
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-    // save if mouse or save if keep intermediate
+    // save if mouse or other or save if keep intermediate
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
         "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
-    }, pattern: "*.{bam,bai}", mode: 'copy', enabled: params.gen_org=='mouse' || params.workflow=='chipseq' ? true : params.keep_intermediate
+    }, pattern: "*.{bam,bai}", mode: 'copy', enabled: params.gen_org=='mouse' || params.gen_org=='other' || params.workflow=='chipseq' ? true : params.keep_intermediate
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
