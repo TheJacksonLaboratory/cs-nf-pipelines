@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.7.6
+
+In this minor release we correct a reference file name typo in the paired somatic WES workflow, and add the option to run a genomes beyond mouse and human to the WGS workflow. She [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a different genome. 
+
 ## Release 0.7.5
 
 In this minor release we make minor adjustments to memory reservations for serval modules, provide an explicit sorting statement for RSEM ensure memory limits are respected, and bump the version of multiQC to 1.25.2.  
