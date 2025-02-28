@@ -27,7 +27,7 @@ transcript_table = pd.read_csv(args.input_transcript_list, sep='\t', header = No
 transcript_table_working = transcript_table.copy()
     # avoid pandas slice error by making a copy, also original is used in final cat statement. 
 
-transcript_table_working[['Transcript', 'Haplotype']] = transcript_table_working['transcript_id'].str.split(pat='_', n=1, expand=True)
+transcript_table_working[['Transcript', 'Haplotype']] = transcript_table_working['transcript_id'].str.rsplit(pat='_', n=1, expand=True)
     # split transcript and haplotype ID into new columns. 
 
 pivot_transcripts = transcript_table_working.pivot(index='Transcript', columns='Haplotype', values='length')
