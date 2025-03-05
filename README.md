@@ -1,5 +1,10 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.11068736.svg)](https://doi.org/10.5281/zenodo.11068736)
 
+<p align="center">
+<img src="lib/cs-nf-worfklows.png" alt="drawing" width="300"/>
+</p>
+
+
 # JAX NGS Operations Nextflow DSL2 Pipelines
 
 This repository contains production bioinformatic analysis pipelines.
