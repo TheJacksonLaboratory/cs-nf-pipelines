@@ -1,0 +1,43 @@
+nextflow_workflow {
+
+    name "Test Workflow GENERATE_RNASEQ_INDEX"
+    script "subworkflows/generate_rnaseq_index.nf"
+    workflow "GENERATE_RNASEQ_INDEX"
+
+    test("RNASeq Index -- Stock") {
+        tag "GRCm38"
+        tag "secondary"
+        tag "rna_index"
+        when {
+            params {
+                gen_org = "mouse"
+                outdir = "tests/results"
+                pipeline = 'generate_rnaseq_index'
+                ref_fa = "${baseDir}/test/rna/index/test.fasta"
+                ref_gtf = "${baseDir}/test/rna/index/test.gtf"
+                custom_gene_fasta = null
+            }
+        }
+        then {
+            assert workflow.success
+        }
+    }
+    test("RNASeq Index -- Custom FASTA Added") {
+        tag "GRCm38"
+        tag "secondary"
+        tag "rna_index"
+        when {
+            params {
+                gen_org = "mouse"
+                outdir = "tests/results"
+                pipeline = 'generate_rnaseq_index'
+                ref_fa = "${baseDir}/test/rna/index/test.fasta"
+                ref_gtf = "${baseDir}/test/rna/index/test.gtf"
+                custom_gene_fasta = "${baseDir}/test/rna/index/extra_gene.fasta"
+            }
+        }
+        then {
+            assert workflow.success
+        }
+    }
+}

@@ -64,6 +64,9 @@ else if (params.workflow == "germline_sv") {
 else if (params.workflow == "cnv_array"){
   include {CNV_ARRAY} from './workflows/cnv_array'
 }
+else if (params.workflow == "generate_rnaseq_index"){
+  include {GENERATE_RNASEQ_INDEX} from './subworkflows/generate_rnaseq_index'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -127,5 +130,8 @@ workflow{
   }
   if (params.workflow == "cnv_array"){
     CNV_ARRAY()
+  }
+  if (params.workflow == "generate_rnaseq_index"){
+    GENERATE_RNASEQ_INDEX()
   }
 }
