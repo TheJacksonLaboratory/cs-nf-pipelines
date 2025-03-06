@@ -2,7 +2,44 @@
 
 ## Release 0.7.6
 
-In this minor release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.
+In this release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.  
+
+Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided as FASTA input.
+
+### Pipelines Added:
+
+1. RNA-Seq index generation (`--workflow generate_rnaseq_index`). 
+
+### Modules Added:
+
+1. modules/kallisto/kallisto_index.nf  
+1. modules/picard/picard_createsequencedictionary.nf  
+1. modules/rsem/rsem_preparereference.nf  
+1. modules/ucsc/ucsc_gtftogenepred.nf  
+1. modules/utility_modules/generate_rrna_intervals.nf  
+1. modules/utility_modules/make_custom_transcriptome.nf  
+
+### Pipeline Changes:
+
+1. workflows/wgs.nf: added support for `other` genome `--gen_org` case.  
+
+### Module Changes:
+
+1. modules/picard/picard_markduplicates.nf: added bam publishing for WGS `other` genome `--gen_org` case.  
+
+### Scripts Added:
+
+1. bin/rnaseq/fasta_to_gtf.py  
+
+### Script Changes:
+
+1. bin/emase/clean_transcript_info.py: fixed case where transcript names may have `_`.  
+
+
+### NF-Test Modules Added: 
+
+1. tests/workflows/generate_rnaseq_index.nf.test  
+
 
 ## Release 0.7.5
 
