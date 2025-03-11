@@ -1,4 +1,0 @@
-patient,sex,status,sampleID,lane,fastq_1,fastq_2
-fizzbangboom,XX,0,n_fizz,test_L1,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPN_subsample_R1.fastq.gz,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPN_subsample_R2.fastq.gz
-fizzbangboom,XX,1,t_bang,test_L1,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPT_sample_R1.fastq.gz,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPT_sample_R2.fastq.gz
-fizzbangboom,XX,1,t_boom,test_L1,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPT_sample_R1.fastq.gz,/projects/omics_share/human/GRCh38/supporting_files/benchmarking_data/SOMATIC_WES/TM01594_TM01594FPT_sample_R2.fastq.gz

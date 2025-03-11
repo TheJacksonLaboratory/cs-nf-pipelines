@@ -13,8 +13,8 @@ nextflow_workflow {
                 gen_org = "mouse"
                 outdir = "tests/results"
                 pipeline = 'generate_rnaseq_index'
-                ref_fa = "${baseDir}/test/rna/index/test.fasta"
-                ref_gtf = "${baseDir}/test/rna/index/test.gtf"
+                ref_fa = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/index/test.fasta"
+                ref_gtf = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/index/test.gtf"
                 custom_gene_fasta = null
             }
         }
@@ -31,9 +31,9 @@ nextflow_workflow {
                 gen_org = "mouse"
                 outdir = "tests/results"
                 pipeline = 'generate_rnaseq_index'
-                ref_fa = "${baseDir}/test/rna/index/test.fasta"
-                ref_gtf = "${baseDir}/test/rna/index/test.gtf"
-                custom_gene_fasta = "${baseDir}/test/rna/index/extra_gene.fasta"
+                ref_fa = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/index/test.fasta"
+                ref_gtf = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/index/test.gtf"
+                custom_gene_fasta = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/index/extra_gene.fasta"
             }
         }
         then {

@@ -4,7 +4,9 @@
 
 In this release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.  
 
-Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided as FASTA input.
+Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided via FASTA input.
+
+Finally, test files associated with `nf-test` routines were removed from this repostiroy and placed in a dedicated repository: [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test). File pointers in the `tests` directory were updated accordingly. Several modules were adjusted to better fit within the testing framework.   
 
 ### Pipelines Added:
 
@@ -26,6 +28,8 @@ Additionally, a new sub-workflow is added to generate RNA-seq index files. This 
 ### Module Changes:
 
 1. modules/picard/picard_markduplicates.nf: added bam publishing for WGS `other` genome `--gen_org` case.  
+1. modules/nygc-short-alignment-marking/short_alignment_marking.nf: the `filter_bam` binary was moved within the tools container. 
+1. modules/delly/delly_cnv_somatic.nf: `stub` case added to facilitate testing. Genome-wide coverage requirements exceed what is achievable with small test data. 
 
 ### Scripts Added:
 
@@ -34,7 +38,10 @@ Additionally, a new sub-workflow is added to generate RNA-seq index files. This 
 ### Script Changes:
 
 1. bin/emase/clean_transcript_info.py: fixed case where transcript names may have `_`.  
-
+1. bin/pta/annotate-bedpe-with-databases.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-genes.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-genes-mouse.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-cnv.r: added catch for edge case where no somatic SV are called.  
 
 ### NF-Test Modules Added: 
 

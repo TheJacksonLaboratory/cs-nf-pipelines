@@ -12,7 +12,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "human"
                 pubdir = "tests/results"
-                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/hs_test_input.csv'
                 bicseq2_no_scaling = true
                 pipeline = 'pta'
             }
@@ -32,7 +32,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "human"
                 pubdir = "tests/results"
-                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/hs_test_input.csv'
                 bicseq2_no_scaling = true
                 pdx = true
                 pipeline = 'pta'
@@ -53,7 +53,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "human"
                 pubdir = "tests/results"
-                csv_input = '${baseDir}/test/pta/hs_test_input.csv'
+                csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/hs_test_input.csv'
                 split_fastq = true
                 split_fastq_bin_size = 1000000
                 bicseq2_no_scaling
@@ -72,12 +72,13 @@ nextflow_workflow {
     test("Full Workflow -- Mouse") {
         tag "GRCm39"
         tag "primary"
+        options "-stub-run"
         when {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 pubdir = "tests/results"
-                csv_input = '${baseDir}/test/pta/mm_test_input.csv'
+                csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/mm_test_input.csv'
                 cnv_germline_prob = 1
                 pipeline = 'pta'
             }
@@ -92,12 +93,13 @@ nextflow_workflow {
     test("Full Workflow -- Mouse -- Deduplicate and Coverage Cap") {
         tag "GRCm39"
         tag "options"
+        options "-stub-run"
         when {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 pubdir = "tests/results"
-                csv_input = '${baseDir}/test/pta/mm_test_input.csv'
+                csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/mm_test_input.csv'
                 cnv_germline_prob = 1
                 split_fastq = true
                 split_fastq_bin_size = 10000000

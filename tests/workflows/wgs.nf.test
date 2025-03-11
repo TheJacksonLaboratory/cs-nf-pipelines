@@ -11,7 +11,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/wgs/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
             }
@@ -30,7 +30,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/wgs/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
                 pubdir = "tests/results"
                 split_fastq = true
                 split_fastq_bin_size = 1000
@@ -54,7 +54,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = "GRCm39"
-                sample_folder = "${baseDir}/test/wgs/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
             }
@@ -73,7 +73,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/wgs/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
             }
@@ -93,7 +93,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/wgs/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_input.csv"
                 pubdir = "tests/results"
                 split_fastq = true
                 split_fastq_bin_size = 1000

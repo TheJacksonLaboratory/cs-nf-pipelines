@@ -11,7 +11,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/atac/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/mm10_ATAC_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'atac'
             }
@@ -31,7 +31,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = 'GRCm39'
-                sample_folder = "${baseDir}/test/atac/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/mm10_ATAC_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'atac'
             }
@@ -50,7 +50,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/atac/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/cast_ATAC_input.csv"
                 pubdir = "tests/results"
                 chain = '/projects/omics_share/mouse/GRCm38/supporting_files/imputed_genomes/REF-to-CAST_EiJ.chain'
                 bowtie2Index = '/projects/omics_share/mouse/GRCm38/genome/indices/imputed/bowtie2/CAST_EiJ/CAST_EiJ_unplaced_unloc'
@@ -71,7 +71,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/atac/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/human/hg38_ATAC_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'atac'
             }

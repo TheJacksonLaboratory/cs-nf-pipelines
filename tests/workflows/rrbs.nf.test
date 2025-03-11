@@ -11,7 +11,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/rna/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/mouse/mm10_RNA_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'rrbs'
             }
@@ -31,7 +31,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = "GRCm39"
-                sample_folder = "${baseDir}/test/rna/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/mouse/mm10_RNA_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'rrbs'
             }
@@ -49,7 +49,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/rna/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/human/hg38_RNA_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'rrbs'
             }

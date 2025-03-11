@@ -21,4 +21,16 @@ process DELLY_CNV_SOMATIC {
     delly cnv -u -z ${params.cnv_min_size} -i ${params.cnv_window} -o ${tumor_name}.bcf -c ${tumor_name}.cov.gz -g ${params.ref_fa} -m ${params.delly_mappability} ${tumor_bam} 
     delly cnv -u -v ${tumor_name}.bcf -o ${normal_name}.bcf -g ${params.ref_fa} -m ${params.delly_mappability} ${normal_bam}
     """
+
+    stub:
+    """
+    wget -O ${tumor_name}.bcf https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--n_fizz.bcf
+    wget -O ${normal_name}.bcf https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--t_bang.bcf
+    wget -O ${tumor_name}.cov.gz https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--t_bang.cov.gz
+    """
 }
+
+// Delly coverage requirements preculde most testing with small sample files. 
+// The stub run is included here to overcome the coverage limitations. 
+// Additional testing of the module has been done, and will be written formally in the future.
+// note that due to sample naming, the stub run must be done with fizzbang--n_fizz and fizzbang--t_bang

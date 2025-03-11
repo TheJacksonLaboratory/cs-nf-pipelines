@@ -11,7 +11,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/amplicon/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/amplicon/human/hg38_amplicon_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'amplicon'
             }

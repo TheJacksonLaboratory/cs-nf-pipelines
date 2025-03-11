@@ -11,7 +11,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "mouse"
-                input = '/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/mouse_chipseq_validation_input.csv'
+                input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/mouse/mm10_chip_input.csv'
                 narrow_peak = true
                 macs_fdr = 0.01
                 read_type = 'SE'
@@ -34,7 +34,7 @@ nextflow_workflow {
                 outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = 'GRCm39'
-                input = '/projects/compsci/omics_share/mouse/GRCm38/supporting_files/benchmarking_data/CHIP/mouse_chipseq_validation_input.csv'
+                input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/mouse/mm10_chip_input.csv'
                 narrow_peak = true
                 macs_fdr = 0.01
                 read_type = 'SE'
@@ -56,7 +56,7 @@ nextflow_workflow {
             params {
                 outdir = "tests/results"
                 gen_org = "human"
-                input = '/projects/compsci/omics_share/human/GRCh38/supporting_files/benchmarking_data/CHIP/human_chipseq_validation_input.csv'
+                input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/human/hg38_chip_input.csv'
                 narrow_peak = true
                 pubdir = "tests/results"
                 pipeline = 'chipseq'
