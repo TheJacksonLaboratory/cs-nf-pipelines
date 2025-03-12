@@ -4,9 +4,9 @@
 
 In this release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.  
 
-Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided via FASTA input.
+Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a reference genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided via FASTA input.
 
-Finally, test files associated with `nf-test` routines were removed from this repostiroy and placed in a dedicated repository: [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test). File pointers in the `tests` directory were updated accordingly. Several modules were adjusted to better fit within the testing framework.   
+Finally, test files associated with `nf-test` routines were removed from this repostiroy and placed in a dedicated repository: [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test). File pointers in the `tests` directory were updated accordingly. Several modules were adjusted to better fit within the updated testing framework, and new tests were added to cover code that was not previously checked.  
 
 ### Pipelines Added:
 
@@ -45,7 +45,17 @@ Finally, test files associated with `nf-test` routines were removed from this re
 
 ### NF-Test Modules Added: 
 
-1. tests/workflows/generate_rnaseq_index.nf.test  
+1. tests/subworkflows/generate_rnaseq_index.nf.test
+1. tests/modules/bbmap/bbmap_clumpify.nf.test
+1. tests/modules/utility_modules/concatenate_reads_PE.nf.test
+1. tests/modules/utility_modules/concatenate_reads_SE.nf.test
+1. tests/subworkflows/aria_download_parse.nf.test
+1. tests/subworkflows/aria_gbrs_download_parse.nf.test
+1. tests/subworkflows/concatenate_gbrs_local_files.nf.test
+1. tests/subworkflows/concatenate_local_files.nf.test
+1. tests/subworkflows/concatenate_pta_fastq.nf.test  
+
+All exisiting modules updated to use [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test) and related `--csv_input` files from that repository. 
 
 
 ## Release 0.7.5
