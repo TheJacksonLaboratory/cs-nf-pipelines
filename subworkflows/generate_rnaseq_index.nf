@@ -28,14 +28,14 @@ workflow GENERATE_RNASEQ_INDEX {
         MAKE_CUSTOM_TRANSCRIPTOME(Channel.of([params.ref_fa, params.ref_gtf, params.custom_gene_fasta]))
 
         bowtie2_input = MAKE_CUSTOM_TRANSCRIPTOME.out.concat_fasta.combine(MAKE_CUSTOM_TRANSCRIPTOME.out.concat_gtf).map{it -> [it[0], it[1], 'bowtie2', '']}
-        star_build_set = MAKE_CUSTOM_TRANSCRIPTOME.out.concat_fasta.combine(MAKE_CUSTOM_TRANSCRIPTOME.out.concat_gtf).combine(Channel.of(75, 100, 125, 150)).map{it -> [it[0], it[1], 'star', it[2]]}
+        star_build_set = MAKE_CUSTOM_TRANSCRIPTOME.out.concat_fasta.combine(MAKE_CUSTOM_TRANSCRIPTOME.out.concat_gtf).combine(Channel.of(75, 100, 125, 150)).map{it -> [it[0], it[1], 'STAR', it[2]]}
         
         fasta = MAKE_CUSTOM_TRANSCRIPTOME.out.concat_fasta
         gtf = MAKE_CUSTOM_TRANSCRIPTOME.out.concat_gtf
     
     } else {
         bowtie2_input = Channel.of([params.ref_fa, params.ref_gtf, 'bowtie2', ''])
-        star_build_set = Channel.of([params.ref_fa, params.ref_gtf, 'star']).combine(Channel.of(75, 100, 125, 150))
+        star_build_set = Channel.of([params.ref_fa, params.ref_gtf, 'STAR']).combine(Channel.of(75, 100, 125, 150))
         
         fasta = params.ref_fa
         gtf = params.ref_gtf
