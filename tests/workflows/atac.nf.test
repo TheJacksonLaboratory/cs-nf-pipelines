@@ -9,7 +9,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/mm10_ATAC_input.csv"
                 pubdir = "tests/results"
@@ -28,7 +27,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = 'GRCm39'
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/mm10_ATAC_input.csv"
@@ -48,7 +46,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/mouse/cast_ATAC_input.csv"
                 pubdir = "tests/results"
@@ -69,7 +66,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/atac/human/hg38_ATAC_input.csv"
                 pubdir = "tests/results"

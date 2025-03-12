@@ -9,7 +9,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/mouse/mm10_chip_input.csv'
                 narrow_peak = true
@@ -31,7 +30,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = 'GRCm39'
                 input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/mouse/mm10_chip_input.csv'
@@ -54,7 +52,6 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
                 input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/chipseq/human/hg38_chip_input.csv'
                 narrow_peak = true

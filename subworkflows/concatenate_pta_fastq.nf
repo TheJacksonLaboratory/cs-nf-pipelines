@@ -10,7 +10,17 @@ workflow CONCATENATE_PTA_FASTQ {
         ch_input_sample
 
     main:
+    /* 
+        General note: 
 
+        Input tuple expected from the CSV sheet: 
+            it[0] is sample ID. 
+            it[1] is metadata information
+            it[2] and it[3] are R1 and R2 if PE. it[3] is empty if SE. 
+
+        All steps expect that sampleID is in position [0] of tuples. 
+
+    */
         if (params.read_type == 'PE') {
             temp_map = ch_input_sample
             .multiMap { it ->
