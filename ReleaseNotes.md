@@ -45,15 +45,16 @@ Finally, test files associated with `nf-test` routines were removed from this re
 
 ### NF-Test Modules Added: 
 
-1. tests/subworkflows/generate_rnaseq_index.nf.test
 1. tests/modules/bbmap/bbmap_clumpify.nf.test
+1. tests/modules/jvarkit/jvarkit_biostar154220.nf.test
 1. tests/modules/utility_modules/concatenate_reads_PE.nf.test
 1. tests/modules/utility_modules/concatenate_reads_SE.nf.test
 1. tests/subworkflows/aria_download_parse.nf.test
 1. tests/subworkflows/aria_gbrs_download_parse.nf.test
 1. tests/subworkflows/concatenate_gbrs_local_files.nf.test
 1. tests/subworkflows/concatenate_local_files.nf.test
-1. tests/subworkflows/concatenate_pta_fastq.nf.test  
+1. tests/subworkflows/concatenate_pta_fastq.nf.test
+1. tests/subworkflows/generate_rnaseq_index.nf.test
 
 All exisiting modules updated to use [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test) and related `--csv_input` files from that repository. 
 

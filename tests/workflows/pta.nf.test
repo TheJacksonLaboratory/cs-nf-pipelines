@@ -52,7 +52,7 @@ nextflow_workflow {
                 pubdir = "tests/results"
                 csv_input = 'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/pta/hs_test_input.csv'
                 split_fastq = true
-                split_fastq_bin_size = 100000
+                split_fastq_bin_size = 200000
                 bicseq2_no_scaling
                 coverage_cap = 300
                 pipeline = 'pta'
