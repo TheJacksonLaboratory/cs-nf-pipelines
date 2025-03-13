@@ -1,6 +1,6 @@
 nextflow_workflow {
 
-    name "Test Workflow CONCATENATE_LOCAL_FILES"
+    name "Test Workflow CONCATENATE_LOCAL_FILES -- gbrs"
     script "subworkflows/concatenate_gbrs_local_files.nf"
     workflow "CONCATENATE_LOCAL_FILES"
 

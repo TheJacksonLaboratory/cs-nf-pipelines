@@ -56,83 +56,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2025-03-12T14:16:23.66318243"
-    },
-    "Multiple Lanes Paired-End Data": {
-        "content": [
-            {
-                "0": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42",
-                            "sex": "M",
-                            "generation": 40
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,33032703817a6fb79151e708003893dc",
-                            "testSample_42_R2.fastq.gz:md5,9ef301d9527a60d589b9b85072f52e68"
-                        ]
-                    ]
-                ],
-                "read_meta_ch": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42",
-                            "sex": "M",
-                            "generation": 40
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,33032703817a6fb79151e708003893dc",
-                            "testSample_42_R2.fastq.gz:md5,9ef301d9527a60d589b9b85072f52e68"
-                        ]
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-03-12T14:16:50.603653213"
-    },
-    "Multiple Lanes Single-End Data": {
-        "content": [
-            {
-                "0": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42",
-                            "sex": "M",
-                            "generation": 40
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,7ada113b0cbcefa1b893c7b3ec71a262"
-                        ]
-                    ]
-                ],
-                "read_meta_ch": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42",
-                            "sex": "M",
-                            "generation": 40
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,7ada113b0cbcefa1b893c7b3ec71a262"
-                        ]
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-03-12T14:17:12.31903676"
+        "timestamp": "2025-03-13T10:13:31.077192109"
     },
     "Paired-End Data": {
         "content": [
@@ -195,6 +119,6 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2025-03-12T14:16:07.110683898"
+        "timestamp": "2025-03-13T10:13:14.936868523"
     }
 }

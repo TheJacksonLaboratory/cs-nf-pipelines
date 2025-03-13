@@ -54,7 +54,7 @@ nextflow_workflow {
                 split_fastq = true
                 split_fastq_bin_size = 100000
                 bicseq2_no_scaling
-                coverage_cap = 50
+                coverage_cap = 300
                 pipeline = 'pta'
             }
         }
@@ -97,7 +97,7 @@ nextflow_workflow {
                 cnv_germline_prob = 1
                 split_fastq = true
                 split_fastq_bin_size = 100000
-                coverage_cap = 50
+                coverage_cap = 300
                 pipeline = 'pta'
             }
         }

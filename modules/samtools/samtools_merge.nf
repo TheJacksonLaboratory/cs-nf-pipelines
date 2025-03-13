@@ -18,13 +18,8 @@ process SAMTOOLS_MERGE {
       tuple val(sampleID), file("*.bam"), emit: bam
 
   script:
-
     """
     samtools merge -@ ${task.cpus} ${sampleID}_${filename}.bam ${bam} 
     """
-  
-  stub:
-    """
-    ${sampleID}_${filename}.bam
-    """
+
 }

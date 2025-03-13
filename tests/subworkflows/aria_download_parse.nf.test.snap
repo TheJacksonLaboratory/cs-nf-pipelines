@@ -48,75 +48,7 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2025-03-12T14:36:00.299611657"
-    },
-    "Multiple Lanes Paired-End Data": {
-        "content": [
-            {
-                "0": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42"
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,6c3b7e552d974c48660ac0b114200d25",
-                            "testSample_42_R2.fastq.gz:md5,1455bd441ab248903fcbafbe623c26b1"
-                        ]
-                    ]
-                ],
-                "read_meta_ch": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42"
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,6c3b7e552d974c48660ac0b114200d25",
-                            "testSample_42_R2.fastq.gz:md5,1455bd441ab248903fcbafbe623c26b1"
-                        ]
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-03-12T14:36:27.023858817"
-    },
-    "Multiple Lanes Single-End Data": {
-        "content": [
-            {
-                "0": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42"
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,7ada113b0cbcefa1b893c7b3ec71a262"
-                        ]
-                    ]
-                ],
-                "read_meta_ch": [
-                    [
-                        "testSample_42",
-                        {
-                            "sampleID": "testSample_42"
-                        },
-                        [
-                            "testSample_42_R1.fastq.gz:md5,7ada113b0cbcefa1b893c7b3ec71a262"
-                        ]
-                    ]
-                ]
-            }
-        ],
-        "meta": {
-            "nf-test": "0.8.4",
-            "nextflow": "24.10.5"
-        },
-        "timestamp": "2025-03-12T14:36:48.710240891"
+        "timestamp": "2025-03-13T10:11:11.412599565"
     },
     "Paired-End Data": {
         "content": [
@@ -171,6 +103,6 @@
             "nf-test": "0.8.4",
             "nextflow": "24.10.5"
         },
-        "timestamp": "2025-03-12T14:35:43.862489966"
+        "timestamp": "2025-03-13T10:10:54.832949852"
     }
 }
