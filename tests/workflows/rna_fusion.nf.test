@@ -9,9 +9,8 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/fusion/human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/fusion/human/hg38_fusion_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'rna_fusion'
             }
@@ -28,9 +27,8 @@ nextflow_workflow {
         tag "pdx"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
-                sample_folder = "${baseDir}/test/fusion/human/pdx"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/fusion/human/pdx_fusion_input.csv"
                 pubdir = "tests/results"
                 pdx = true
                 pipeline = 'rna_fusion'

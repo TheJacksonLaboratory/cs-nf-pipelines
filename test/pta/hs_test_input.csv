@@ -1,3 +1,0 @@
-patient,sex,status,sampleID,lane,fastq_1,fastq_2
-fizzbang,XX,0,n_fizz,test_L1,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCh38/work/pta_germline_read1.fastq.gz,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCh38/work/pta_germline_read2.fastq.gz
-fizzbang,XX,1,t_bang,test_L1,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCh38/work/pta_somatic_read1.fastq.gz,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCh38/work/pta_somatic_read2.fastq.gz

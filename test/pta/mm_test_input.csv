@@ -1,3 +1,0 @@
-patient,sex,status,sampleID,lane,fastq_1,fastq_2
-fizzbang,XX,0,n_fizz,test_L1,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/10x/GRCm39.v105.autosomes_simSV_germline.R1.fq.gz,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/10x/GRCm39.v105.autosomes_simSV_germline.R2.fq.gz
-fizzbang,XX,1,t_bang,test_L1,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/10x/GRCm39.v105.autosomes_simSV_somatic.R1.fq.gz,/projects/compsci/omics_share/meta/benchmarking/sim_sv/GRCm39/illumina/10x/GRCm39.v105.autosomes_simSV_somatic.R2.fq.gz

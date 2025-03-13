@@ -8,8 +8,9 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                csv_input = "${baseDir}/test/cnv_array/example_sample_input.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/cnv_array/example_sample_input.csv"
                 pipeline = 'cnv_array'
+                pubdir = "tests/results"
             }
         }
 
@@ -22,8 +23,9 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                csv_input = "${baseDir}/test/cnv_array/fail_example_input.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/cnv_array/fail_example_input.csv"
                 pipeline = 'cnv_array'
+                pubdir = "tests/results"
             }
         }
 
