@@ -6,7 +6,7 @@ process SHORT_ALIGNMENT_MARKING {
   time '24:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
+  container 'quay.io/jaxcompsci/samtools-with-filterbam:v1.0'
 
   publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'short_alignment_marking' }", pattern:"*.marked.bam", mode:'copy', enabled: params.keep_intermediate
   
@@ -19,7 +19,7 @@ process SHORT_ALIGNMENT_MARKING {
   script:
   // parses the bam file and marks as unmapped a read with alignment length below a user-defined threshold. Reads are not filtered from the bam file but kept as unmapped.
   """
-  ${projectDir}/bin/pta/filter_bam -I ${bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools sort -O BAM -o ${bam.baseName}.marked.bam
+  /filter_bam -I ${bam} -A1 30 -A2 30 -o ${sampleID}.marked.bam | samtools sort -O BAM -o ${bam.baseName}.marked.bam
   """
 }
 

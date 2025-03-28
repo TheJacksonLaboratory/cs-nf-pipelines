@@ -1,5 +1,71 @@
 # RELEASE NOTES
 
+## Release 0.7.6
+
+In this release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.  
+
+Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a reference genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided via FASTA input.
+
+Finally, test files associated with `nf-test` routines were removed from this repostiroy and placed in a dedicated repository: [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test). File pointers in the `tests` directory were updated accordingly. Several modules were adjusted to better fit within the updated testing framework, and new tests were added to cover code that was not previously checked.  
+
+### Pipelines Added:
+
+1. RNA-Seq index generation (`--workflow generate_rnaseq_index`). 
+
+### Modules Added:
+
+1. modules/kallisto/kallisto_index.nf  
+1. modules/picard/picard_createsequencedictionary.nf  
+1. modules/rsem/rsem_preparereference.nf  
+1. modules/ucsc/ucsc_gtftogenepred.nf  
+1. modules/utility_modules/generate_rrna_intervals.nf  
+1. modules/utility_modules/make_custom_transcriptome.nf  
+
+### Pipeline Changes:
+
+1. workflows/wgs.nf: added support for `other` genome `--gen_org` case.  
+
+### Module Changes:
+
+1. modules/picard/picard_markduplicates.nf: added bam publishing for WGS `other` genome `--gen_org` case.  
+1. modules/nygc-short-alignment-marking/short_alignment_marking.nf: the `filter_bam` binary was moved within the tools container. 
+1. modules/delly/delly_cnv_somatic.nf: `stub` case added to facilitate testing. Genome-wide coverage requirements exceed what is achievable with small test data. 
+
+### Scripts Added:
+
+1. bin/rnaseq/fasta_to_gtf.py  
+
+### Script Changes:
+
+1. bin/emase/clean_transcript_info.py: fixed case where transcript names may have `_`.  
+1. bin/pta/annotate-bedpe-with-databases.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-genes.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-genes-mouse.r: added catch for edge case where no somatic SV are called.  
+1. bin/pta/annotate-bedpe-with-cnv.r: added catch for edge case where no somatic SV are called.  
+
+### NF-Test Modules Added: 
+
+1. tests/modules/bbmap/bbmap_clumpify.nf.test
+1. tests/modules/jvarkit/jvarkit_biostar154220.nf.test
+1. tests/modules/utility_modules/concatenate_reads_PE.nf.test
+1. tests/modules/utility_modules/concatenate_reads_SE.nf.test
+1. tests/subworkflows/aria_download_parse.nf.test
+1. tests/subworkflows/aria_gbrs_download_parse.nf.test
+1. tests/subworkflows/concatenate_gbrs_local_files.nf.test
+1. tests/subworkflows/concatenate_local_files.nf.test
+1. tests/subworkflows/concatenate_pta_fastq.nf.test
+1. tests/subworkflows/generate_rnaseq_index.nf.test
+
+All exisiting modules updated to use [https://github.com/TheJacksonLaboratory/cs-nf-test](https://github.com/TheJacksonLaboratory/cs-nf-test) and related `--csv_input` files from that repository. 
+
+
+## Release 0.7.5
+
+In this minor release we make minor adjustments to memory reservations for serval modules, provide an explicit sorting statement for RSEM ensure memory limits are respected, and bump the version of multiQC to 1.25.2.  
+
+## Release 0.7.4
+
+In this release we correct a nextflow issue in the GRIDSS_ASSEMBLY step used in the human PTA workflow.    
 
 ## Release 0.7.3
 

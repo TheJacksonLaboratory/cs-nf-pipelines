@@ -17,13 +17,12 @@ workflow FILE_DOWNLOAD {
 
         Input tuple expected from the CSV sheet: 
             it[0] is sample ID. 
-            it[1] is metadata information
+            it[1] is metadata information. meta includes: [sampleID:'testSample_42', lane:'lane1', replicate:'NA', id:'testSample_42', size:1]. This comes from `extract_csv.nf`
             it[2] and it[3] are R1 and R2 if PE. it[3] is empty if SE. 
 
         All steps expect that sampleID is in position [0] of tuples. 
 
     */
-
 
         if (params.read_type == 'PE') {
             aria_download_input = ch_input_sample
@@ -48,7 +47,6 @@ workflow FILE_DOWNLOAD {
                 }
                 R1: tuple(sampleID, it[1], 'R1', it[2])
             }
-            .mix()
             group_size = 1
         }
         /* 
@@ -88,6 +86,7 @@ workflow FILE_DOWNLOAD {
             See: https://www.nextflow.io/docs/latest/operator.html#grouptuple and the note about dynamic group size. 
     
         */
+
 
         no_concat_samples = concat_input.pass
                             .map{it -> tuple(it[0], it[1], it[2], it[3], it[4][0])} // sampleID, num_lanes, meta, read_ID:[R1|R2], file

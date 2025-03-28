@@ -1,0 +1,28 @@
+nextflow_process {
+
+    name "Test Process JVARKIT_COVERAGE_CAP"
+    script "modules/jvarkit/jvarkit_biostar154220.nf"
+    process "JVARKIT_COVERAGE_CAP"
+
+    test("Coverage Cap -- 15") {
+
+        when {
+            params {
+                pipeline = 'pta'
+                pubdir = "tests/results"
+                coverage_cap = 15
+            }
+            process {
+                """
+                input[0] = tuple('testSample_42', file('https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/ancestry/bam/pdx_WES_sample_realigned_BQSR.bam', checkIfExists: true))
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+
+    }
+
+}

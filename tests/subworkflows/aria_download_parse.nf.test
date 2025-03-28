@@ -1,0 +1,145 @@
+nextflow_workflow {
+
+    name "Test Workflow FILE_DOWNLOAD -- stock"
+    script "subworkflows/aria_download_parse.nf"
+    workflow "FILE_DOWNLOAD"
+
+    test("Paired-End Data") {
+
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                read_type = "PE"
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.fromList([
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane1', replicate:'NA', id:'testSample_42', size:1], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/mm10_WGS_sample_R1.fastq.gz', 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/mm10_WGS_sample_R2.fastq.gz'
+                    ),
+                    tuple(
+                        'testSample_101',
+                        [sampleID:'testSample_101', lane:'lane1', replicate:'NA', id:'testSample_101', size:1], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/human/hg38_WGS_sample_R1.fastq.gz', 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/human/hg38_WGS_sample_R2.fastq.gz'
+                    )
+                ])
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+    test("Single-End Data") {
+
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                read_type = "SE"
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.fromList([
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane1', replicate:'NA', id:'testSample_42', size:1], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/mm10_WGS_sample_R1.fastq.gz'
+                    ),
+                    tuple(
+                        'testSample_101',
+                        [sampleID:'testSample_101', lane:'lane1', replicate:'NA', id:'testSample_101', size:1], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/mm10_WGS_sample_R2.fastq.gz'
+                    ),
+                ])
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+            assert snapshot(workflow.out).match()
+        }
+
+    }
+
+    test("Multiple Lanes Paired-End Data") {
+
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                read_type = "PE"
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.fromList([
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane1', replicate:'NA', id:'testSample_42', size:2], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L001_R1.fastq.gz',
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L001_R2.fastq.gz'
+                    ),
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane2', replicate:'NA', id:'testSample_42', size:2], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L002_R1.fastq.gz',
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L002_R2.fastq.gz'
+                    )
+                ])
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Multiple Lanes Single-End Data") {
+
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                read_type = "SE"
+            }
+            workflow {
+                """
+                // define inputs of the workflow here. Example:
+                input[0] = Channel.fromList([
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane1', replicate:'NA', id:'testSample_42', size:2], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L001_R1.fastq.gz'
+                    ),
+                    tuple(
+                        'testSample_42',
+                        [sampleID:'testSample_42', lane:'lane2', replicate:'NA', id:'testSample_42', size:2], 
+                        'https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/wgs/mouse/individual_lanes/mm10-WGS-sample_GT42-42424_TTTTTTTT-TTTTTTTT_S42_L001_R2.fastq.gz'
+                    )
+                ])
+                """
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

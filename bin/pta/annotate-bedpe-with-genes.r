@@ -318,7 +318,18 @@ opt = parse_args(OptionParser(option_list=option_list))
 
 
 ## Read bedpe
-sv = readBEDPE(opt$bedpe)
+sv <- tryCatch( 
+  {
+      readBEDPE(opt$bedpe)
+  },
+  error = function(e) {
+      res <- data.frame('a'=character(), 'b'=numeric(), 'c'=numeric(), 'd'=character(), 'e'=numeric(), 'f'=numeric(), 'g'=character(), 'h'=character(), 'i'=character(), 'j'=character(), 'k'=character(), 'l'=character(), 'm'=character(), 'n'=character())
+      colnames(res) = c('#chr1', 'start1', 'end1', 'chr2', 'start2', 'end2', 'type', 'score', 'strand1', 'strand2', 'evidence', 'tools', 'tumor--normal', 'info')
+      write.table(res, opt$out_file, row.names=F, col.names=T, sep='\t', quote=F)
+      quit(save = "no", status = 0)
+  }
+)
+# if SV CSV is empty (i.e., no somatic SV), write an empty file as output object.
 
 ## Read gene lists
 genes = readEnsembl(opt$ensembl)
