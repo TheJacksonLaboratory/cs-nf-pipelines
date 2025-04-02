@@ -120,6 +120,5 @@ sex = data.frame(id    = file_prefix,
 ) 
 
 # Write out a file containing the estimated sex for each sample.
-write.csv(sex, file = file.path(output_path, paste0(file_prefix, '_sex.csv')), 
+write.csv(sex, file = file.path(output_path, paste0(file_prefix, '_SexDet.csv')), 
           quote = FALSE, row.names = FALSE)
-

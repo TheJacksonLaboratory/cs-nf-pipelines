@@ -2,6 +2,11 @@
 
 ## Release 0.7.6
 
+In this minor release we add sex determination to the RNA workflows (human, mouse, and PDX), and adjust memory and time reservations of a few WGS related modules. 
+
+
+## Release 0.7.6
+
 In this release we correct a reference file name typo in the paired somatic WES workflow, correct a bug in the emase clean transcript script, and add the option to run a genomes beyond mouse and human to the WGS workflow. See the [wiki page](https://github.com/TheJacksonLaboratory/cs-nf-pipelines/wiki/WGS-Pipeline-ReadMe) for more information on running a alternate genomes.  
 
 Additionally, a new sub-workflow is added to generate RNA-seq index files. This sub-workflow will provide both standard files given a reference genome and gtf annotation file, as well as custom transcriptomes with the addition of novel sequence provided via FASTA input.

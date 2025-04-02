@@ -76,7 +76,7 @@ workflow PDX_RNASEQ {
 
     RSEM_ALIGNMENT_EXPRESSION_HUMAN(human_reads, params.rsem_ref_files_human, params.rsem_star_prefix_human, params.rsem_ref_prefix_human)
     
-    SEX_DETERMINATION_HUMAN(RSEM_ALIGNMENT_EXPRESSION.out.rsem_genes)
+    SEX_DETERMINATION_HUMAN(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_genes)
 
     if (params.merge_rna_counts) {
       MERGE_RSEM_COUNTS_HUMAN(RSEM_ALIGNMENT_EXPRESSION_HUMAN.out.rsem_genes.collect{it[1]},
