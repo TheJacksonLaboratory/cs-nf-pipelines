@@ -1,6 +1,11 @@
 # RELEASE NOTES
 
-## Release 0.7.6
+## Release 0.7.8
+
+In this minor release make minor adjustments to memory and wallclock of several wgs related modules. 
+
+
+## Release 0.7.7
 
 In this minor release we add sex determination to the RNA workflows (human, mouse, and PDX), and adjust memory and time reservations of a few WGS related modules. 
 

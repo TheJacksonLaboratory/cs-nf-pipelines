@@ -104,4 +104,42 @@ nextflow_workflow {
 
     }
 
+    test("Full Workflow -- Mouse -- GRCm38 -- gvcf") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                run_gvcf = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Human -- gvcf") {
+        tag "GRCh38"
+        tag "options"
+        when {
+            params {
+                gen_org = "human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                run_gvcf = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
 }
