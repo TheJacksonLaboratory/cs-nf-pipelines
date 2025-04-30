@@ -1,0 +1,49 @@
+nextflow_process {
+
+    name "Test Process GATK_HAPLOTYPECALLER_INTERVAL"
+    script "modules/gatk/gatk_haplotypecaller_interval.nf"
+    process "GATK_HAPLOTYPECALLER_INTERVAL"
+
+    test("VCF Run") {
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                gen_org = "human"
+            }
+            process {
+                """
+                // define inputs of the process here. Example:
+                input[0] = tuple('testSample_42', file('https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/ancestry/bam/pdx_WES_sample_realigned_BQSR.bam', checkIfExists: true), file('https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/ancestry/bam/pdx_WES_sample_realigned_BQSR.bai', checkIfExists: true), 'chr1')
+                input[1] = ''
+                """
+            }
+        }
+        then {
+            assert process.success
+        }
+    }
+    test("GVCF Run") {
+
+        when {
+            params {
+                pipeline = 'wgs'
+                pubdir = "tests/results"
+                gen_org = "human"
+                run_gvcf = true
+            }
+            process {
+                """
+                // define inputs of the process here. Example:
+                input[0] = tuple('testSample_42', file('https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/ancestry/bam/pdx_WES_sample_realigned_BQSR.bam', checkIfExists: true), file('https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/ancestry/bam/pdx_WES_sample_realigned_BQSR.bai', checkIfExists: true), 'chr1')
+                input[1] = 'gvcf'
+                """
+            }
+        }
+
+        then {
+            assert process.success
+        }
+
+    }
+}
