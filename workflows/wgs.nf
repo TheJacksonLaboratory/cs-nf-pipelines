@@ -299,6 +299,8 @@ workflow WGS {
 
     // Applies scatter intervals from above to the markdup bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
+
+    // If using WMGP profile, use Google DeepVariant to make vcfs and gvcfs
     if(params.wmgp){
       sample_meta_ch = Channel.fromPath("${params.wmgp_meta}")
                     .splitCsv(header: true)
@@ -306,9 +308,24 @@ workflow WGS {
                             [   sampleID = row.sampleID,
                                 ind = row.ind,
                                 sex = row.sex]}
-      deepvariant_channel = chrom_channel.join(sample_meta_ch)
-      DEEPVARIANT(deepvariant_channel)
+      // deepvariant_region_ch = Channel.fromPath("${params.deepvar_region_file}")
+      //                              .splitText()
+      //                              .map{ it -> it.toString()}
+      // deepvariant_channel = bam_file.join(index_file)
+      //                               .combine(deepvariant_region_ch)
+      //                               .combine(sample_meta_ch, by: 0)
+      deepvariant_channel = chrom_channel.combine(sample_meta_ch, by: 0)
+      
+      // Use appended chrom channel with sex information in DeepVariant
+      GOOGLE_DEEPVARIANT(deepvariant_channel)
 
+      // Make sample vcf
+      GOOGLE_DEEPVARIANT.out.vcf.groupTuple().view()
+      
+      // Sort VCF within MAKE_VCF_LIST
+      //GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
+      
+      
     } else {
       // Use the Channel in HaplotypeCaller
       GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
