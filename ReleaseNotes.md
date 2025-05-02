@@ -1,5 +1,9 @@
 # RELEASE NOTES
 
+## Release 0.7.9
+
+In this minor release we correct a broken GitHub runner, and add an output capture for the Mm-PTA Delly CNV coverage file. 
+
 ## Release 0.7.8
 
 In this minor release make minor adjustments to memory and wallclock of several wgs related modules. 
