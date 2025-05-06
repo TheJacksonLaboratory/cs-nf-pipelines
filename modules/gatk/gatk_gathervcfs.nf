@@ -1,4 +1,4 @@
-process GATK_COMBINEGVCFS {
+process GATK_GATHERVCFS {
     tag "$sampleID"
 
     cpus 1
@@ -8,14 +8,14 @@ process GATK_COMBINEGVCFS {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
+    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.{vcf,idx}", mode:'copy'
 
     input:
-    tuple val(sampleID), path(gvcf)
+    tuple val(sampleID), path(vcf)
     val(output_suffix)
 
     output:
-    tuple val(sampleID), file("*.gvcf"), emit: gvcf
+    tuple val(sampleID), file("*.vcf"), emit: vcf
     tuple val(sampleID), file("*.idx"), emit: idx
 
     script:
@@ -23,13 +23,12 @@ process GATK_COMBINEGVCFS {
     String my_mem = (task.memory-1.GB).toString()
     my_mem =  my_mem[0..-4]
 
-    inputs = gvcf.collect { "--variant $it" }.join(' ')
+    inputs = vcf.collect { "-I $it" }.join(' ')
 
     """
     mkdir -p tmp
-    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" CombineGVCFs \
-    -R ${params.ref_fa} \
+    gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" GatherVcfs \
     ${inputs} \
-    -O ${sampleID}_GATKcombined_${output_suffix}.gvcf
+    -O ${sampleID}_${output_suffix}.vcf
     """
 }

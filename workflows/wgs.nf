@@ -261,7 +261,7 @@ workflow WGS {
     if (params.run_gvcf) {
       // Use the Channel in HaplotypeCaller_GVCF
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
+      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
     }
   }
 
@@ -307,7 +307,7 @@ workflow WGS {
     if (params.run_gvcf) {
       // Use the Channel in HaplotypeCaller_GVCF
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
+      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
     }
   }
 

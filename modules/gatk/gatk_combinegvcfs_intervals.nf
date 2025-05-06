@@ -1,22 +1,21 @@
-process GATK_COMBINEGVCFS {
+process GATK_COMBINEGVCFS_INTERVALS {
     tag "$sampleID"
-
+    
     cpus 1
+    array 23
     memory 16.GB
     time '05:00:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
+    // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
 
     input:
-    tuple val(sampleID), path(gvcf)
-    val(output_suffix)
+    tuple val(sampleID), path(gvcf), path(idx), val(chrom)
 
     output:
-    tuple val(sampleID), file("*.gvcf"), emit: gvcf
-    tuple val(sampleID), file("*.idx"), emit: idx
+    tuple val(sampleID), path("*.gvcf"), path("*.idx"), emit: gvcf_idx
 
     script:
     // memory needs to be set explicitly
@@ -30,6 +29,7 @@ process GATK_COMBINEGVCFS {
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" CombineGVCFs \
     -R ${params.ref_fa} \
     ${inputs} \
-    -O ${sampleID}_GATKcombined_${output_suffix}.gvcf
+    --intervals ${chrom} \
+    -O ${sampleID}_GATKcombined_${chrom}.gvcf
     """
 }

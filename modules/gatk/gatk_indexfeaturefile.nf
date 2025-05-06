@@ -11,10 +11,11 @@ process GATK_INDEXFEATUREFILE {
     publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.idx", mode:'copy', enabled: params.keep_intermediate
 
     input:
-    tuple val(sampleID), file(vcf)
+    tuple val(sampleID), path(vcf)
 
     output:
-    tuple val(sampleID), file("*.idx"), emit: idx
+    tuple val(sampleID), path("*.idx"), emit: idx, optional: true
+    tuple val(sampleID), path("*.tbi"), emit: tbi, optional: true
 
     script:
     String my_mem = (task.memory-1.GB).toString()
