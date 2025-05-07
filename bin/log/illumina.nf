@@ -7,6 +7,10 @@ def PARAM_LOG(){
         error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
     }
     
+    if (params.gen_org != "mouse") {
+        error "'--gen_org': \"${params.gen_org}\" is not valid, supported option is 'mouse'" 
+    }
+    
     log.info """
 ______________________________________________________
 

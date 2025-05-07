@@ -34,7 +34,7 @@ process BWA_MEM {
   """
   rg=\$(cat $read_groups)
   bwa mem -R \${rg} \
-  -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}_${index}.sam
+  -t $task.cpus $split_hits -B ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}_${index}.sam
   """
 }
 

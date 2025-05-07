@@ -22,4 +22,15 @@ process DELLY_CNV_GERMLINE {
     """
     delly cnv -u -z ${params.cnv_min_size} -i ${params.cnv_window} -o ${sampleID}_Delly.bcf -c ${sampleID}_Delly.cov.gz -g ${fasta} -m ${params.delly_mappability} ${bam} 
     """
+
+    stub:
+    """
+    wget -O ${sampleID}_Delly.bcf https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--t_bang.bcf
+    wget -O ${sampleID}_Delly.bcf.csi https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--t_bang.bcf.csi
+    wget -O ${sampleID}_Delly.cov.gz https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/mouse/fizzbang--t_bang.cov.gz
+    """
 }
+
+// Delly coverage requirements preculde most testing with small sample files. 
+// The stub run is included here to overcome the coverage limitations. 
+// Additional testing of the module has been done, and will be written formally in the future.

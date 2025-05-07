@@ -1,8 +1,5 @@
 #!/usr/bin/env Rscript
 
-zout <- file("messages.Rout", open = "wt")
-sink(zout, type = "message")
-
 library(tidyverse)
 
 args = commandArgs(trailingOnly=TRUE)
@@ -382,7 +379,7 @@ tra_regulatory <- read_delim(paste(sample_name, "tra.regulatory.bed", sep="."), 
                             description = str_replace(description, "description=", ""),
                             reg_out = str_c(ID, description, sep = ":")) 
                    else(.)}
-                                                       
+
 ins_full <- ins %>%
     mutate(., sv_type = "insertion") %>%
     {if(nrow(ins_c) != 0) 
@@ -419,7 +416,7 @@ del_full <- del %>%
     else(.) } %>%
     {if(nrow(del_regulatory) != 0)
        mutate(., regulatory_regions = if_else(sv_name %in% del_regulatory$sv_name,  "Y", "N"))
-        else(mutate(., regulatory_regions = "N")) }                
+        else(mutate(., regulatory_regions = "N")) }
 
 tra_full <- tra %>%
     mutate(., sv_type = "translocation") %>%
@@ -475,9 +472,18 @@ dup_full <- dup %>%
        mutate(., regulatory_regions = if_else(sv_name %in% dup_regulatory$sv_name,  "Y", "N"))
         else(mutate(., regulatory_regions = "N")) }
 
+ins_full <- ins_full %>% mutate(beck = as.character(beck))
+del_full <- del_full %>% mutate(beck = as.character(beck))
+tra_full <- tra_full %>% mutate(beck = as.character(beck))
+inv_full <- inv_full %>% mutate(beck = as.character(beck))
+dup_full <- dup_full %>% mutate(beck = as.character(beck))
+## Adjusts an edge case no calls are present and 'beck' is set to logical and char. Must be character.
+
 bind_rows(ins_full, del_full, tra_full, inv_full, dup_full) %>%
     mutate(., pos = start + 1) %>%
     mutate(., sv_size = abs(stop - start) + 1) %>%
+    mutate(., exons = ifelse("exons" %in% names(.), exons, NA),
+              gene = ifelse("gene" %in% names(.), exons, NA)) %>%
     relocate(chr, pos, sv_name, sv_size, sv_type, 
              beck, regulatory_regions, gene, exons) %>%
     select(., -start, -stop) %>%
@@ -485,13 +491,21 @@ bind_rows(ins_full, del_full, tra_full, inv_full, dup_full) %>%
                         delim = "\t",
                         col_types = cols("chr" = "c")) %>%
              select(., -chr, -pos), 
-             by = c("sv_name" = "SV")) %>%    
+             by = c("sv_name" = "SV")) %>%
     arrange(., chr, pos) %>%
-    mutate(., gene = case_when(sv_size > 5000000 ~ "sv_too_large",
-                               TRUE ~ gene),
-              exons = case_when(sv_size > 5000000 ~ "sv_too_large",
-                               TRUE ~ exons),
-              regulatory_regions = case_when(sv_size > 5000000 ~ "sv_too_large",
+    mutate(., regulatory_regions = case_when(sv_size > 5000000 ~ "sv_too_large",
                                TRUE ~ regulatory_regions)) %>%
+    mutate(., exons = ifelse(is.na(exons), NA, case_when(sv_size > 5000000 ~ "sv_too_large",
+                               TRUE ~ exons))) %>%
+    mutate(., gene = ifelse(is.na(gene), NA, case_when(sv_size > 5000000 ~ "sv_too_large",
+                               TRUE ~ gene))) %>%                   
     distinct() %>%
     write_csv(., surv_out_fh)
+
+## Note: there is an edge case where no exons were added to the data frames because all cases where exons might be set (e.g., {if(nrow(inv_exons) != 0)) are not met.
+## In the original script, this was throwing an error "exons not found." A check was added to see if the column exists and if not, set it to NA.
+## This introduced a new issue where the case_when statement was failing to evaluate on a column that contained only NA. 
+## This was fixed by adding a check to see if the data in exons is all na, and if so maintain NA, if not process the 'case_when' statement.
+
+## There is an additional edge case where there are no SVs called at all. Adjustments were made to 'gene' to add an empty column and provide an ifelse statement
+## prior to the case_when statement to deal with replacement mismatch errors due to 'NA' being logic not str.

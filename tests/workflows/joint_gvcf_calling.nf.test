@@ -12,7 +12,6 @@ nextflow_workflow {
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/gvcf/bgzip/GVCF_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'joint_gvcf_calling'
-
             }
         }
 
@@ -30,7 +29,6 @@ nextflow_workflow {
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/gvcf/unzip/GVCF_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'joint_gvcf_calling'
-
             }
         }
 

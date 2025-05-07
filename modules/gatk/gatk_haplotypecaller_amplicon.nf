@@ -39,7 +39,7 @@ process GATK_HAPLOTYPECALLER {
     -I ${bam} \
     -O ${sampleID}_haplotypecaller_raw.${output_suffix} \
     -L ${params.target_gatk} \
-    ${params.ploidy_val} \
+    -ploidy ${params.ploidy_val} \
     ${delta} \
     --max-reads-per-alignment-start 0 \
     --recover-all-dangling-branches

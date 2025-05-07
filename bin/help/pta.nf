@@ -35,7 +35,7 @@ The following are human specific parameters. To see help for mouse, add `--gen_o
 --ref_fa_dict | '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.dict' | FASTA dictonary file. JAX users should not change this parameter. 
 --combined_reference_set | '/projects/compsci/omics_share/human/GRCh38/supporting_files/PTA_inputs/combined_ref_set/Homo_sapiens_assembly38.fasta' | Several tools (GRIDSS, SVABA) requires reference and bwa index files in same directory. Links used within this directory to avoid duplication of fasta and bwa indicies. See note in directory. 
 
---mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
+--mismatch_penalty | 8 | The BWA penalty for a mismatch.
 
 --gold_std_indels | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/Mills_and_1000G_gold_standard.indels.hg38.vcf.gz’ | Used in GATK BaseRecalibrator and variant tranche recalibration derived from the GATK resource bundle. JAX users should not change this parameter.
 --phase1_1000G | '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/1000G_phase1.snps.high_confidence.hg38.vcf.gz' | Used in GATK BaseRecalibrator derived from the GATK resource bundle. JAX users should not change this parameter.
@@ -46,7 +46,7 @@ The following are human specific parameters. To see help for mouse, add `--gen_o
 --chrom_intervals | '/projects/omics_share/human/GRCh38/genome/annotation/intervals/hg38_calling_intervals/' | Chromosome intervals used for scatter gather in calling. 
 
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
---ploidy_val | '-ploidy 2' | Sample ploidy used by Haplotypecaller in germline small variant calling. 
+--ploidy_val | '2' | Sample ploidy used by Haplotypecaller in germline small variant calling. 
 
 --excludeIntervalList | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/intervals/hg38_haplotypeCaller_skip.interval_list' | Germline caller exclusion list. 
 --hapmap | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/hapmap_3.3.hg38.vcf.gz' | variant tranche recalibration requirement derived from the GATK resource bundle. 
@@ -123,7 +123,7 @@ The following are mouse specific parameters. To see help for mouse, add `--gen_o
 --ref_fa_dict | '/projects/compsci/omics_share/mouse/GRCm39/genome/sequence/ensembl/GRCm39.p0/Mus_musculus.GRCm39.dna.primary_assembly.dict' | FASTA dictonary file. JAX users should not change this parameter. 
 --combined_reference_set | '/projects/compsci/omics_share/mouse/GRCm39/supporting_files/PTA_inputs/combined_ref_set/Mus_musculus.GRCm39.dna.primary_assembly.fa' | Several tools (GRIDSS, SVABA) requires reference and bwa index files in same directory. Links used within this directory to avoid duplication of fasta and bwa indicies. See note in directory. 
 
---mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
+--mismatch_penalty | 8 | The BWA penalty for a mismatch.
 
 --dbSNP | '/projects/omics_share/mouse/GRCm39/genome/annotation/snps_indels/GCA_000001635.9_current_ids.vcf.gz' | Used in variant annotation and by SVABA. JAX users should not change this parameter.
 --dbSNP_index | '/projects/omics_share/mouse/GRCm39/genome/annotation/snps_indels/GCA_000001635.9_current_ids.vcf.gz.tbi' | Index associated with the dbsnp file. 
@@ -132,7 +132,7 @@ The following are mouse specific parameters. To see help for mouse, add `--gen_o
 --chrom_intervals | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/GRCm39_calling_intervals/' | Chromosome intervals used for scatter gather in calling. 
 
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
---ploidy_val | '-ploidy 2' | Sample ploidy used by Haplotypecaller in germline small variant calling. 
+--ploidy_val | '2' | Sample ploidy used by Haplotypecaller in germline small variant calling. 
 
 --excludeIntervalList | '/projects/compsci/omics_share/mouse/GRCm39/genome/annotation/intervals/mm39.excluderanges.interval_list' | Germline caller exclusion list. 
 
