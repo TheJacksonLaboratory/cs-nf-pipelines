@@ -6,7 +6,7 @@ println logo.show()
 
 
 def param_log(){
-if (params.gen_org != "human" || params.gen_org != "mouse" || params.gen_org != "other") {
+if (params.gen_org != "human" && params.gen_org != "mouse" && params.gen_org != "other") {
   error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse', 'human', or 'other'" 
 }
 
