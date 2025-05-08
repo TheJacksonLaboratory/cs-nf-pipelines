@@ -24,7 +24,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --genotype_targets              ${params.genotype_targets}
 --snpID_list                    ${params.snpID_list}

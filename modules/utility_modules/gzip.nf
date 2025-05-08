@@ -9,13 +9,14 @@ process GZIP {
 
   container "quay.io/jaxcompsci/py3_perl_pylibs:v2"
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/processed_reads' : 'xengsort' }", pattern: "*.gz", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID + '/processed_reads'}", pattern: "*.gz", mode:'copy'
 
   input:
   tuple val(sampleID), path(reads)
 
   output:
   tuple val(sampleID), path("*.gz"), emit: gunzip_fastq
+  
   script:
   """
   gzip -c ${reads[0]} > ${reads[0]}.gz

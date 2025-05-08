@@ -30,7 +30,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --merge_replicates              ${params.merge_replicates}
 --bowtie2Index                  ${params.bowtie2Index}
 --bowtieMaxInsert               ${params.bowtieMaxInsert}
@@ -67,7 +66,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --merge_replicates              ${params.merge_replicates}
 --effective_genome_size         ${params.effective_genome_size} 
 --chain                         ${params.chain}

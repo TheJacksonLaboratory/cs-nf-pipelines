@@ -8,7 +8,7 @@ process PICARD_REORDERSAM {
 
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), file(bam)

@@ -33,7 +33,6 @@ ________________________________________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
@@ -84,7 +83,6 @@ ________________________________________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}

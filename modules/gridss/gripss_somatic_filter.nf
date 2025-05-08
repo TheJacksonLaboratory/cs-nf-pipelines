@@ -10,7 +10,7 @@ process GRIPSS_SOMATIC_FILTER {
 
     stageInMode = 'copy'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gridss' }", pattern: "*gripss.filtered.vcf.gz", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern: "*gripss.filtered.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name)

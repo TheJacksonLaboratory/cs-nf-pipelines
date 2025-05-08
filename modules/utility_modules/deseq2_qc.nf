@@ -7,7 +7,7 @@ process DESEQ2_QC {
 
     container 'quay.io/biocontainers/mulled-v2-8849acf39a43cdd6c839a369a74c0adc823e2f91:ab110436faf952a33575c64dd74615a84011450b-0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'consensusCalling_'+antibody+'/deseq2' : 'deseq2' }", mode: 'copy'
+    publishDir "${params.pubdir}/${'consensusCalling_' + antibody + '/deseq2'}", mode: 'copy'
 
     input:
     tuple val(antibody), path(counts)

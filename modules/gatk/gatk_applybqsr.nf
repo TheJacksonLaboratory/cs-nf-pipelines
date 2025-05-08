@@ -8,7 +8,7 @@ process GATK_APPLYBQSR {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.ba*", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern: "*.ba*", mode:'copy'
 
     input:
     tuple val(sampleID), file(bam), file(table)

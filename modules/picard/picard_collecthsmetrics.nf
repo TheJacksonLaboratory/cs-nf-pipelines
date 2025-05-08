@@ -8,7 +8,7 @@ process PICARD_COLLECTHSMETRICS {
 
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'picard' }", pattern: "*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*.txt", mode:'copy'
 
     input:
     tuple val(sampleID), file(bam), file(bai)

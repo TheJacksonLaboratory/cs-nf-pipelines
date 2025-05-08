@@ -9,9 +9,8 @@ process PICARD_COLLECTMULTIPLEMETRICS {
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'picard'}"
+        "${params.pubdir}/${type + sampleID + '/stats'}"
     }, pattern: "*.CollectMultipleMetrics.*", mode: 'copy'
-
 
     input:
     tuple val(sampleID), file(bam)
@@ -19,7 +18,6 @@ process PICARD_COLLECTMULTIPLEMETRICS {
     output:
     tuple val(sampleID), file("*_metrics"), emit : metrics
     tuple val(sampleID), file("*.pdf"), emit : pdf
-
 
     script:
     prefix = "${sampleID}.mLb.clN"

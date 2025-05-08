@@ -10,7 +10,7 @@ process GATK_VARIANTANNOTATOR {
   // Flag --snpEffFile was removed in GATK4
   container 'broadinstitute/gatk3:3.6-0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID), file(sample_vcf), file(snpeff_vcf)

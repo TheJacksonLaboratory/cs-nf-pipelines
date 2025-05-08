@@ -28,7 +28,6 @@ ______________________________________________________
 --keep_intermediate             ${params.keep_intermediate}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --pdx                           ${params.pdx}
 --xengsort_host_fasta           ${params.xengsort_host_fasta}
 --xengsort_idx_path             ${params.xengsort_idx_path}

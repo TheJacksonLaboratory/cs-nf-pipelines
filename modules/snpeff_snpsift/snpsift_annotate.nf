@@ -8,9 +8,9 @@ process SNPSIFT_ANNOTATE {
 
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpsift' }", pattern:"*dbsnpID.vcf", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpsift' }", pattern:"*_germline_snv_indel_annotated_filtered_final.vcf", mode:'copy'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.vcf", mode:'copy', enabled: params.workflow == 'amplicon' ? true : false
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*dbsnpID.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*_germline_snv_indel_annotated_filtered_final.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*.vcf", mode:'copy', enabled: params.workflow == 'amplicon' ? true : false
 
   input:
   tuple val(sampleID), file(vcf)

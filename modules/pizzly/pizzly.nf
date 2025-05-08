@@ -9,7 +9,7 @@ process PIZZLY {
 
     container 'quay.io/biocontainers/pizzly:0.37.3--h470a237_3'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'pizzly' }", pattern: "*_pizzly_fusions.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions'}", pattern: "*_pizzly_fusions.txt", mode:'copy'
 
     input:
         tuple val(sampleID), path(kallisto_fusions), path(kallisto_insert_size)
@@ -20,7 +20,6 @@ process PIZZLY {
 
     script:
     """
-
     insert_size="\$(cat ${kallisto_insert_size})"
 
     pizzly \
@@ -33,6 +32,5 @@ process PIZZLY {
     --output ${sampleID}.pizzly ${kallisto_fusions}
 
     pizzly_flatten_json.py ${sampleID}.pizzly.json ${sampleID}_pizzly_fusions.txt
-
     """
 }

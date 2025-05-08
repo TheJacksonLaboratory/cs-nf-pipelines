@@ -10,7 +10,7 @@ process BWA_MEM {
 
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID : 'bwa_mem'}"
+      "${params.pubdir}/${type + sampleID}"
   }, pattern: "*.sam", mode: 'copy', enabled: params.keep_intermediate
 
 

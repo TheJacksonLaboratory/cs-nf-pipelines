@@ -8,7 +8,7 @@ process SNIFFLES {
 
     container 'quay.io/jaxcompsci/sniffles-td_refs:2.0.7--refv0.2.0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls'}", pattern: "${sampleID}.sniffles_sorted_prefix.vcf", mode: "copy"
+    publishDir "${params.pubdir}/${sampleID + '/unmerged_calls'}", pattern: "${sampleID}.sniffles_sorted_prefix.vcf", mode: "copy"
 
     input:
         tuple val(sampleID), file(bam), file(index)

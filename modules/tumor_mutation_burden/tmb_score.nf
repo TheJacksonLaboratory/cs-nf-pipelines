@@ -8,7 +8,7 @@ process TMB_SCORE {
 
     container 'quay.io/jaxcompsci/snpeff_5.1_r_bedtools_tmb:v3'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'tmb' }", pattern: "*TMB_Score.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*TMB_Score.txt", mode:'copy'
 
     input:
     tuple val(sampleID), path(vcf), val(tumor_name)

@@ -7,7 +7,7 @@ process BICSEQ2_SEG_UNPAIRED {
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
   container 'quay.io/jaxcompsci/bicseq2:v3'
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'biqseq2' }", pattern:"{*.txt,*.png}", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern:"{*.txt,*.png}", mode:'copy'
 
   input:
   tuple val(sampleID), file(individual_tumor_norm_bin_files), val(meta), val(tumor_name)
@@ -44,12 +44,8 @@ process BICSEQ2_SEG_UNPAIRED {
 
   stub:
   """
-  touch ${sampleID}.bicseq2.png
-  touch ${sampleID}.bicseq2.txt
+  wget -O ${sampleID}.bicseq2.png https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/human/fizzbang--t_bang--n_fizz.bicseq2.png
+  wget -O ${sampleID}.bicseq2.txt https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/pta/human/fizzbang--t_bang--n_fizz.bicseq2.txt
   """
 }
-
-
-
-
-
+// Stub run is to test lower coverage sample data.

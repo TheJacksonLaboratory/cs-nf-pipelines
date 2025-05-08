@@ -8,7 +8,7 @@ process SCARHRD {
 
     container 'quay.io/jaxcompsci/sequenza:v1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'hrd' }", pattern: "*HRD_score.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*HRD_score.txt", mode:'copy'
 
 
     input:
