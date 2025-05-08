@@ -43,10 +43,4 @@ process GRIPSS_SOMATIC_FILTER {
         mv ${tumor_name}.gripss.vcf.gz.tbi ${sampleID}.gripss.vcf.gz.tbi
 
     """
-
-    stub:
-    """
-    touch ${sampleID}_gripss.filtered.vcf.gz
-    touch ${sampleID}_gripss.filtered.vcf.gz.tbi
-    """
 }
