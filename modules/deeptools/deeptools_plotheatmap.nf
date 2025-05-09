@@ -7,7 +7,7 @@ process DEEPTOOLS_PLOTHEATMAP {
 
     publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/deeptools' : 'deeptools'}"
+      "${params.pubdir}/${type + sampleID + '/deeptools'}"
     }, pattern: "*.pdf", mode: 'copy'
 
  

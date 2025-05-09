@@ -11,7 +11,7 @@ process FASTQC {
 
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? 'fastqc/' : '' 
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'fastqc'}"
+      "${params.pubdir}/${type + sampleID + '/stats'}"
   }, pattern: "*_fastqc.{zip,html}", mode: 'copy'
 
 

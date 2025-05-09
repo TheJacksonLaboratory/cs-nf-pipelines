@@ -6,7 +6,7 @@ process FEATURE_COUNTS {
   time '10:00:00'
   errorStrategy 'ignore'
   
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'subread' }", pattern: "*_peaks_countMatrix.txt", mode: 'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*_peaks_countMatrix.txt", mode: 'copy'
   container 'quay.io/biocontainers/subread:1.6.4--h84994c4_1'
 
   input:

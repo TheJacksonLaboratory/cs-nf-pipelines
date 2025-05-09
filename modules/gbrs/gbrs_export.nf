@@ -8,7 +8,7 @@ process GBRS_EXPORT {
 
     container 'quay.io/jaxcompsci/gbrs_py3:v1.0.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.tsv", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.tsv", mode: 'copy'
 
     input:
     tuple val(sampleID), path(interpolated_genoprobs)

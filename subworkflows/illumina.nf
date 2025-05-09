@@ -128,7 +128,7 @@ workflow ILLUMINA {
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
     } else {
-        exit 1, "Both FASTQ and BAM inputs were specified. Use either FASTQ or BAM as workflow input."
+        exit 1, "FASTQ: fastq1 '${params.fastq1}'; fastq2 '${params.fastq2}' and BAM: '${params.bam}' inputs either were both specified, or both null. Use FASTQ, BAM or csv_input as workflow input."
     }
 
     // Index reference fasta

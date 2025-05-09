@@ -11,7 +11,7 @@ process GATK_INDELREALIGNER{
   container 'broadinstitute/gatk3:3.6-0'
 
   // save if mouse and wgs or save if keep intermediate
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'gatk' }", pattern: "*.bam", mode:'copy', enabled: params.gen_org=='mouse' && params.workflow=='wgs' ? true : params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern: "*.bam", mode:'copy', enabled: params.gen_org=='mouse' && params.workflow=='wgs' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID), file(bam)

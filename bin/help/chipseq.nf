@@ -3,7 +3,6 @@ def help(){
 Parameter | Default | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
---organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 --cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
 -w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
@@ -34,7 +33,7 @@ Parameter | Default | Description
 --adapOverlap | 1 | Stringency for overlap with adapter sequence required to trim a sequence. Defaults to a very stringent setting of 1, i.e. even a single base pair of overlapping sequence will be trimmed of the 3' end of any read.
 --adaptorSeq | 'AGATCGGAAGAGC' | Adapter sequence to be trimmed. This sequence is the standard Illumina adapter sequence.
 
---mismatch_penalty | '' | The BWA penalty for a mismatch.
+--mismatch_penalty | 4 | The BWA penalty for a mismatch, set to BWA mem default by default.
 --bwa_min_score | false | Don’t output BWA MEM alignments with score lower than this parameter (Default: false)
 --keep_dups | false | Duplicate reads are not filtered from alignments (Default: false)
 --keep_multi_map | false | Reads mapping to multiple locations in the genome are not filtered from alignments (Default: false)

@@ -10,8 +10,8 @@ process IAAP_CLI {
   
   container 'quay.io/jaxcompsci/gtc2vcf_with_tools:v2'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'iaap_cli' }", pattern: "*.gtc", mode:'copy', enabled: params.keep_intermediate
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'iaap_cli' }", pattern: "*.log", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.gtc", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.log", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), val(meta), path(red_idat), path(green_idat)

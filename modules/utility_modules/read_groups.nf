@@ -8,7 +8,7 @@ process READ_GROUPS {
 
   container 'quay.io/jaxcompsci/py3_bgzip:3.10.12'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'read_groups' }", pattern: "*read_group.txt", mode:'copy', enabled: params.workflow == 'rnaseq' || params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*read_group.txt", mode:'copy', enabled: params.workflow == 'rnaseq' || params.keep_intermediate
 
   input:
   tuple val(sampleID), path(fq_reads)

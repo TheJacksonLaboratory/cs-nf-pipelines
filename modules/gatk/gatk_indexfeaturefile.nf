@@ -8,7 +8,7 @@ process GATK_INDEXFEATUREFILE {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.idx", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.idx", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), path(vcf)

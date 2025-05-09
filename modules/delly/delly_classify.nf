@@ -8,7 +8,7 @@ process DELLY_CLASSIFY {
     
     container 'quay.io/biocontainers/delly:1.1.6--h6b1aa3f_2'
     
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'delly'}", pattern: "*.bcf", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern: "*.bcf", mode: 'copy'
 
     input:
     tuple val(sampleID), path(bcf), path(csi), val(meta), val(normal_name), val(tumor_name)

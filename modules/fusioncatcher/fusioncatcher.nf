@@ -9,7 +9,7 @@ process FUSIONCATCHER {
 
     container 'quay.io/biocontainers/fusioncatcher:1.33--hdfd78af_4'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'fusioncatcher' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions'}", pattern: "*.{tsv,txt}", mode:'copy'
 
 
     input:

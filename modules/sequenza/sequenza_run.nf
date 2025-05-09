@@ -8,10 +8,10 @@ process SEQUENZA_RUN {
 
     container 'quay.io/jaxcompsci/sequenza:v1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/txt' : 'sequenza' }", pattern:"*.txt", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv' : 'sequenza' }", pattern:"*segments.txt", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/Rdata' : 'sequenza' }", pattern:"*.RData", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv/pdfs' : 'sequenza' }", pattern:"*.pdf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv/txt'}", pattern:"*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv'}", pattern:"*segments.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv/Rdata'}", pattern:"*.RData", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv/pdfs'}", pattern:"*.pdf", mode:'copy'
 
     input:
     tuple val(sampleID), val(meta), path(seqz)

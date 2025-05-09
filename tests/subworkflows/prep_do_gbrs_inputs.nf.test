@@ -12,6 +12,7 @@ nextflow_workflow {
             params {
                 pubdir = "tests/results"
                 num_generations = 10
+                ensembl_build = 113
                 pipeline = 'prep_do_gbrs_inputs'
             }
         }
