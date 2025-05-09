@@ -37,6 +37,7 @@ include {GATK_HAPLOTYPECALLER_INTERVAL;
          GATK_HAPLOTYPECALLER_INTERVAL as GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
+include {BCFTOOLS_MERGEDEEPVAR} from "${projectDir}/modules/bcftools/bcftools_merge_deepvar_vcfs.nf"
 include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
@@ -308,24 +309,18 @@ workflow WGS {
                             [   sampleID = row.sampleID,
                                 ind = row.ind,
                                 sex = row.sex]}
-      // deepvariant_region_ch = Channel.fromPath("${params.deepvar_region_file}")
-      //                              .splitText()
-      //                              .map{ it -> it.toString()}
-      // deepvariant_channel = bam_file.join(index_file)
-      //                               .combine(deepvariant_region_ch)
-      //                               .combine(sample_meta_ch, by: 0)
       deepvariant_channel = chrom_channel.combine(sample_meta_ch, by: 0)
       
       // Use appended chrom channel with sex information in DeepVariant
       GOOGLE_DEEPVARIANT(deepvariant_channel)
 
-      // Make sample vcf
-      GOOGLE_DEEPVARIANT.out.vcf.groupTuple().view()
-      
-      // Sort VCF within MAKE_VCF_LIST
-      //GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
-      
-      
+      // Merge DeepVariant calls
+      BCFTOOLS_MERGEDEEPVAR(GOOGLE_DEEPVARIANT.out.vcf_channel.groupTuple())
+
+      // create select var channels
+      select_var_snp = BCFTOOLS_MERGEDEEPVAR.out.vcf
+      select_var_indel = BCFTOOLS_MERGEDEEPVAR.out.vcf
+
     } else {
       // Use the Channel in HaplotypeCaller
       GATK_HAPLOTYPECALLER_INTERVAL(chrom_channel, '')
@@ -341,73 +336,75 @@ workflow WGS {
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
       GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
       }
+
+      // create select var channels
+      select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+      select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
     }
   }
 
-  // // SNP
-  // select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
-  // GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'selected_SNP')
-  // var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
-  // GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
+  // SNP
+  GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'selected_SNP')
+  var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
+  GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
-  // // INDEL
-  // select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
-  // GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'selected_INDEL')
-  // var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
-  // GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
+  // INDEL
+  GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'selected_INDEL')
+  var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
+  GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
-  // SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
-  // SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+  SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+  SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
 
-  // // If Human
-  // if (params.gen_org=='human'){
+  // If Human
+  if (params.gen_org=='human'){
 
-  //   // SNP
-  //     SNPSIFT_ANNOTATE_SNP_COSMIC(SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
-  //     SNPEFF_SNP(SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf, 'SNP', 'vcf')
-  //     SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
-  //     SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
-  //   // INDEL
-  //     SNPSIFT_ANNOTATE_INDEL_COSMIC(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
-  //     SNPEFF_INDEL(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf, 'INDEL', 'vcf')
-  //     SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
-  //     SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
+    // SNP
+      SNPSIFT_ANNOTATE_SNP_COSMIC(SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+      SNPEFF_SNP(SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf, 'SNP', 'vcf')
+      SNPSIFT_DBNSFP_SNP(SNPEFF_SNP.out.vcf, 'SNP')
+      SNPEFF_ONEPERLINE_SNP(SNPSIFT_DBNSFP_SNP.out.vcf, 'SNP')
+    // INDEL
+      SNPSIFT_ANNOTATE_INDEL_COSMIC(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf, params.cosmic, params.cosmic_index, 'cosmicID')
+      SNPEFF_INDEL(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf, 'INDEL', 'vcf')
+      SNPSIFT_DBNSFP_INDEL(SNPEFF_INDEL.out.vcf, 'INDEL')
+      SNPEFF_ONEPERLINE_INDEL(SNPSIFT_DBNSFP_INDEL.out.vcf, 'INDEL')
       
-  //   // Merge SNP and INDEL and Aggregate Stats
-  //     vcf_files_unannotated = SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf)
-  //     GATK_MERGEVCF_UNANNOTATED(vcf_files_unannotated, 'SNP_INDEL_filtered_unannotated_final')
+    // Merge SNP and INDEL and Aggregate Stats
+      vcf_files_unannotated = SNPSIFT_ANNOTATE_SNP_COSMIC.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_COSMIC.out.vcf)
+      GATK_MERGEVCF_UNANNOTATED(vcf_files_unannotated, 'SNP_INDEL_filtered_unannotated_final')
 
-  //     vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
-  //     GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
+      vcf_files_annotated = SNPEFF_ONEPERLINE_SNP.out.vcf.join(SNPEFF_ONEPERLINE_INDEL.out.vcf)
+      GATK_MERGEVCF_ANNOTATED(vcf_files_annotated, 'SNP_INDEL_filtered_annotated_final')
       
-  //     SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
-  // }
+      SNPSIFT_EXTRACTFIELDS(GATK_MERGEVCF_ANNOTATED.out.vcf)
+  }
 
-  // // If Mouse
-  // if (params.gen_org=='mouse'){
-  //   // Merge SNP and INDEL
+  // If Mouse
+  if (params.gen_org=='mouse'){
+    // Merge SNP and INDEL
 
-  //   vcf_files = SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf)
+    vcf_files = SNPSIFT_ANNOTATE_SNP_DBSNP.out.vcf.join(SNPSIFT_ANNOTATE_INDEL_DBSNP.out.vcf)
 
-  //   GATK_MERGEVCF(vcf_files, 'SNP_INDEL_filtered_unannotated_final')
+    GATK_MERGEVCF(vcf_files, 'SNP_INDEL_filtered_unannotated_final')
 
-  //   SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'vcf')
+    SNPEFF(GATK_MERGEVCF.out.vcf, 'BOTH', 'vcf')
 
-  //   SNPEFF_ONEPERLINE(SNPEFF.out.vcf, 'BOTH')
+    SNPEFF_ONEPERLINE(SNPEFF.out.vcf, 'BOTH')
 
-  //   SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
-  // }
+    SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
+  }
 
-  // ch_multiqc_files = Channel.empty()
-  // ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
-  // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
-  // ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
-  // ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
-  // ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
-  // ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = Channel.empty()
+  ch_multiqc_files = ch_multiqc_files.mix(FASTP.out.quality_json.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.quality_stats.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(ch_GATK_BASERECALIBRATOR_multiqc.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTALIGNMENTSUMMARYMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_COLLECTWGSMETRICS.out.txt.collect{it[1]}.ifEmpty([]))
+  ch_multiqc_files = ch_multiqc_files.mix(PICARD_MARKDUPLICATES.out.dedup_metrics.collect{it[1]}.ifEmpty([]))
 
-  // MULTIQC (
-  //     ch_multiqc_files.collect()
-  // )
+  MULTIQC (
+      ch_multiqc_files.collect()
+  )
 
 }

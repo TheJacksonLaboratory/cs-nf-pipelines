@@ -8,14 +8,11 @@ process GOOGLE_DEEPVARIANT {
 
   container 'docker://google/deepvariant:latest'
 
-  //publishDir "${params.pubdir}/${sampleID}/vcfs", pattern: "*.vcf", mode:'copy'
-
   input:
   tuple val(sampleID), file(bam), file(bai), val(chrom), val(ind), val(sex)
 
   output:
-  tuple val(sampleID), file("*_dv.vcf"), emit: vcf
-  tuple val(sampleID), file("*_dv.g.vcf"), emit: gvcf
+  tuple val(sampleID), file("*.vcf.gz"), file("*.gvcf.gz"), file("*.vcf.gz.tbi"), file("*.gvcf.gz.tbi"), emit: vcf_channel
 
   script:
   
@@ -26,11 +23,11 @@ process GOOGLE_DEEPVARIANT {
     --ref ${params.ref_fa} \
     --haploid_contigs X,Y \
     --reads ${bam} \
-    --output_vcf ${sampleID}_${chrom}_dv.vcf \
+    --output_vcf ${sampleID}_${chrom}.vcf.gz \
     --sample_name ${sampleID} \
     --num_shards 4 \
     --regions ${chrom} \
-    --output_gvcf ${sampleID}_${chrom}_dv.g.vcf \
+    --output_gvcf ${sampleID}_${chrom}.gvcf.gz \
     --verbosity 1 
   fi
 
@@ -39,11 +36,11 @@ process GOOGLE_DEEPVARIANT {
     --model_type WGS \
     --ref ${params.ref_fa} \
     --reads ${bam} \
-    --output_vcf ${sampleID}_${chrom}_dv.vcf \
+    --output_vcf ${sampleID}_${chrom}.vcf.gz \
     --sample_name ${sampleID} \
     --num_shards 4 \
     --regions ${chrom} \
-    --output_gvcf ${sampleID}_${chrom}_dv.g.vcf \
+    --output_gvcf ${sampleID}_${chrom}.gvcf.gz \
     --verbosity 1
   fi
   
