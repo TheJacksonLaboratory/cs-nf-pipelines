@@ -37,7 +37,7 @@ include {GATK_HAPLOTYPECALLER_INTERVAL;
          GATK_HAPLOTYPECALLER_INTERVAL as GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
-include {BCFTOOLS_MERGEDEEPVAR} from "${projectDir}/modules/bcftools/bcftools_merge_deepvar_vcfs.nf"
+include {BCFTOOLS_MERGEDEEPVAR} from "${projectDir}/modules/bcftools/bcftools_merge_deepvar_vcfs"
 include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
@@ -301,6 +301,27 @@ workflow WGS {
     // Applies scatter intervals from above to the markdup bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
 
+    /*
+    EXAMPLE FOR JOIN ON IND. pseudo code and needs refinment and testing.
+    if(params.join_on_ind) {
+      merge_ind_ch = chrom_channel.join(meta_ch)
+          .map { chrom_ch, meta_ch ->
+                def meta = [:]
+                meta.ind   = meta_ch.ind
+                meta.sampleID   = meta_ch.sampleID
+                meta.sex        = meta_ch.sex
+                meta.id         = "${meta.ind}--${meta.sampleID}".toString()
+
+                [meta.id, ...... required files for merge step]
+            } groupTuple? then remap / set IDs as needed. 
+            
+      SAMTOOLS_MERGE_IND(merge_ind_ch)
+      calling_input = SAMTOOLS_MERGE_IND()
+    } else {
+      calling_input = chrom_channel
+    }
+    */
+
     // If using WMGP profile, use Google DeepVariant to make vcfs and gvcfs
     if(params.wmgp){
       sample_meta_ch = Channel.fromPath("${params.wmgp_meta}")
@@ -315,11 +336,11 @@ workflow WGS {
       GOOGLE_DEEPVARIANT(deepvariant_channel)
 
       // Merge DeepVariant calls
-      BCFTOOLS_MERGEDEEPVAR(GOOGLE_DEEPVARIANT.out.vcf_channel.groupTuple())
+      BCFTOOLS_MERGEDEEPVAR(GOOGLE_DEEPVARIANT.out.vcf_channel.groupTuple(size: num_chroms))
 
       // create select var channels
-      select_var_snp = BCFTOOLS_MERGEDEEPVAR.out.vcf
-      select_var_indel = BCFTOOLS_MERGEDEEPVAR.out.vcf
+      select_var_snp = BCFTOOLS_MERGEDEEPVAR.out.vcf_idx
+      select_var_indel = BCFTOOLS_MERGEDEEPVAR.out.vcf_idx
 
     } else {
       // Use the Channel in HaplotypeCaller
@@ -331,6 +352,9 @@ workflow WGS {
       // Sort VCF within MAKE_VCF_LIST
       GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
 
+      select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+      select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+
       if (params.run_gvcf) {
         // Use the Channel in HaplotypeCaller_GVCF
         GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
@@ -340,13 +364,11 @@ workflow WGS {
   }
 
   // SNP
-  select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
   GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'selected_SNP')
   var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
   GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
   // INDEL
-  select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
   GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'selected_INDEL')
   var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
   GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')

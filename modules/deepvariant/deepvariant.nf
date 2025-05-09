@@ -9,10 +9,10 @@ process GOOGLE_DEEPVARIANT {
   container 'docker://google/deepvariant:latest'
 
   input:
-  tuple val(sampleID), file(bam), file(bai), val(chrom), val(ind), val(sex)
+  tuple val(sampleID), path(bam), path(bai), val(chrom), val(ind), val(sex)
 
   output:
-  tuple val(sampleID), file("*.vcf.gz"), file("*.gvcf.gz"), file("*.vcf.gz.tbi"), file("*.gvcf.gz.tbi"), emit: vcf_channel
+  tuple val(sampleID), path("*.vcf.gz"), path("*.gvcf.gz"), path("*.vcf.gz.tbi"), path("*.gvcf.gz.tbi"), emit: vcf_channel
 
   script:
   
