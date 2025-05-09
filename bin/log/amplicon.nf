@@ -31,7 +31,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --multiqc_config                ${params.multiqc_config}
 
 --quality_phred                 ${params.quality_phred}
@@ -83,7 +82,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --multiqc_config                ${params.multiqc_config}
 --cutadaptMinLength             ${params.cutadaptMinLength}
 --cutadaptQualCutoff            ${params.cutadaptQualCutoff}

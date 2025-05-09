@@ -8,7 +8,7 @@ process GATK_GATHERVCFS {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.{vcf,idx}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.{vcf,idx}", mode:'copy'
 
     input:
     tuple val(sampleID), path(vcf)

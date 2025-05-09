@@ -8,8 +8,8 @@ process GATK_SELECTVARIANTS {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*filtered_dbsnpID.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*filtered_dbsnpID.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf), file(idx)

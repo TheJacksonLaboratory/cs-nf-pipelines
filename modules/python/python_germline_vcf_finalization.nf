@@ -8,7 +8,7 @@ process GERMLINE_VCF_FINALIZATION {
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*final.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)

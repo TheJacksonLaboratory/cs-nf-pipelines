@@ -7,7 +7,7 @@ process HOMER_ANNOTATEPEAKS {
 
     publishDir {
         def type = "${ip}" ? "${'immuno_precip_samples/'+ip+'_vs_'+control+'/macs2'}" : "${'consensusCalling_'+antibody+'/macs2'}"
-        "${params.pubdir}/${ params.organize_by=='sample' ? type : 'macs2'}"
+        "${params.pubdir}/${type}"
     }, pattern: "*annotatePeaks.txt", mode: 'copy'
 
     container 'quay.io/biocontainers/homer:4.11--pl526hc9558a2_3'

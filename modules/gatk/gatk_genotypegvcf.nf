@@ -9,7 +9,7 @@ process GATK_GENOTYPEGVCF {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy'
+    // publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), path(gvcf), path(idx)

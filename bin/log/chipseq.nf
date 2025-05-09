@@ -21,7 +21,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --fragment_size                 ${params.fragment_size}
 --fingerprint_bins              ${params.fingerprint_bins}
 --gtf                           ${params.gtf}
@@ -76,7 +75,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --fragment_size                 ${params.fragment_size}
 --fingerprint_bins              ${params.fingerprint_bins}
 --gtf                           ${params.gtf}

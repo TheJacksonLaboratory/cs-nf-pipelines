@@ -8,7 +8,7 @@ process XENOME_CLASSIFY {
 
     container 'quay.io/jaxcompsci/xenome:1.0.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats': 'xenome' }", pattern: "*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*.txt", mode:'copy'
 
     input:
     tuple val(sampleID), path(trimmed)

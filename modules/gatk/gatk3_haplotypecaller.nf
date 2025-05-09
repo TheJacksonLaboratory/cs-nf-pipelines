@@ -8,7 +8,7 @@ process GATKv3_5_HAPLOTYPECALLER {
 
   container 'broadinstitute/gatk3:3.5-0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'gatk' }", pattern: "*.gvcf", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.gvcf", mode:'copy'
 
   input:
   tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai)

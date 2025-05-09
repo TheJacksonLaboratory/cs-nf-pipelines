@@ -6,7 +6,7 @@ process SAMTOOLS_SORT {
   time '20:00:00'
   errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'samtools' }", pattern: "*.bam", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
+  publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern: "*.bam", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
   
   container 'quay.io/jaxcompsci/samtools_with_bc:1.3.1'
 

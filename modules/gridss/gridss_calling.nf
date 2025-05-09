@@ -8,7 +8,7 @@ process GRIDSS_CALLING {
 
     container 'quay.io/jaxcompsci/gridss:2.13.2-3'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gridss' }", pattern: "*_gridss_sv.vcf.gz", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern: "*_gridss_sv.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name), val(gridss_assembled)

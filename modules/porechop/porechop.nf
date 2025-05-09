@@ -6,7 +6,7 @@ process PORECHOP {
     time "72:00:00"
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/fastq' : 'fastq'}", pattern: "${sampleID}_porechop.fastq", mode:'copy', enabled: params.keep_intermediate ? true : false
+    publishDir "${params.pubdir}/${sampleID + '/fastq'}", pattern: "${sampleID}_porechop.fastq", mode:'copy', enabled: params.keep_intermediate ? true : false
 
     container 'quay.io/biocontainers/porechop:0.2.4--py39hc16433a_3'
 

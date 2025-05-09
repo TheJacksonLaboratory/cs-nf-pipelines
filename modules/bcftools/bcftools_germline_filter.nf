@@ -11,7 +11,7 @@ process BCFTOOLS_GERMLINE_FILTER {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*haplotypecaller.gatk.filtered.vcf.gz", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*haplotypecaller.gatk.filtered.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)

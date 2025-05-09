@@ -8,7 +8,7 @@ process BCFTOOLS_QUERY_ASCAT {
     errorStrategy 'finish'
 
     container 'quay.io/jaxcompsci/gtc2vcf_with_tools:v2'
-    publishDir "${params.pubdir}/${params.organize_by == 'sample' ? sampleID : 'bcftools'}", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode: 'copy'
 
     input:
     tuple val(sampleID), val(meta), path(bcf), path(csi), path(vcf), path(tsv)

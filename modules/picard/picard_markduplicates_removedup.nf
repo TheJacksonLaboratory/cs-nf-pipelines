@@ -8,7 +8,7 @@ process PICARD_MARKDUPLICATES {
     
     container 'quay.io/biocontainers/picard:2.26.10--hdfd78af_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/bam' : 'picard'}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/bam'}", mode:'copy'
 
     input:
         tuple val(sampleID), file(bam)
