@@ -22,7 +22,7 @@ nextflow_workflow {
 
     }
 
-    test("Full Workflow -- Mouse -- GRCm38 -- Deduplicate, Coverage Cap, Split Fastq") {
+    test("Full Workflow -- Mouse -- GRCm38 -- Deduplicate Coverage Cap Split Fastqwm") {
         tag "GRCm38"
         tag "options"
         when {
@@ -32,7 +32,7 @@ nextflow_workflow {
                 pubdir = "tests/results"
                 split_fastq = true
                 split_fastq_bin_size = 1000
-                deduplicate_reads
+                deduplicate_reads = true
                 coverage_cap = 50
                 pipeline = 'wgs'
             }
@@ -82,7 +82,7 @@ nextflow_workflow {
     }
 
 
-    test("Full Workflow -- Human -- Deduplicate, Coverage Cap, Split Fastq") {
+    test("Full Workflow -- Human -- Deduplicate Coverage Cap Split Fastq") {
         tag "GRCh38"
         tag "options"
         when {
@@ -92,7 +92,7 @@ nextflow_workflow {
                 pubdir = "tests/results"
                 split_fastq = true
                 split_fastq_bin_size = 1000
-                deduplicate_reads
+                deduplicate_reads = true
                 coverage_cap = 50
                 pipeline = 'wgs'
             }
