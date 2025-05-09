@@ -8,7 +8,7 @@ process BWA_MEM_HLA {
 
   container 'quay.io/biocontainers/bwakit:0.7.17.dev1--hdfd78af_1'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bwa_mem' }", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.bam", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), path(fq_reads), val(index), path(read_groups)

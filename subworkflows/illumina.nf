@@ -29,7 +29,6 @@ include {GATK_INDEXFEATUREFILE;
 include {GATK_HAPLOTYPECALLER_INTERVAL} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
-include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
          GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_INDEL} from "${projectDir}/modules/gatk/gatk_selectvariants"
 include {GATK_VARIANTFILTRATION as GATK_VARIANTFILTRATION_SNP;
@@ -129,7 +128,7 @@ workflow ILLUMINA {
                             .collect()
                             .map { it -> tuple(it[0], it[1])}
     } else {
-        exit 1, "Both FASTQ and BAM inputs were specified. Use either FASTQ or BAM as workflow input."
+        exit 1, "FASTQ: fastq1 '${params.fastq1}'; fastq2 '${params.fastq2}' and BAM: '${params.bam}' inputs either were both specified, or both null. Use FASTQ, BAM or csv_input as workflow input."
     }
 
     // Index reference fasta

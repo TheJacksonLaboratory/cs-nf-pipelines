@@ -11,14 +11,13 @@ process PICARD_MARKDUPLICATES {
     // save if mouse or other or save if keep intermediate
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
+        "${params.pubdir}/${type + sampleID + '/bam'}"
     }, pattern: "*.{bam,bai}", mode: 'copy', enabled: params.gen_org=='mouse' || params.gen_org=='other' || params.workflow=='chipseq' ? true : params.keep_intermediate
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/stats' : 'picard'}"
+        "${params.pubdir}/${type + sampleID + '/stats'}"
     }, pattern: "*.txt", mode: 'copy'
-
 
     input:
     tuple val(sampleID), file(bam)

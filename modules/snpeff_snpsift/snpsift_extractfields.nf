@@ -8,7 +8,7 @@ process SNPSIFT_EXTRACTFIELDS {
 
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), path(vcf)

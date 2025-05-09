@@ -5,6 +5,10 @@ println '\n'
 println logo.show()
 
 def param_log(){
+if (params.gen_org != "human") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported option is 'human'" 
+}
+
 if (params.workflow=='amplicon_generic')
 
 log.info """
@@ -27,7 +31,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --multiqc_config                ${params.multiqc_config}
 
 --quality_phred                 ${params.quality_phred}
@@ -79,7 +82,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --multiqc_config                ${params.multiqc_config}
 --cutadaptMinLength             ${params.cutadaptMinLength}
 --cutadaptQualCutoff            ${params.cutadaptQualCutoff}

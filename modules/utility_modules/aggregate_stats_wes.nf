@@ -7,7 +7,7 @@ process AGGREGATE_STATS {
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'aggregate_stats' }", pattern:"*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(filter_stats), file(algn_met), file(picard_met)

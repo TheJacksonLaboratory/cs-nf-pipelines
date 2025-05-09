@@ -7,7 +7,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
 
     publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bigwig' : 'ucsc'}"
+      "${params.pubdir}/${type + sampleID + '/bigwig'}"
     }, pattern: "*.bigWig", mode: 'copy'
 
     container 'quay.io/biocontainers/ucsc-bedgraphtobigwig:377--h446ed27_1'

@@ -267,7 +267,7 @@ workflow WGS {
     if (params.run_gvcf) {
       // Use the Channel in HaplotypeCaller_GVCF
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
+      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
     }
   }
 
@@ -334,21 +334,18 @@ workflow WGS {
       if (params.run_gvcf) {
       // Use the Channel in HaplotypeCaller_GVCF
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
-      }
-
-      // create select var channels
-      select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
-      select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
     }
   }
 
   // SNP
+  select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
   GATK_SELECTVARIANTS_SNP(select_var_snp, 'SNP', 'selected_SNP')
   var_filter_snp = GATK_SELECTVARIANTS_SNP.out.vcf.join(GATK_SELECTVARIANTS_SNP.out.idx)
   GATK_VARIANTFILTRATION_SNP(var_filter_snp, 'SNP')
 
   // INDEL
+  select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
   GATK_SELECTVARIANTS_INDEL(select_var_indel, 'INDEL', 'selected_INDEL')
   var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
   GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')

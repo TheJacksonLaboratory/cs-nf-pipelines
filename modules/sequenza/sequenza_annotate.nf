@@ -8,7 +8,7 @@ process SEQUENZA_ANNOTATE {
 
     container 'quay.io/biocontainers/perl-vcftools-vcf:0.1.16--pl5321hdfd78af_4'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv' : 'sequenza' }", pattern:"*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv'}", pattern:"*.txt", mode:'copy'
 
     input:
     tuple val(sampleID), val(meta), path(segment_file)

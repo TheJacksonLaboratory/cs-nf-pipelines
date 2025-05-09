@@ -8,6 +8,8 @@ process DELLY_CNV_SOMATIC {
     
     container 'quay.io/biocontainers/delly:1.1.6--h6b1aa3f_2'
     
+    publishDir "${params.pubdir}/${sampleID + '/cnv_plots'}", pattern: "*.cov.gz", mode: 'copy'
+
     input:
     tuple val(sampleID), val(meta), path(normal_bam), path(normal_bai), val(normal_name), path(tumor_bam), path(tumor_bai), val(tumor_name)
 

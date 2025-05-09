@@ -9,7 +9,7 @@ process CONCATENATE_READS_PE {
 
   container 'ubuntu:20.04'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/concatenated_reads' : 'concatenated_reads' }", pattern: "*", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID + '/concatenated_reads'}", pattern: "*", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(R1), file(R2)

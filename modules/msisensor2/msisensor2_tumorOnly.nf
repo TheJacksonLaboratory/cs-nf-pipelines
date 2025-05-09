@@ -8,7 +8,7 @@ process MSISENSOR2_MSI {
 
   container 'quay.io/biocontainers/msisensor2:0.1--hd03093a_0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/msi' : 'msisensor2' }", pattern:"*msisensor", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID + '/msi'}", pattern:"*msisensor", mode:'copy'
 
   input:
   tuple val(sampleID), file(bam), file(bai)

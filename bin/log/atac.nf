@@ -5,6 +5,10 @@ println '\n'
 println logo.show()
 
 def param_log(){
+if (params.gen_org != "human" && params.gen_org != "mouse") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse', or 'human'" 
+}
+
 if (params.gen_org=='human')
 log.info """
 ATAC PARAMETER LOG
@@ -26,7 +30,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --merge_replicates              ${params.merge_replicates}
 --bowtie2Index                  ${params.bowtie2Index}
 --bowtieMaxInsert               ${params.bowtieMaxInsert}
@@ -63,7 +66,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --merge_replicates              ${params.merge_replicates}
 --effective_genome_size         ${params.effective_genome_size} 
 --chain                         ${params.chain}

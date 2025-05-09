@@ -8,7 +8,7 @@ process NANOSV {
 
     container 'quay.io/jaxcompsci/nanosv:1.2.4'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/unmerged_calls' : 'unmerged_calls'}", pattern: "${sampleID}.nanosv_sorted_prefix.vcf", mode: "copy"
+    publishDir "${params.pubdir}/${sampleID + '/unmerged_calls'}", pattern: "${sampleID}.nanosv_sorted_prefix.vcf", mode: "copy"
 
     input:
         tuple val(sampleID), file(bam), file(index)
@@ -16,7 +16,7 @@ process NANOSV {
         tuple val(sampleID), file("${sampleID}.nanosv_sorted_prefix.vcf"), emit: nanosv_vcf
     shell:
         '''
-        NanoSV -o !{sampleID}.nanosv_calls.vcf -t !{task.cpus} -c !{projectDir}/config/nanosv_config.ini !{bam}
+        NanoSV -o !{sampleID}.nanosv_calls.vcf -t !{task.cpus} -b !{params.nanosv_bed} -c !{projectDir}/config/nanosv_config.ini !{bam} 
 
         cat !{sampleID}.nanosv_calls.vcf | awk '$1 ~ /^#/ {print $0;next} {print $0 | "sort -k1,1 -k2,2n"}' > !{sampleID}.nanosv_calls_sorted.vcf
 
@@ -26,4 +26,13 @@ process NANOSV {
             awk 'BEGIN{FS=OFS="\t"} {sub("^", "NanoSV.", $3)}; 1' | \
             sed -e 's/None/0/g' >> !{sampleID}.nanosv_sorted_prefix.vcf;   
         '''
+
+    stub:
+        """
+        wget -O ${sampleID}.nanosv_sorted_prefix.vcf https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/main/germline_sv/ont/mouse/example.nanosv_sorted_prefix.vcf
+        """
 }
+
+// NanoSV coverage requirements preculde most testing with small sample files. 
+// The stub run is included here to overcome the coverage limitations. 
+// Additional testing of the module has been done, and will be written formally in the future.

@@ -10,7 +10,7 @@ process GRIDSS_CHROM_FILTER {
 
     stageInMode = 'copy'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'gridss' }", pattern: "*_gridss_sv_unfiltered_chroms.vcf", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern: "*_gridss_sv_unfiltered_chroms.vcf", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name)
