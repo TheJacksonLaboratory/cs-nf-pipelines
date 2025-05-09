@@ -9,9 +9,8 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
-                csv_input = "${baseDir}/test/csv_samplesheets/ancestry.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/ancestry/ancestry_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'ancestry'
             }

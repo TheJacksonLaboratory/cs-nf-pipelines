@@ -1,0 +1,25 @@
+{
+    "Single-End Data": {
+        "content": [
+            {
+                "0": [
+                    [
+                        "testSample_42",
+                        "testSample_42_R1:md5,7ac1324cfd90d6780baea1c1df20e057"
+                    ]
+                ],
+                "concat_fastq": [
+                    [
+                        "testSample_42",
+                        "testSample_42_R1:md5,7ac1324cfd90d6780baea1c1df20e057"
+                    ]
+                ]
+            }
+        ],
+        "meta": {
+            "nf-test": "0.8.4",
+            "nextflow": "24.10.5"
+        },
+        "timestamp": "2025-03-12T14:04:55.608506131"
+    }
+}

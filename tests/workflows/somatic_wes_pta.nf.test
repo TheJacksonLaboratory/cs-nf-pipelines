@@ -9,9 +9,8 @@ nextflow_workflow {
         tag "primary"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
-                csv_input = "${baseDir}/test/csv_samplesheets/somatic_wes_pta.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wes/somatic_wes/somatic_wes_pta_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'somatic_wes_pta'
             }
@@ -29,9 +28,8 @@ nextflow_workflow {
         tag "pdx"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "human"
-                csv_input = "${baseDir}/test/csv_samplesheets/somatic_wes_pta.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wes/somatic_wes/somatic_wes_pta_input.csv"
                 pdx = true
                 pubdir = "tests/results"
                 pipeline = 'somatic_wes_pta'
@@ -43,6 +41,4 @@ nextflow_workflow {
         }
 
     }
-
-
 }

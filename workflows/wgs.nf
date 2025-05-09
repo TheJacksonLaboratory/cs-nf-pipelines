@@ -199,7 +199,7 @@ workflow WGS {
   }
 
   // Step 3: BWA-MEM Alignment
-  if (params.gen_org=='mouse'){
+  if (params.gen_org=='mouse' | params.gen_org=='other'){
     BWA_MEM(bwa_mem_mapping)
     PICARD_SORTSAM(BWA_MEM.out.sam, 'coordinate')
   }
@@ -272,7 +272,7 @@ workflow WGS {
   }
 
   // If Mouse
-  if (params.gen_org=='mouse'){
+  if (params.gen_org=='mouse' | params.gen_org=='other'){
 
     if (params.coverage_cap) {
         JVARKIT_COVERAGE_CAP(PICARD_MARKDUPLICATES.out.dedup_bam)
@@ -353,8 +353,11 @@ workflow WGS {
   var_filter_indel = GATK_SELECTVARIANTS_INDEL.out.vcf.join(GATK_SELECTVARIANTS_INDEL.out.idx)
   GATK_VARIANTFILTRATION_INDEL(var_filter_indel, 'INDEL')
 
-  SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
-  SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+  // For other genome, expectation is that dbSNP will not exist.  
+  if (params.gen_org=='mouse' | params.gen_org=='human'){
+    SNPSIFT_ANNOTATE_SNP_DBSNP(GATK_VARIANTFILTRATION_SNP.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+    SNPSIFT_ANNOTATE_INDEL_DBSNP(GATK_VARIANTFILTRATION_INDEL.out.vcf, params.dbSNP, params.dbSNP_index, 'dbsnpID')
+  }
 
   // If Human
   if (params.gen_org=='human'){
@@ -393,6 +396,13 @@ workflow WGS {
     SNPEFF_ONEPERLINE(SNPEFF.out.vcf, 'BOTH')
 
     SNPSIFT_EXTRACTFIELDS(SNPEFF_ONEPERLINE.out.vcf)
+  }
+
+  if (params.gen_org=='other'){
+  // For other genomes, there will likely not be SNP EFF annotations, but merge still needs to happen. 
+    vcf_files = GATK_VARIANTFILTRATION_SNP.out.vcf.join(GATK_VARIANTFILTRATION_INDEL.out.vcf)
+
+    GATK_MERGEVCF(vcf_files, 'SNP_INDEL_filtered_unannotated_final')
   }
 
   ch_multiqc_files = Channel.empty()

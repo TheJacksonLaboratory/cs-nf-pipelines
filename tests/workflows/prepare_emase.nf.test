@@ -10,7 +10,7 @@ nextflow_workflow {
         tag "emase_gbrs"
         when {
             params {
-                outdir = "tests/results"
+                pubdir = "tests/results"
                 pipeline = 'prepare_emase'
             }
         }

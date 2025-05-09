@@ -10,9 +10,8 @@ nextflow_workflow {
         tag "emase_gbrs"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
-                sample_folder = "${baseDir}/test/rna/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/mouse/gbrs_input.csv"
                 sample_generation = 18
                 sample_sex = 'M'
                 pubdir = "tests/results"
@@ -32,10 +31,9 @@ nextflow_workflow {
         tag "emase_gbrs"
         when {
             params {
-                outdir = "tests/results"
                 gen_org = "mouse"
                 genome_build = "GRCm38"
-                sample_folder = "${baseDir}/test/rna/mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/rna/mouse/gbrs_input.csv"
                 sample_generation = 18
                 sample_sex = 'M'
                 pubdir = "tests/results"
