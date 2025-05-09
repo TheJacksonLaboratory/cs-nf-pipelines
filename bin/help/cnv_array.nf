@@ -3,7 +3,6 @@ def help() {
 Parameter | Default | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
---organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 -w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /fastscratch or other directory with ample storage.
 --gtc_csv | '/projects/compsci/omics_share/human/GRCh38/supporting_files/cnv_array/HumanCytoSNP-12v2-1_L1.csv' | Genotype Call (GTC) manifest for IDAT conversion. Provided by Illumina.
 --bpm_file | '/projects/compsci/omics_share/human/GRCh38/supporting_files/cnv_array/HumanCytoSNP-12v2-1_L1.bpm' | Manifest file describing the SNP or probe content on a BeadChip. Provided by Illumina.

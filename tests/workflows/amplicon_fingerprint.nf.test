@@ -1,6 +1,6 @@
 nextflow_workflow {
 
-    name "Test Workflow AMPLICON"
+    name "Test Workflow AMPLICON Fingerprint"
     script "workflows/amplicon_fingerprint.nf"
     workflow "AMPLICON"
 

@@ -8,7 +8,7 @@ process DUPHOLD {
     
     container 'quay.io/biocontainers/duphold:0.2.1--h516909a_1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/duphold' : '' }", pattern:"*.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/duphold'}", pattern:"*.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), path(alignment_file), path(alignement_index), path(sv_variants)

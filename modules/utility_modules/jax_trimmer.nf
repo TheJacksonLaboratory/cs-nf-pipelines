@@ -9,7 +9,7 @@ process JAX_TRIMMER {
 
   container 'quay.io/jaxcompsci/python-bz2file:np_2.7.18'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'quality_stats' }", pattern: "*_stat", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*_stat", mode:'copy'
 
   input:
   tuple val(sampleID), path(fq_reads)

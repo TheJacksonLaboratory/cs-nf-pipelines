@@ -9,7 +9,7 @@ process ARRIBA {
   
     container 'quay.io/biocontainers/arriba:2.4.0--ha04fe3b_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions' : 'arriba' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions' }", pattern: "*.{tsv,txt}", mode:'copy'
 
     input:
         tuple val(sampleID), path(bam), path(bai)

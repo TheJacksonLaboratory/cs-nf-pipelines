@@ -5,9 +5,9 @@ process DEEPTOOLS_PLOTFINGERPRINT {
     memory 10.GB
     time '04:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/'+ip+'_vs_'+control+'/deeptools' : 'deeptools' }", pattern: "*.pdf", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/'+ip+'_vs_'+control+'/deeptools' : 'deeptools' }", pattern: "*.raw.txt", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/'+ip+'_vs_'+control+'/deeptools' : 'deeptools' }", pattern: "*.qcmetrics.txt", mode: 'copy'
+    publishDir "${params.pubdir}/${'immuno_precip_samples/' + ip + '_vs_' + control + '/deeptools'}", pattern: "*.pdf", mode: 'copy'
+    publishDir "${params.pubdir}/${'immuno_precip_samples/' + ip + '_vs_' + control + '/deeptools'}", pattern: "*.raw.txt", mode: 'copy'
+    publishDir "${params.pubdir}/${'immuno_precip_samples/' + ip + '_vs_' + control + '/deeptools'}", pattern: "*.qcmetrics.txt", mode: 'copy'
 
     container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
 

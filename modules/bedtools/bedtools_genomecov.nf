@@ -7,7 +7,7 @@ process BEDTOOLS_GENOMECOV {
 
   publishDir {
       def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples' : 'immuno_precip_samples') : '' 
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+'/'+sampleID+'/bigwig' : 'bedtools'}"
+      "${params.pubdir}/${type + '/' + sampleID + '/bigwig'}"
   }, pattern: "*.txt", mode: 'copy'
 
  

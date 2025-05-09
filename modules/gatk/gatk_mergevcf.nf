@@ -8,7 +8,7 @@ process GATK_MERGEVCF {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.vcf", mode:'copy', enabled: params.workflow == 'amplicon' || params.workflow == 'amplicon_generic' ? params.keep_intermediate : true
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy', enabled: params.workflow == 'amplicon' || params.workflow == 'amplicon_generic' ? params.keep_intermediate : true
 
     input:
     tuple val(sampleID), file(snp_vcf), file(indel_vcf)

@@ -9,7 +9,7 @@ process GATK_REALIGNERTARGETCREATOR {
 
   container 'broadinstitute/gatk3:3.6-0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.intervals", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.intervals", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(bam)

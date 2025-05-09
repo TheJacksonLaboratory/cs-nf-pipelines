@@ -8,7 +8,7 @@ process SNPWEIGHTS_INFERANC {
 
     container 'quay.io/jaxcompsci/snpweights:2.1_bash'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpweights'}", pattern: "*ancestry.tsv", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*ancestry.tsv", mode: 'copy'
 
     input:
     tuple val(sampleID), path(geno), path(ind), path(snp)

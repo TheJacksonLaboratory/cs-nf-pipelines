@@ -1,0 +1,213 @@
+nextflow_workflow {
+
+    name "Test Workflow GERMLINE_SV"
+    script "workflows/germline_sv.nf"
+    workflow "GERMLINE_SV"
+
+    test("Illumina -- Parameter Mismatch") {
+        tag "GRCm38"
+        tag "failed"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq_1 = "garbage"
+                fastq_2 = "input"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'illumina'
+                genome_build = 'GRCm38'
+                sampleID = 'nf-test_GRCm38'
+            }
+        }
+
+        then {
+            assert workflow.failed
+        }
+
+    }
+
+    test("Illumina -- Mouse -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        options "-stub-run"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/illumina/mouse/sampled_regions_sim_data_germline_read1.fq.gz"
+                fastq2 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/illumina/mouse/sampled_regions_sim_data_germline_read2.fq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'illumina'
+                genome_build = 'GRCm38'
+                sampleID = 'nf-test_GRCm38'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+    test("Illumina -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        options "-stub-run"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/illumina/mouse/sampled_regions_sim_data_germline_read1.fq.gz"
+                fastq2 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/illumina/mouse/sampled_regions_sim_data_germline_read2.fq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'illumina'
+                genome_build = 'GRCm39'
+                sampleID = 'nf-test_GRCm39'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    // Future test expansion for illumina needs to include: CSV and BAM inputs.
+
+
+    test("PacBio -- Invalid Param") {
+        tag "GRCm39"
+        tag "failed"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/pacbio/ccs/sample_ccs.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'pacbio'
+                pbmode = "CSS"
+                genome_build = 'GRCm39'
+                sampleID = 'nf-test_GRCm39'
+            }
+        }
+
+        then {
+            assert workflow.failed
+        }
+
+    }
+
+    test("PacBio -- CCS -- Mouse -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/pacbio/ccs/sample_ccs.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'pacbio'
+                pbmode = "CCS"
+                genome_build = 'GRCm38'
+                sampleID = 'nf-test_GRCm38'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("PacBio -- CCS -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/pacbio/ccs/sample_ccs.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'pacbio'
+                pbmode = "CCS"
+                genome_build = 'GRCm39'
+                sampleID = 'nf-test_GRCm39'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
+
+    test("PacBio -- CLR -- Mouse -- GRCm38") {
+        tag "GRCm38"
+        tag "primary"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/pacbio/clr/sample_clr.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'pacbio'
+                pbmode = "CLR"
+                genome_build = 'GRCm38'
+                sampleID = 'nf-test_GRCm38'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("PacBio -- CLR -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/pacbio/clr/sample_clr.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'pacbio'
+                pbmode = "CLR"
+                genome_build = 'GRCm39'
+                sampleID = 'nf-test_GRCm39'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("ONT -- Mouse -- GRCm39") {
+        tag "GRCm39"
+        tag "primary"
+        options "-stub-run"
+        when {
+            params {
+                gen_org = "mouse"
+                fastq1 = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/germline_sv/ont/mouse/sample_ont.fastq.gz"
+                pubdir = "tests/results"
+                pipeline = 'germline_sv'
+                data_type = 'ont'
+                genome_build = 'GRCm39'
+                sampleID = 'nf-test_GRCm39'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

@@ -10,7 +10,7 @@ process BWA_MEM2 {
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID : 'bwa_mem'}"
+        "${params.pubdir}/${type + sampleID}"
     }, pattern: "*.sam", mode: 'copy', enabled: params.keep_intermediate
 
 
@@ -34,6 +34,6 @@ process BWA_MEM2 {
     """
     rg=\$(cat $read_groups)
     bwa-mem2 mem -R \${rg} \
-    -t $task.cpus $split_hits ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
+    -t $task.cpus $split_hits -B ${params.mismatch_penalty} $score ${params.ref_fa_indices} $inputfq > ${sampleID}.sam
     """
 }

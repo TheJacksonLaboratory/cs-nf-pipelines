@@ -3,7 +3,6 @@ def help(){
 Parameter | Default | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
---organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 --cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
 -w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
@@ -39,7 +38,7 @@ Parameter | Default | Description
 --target_picard | '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.picard.interval_list' | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. NOTE: This file MUST reflect the capture array used to generate your data.
 --bait_picard | '/projects/omics_share/human/GRCh38/supporting_files/capture_kit_files/agilent/v7/S31285117_MergedProbes_no_gene_names.picard.interval_list' | A GATK interval file covering WES target intervals. Used in calculating coverage metrics. This file can be the same as the interval file,  NOTE: This file MUST reflect the capture array used to generate your data.
 
---mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
+--mismatch_penalty | 8 | The BWA penalty for a mismatch.
 
 --gnomad_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/af-only-gnomad.hg38.vcf.gz' | GnomAD germline reference from GATK resource pack. 
 --pon_ref | '/projects/compsci/omics_share/human/GRCh38/genome/annotation/snps_indels/1000g_pon.hg38.vcf.gz' | 1000 genome germline panel of normals from GATK resource pack.

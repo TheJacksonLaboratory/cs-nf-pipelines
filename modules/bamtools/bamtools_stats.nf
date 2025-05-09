@@ -9,7 +9,7 @@ process BAMTOOLS_STATS {
   
   container 'quay.io/biocontainers/bamtools:2.5.1--h9a82719_9'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'quality_stats' }", pattern:"*.txt", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*.txt", mode:'copy'
 
   input:
   tuple val(sampleID), file(reordered_sorted_bam)

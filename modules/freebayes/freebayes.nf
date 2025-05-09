@@ -8,7 +8,7 @@ process FREEBAYES {
 
     container 'quay.io/biocontainers/freebayes:1.3.7--h1870644_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'freebayes' }", pattern: "*.*vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.*vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(bam), file(bai)

@@ -4,7 +4,13 @@ logo = new Logo()
 println '\n'
 println logo.show()
 
+
 def param_log(){
+if (params.gen_org != "human" && params.gen_org != "mouse" && params.gen_org != "other") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse', 'human', or 'other'" 
+}
+
+
 if (params.gen_org=='human')
 log.info """
 WGS PARAMETER LOG
@@ -27,7 +33,6 @@ ________________________________________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
@@ -78,7 +83,6 @@ ________________________________________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}

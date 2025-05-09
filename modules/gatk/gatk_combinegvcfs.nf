@@ -8,10 +8,11 @@ process GATK_COMBINEGVCFS {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.gvcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.gvcf", mode:'copy'
 
     input:
     tuple val(sampleID), path(gvcf)
+    val(output_suffix)
 
     output:
     tuple val(sampleID), file("*.gvcf"), emit: gvcf
@@ -29,6 +30,6 @@ process GATK_COMBINEGVCFS {
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" CombineGVCFs \
     -R ${params.ref_fa} \
     ${inputs} \
-    -O ${sampleID}_GATKcombined_raw.gvcf
+    -O ${sampleID}_GATKcombined_${output_suffix}.gvcf
     """
 }

@@ -8,7 +8,7 @@ process VEP_GERMLINE {
 
   container 'ensemblorg/ensembl-vep:release_102.0'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vep' }", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy', enabled: params.keep_intermediate
 
   input:
   tuple val(sampleID), file(vcf), file(idx)
