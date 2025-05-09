@@ -1,6 +1,6 @@
 nextflow_workflow {
 
-    name "Test Workflow AMPLICON"
+    name "Test Workflow AMPLICON Generic"
     script "workflows/amplicon_generic.nf"
     workflow "AMPLICON"
 
