@@ -332,9 +332,10 @@ workflow WGS {
       GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
 
       if (params.run_gvcf) {
-      // Use the Channel in HaplotypeCaller_GVCF
-      GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
+        // Use the Channel in HaplotypeCaller_GVCF
+        GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
+        GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
+      }
     }
   }
 
