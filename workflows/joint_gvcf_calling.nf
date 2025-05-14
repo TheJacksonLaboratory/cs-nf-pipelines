@@ -45,7 +45,7 @@ workflow JOINT_GVCF_CALLING {
     num_chroms = file(params.chrom_contigs).countLines().toInteger()
 
     combine_input_ch = gvcf_ch
-    .join(GATK_INDEXFEATUREFILE.out.tbi.ifEmpty(GATK_INDEXFEATUREFILE.out.idx)) 
+    .join(GATK_INDEXFEATUREFILE.out.idx) 
     .join(meta_ch)
     .map{ it -> [it[3]['output'], it[1], it[2]] }
     .groupTuple() // make this sized by number of samples from meta_ch

@@ -8,14 +8,13 @@ process GATK_INDEXFEATUREFILE {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${sampleID}", pattern: "*.idx", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID}", pattern: "{*.idx, *.tbi}", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), path(vcf)
 
     output:
-    tuple val(sampleID), path("*.idx"), emit: idx, optional: true
-    tuple val(sampleID), path("*.tbi"), emit: tbi, optional: true
+    tuple val(sampleID), path("{*.idx,*.tbi}"), emit: idx
 
     script:
     String my_mem = (task.memory-1.GB).toString()
