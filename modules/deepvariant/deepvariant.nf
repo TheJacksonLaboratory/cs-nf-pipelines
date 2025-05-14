@@ -6,10 +6,10 @@ process GOOGLE_DEEPVARIANT {
   errorStrategy 'retry' 
   maxRetries 2
 
-  container 'docker://google/deepvariant:latest'
+  container 'docker://google/deepvariant:1.9.0'
 
   input:
-  tuple val(sampleID), file(bam), file(bai), val(chrom), val(ind), val(sex)
+  tuple val(sampleID), file(bam), file(bai), val(chrom), val(sex)
 
   output:
   tuple val(sampleID), file("*.vcf.gz"), file("*.gvcf.gz"), file("*.vcf.gz.tbi"), file("*.gvcf.gz.tbi"), emit: vcf_channel

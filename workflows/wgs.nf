@@ -19,7 +19,8 @@ include {READ_GROUPS} from "${projectDir}/modules/utility_modules/read_groups"
 include {BWA_MEM} from "${projectDir}/modules/bwa/bwa_mem"
 include {BWA_MEM_HLA} from "${projectDir}/modules/bwa/bwa_mem_hla"
 include {PICARD_SORTSAM} from "${projectDir}/modules/picard/picard_sortsam"
-include {SAMTOOLS_MERGE} from "${projectDir}/modules/samtools/samtools_merge"
+include {SAMTOOLS_MERGE;
+         SAMTOOLS_MERGE as SAMTOOLS_MERGE_INDS} from "${projectDir}/modules/samtools/samtools_merge"
 include {PICARD_MARKDUPLICATES} from "${projectDir}/modules/picard/picard_markduplicates"
 
 include {GOOGLE_DEEPVARIANT} from "${projectDir}/modules/deepvariant/deepvariant"
@@ -28,7 +29,8 @@ include {GATK_GATHERBQSRREPORTS} from "${projectDir}/modules/gatk/gatk_gatherbqs
 include {GATK_APPLYBQSR} from "${projectDir}/modules/gatk/gatk_applybqsr"
 
 include {JVARKIT_COVERAGE_CAP} from "${projectDir}/modules/jvarkit/jvarkit_biostar154220"
-include {SAMTOOLS_INDEX} from "${projectDir}/modules/samtools/samtools_index"
+include {SAMTOOLS_INDEX;
+         SAMTOOLS_INDEX as SAMTOOLS_INDEX_INDS} from "${projectDir}/modules/samtools/samtools_index"
 
 include {PICARD_COLLECTALIGNMENTSUMMARYMETRICS} from "${projectDir}/modules/picard/picard_collectalignmentsummarymetrics"
 include {PICARD_COLLECTWGSMETRICS} from "${projectDir}/modules/picard/picard_collectwgsmetrics"
@@ -118,6 +120,33 @@ if (params.csv_input) {
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 }
 
+// if merg pull a metadata file to join on ind
+if(params.merge_inds){
+  ind_meta_ch = Channel.fromPath("${params.ind_meta}")
+                       .splitCsv(header: true)
+                       .map {row -> 
+                            [ sampleID = row.sampleID,
+                              ind = row.ind] }
+}
+
+// if Google DeepVariant is desired, pull a metadata file to join sex
+if(params.google_deepvariant){
+  // if merge_inds is specified, sex needs to be joined at the ind level
+  if(params.merge_inds){
+    deepvariant_meta_ch = Channel.fromPath("${params.google_deepvariant_meta}")
+                       .splitCsv(header: true)
+                       .map {row -> 
+                            [ sampleID = row.ind,
+                              sex = row.sex] }
+  } else {
+    deepvariant_meta_ch = Channel.fromPath("${params.google_deepvariant_meta}")
+                       .splitCsv(header: true)
+                       .map {row -> 
+                            [ sampleID = row.sampleID,
+                              sex = row.sex] }
+  }
+}
+
 // main workflow
 workflow WGS {
   // Step 0: Download data and concat Fastq files if needed. 
@@ -171,7 +200,7 @@ workflow WGS {
                          .combine(READ_GROUPS.out.read_groups, by: 0)
                          // from fastp the naming convention will always be *R*.fastq. 
                          // splitFastq adds an increment between *R* and .fastq. 
-                         // This can be used to set an 'index' value to make file names unique. 
+                         // This can be used to set an 'index' value to make file names unique.
     } else {
       split_fastq_files = FASTP.out.trimmed_fastq
                          .map{it -> [it[0], it[1]]}
@@ -182,16 +211,12 @@ workflow WGS {
                          // splitFastq adds an increment between *R* and .fastq. 
                          // This can be used to set an 'index' value to make file names unique.
     }
-    bwa_mem_mapping = split_fastq_files
-
-    // SJW: I think something about combining on sampleID messed with my channel; entire workflow hung after the split_fastq_count channel is made.
-    //      by my estimation, the split_fastq_files channel is sufficient to run bwa-mem on split fastqs, though this probably wasn't the sole consideration.
-    // split_fastq_count = split_fastq_files
-    //                 .groupTuple()
-    //                 .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
-    // bwa_mem_mapping = split_fastq_count
-    //             .combine(split_fastq_files, by:0) 
-    //             .map{it -> [it[1], it[2], it[3], it[4]] }
+    split_fastq_count = split_fastq_files
+                    .groupTuple()
+                    .map{sample, reads, index, read_group -> [sample, groupKey(sample, index.size())]}
+    bwa_mem_mapping = split_fastq_count
+                .combine(split_fastq_files, by:0) 
+                .map{it -> [it[1], it[2], it[3], it[4]] }
 
   } else {
     bwa_mem_mapping = FASTP.out.trimmed_fastq.join(READ_GROUPS.out.read_groups)
@@ -252,6 +277,19 @@ workflow WGS {
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
     PICARD_COLLECTWGSMETRICS(bam_file)
 
+    // if merging on individual, merge on ind field and pass the ind through the sampleID tuple spot
+    // else pass on the sampleID
+    if (params.merge_inds) {
+      // merge inds for bams
+      merge_ch = bam_file.combine(ind_meta_ch, by: 0)
+                         .groupTuple(by: 2)
+                         .map{it -> [it[2], it[1]]}
+      SAMTOOLS_MERGE_INDS(merge_ch, 'ind_merged_file')
+      SAMTOOLS_INDEX_INDS(SAMTOOLS_MERGE_INDS.out.bam)
+      bam_file    = SAMTOOLS_MERGE_INDS.out.bam
+      index_file  = SAMTOOLS_INDEX_INDS.out.bai
+    }
+
     // HaplotypeCaller does not have multithreading so it runs faster when individual chromosomes called instead of Whole Genome
     // Applies scatter intervals from above to the BQSR bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
@@ -271,7 +309,7 @@ workflow WGS {
     }
   }
 
-  // If Mouse
+  //If Mouse
   if (params.gen_org=='mouse' | params.gen_org=='other'){
 
     if (params.coverage_cap) {
@@ -288,6 +326,19 @@ workflow WGS {
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
     PICARD_COLLECTWGSMETRICS(bam_file)
 
+    // if merging on individual, merge on ind field and pass the ind through the sampleID tuple spot
+    // else pass on the sampleID
+    if (params.merge_inds) {
+      // merge inds for bams
+      merge_ch = bam_file.combine(ind_meta_ch, by: 0)
+                         .groupTuple(by: 2)
+                         .map{it -> [it[2], it[1]]}
+      SAMTOOLS_MERGE_INDS(merge_ch, 'ind_merged_file')
+      SAMTOOLS_INDEX_INDS(SAMTOOLS_MERGE_INDS.out.bam)
+      bam_file    = SAMTOOLS_MERGE_INDS.out.bam
+      index_file  = SAMTOOLS_INDEX_INDS.out.bai
+    }
+
     // Read a list of contigs from parameters to provide to GATK as intervals
     // for HaplotypeCaller variant regions
     chroms = Channel
@@ -300,16 +351,12 @@ workflow WGS {
 
     // Applies scatter intervals from above to the markdup bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
+    chrom_channel.view()
 
-    // If using WMGP profile, use Google DeepVariant to make vcfs and gvcfs
-    if(params.wmgp){
-      sample_meta_ch = Channel.fromPath("${params.wmgp_meta}")
-                    .splitCsv(header: true)
-                    .map {row -> 
-                            [   sampleID = row.sampleID,
-                                ind = row.ind,
-                                sex = row.sex]}
-      deepvariant_channel = chrom_channel.combine(sample_meta_ch, by: 0)
+    // Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
+    if(params.google_deepvariant){
+      
+      deepvariant_channel = chrom_channel.combine(deepvariant_meta_ch, by: 0)
       
       // Use appended chrom channel with sex information in DeepVariant
       GOOGLE_DEEPVARIANT(deepvariant_channel)
