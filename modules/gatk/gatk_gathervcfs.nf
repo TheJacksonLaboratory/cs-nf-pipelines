@@ -29,6 +29,7 @@ process GATK_GATHERVCFS {
     mkdir -p tmp
     gatk --java-options "-Xmx${my_mem}G -Djava.io.tmpdir=`pwd`/tmp" GatherVcfs \
     ${inputs} \
+    --REORDER_INPUT_BY_FIRST_VARIANT true \
     -O ${sampleID}_${output_suffix}.vcf
     """
 }
