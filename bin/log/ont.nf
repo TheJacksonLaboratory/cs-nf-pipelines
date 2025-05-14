@@ -8,6 +8,10 @@ def PARAM_LOG(){
         error "'--sampleID': \"${params.sampleID}\" is not valid, specify a name for this sample" 
     }
     
+    if (params.gen_org != "mouse") {
+        error "'--gen_org': \"${params.gen_org}\" is not valid, supported option is 'mouse'" 
+    }
+    
     log.info """
 ______________________________________________________
 
@@ -30,6 +34,7 @@ ______________________________________________________
 --length               ${params.length} 
 --headcrop             ${params.headcrop}
 --tailcrop             ${params.tailcrop}
+--nanosv_bed           ${params.nanosv_bed}
 --tandem_repeats       ${params.tandem_repeats}
 --sv_ins_ref           ${params.sv_ins_ref}
 --sv_del_ref           ${params.sv_del_ref}

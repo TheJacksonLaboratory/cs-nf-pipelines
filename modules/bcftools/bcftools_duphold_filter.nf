@@ -6,7 +6,7 @@ process BCFTOOLS_DUPHOLD_FILTER {
     time = '02:00:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/duphold' : '' }", pattern:"*.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/duphold'}", pattern:"*.vcf", mode:'copy'
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 

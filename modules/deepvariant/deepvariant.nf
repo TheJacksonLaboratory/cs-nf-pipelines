@@ -12,7 +12,7 @@ process GOOGLE_DEEPVARIANT {
   tuple val(sampleID), file(bam), file(bai), val(chrom), val(sex)
 
   output:
-  tuple val(sampleID), file("*.vcf.gz"), file("*.gvcf.gz"), file("*.vcf.gz.tbi"), file("*.gvcf.gz.tbi"), emit: vcf_channel
+  tuple val(sampleID), path("*.vcf.gz"), path("*.gvcf.gz"), path("*.vcf.gz.tbi"), path("*.gvcf.gz.tbi"), emit: vcf_channel
 
   script:
   

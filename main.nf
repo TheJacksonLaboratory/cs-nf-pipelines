@@ -67,6 +67,9 @@ else if (params.workflow == "cnv_array"){
 else if (params.workflow == "generate_rnaseq_index"){
   include {GENERATE_RNASEQ_INDEX} from './subworkflows/generate_rnaseq_index'
 }
+else if (params.workflow == "joint_gvcf_calling"){
+  include {JOINT_GVCF_CALLING} from './workflows/joint_gvcf_calling'
+}
 else {
   // if workflow name is not supported: 
   exit 1, "ERROR: No valid pipeline called. '--workflow ${params.workflow}' is not a valid workflow name."
@@ -133,5 +136,8 @@ workflow{
   }
   if (params.workflow == "generate_rnaseq_index"){
     GENERATE_RNASEQ_INDEX()
+  }
+  if (params.workflow == "joint_gvcf_calling"){
+    JOINT_GVCF_CALLING()
   }
 }

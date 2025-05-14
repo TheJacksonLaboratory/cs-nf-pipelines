@@ -21,6 +21,9 @@ output_bed_fh <- paste(sample_name, "merged_depths.bed", sep = ".")
 nanosv_depth <- read_csv(nanosv_depth_fh)
 sniffles_depth <- read_csv(sniffles_depth_fh)
 merged_depth <- read_csv(merged_depth_fh, na = "NaN")
+merged_depth <- merged_depth %>% mutate(sniffles_id = as.character(sniffles_id))
+# This catches edge cases where no sniffles calls are made. 
+# NanoSV is not expected to have this edge case, as the tool fails when coverage is too low. 
 joined_results <- read_csv(joined_results_fh, col_types = cols("chr" = "c"))
 
 merged_1 <- filter(merged_depth, !is.na(nanosv_id)) %>%

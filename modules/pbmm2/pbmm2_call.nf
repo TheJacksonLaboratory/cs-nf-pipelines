@@ -9,7 +9,7 @@ process PBMM2_CALL {
 
     container 'quay.io/biocontainers/pbmm2:1.9.0--h9ee0642_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments' : 'alignments'}", pattern: "${sampleID}.pbmm2.aligned.bam*", mode: "copy"
+    publishDir "${params.pubdir}/${sampleID + '/alignments'}", pattern: "${sampleID}.pbmm2.aligned.bam*", mode: "copy"
 
     input:
         tuple val(sampleID), path(fq1)
@@ -26,5 +26,4 @@ process PBMM2_CALL {
             """
             pbmm2 align ${pbmm2_index} ${fq1} ${sampleID}.pbmm2.aligned.bam --median-filter --sort -j ${task.cpus}
             """
-        
 }

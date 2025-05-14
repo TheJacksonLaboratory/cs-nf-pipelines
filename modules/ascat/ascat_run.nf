@@ -8,7 +8,7 @@ process ASCAT {
 
     container 'quay.io/jaxcompsci/ascat:v3.1.3'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'ascat' }", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode: 'copy'
 
     input:
         tuple val(sampleID), val(meta), path(BAF), path(LRR)

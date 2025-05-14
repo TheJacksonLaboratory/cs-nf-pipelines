@@ -8,7 +8,7 @@ process BCFTOOLS_MERGECALLERS {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bcftools' }", pattern:"*.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern:"*.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), path(vcf_haplotypecaller), path(vcf_freebayes)

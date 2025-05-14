@@ -8,12 +8,12 @@ process EMASE_RUN {
 
     container 'quay.io/jaxcompsci/gbrs_py3:v1.0.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.isoforms.tpm", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.isoforms.expected_read_counts", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.isoforms.alignment_counts", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.genes.tpm", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.genes.expected_read_counts", mode: 'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/gbrs' : 'gbrs' }", pattern: "*.genes.alignment_counts", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.isoforms.tpm", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.isoforms.expected_read_counts", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.isoforms.alignment_counts", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.genes.tpm", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.genes.expected_read_counts", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/gbrs'}", pattern: "*.genes.alignment_counts", mode: 'copy'
 
     input:
     tuple val(sampleID), path(h5)

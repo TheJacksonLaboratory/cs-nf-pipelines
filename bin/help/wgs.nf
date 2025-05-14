@@ -3,7 +3,6 @@ def help(){
 Parameter | Default | Description
 
 --pubdir | /<PATH> | The directory that the saved outputs will be stored.
---organize_by | sample | How to organize the output folder structure. Options: sample or analysis.
 --cacheDir | /projects/omics_share/meta/containers | This is directory that contains cached Singularity containers. JAX users should not change this parameter.
 -w | /<PATH> | The directory that all intermediary files and nextflow processes utilize. This directory can become quite large. This should be a location on /flashscratch or other directory with ample storage.
 
@@ -25,8 +24,8 @@ Parameter | Default | Description
 
 --run_gvcf | false | Options: false and true. Default: false. If this boolean is specified, GCVF output will be generated.
 
---gen_org | mouse | Options: mouse and human.
---genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCm38.
+--gen_org | mouse | Options: mouse, human, other.
+--genome_build | 'GRCm38' | Mouse specific. Options: GRCm38 or GRCm39. If gen_org == human, build defaults to GRCh38. If other, this parameter is not used.
 
 --ref_fa | Mouse: '/projects/omics_share/mouse/GRCm38/genome/sequence/ensembl/v102/Mus_musculus.GRCm38.dna.toplevel.fa' 
          | Human: '/projects/omics_share/human/GRCh38/genome/sequence/gatk/Homo_sapiens_assembly38.fasta'
@@ -44,9 +43,9 @@ Parameter | Default | Description
 --unqualified_perc | 40 | Percent of bases that are allowed to be unqualified (0~100). Default: 40 which is 40%.
 --detect_adapter_for_pe | false | If true, adapter auto-detection is used for paired end data. By default, paired-end data adapter sequence auto-detection is disabled as the adapters can be trimmed by overlap analysis. However, --detect_adapter_for_pe will enable it. Fastp will run a little slower if you specify the sequence adapters or enable adapter auto-detection, but usually result in a slightly cleaner output, since the overlap analysis may fail due to sequencing errors or adapter dimers.
 
---mismatch_penalty | -B 8 | The BWA penalty for a mismatch.
+--mismatch_penalty | 8 | The BWA penalty for a mismatch.
 --call_val | 50 | The minimum phred-scaled confidence threshold at which variants should be called.
---ploidy_val | '-ploidy 2' | Sample ploidy
+--ploidy_val | '2' | Sample ploidy
 
 --dbSNP | Mouse: '/projects/omics_share/mouse/GRCm38/genome/annotation/snps_indels/GCA_000001635.6_current_ids.vcf.gz' 
         | Human: '/projects/omics_share/human/GRCh38/genome/annotation/snps_indels/dbsnp_151.vcf.gz'

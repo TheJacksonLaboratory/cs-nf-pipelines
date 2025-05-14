@@ -8,7 +8,7 @@ process GATK_HAPLOTYPECALLER {
 
     container 'broadinstitute/gatk:4.2.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*.*vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.*vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(bam), file(bai)
@@ -39,7 +39,7 @@ process GATK_HAPLOTYPECALLER {
     -I ${bam} \
     -O ${sampleID}_haplotypecaller_raw.${output_suffix} \
     -L ${params.target_gatk} \
-    ${params.ploidy_val} \
+    -ploidy ${params.ploidy_val} \
     ${delta} \
     --max-reads-per-alignment-start 0 \
     --recover-all-dangling-branches

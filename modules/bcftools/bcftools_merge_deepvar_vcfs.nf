@@ -11,12 +11,14 @@ process BCFTOOLS_MERGEDEEPVAR {
 
   container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.*vcf*", mode:'copy'
+
   input:
-  tuple val(sampleID), file(vcf), file(gvcf), file(vcf_index), file(gvcf_index)
+  tuple val(sampleID), path(vcf), path(gvcf), path(vcf_index), path(gvcf_index)
 
   output:
-  tuple val(sampleID), file("*_sorted_deepvariant.vcf.gz"), file("*_sorted_deepvariant.vcf.gz.tbi"), emit: vcf
-  tuple val(sampleID), file("*_sorted_deepvariant.gvcf.gz"), file("*_sorted_deepvariant.gvcf.gz"), emit: gvcf
+  tuple val(sampleID), path("*_sorted_deepvariant.vcf.gz"), path("*_sorted_deepvariant.vcf.gz.tbi"), emit: vcf_idx
+  tuple val(sampleID), path("*_sorted_deepvariant.gvcf.gz"), path("*_sorted_deepvariant.gvcf.gz.tbi"), emit: gvcf_idx
 
   script:
 

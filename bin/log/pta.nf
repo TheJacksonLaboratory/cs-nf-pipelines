@@ -19,7 +19,6 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --csv_input                     ${params.csv_input}
---organize_by                   ${params.organize_by}
 --pubdir                        ${params.pubdir}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}
@@ -100,7 +99,6 @@ Results Published to: ${params.pubdir}
 ______________________________________________________
 --workflow                      ${params.workflow}
 --csv_input                     ${params.csv_input}
---organize_by                   ${params.organize_by}
 --pubdir                        ${params.pubdir}
 -w                              ${workDir}
 --keep_intermediate             ${params.keep_intermediate}

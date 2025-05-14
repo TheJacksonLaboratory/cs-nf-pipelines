@@ -40,17 +40,15 @@ opt_parser = OptionParser(option_list=option_list);
 opt = parse_args(opt_parser);
 
 Sys.setenv(BIOMART_CACHE=tempdir())
-
+httr::set_config(httr::config(ssl_verifypeer = FALSE))
+## NOTE: The above line is required to avoid SSL errors when using biomaRt.
 ################################################################################
 
 ## Obtain geneIDs, and positions from biomaRt.
 
 ensembl_mart <- useEnsembl(biomart = 'genes',
                         dataset = 'mmusculus_gene_ensembl',
-                        version = opt$ensembl_build,
-                        mirror = "useast") 
-                        ## note: I have seen issues with timeout: "Error in curl::curl_fetch_memory(url, handle = handle) : Timeout was reached: [www.ensembl.org:443] Operation timed out after 10001 milliseconds with 0 bytes received"
-                        ##       useast seems to be more stable. Other options are: useast, uswest, asia, and www. A try/except catch could be added to retry on a different mirror if this is a highly recurrent issue. 
+                        version = opt$ensembl_build)
 
 attributes <- searchAttributes(mart = ensembl_mart)
 

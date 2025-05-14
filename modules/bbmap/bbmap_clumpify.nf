@@ -8,7 +8,7 @@ process CLUMPIFY {
 
     container 'quay.io/biocontainers/bbmap:39.06--h92535d8_0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/stats' : 'stats'}", pattern: "*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*.txt", mode:'copy'
 
     input:
     tuple val(sampleID), path(fq_reads)

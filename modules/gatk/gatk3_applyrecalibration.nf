@@ -8,7 +8,7 @@ process GATKv3_5_ApplyRecalibration {
 
   container 'broadinstitute/gatk3:3.5-0'
    
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? "$sampleID" : 'gatk' }", pattern: "*.vcf", mode:'copy'
+  publishDir "${params.pubdir}/${sampleID}", pattern: "*.vcf", mode:'copy'
 
   input:
   tuple val(sampleID), file(normal_germline_vcf)

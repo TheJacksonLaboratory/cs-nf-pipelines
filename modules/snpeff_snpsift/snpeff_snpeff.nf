@@ -8,8 +8,8 @@ process SNPEFF{
 
   container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
 
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
-  publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.*", mode:'copy', enabled: params.workflow=='amplicon_generic' ? true : params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*.*", mode:'copy', enabled: params.gen_org=='mouse' ? true : params.keep_intermediate
+  publishDir "${params.pubdir}/${sampleID}", pattern:"*.*", mode:'copy', enabled: params.workflow=='amplicon_generic' ? true : params.keep_intermediate
 
   input:
   tuple val(sampleID),file(vcf)

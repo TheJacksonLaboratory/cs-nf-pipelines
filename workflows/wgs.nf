@@ -39,7 +39,7 @@ include {GATK_HAPLOTYPECALLER_INTERVAL;
          GATK_HAPLOTYPECALLER_INTERVAL as GATK_HAPLOTYPECALLER_INTERVAL_GVCF} from "${projectDir}/modules/gatk/gatk_haplotypecaller_interval"
 include {MAKE_VCF_LIST} from "${projectDir}/modules/utility_modules/make_vcf_list"
 include {GATK_MERGEVCF_LIST} from "${projectDir}/modules/gatk/gatk_mergevcf_list"
-include {BCFTOOLS_MERGEDEEPVAR} from "${projectDir}/modules/bcftools/bcftools_merge_deepvar_vcfs.nf"
+include {BCFTOOLS_MERGEDEEPVAR} from "${projectDir}/modules/bcftools/bcftools_merge_deepvar_vcfs"
 include {GATK_COMBINEGVCFS} from "${projectDir}/modules/gatk/gatk_combinegvcfs"
 
 include {GATK_SELECTVARIANTS as GATK_SELECTVARIANTS_SNP;
@@ -305,7 +305,7 @@ workflow WGS {
     if (params.run_gvcf) {
       // Use the Channel in HaplotypeCaller_GVCF
       GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
+      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
     }
   }
 
@@ -353,6 +353,7 @@ workflow WGS {
     chrom_channel = bam_file.join(index_file).combine(chroms)
     chrom_channel.view()
 
+<<<<<<< HEAD
     // Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
     if(params.google_deepvariant){
       
@@ -362,11 +363,11 @@ workflow WGS {
       GOOGLE_DEEPVARIANT(deepvariant_channel)
 
       // Merge DeepVariant calls
-      BCFTOOLS_MERGEDEEPVAR(GOOGLE_DEEPVARIANT.out.vcf_channel.groupTuple())
+      BCFTOOLS_MERGEDEEPVAR(GOOGLE_DEEPVARIANT.out.vcf_channel.groupTuple(size: num_chroms))
 
       // create select var channels
-      select_var_snp = BCFTOOLS_MERGEDEEPVAR.out.vcf
-      select_var_indel = BCFTOOLS_MERGEDEEPVAR.out.vcf
+      select_var_snp = BCFTOOLS_MERGEDEEPVAR.out.vcf_idx
+      select_var_indel = BCFTOOLS_MERGEDEEPVAR.out.vcf_idx
 
     } else {
       // Use the Channel in HaplotypeCaller
@@ -378,15 +379,14 @@ workflow WGS {
       // Sort VCF within MAKE_VCF_LIST
       GATK_MERGEVCF_LIST(MAKE_VCF_LIST.out.list)
 
-      if (params.run_gvcf) {
-      // Use the Channel in HaplotypeCaller_GVCF
-      GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
-      GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms))
-      }
-
-      // create select var channels
       select_var_snp = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
       select_var_indel = GATK_MERGEVCF_LIST.out.vcf.join(GATK_MERGEVCF_LIST.out.idx)
+
+      if (params.run_gvcf) {
+        // Use the Channel in HaplotypeCaller_GVCF
+        GATK_HAPLOTYPECALLER_INTERVAL_GVCF(chrom_channel,'gvcf')
+        GATK_COMBINEGVCFS(GATK_HAPLOTYPECALLER_INTERVAL_GVCF.out.vcf.groupTuple(size: num_chroms), 'raw')
+      }
     }
   }
 

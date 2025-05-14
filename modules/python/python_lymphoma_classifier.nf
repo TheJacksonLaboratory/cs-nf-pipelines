@@ -8,7 +8,7 @@ process LYMPHOMA_CLASSIFIER {
 
     container 'quay.io/jaxcompsci/biopython-pyvcf:1.78'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'python' }", pattern:"*EBV_classifier.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern:"*EBV_classifier.txt", mode:'copy'
 
     input:
     tuple val(sampleID), file(rsem_counts)

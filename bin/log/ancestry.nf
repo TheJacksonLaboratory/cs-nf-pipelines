@@ -6,6 +6,10 @@ logo = new Logo()
 println '\n'
 println logo.show()
 
+if (params.gen_org != "human") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported option is 'human'" 
+}
+
 log.info """
 WES PARAMETER LOG
 
@@ -20,7 +24,6 @@ ______________________________________________________
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --genotype_targets              ${params.genotype_targets}
 --snpID_list                    ${params.snpID_list}

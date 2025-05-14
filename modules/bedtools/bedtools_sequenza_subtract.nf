@@ -8,7 +8,7 @@ process BEDTOOLS_SUBTRACT {
 
     container 'quay.io/biocontainers/bedtools:2.23.0--h5b5514e_6'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/sequenza_cnv' : 'sequenza' }", pattern:"*segments_naWindowFiltered.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/sequenza_cnv'}", pattern:"*segments_naWindowFiltered.txt", mode:'copy'
 
     input:
     tuple val(sampleID), path(segments), path(na_win)
