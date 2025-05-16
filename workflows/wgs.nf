@@ -120,30 +120,19 @@ if (params.csv_input) {
     read_ch.ifEmpty{ exit 1, "ERROR: No Files Found in Path: ${params.sample_folder} Matching Pattern: ${params.pattern} and file extension: ${params.extension}"}
 }
 
-// if merg pull a metadata file to join on ind
-if(params.merge_inds){
-  ind_meta_ch = Channel.fromPath("${params.ind_meta}")
-                       .splitCsv(header: true)
-                       .map {row -> 
-                            [ sampleID = row.sampleID,
-                              ind = row.ind] }
+// Extract ind from meta_ch for merging
+if (params.merge_inds) {
+      meta_ch.map{it -> [it[0], it[1].ind]}.set{ind_meta_ch}
 }
 
-// if Google DeepVariant is desired, pull a metadata file to join sex
+// Extract sex from meta_ch for DeepVariant
 if(params.google_deepvariant){
-  // if merge_inds is specified, sex needs to be joined at the ind level
-  if(params.merge_inds){
-    deepvariant_meta_ch = Channel.fromPath("${params.google_deepvariant_meta}")
-                       .splitCsv(header: true)
-                       .map {row -> 
-                            [ sampleID = row.ind,
-                              sex = row.sex] }
+  if (params.merge_inds){
+    // Get ind and sex as the metadata
+    meta_ch.map{it -> [it[1].ind, it[1].sex]}.unique().set{deepvariant_meta_ch}
   } else {
-    deepvariant_meta_ch = Channel.fromPath("${params.google_deepvariant_meta}")
-                       .splitCsv(header: true)
-                       .map {row -> 
-                            [ sampleID = row.sampleID,
-                              sex = row.sex] }
+    // Get sampleID and sex as the metadata
+    meta_ch.map{it -> [it[0], it[1].sex]}.set{deepvariant_meta_ch}
   }
 }
 
@@ -277,8 +266,8 @@ workflow WGS {
     PICARD_COLLECTALIGNMENTSUMMARYMETRICS(bam_file)
     PICARD_COLLECTWGSMETRICS(bam_file)
 
-    // if merging on individual, merge on ind field and pass the ind through the sampleID tuple spot
-    // else pass on the sampleID
+    //if merging on individual, merge on ind field and pass the ind through the sampleID tuple spot
+    //else pass on the sampleID
     if (params.merge_inds) {
       // merge inds for bams
       merge_ch = bam_file.combine(ind_meta_ch, by: 0)
@@ -352,11 +341,11 @@ workflow WGS {
     // Applies scatter intervals from above to the markdup bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
 
-    // Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
-    if(params.google_deepvariant){
+    //Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
+    if (params.google_deepvariant) {
       
       deepvariant_channel = chrom_channel.combine(deepvariant_meta_ch, by: 0)
-      
+
       // Use appended chrom channel with sex information in DeepVariant
       GOOGLE_DEEPVARIANT(deepvariant_channel)
 

@@ -46,6 +46,32 @@ def extract_csv(csv_file) {
         // If no replicate specified, replicate is not considered
         if (row.replicate) meta.replicate = row.replicate.toString()
         else meta.replicate = 'NA'
+
+        // Parse optional "ind" field
+        if (row.ind) meta.ind = row.ind.toString()
+        else meta.ind = 'NA'
+    
+        // Check if `merge_inds` is specified and `ind` is missing
+        if (params.merge_inds && meta.ind == 'NA') {
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+            System.err.println(ANSI_RED + "`merge_inds` specified, but `ind` field is missing in the CSV manifest. Please add the `ind` field to the manifest and restart the run." + ANSI_RESET)
+            System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+            System.exit(1)
+        }
+
+        // Parse optional "sex" field
+        if (row.sex) meta.sex = row.sex.toString()
+        else meta.sex = 'NA'
+
+        // Check if `sex` is specified and `ind` is missing
+        if (params.google_deepvariant && meta.sex == 'NA') {
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+            System.err.println(ANSI_RED + "`google_deepvariant` specified, but `sex` field is missing in the CSV manifest. Please add the `sex` field to the manifest and restart the run." + ANSI_RESET)
+            System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
+            System.err.println(ANSI_RED + "---------------------------------------------" + ANSI_RESET)
+            System.exit(1)
+        }
         
 
         /* 
