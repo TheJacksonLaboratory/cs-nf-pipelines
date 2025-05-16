@@ -351,9 +351,7 @@ workflow WGS {
 
     // Applies scatter intervals from above to the markdup bam file
     chrom_channel = bam_file.join(index_file).combine(chroms)
-    chrom_channel.view()
 
-<<<<<<< HEAD
     // Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
     if(params.google_deepvariant){
       
