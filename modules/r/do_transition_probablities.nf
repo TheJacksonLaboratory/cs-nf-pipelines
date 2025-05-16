@@ -29,5 +29,4 @@ process DO_TRANSITION_PROBABILITIES {
     touch "tranprob.genes.DO.G0-1.F.genPlots.pdf"
     touch "tranprob.genes.DO.G0-1.M.genPlots.pdf"
     """
-
 }

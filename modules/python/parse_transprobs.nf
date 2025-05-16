@@ -1,5 +1,4 @@
 process PARSE_TRANSITION_PROBABILITIES {
-
     tag "${generation} - ${sex}"
     
     cpus 2
@@ -28,5 +27,4 @@ process PARSE_TRANSITION_PROBABILITIES {
     """
     touch "tranprob.DO.G1.F.npz"
     """
-
 }

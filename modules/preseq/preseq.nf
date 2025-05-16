@@ -6,9 +6,7 @@ process PRESEQ {
     time '20:00:00'
     errorStrategy 'ignore'
 
-
     container 'quay.io/biocontainers/preseq:3.1.2--h445547b_2'
-
 
     input:
     tuple val(sampleID), file(bam)

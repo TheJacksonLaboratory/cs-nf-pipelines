@@ -1,5 +1,4 @@
 process R_MERGE_DEPTHS {
-    
     tag "$sampleID"
 
     cpus 1

@@ -38,5 +38,4 @@ process BCFTOOLS_SPLITMULTIALLELIC_REGIONS {
     tabix ${sampleID}_split.vcf.gz
 
     """
-
 }

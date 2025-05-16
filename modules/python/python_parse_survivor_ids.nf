@@ -1,5 +1,4 @@
 process PYTHON_PARSE_SURVIVOR_IDS {
-
     tag "$sampleID"
 
     cpus 1

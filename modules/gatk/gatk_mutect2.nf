@@ -34,5 +34,5 @@ process GATK_MUTECT2 {
     -L ${interval} \
     --native-pair-hmm-threads 4 \
     -O ${sampleID}_${interval_index}_somatic.vcf.gz
-  """
+    """
 }

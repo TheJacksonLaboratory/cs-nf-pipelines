@@ -1,5 +1,4 @@
 process STAR_FUSION {
-
     tag "$sampleID"
 
     cpus 12

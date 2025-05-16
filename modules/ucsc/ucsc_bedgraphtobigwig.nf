@@ -32,9 +32,7 @@ process UCSC_BEDGRAPHTOBIGWIG {
 
 /*
 IGV steps removed, re-add if IGV is needed: 
-
     OUTPUT: tuple val(sampleID), file("*.igv.txt"), emit: igv_txt
 
     SCRIPT: find * -type f -name "*.bigWig" -exec echo -e "bigwig/"{}"\\t0,0,178" \\; > ${sampleID}.bigWig.igv.txt
-
 */

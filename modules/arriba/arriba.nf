@@ -1,5 +1,4 @@
 process ARRIBA {
-
     tag "$sampleID"
 
     cpus 1

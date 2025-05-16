@@ -1,5 +1,4 @@
 process PYTHON_ANNOT_ON_TARGET {
-
     tag "$sampleID"
 
     cpus 1

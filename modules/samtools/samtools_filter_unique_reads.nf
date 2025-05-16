@@ -23,7 +23,6 @@ process SAMTOOLS_FILTER_UNIQUE {
     mkdir seq_out
 
     for chrom in ${chrom_list}; do mv *_\$chrom.seq seq_out/; done
-
     """
 }
 // Modified samtools view: 

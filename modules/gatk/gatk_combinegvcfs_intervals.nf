@@ -1,6 +1,6 @@
 process GATK_COMBINEGVCFS_INTERVALS {
     tag "$sampleID"
-    array 23
+
     cpus 1
     memory 16.GB
     time '05:00:00'

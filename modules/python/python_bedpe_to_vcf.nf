@@ -1,5 +1,4 @@
 process PYTHON_BEDPE_TO_VCF {
-
     tag "$sampleID"
 
     cpus 1

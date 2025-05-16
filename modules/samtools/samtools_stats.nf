@@ -32,7 +32,6 @@ process SAMTOOLS_STATS {
     tuple val(sampleID), file("*.stats"), emit: stats
 
     script:
-
     """
     samtools flagstat ${bam[0]} > ${bam[0]}.flagstat
     samtools idxstats ${bam[0]} > ${bam[0]}.idxstats

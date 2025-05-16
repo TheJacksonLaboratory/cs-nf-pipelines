@@ -23,5 +23,4 @@ process FILTER_GTF {
     """
     touch "gtf.included.gtf"
     """
-
 }

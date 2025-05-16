@@ -1,6 +1,6 @@
 process BCFTOOLS_CALL {
     tag "$sampleID"
-
+    
     cpus = 8
     memory = 6.GB
     time = '06:00:00'

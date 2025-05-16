@@ -1,6 +1,6 @@
 process BCFTOOLS_REHEAD_SORT {
     tag "$sampleID"
-
+    
     cpus = 1
     memory = 10.GB
     time '00:30:00'

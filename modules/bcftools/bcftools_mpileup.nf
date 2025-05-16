@@ -1,6 +1,6 @@
 process BCFTOOLS_MPILEUP {
     tag "$sampleID"
-
+    
     cpus = 8
     memory = 20.GB
     time = '12:00:00'

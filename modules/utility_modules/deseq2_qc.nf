@@ -25,7 +25,6 @@ process DESEQ2_QC {
     path "*.log"                , optional:true, emit: log
     path "size_factors"         , optional:true, emit: size_factors
 
-
     script:
     prefix = "${antibody}.consensus_peaks"
     bam_ext = params.read_type == 'SE'  ? '.mLb.clN.sorted.bam' : '.mLb.clN.bam'
@@ -47,6 +46,5 @@ process DESEQ2_QC {
     sed 's/deseq2_clustering/deseq2_clustering_${task.index}/g' <$deseq2_clustering_header >tmp.txt
     sed -i -e 's/DESeq2 /${antibody} DESeq2 /g' tmp.txt
     cat tmp.txt ${prefix}.sample.dists.txt > ${prefix}.sample.dists_mqc.tsv
-
     """
 }

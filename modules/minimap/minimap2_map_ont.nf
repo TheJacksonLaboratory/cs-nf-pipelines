@@ -1,5 +1,6 @@
 process MINIMAP2_MAP_ONT {
     tag "$sampleID"
+    
     cpus 16
     memory 24.GB
     time "24:00:00"

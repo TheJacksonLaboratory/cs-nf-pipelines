@@ -1,9 +1,8 @@
 process BCFTOOLS_GERMLINE_FILTER {
     // This modules is a port of the NYGC germline filtering scheme found at this site:
     // https://bitbucket.nygenome.org/projects/WDL/repos/somatic_dna_wdl/browse/germline/germline.wdl?at=7.4.0
-
     tag "$sampleID"
-
+    
     cpus = 1
     memory = 2.GB
     time = '00:30:00'

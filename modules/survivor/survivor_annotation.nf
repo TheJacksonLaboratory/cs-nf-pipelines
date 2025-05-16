@@ -1,5 +1,4 @@
 process SURVIVOR_ANNOTATION {
-    
     tag "$sampleID"
 
     cpus 1

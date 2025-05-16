@@ -34,5 +34,4 @@ process CUTADAPT {
     > ${sampleID}_cutadapt.log \
     2>&1
     """
-
 }

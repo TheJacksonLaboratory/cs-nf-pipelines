@@ -1,5 +1,6 @@
 process PHANTOMPEAKQUALTOOLS {
     tag "$sampleID"
+    
     cpus 8
     memory 50.GB
     time '04:00:00'

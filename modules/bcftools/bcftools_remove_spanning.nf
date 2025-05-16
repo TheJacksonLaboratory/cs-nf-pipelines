@@ -1,6 +1,6 @@
 process BCFTOOLS_REMOVESPANNING {
     tag "$sampleID"
-
+    
     cpus = 4
     memory = 2.GB
     time = '01:00:00'

@@ -1,5 +1,4 @@
 process SURVIVOR_INEXON {
-
     tag "$sampleID"
 
     cpus 1

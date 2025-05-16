@@ -1,5 +1,4 @@
 process SURVIVOR_VCF_TO_TABLE {
-
     tag "$sampleID"
 
     cpus 1

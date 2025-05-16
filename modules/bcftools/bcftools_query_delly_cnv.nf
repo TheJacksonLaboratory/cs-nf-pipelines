@@ -1,6 +1,6 @@
 process BCFTOOLS_QUERY_DELLY_CNV {
     tag "$sampleID"
-
+    
     cpus = 8
     memory = 6.GB
     time = '06:00:00'

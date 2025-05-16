@@ -1,5 +1,4 @@
 process SURVIVOR_MERGE {
-
     tag "$sampleID"
 
     cpus 8

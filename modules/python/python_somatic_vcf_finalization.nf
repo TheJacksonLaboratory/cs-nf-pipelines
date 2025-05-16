@@ -59,6 +59,5 @@ process SOMATIC_VCF_FINALIZATION {
     --tumor ${tumor_name} \
     --normal ${normal_name} \
     --ensembl-entrez ${params.ensembl_entrez}
-
     """
 }

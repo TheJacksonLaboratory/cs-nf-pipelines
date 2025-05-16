@@ -21,5 +21,4 @@ process GENERATE_GRID_FILE {
     """
     touch "ref.genome_grid.GRCm39.tsv"
     """
-
 }

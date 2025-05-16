@@ -1,5 +1,4 @@
 process MINIMAP2_INDEX {
-
     tag "${fasta.baseName}"
 
     cpus 8

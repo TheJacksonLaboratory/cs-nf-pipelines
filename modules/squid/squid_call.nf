@@ -1,5 +1,4 @@
 process SQUID {
-
     tag "$sampleID"
 
     cpus 1

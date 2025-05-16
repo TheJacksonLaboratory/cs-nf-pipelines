@@ -1,4 +1,3 @@
-
 process CHECK_STRANDEDNESS {
     tag "$sampleID"
 

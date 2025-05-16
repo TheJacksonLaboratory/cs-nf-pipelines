@@ -1,5 +1,4 @@
 process ASCAT_ANNOTATION {
-
     tag "$sampleID"
 
     cpus = 1

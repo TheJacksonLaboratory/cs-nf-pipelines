@@ -39,5 +39,4 @@ process PICARD_MERGESAMFILES {
         ln -s ${bam_files[0]} ${prefix}.bam
         """
     }
-
 }

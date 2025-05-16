@@ -1,4 +1,3 @@
-
 process ADD_ALT_AF {
     tag "$sampleID"
 

@@ -1,6 +1,6 @@
 process BCFTOOLS_COMPRESS_INDEX {
     tag "$sampleID"
-
+    
     cpus = 1
     memory = 2.GB
     time = '00:30:00'

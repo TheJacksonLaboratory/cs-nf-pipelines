@@ -1,5 +1,4 @@
 process SQUID_ANNOTATE {
-
     tag "$sampleID"
 
     cpus 1

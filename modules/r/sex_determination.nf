@@ -1,5 +1,4 @@
 process SEX_DETERMINATION {
-    
     tag "$sampleID"
 
     cpus 1

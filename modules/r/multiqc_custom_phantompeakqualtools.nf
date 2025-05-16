@@ -1,6 +1,10 @@
 process MULTIQC_CUSTOM_PHANTOMPEAKQUALTOOLS {
     tag "$sampleID"
 
+    cpus 1
+    memory 8.GB
+    time '04:00:00'
+
     container 'quay.io/biocontainers/r-base:3.5.1'
 
     input:
