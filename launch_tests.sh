@@ -4,7 +4,7 @@
 #SBATCH -p compute
 #SBATCH -q batch
 #SBATCH -t 72:00:00
-#SBATCH --mem=15G
+#SBATCH --mem=30G
 #SBATCH --ntasks=1
 #SBATCH --output=log_nf_test_%j.out
 
