@@ -13,7 +13,7 @@ We implimented a number of minor changes as well:
 * Added test cases for all germline_sv workflows.  
 * Adjusted the syntax for two paramters (`--ploidy_val` and `--mismatch_penalty`) used in various workflows. We removed the non-integer charecters, and the parameters now take the form: `--ploidy_val 2` and `--mismatch_penalty 8`).   
 * Removed the `--organize_by` parameter, and ability to organize output by anything but sample. This parameter was intended to organize outputs by tool rather than by sample, but was not highly utilized.  
-
+* Fix a Conpair edge case where quality scores were off scale (occasionally seen in older samples). 
 
 ### Pipelines Added:
 
@@ -42,6 +42,8 @@ We implimented a number of minor changes as well:
 1. modules/bwa/bwa_mem2.nf: Adjust mismatch_penalty parameter.  
 1. modules/nanosv/nanosv.nf: Added nanosv_bed for species and build specific bed input and parameter, used by nanoSV for initial coverage computation.  
 1. modules/r/do_transition_probablities.nf: Bump memory reservation.  
+1. modules/conpair/conpair.nf: Change to GATK4 version of Conpair, and implement adjusted internal verify_concordance.py script.  
+1. modules/conpair/conpair_pileup.nf: Change to GATK4 based version of Conpair.  
 1. Across all modules, `--organize_by`removed from `publishDir` options.
 
 ### Scripts Added:
