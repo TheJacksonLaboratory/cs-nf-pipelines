@@ -6,7 +6,7 @@ println logo.show()
 
 def param_log(){
     log.info """
-    GBRS RUN PARAMETER LOG
+    JOIN GVCF CALLING PARAMETER LOG
 
     --comment: ${params.comment}
 
