@@ -168,7 +168,7 @@ nextflow_workflow {
         when {
             params {
                 gen_org = "human"
-                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/huamn/hg38_WGS_inds_input.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_inds_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
                 merge_ind = true
@@ -226,7 +226,7 @@ nextflow_workflow {
         when {
             params {
                 gen_org = "human"
-                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/huamn/hg38_WGS_inds_input.csv"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_inds_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
                 deepvariant = true
