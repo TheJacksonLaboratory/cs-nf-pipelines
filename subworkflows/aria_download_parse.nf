@@ -21,6 +21,8 @@ workflow FILE_DOWNLOAD {
             it[2] and it[3] are R1 and R2 if PE. it[3] is empty if SE. 
 
         All steps expect that sampleID is in position [0] of tuples. 
+        
+        merge_replicates is used in the ATAC workflow and is used to merge replicates of one sample.
 
     */
 
@@ -31,6 +33,8 @@ workflow FILE_DOWNLOAD {
                     sampleID   = it[1].sampleID+'_'+it[1].replicate
                 } else {
                     sampleID   = it[1].sampleID
+                    meta.ind   = it[1].ind
+                    meta.sex   = it[1].sex
                 }
                 R1: tuple(sampleID, it[1], 'R1', it[2])
                 R2: tuple(sampleID, it[1], 'R2', it[3])
@@ -44,6 +48,8 @@ workflow FILE_DOWNLOAD {
                     sampleID   = it[1].sampleID+'_'+it[1].replicate
                 } else {
                     sampleID   = it[1].sampleID
+                    meta.ind   = it[1].ind
+                    meta.sex   = it[1].sex
                 }
                 R1: tuple(sampleID, it[1], 'R1', it[2])
             }

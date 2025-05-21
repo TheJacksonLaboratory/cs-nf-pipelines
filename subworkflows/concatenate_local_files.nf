@@ -20,6 +20,8 @@ workflow CONCATENATE_LOCAL_FILES {
 
         All steps expect that sampleID is in position [0] of tuples. 
 
+        merge_replicates is used in the ATAC workflow and is used to merge replicates of one sample.
+
     */
         if (params.read_type == 'PE') {
             temp_map = ch_input_sample
@@ -31,6 +33,8 @@ workflow CONCATENATE_LOCAL_FILES {
                     meta.baseSampleID = it[1].sampleID
                 } else {
                     meta.sampleID   = it[1].sampleID
+                    meta.ind        = it[1].ind
+                    meta.sex        = it[1].sex
                 }
                 R1: tuple(meta.sampleID, meta.lane, meta, 'R1', it[2])
                 R2: tuple(meta.sampleID, meta.lane, meta, 'R2', it[3])
@@ -46,7 +50,6 @@ workflow CONCATENATE_LOCAL_FILES {
             }
             group_size = 2
         } else {
-
             temp_map = ch_input_sample
             .multiMap { it ->
                 def meta = [:]
@@ -56,6 +59,8 @@ workflow CONCATENATE_LOCAL_FILES {
                     meta.baseSampleID = it[1].sampleID
                 } else {
                     meta.sampleID   = it[1].sampleID
+                    meta.ind        = it[1].ind
+                    meta.sex        = it[1].sex
                 }
                 R1: tuple(meta.sampleID, meta.lane, meta, 'R1', it[2])
             }

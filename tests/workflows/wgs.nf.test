@@ -142,4 +142,107 @@ nextflow_workflow {
 
     }
 
+
+    test("Full Workflow -- Mouse -- Individual Merge") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_inds_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                merge_ind = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Human -- Individual Merge") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/huamn/hg38_WGS_inds_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                merge_ind = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- merge_ind Bad Input") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                merge_ind = true
+            }
+        }
+
+        then {
+            assert workflow.failed
+        }
+
+    }
+
+    test("Full Workflow -- Mouse -- Deepvariant -- GVCF") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_inds_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                deepvariant = true
+                run_gvcf = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- Human -- Deepvariant -- GVCF") {
+        tag "GRCm38"
+        tag "options"
+        when {
+            params {
+                gen_org = "human"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/huamn/hg38_WGS_inds_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'wgs'
+                deepvariant = true
+                run_gvcf = true
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+
 }
+
+// NEW TESTS NEEDED: Merge ind with deepvariant
+
+// For sample merging, what if user provides mismatching information in one of the columns? 

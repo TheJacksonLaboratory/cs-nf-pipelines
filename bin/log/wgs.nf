@@ -30,6 +30,7 @@ ________________________________________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --csv_input                     ${params.csv_input}
 --download_data                 ${params.download_data}
+--merge_inds                    ${params.merge_inds}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -42,6 +43,7 @@ ________________________________________________________________________________
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
+--deepvariant                   ${params.deepvariant}
 --run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
@@ -80,6 +82,7 @@ ________________________________________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --csv_input                     ${params.csv_input}
 --download_data                 ${params.download_data}
+--merge_inds                    ${params.merge_inds}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
@@ -92,6 +95,7 @@ ________________________________________________________________________________
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
+--deepvariant                   ${params.deepvariant}
 --run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
