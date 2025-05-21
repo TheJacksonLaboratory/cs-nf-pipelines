@@ -152,7 +152,7 @@ nextflow_workflow {
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_inds_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
-                merge_ind = true
+                merge_inds = true
             }
         }
 
@@ -171,7 +171,7 @@ nextflow_workflow {
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/human/hg38_WGS_inds_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
-                merge_ind = true
+                merge_inds = true
             }
         }
 
@@ -190,7 +190,7 @@ nextflow_workflow {
                 csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/mouse/mm10_WGS_input.csv"
                 pubdir = "tests/results"
                 pipeline = 'wgs'
-                merge_ind = true
+                merge_inds = true
             }
         }
 
