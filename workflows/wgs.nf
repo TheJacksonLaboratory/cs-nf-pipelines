@@ -302,7 +302,7 @@ workflow WGS {
     chrom_channel = bam_file.join(index_file).combine(chroms)
     
     //Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
-    if (params.google_deepvariant) {
+    if (params.deepvariant) {
       // Find X and Y chromosomes in chroms channel
       haploid_chroms = chroms.filter { it ==~ /(?i).*\b(chr)?X\b.*/ }.map{ it[0] }
               .combine(chroms.filter { it ==~ /(?i).*\b(chr)?Y\b.*/ }.map{ it[0] })
@@ -426,7 +426,7 @@ workflow WGS {
     chrom_channel = bam_file.join(index_file).combine(chroms)
 
     //Use Google DeepVariant to make vcfs and gvcfs if specified; makes gvcfs automatically
-    if (params.google_deepvariant) {
+    if (params.deepvariant) {
       // Find X and Y chromosomes in chroms channel
       haploid_chroms = chroms.filter { it ==~ /(?i).*\b(chr)?X\b.*/ }.map{ it[0] }
               .combine(chroms.filter { it ==~ /(?i).*\b(chr)?Y\b.*/ }.map{ it[0] })
