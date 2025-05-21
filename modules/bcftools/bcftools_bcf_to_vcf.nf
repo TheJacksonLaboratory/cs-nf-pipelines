@@ -1,6 +1,6 @@
 process BCFTOOLS_BCF_TO_VCF {
     tag "$sampleID"
-
+    
     cpus = 8
     memory = 6.GB
     time = '06:00:00'
@@ -8,7 +8,7 @@ process BCFTOOLS_BCF_TO_VCF {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'delly'}", pattern: "*.vcf.gz", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern: "*.vcf.gz", mode: 'copy'
 
     input:
     tuple val(sampleID), path(bcf), path(csi), val(meta), val(normal_name), val(tumor_name), val(caller)

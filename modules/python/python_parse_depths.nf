@@ -1,5 +1,4 @@
 process PYTHON_PARSE_DEPTHS {
-
     tag "$sampleID"
 
     cpus 1

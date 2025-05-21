@@ -1,6 +1,6 @@
 process ABRA2 {
     tag "$sampleID"
-
+    
     cpus = 8
     memory = 40.GB
     time = '24:00:00'

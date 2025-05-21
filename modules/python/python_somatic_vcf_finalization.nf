@@ -8,8 +8,8 @@ process SOMATIC_VCF_FINALIZATION {
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.*", mode:'copy'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*supplemental.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*final.*", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*supplemental.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf), val(meta), val(normal_name), val(tumor_name)
@@ -59,6 +59,5 @@ process SOMATIC_VCF_FINALIZATION {
     --tumor ${tumor_name} \
     --normal ${normal_name} \
     --ensembl-entrez ${params.ensembl_entrez}
-
     """
 }

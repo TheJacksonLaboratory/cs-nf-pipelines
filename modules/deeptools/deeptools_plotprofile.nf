@@ -1,30 +1,30 @@
 process DEEPTOOLS_PLOTPROFILE {
-    tag "$sampleID"
+        tag "$sampleID"
 
-    cpus 8
-    memory 10.GB
-    time '04:00:00'
+        cpus 8
+        memory 10.GB
+        time '04:00:00'
 
-    publishDir {
-      def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
-      "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/deeptools' : 'deeptools'}"
-    }, pattern: "*.pdf", mode: 'copy'
-
-
-    container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
+        publishDir {
+        def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : '' 
+        "${params.pubdir}/${type + sampleID + '/deeptools'}"
+        }, pattern: "*.pdf", mode: 'copy'
 
 
-    input:
-    tuple val(sampleID), file(matrix)
+        container 'quay.io/biocontainers/deeptools:3.3.2--py_1'
 
-    output:
-    tuple val(sampleID), path("*.pdf"), emit: pdf
-    tuple val(sampleID), path("*.tab"), emit: table
 
-    script:
-    """
-    plotProfile --matrixFile ${sampleID}.computeMatrix.mat.gz \\
-        --outFileName ${sampleID}.plotProfile.pdf \\
-        --outFileNameData ${sampleID}.plotProfile.tab
-    """
+        input:
+        tuple val(sampleID), file(matrix)
+
+        output:
+        tuple val(sampleID), path("*.pdf"), emit: pdf
+        tuple val(sampleID), path("*.tab"), emit: table
+
+        script:
+        """
+        plotProfile --matrixFile ${sampleID}.computeMatrix.mat.gz \\
+            --outFileName ${sampleID}.plotProfile.pdf \\
+            --outFileNameData ${sampleID}.plotProfile.tab
+        """
 }

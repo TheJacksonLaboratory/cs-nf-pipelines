@@ -1,5 +1,4 @@
 process MAKE_CUSTOM_TRANSCRIPTOME {
-
     tag "$custom_gene_fasta"
 
     cpus 1

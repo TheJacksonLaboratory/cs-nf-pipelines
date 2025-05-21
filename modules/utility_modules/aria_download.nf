@@ -1,5 +1,4 @@
 process ARIA_DOWNLOAD {
-
     tag "$sampleID"
 
     cpus 1

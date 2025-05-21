@@ -1,14 +1,13 @@
 process BCFTOOLS_QUERY_ASCAT {
-    
     tag "$sampleID"
-
+    
     cpus 1
     memory 8.GB
     time '01:00:00'
     errorStrategy 'finish'
 
     container 'quay.io/jaxcompsci/gtc2vcf_with_tools:v2'
-    publishDir "${params.pubdir}/${params.organize_by == 'sample' ? sampleID : 'bcftools'}", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode: 'copy'
 
     input:
     tuple val(sampleID), val(meta), path(bcf), path(csi), path(vcf), path(tsv)

@@ -1,5 +1,4 @@
 process SQUID_ANNOTATE {
-
     tag "$sampleID"
 
     cpus 1
@@ -9,7 +8,7 @@ process SQUID_ANNOTATE {
 
     container 'docker.io/nfcore/rnafusion:squid_1.5-star2.7.1a'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'squid' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions'}", pattern: "*.{tsv,txt}", mode:'copy'
 
     input:
         tuple val(sampleID), path(txt)

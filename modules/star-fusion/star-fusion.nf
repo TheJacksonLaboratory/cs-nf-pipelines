@@ -1,5 +1,4 @@
 process STAR_FUSION {
-
     tag "$sampleID"
 
     cpus 12
@@ -9,7 +8,7 @@ process STAR_FUSION {
 
     container 'trinityctat/starfusion:1.12.0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'star-fusion' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions'}", pattern: "*.{tsv,txt}", mode:'copy'
 
     input:
         tuple val(sampleID), file(reads)

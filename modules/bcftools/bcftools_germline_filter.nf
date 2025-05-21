@@ -1,9 +1,8 @@
 process BCFTOOLS_GERMLINE_FILTER {
     // This modules is a port of the NYGC germline filtering scheme found at this site:
     // https://bitbucket.nygenome.org/projects/WDL/repos/somatic_dna_wdl/browse/germline/germline.wdl?at=7.4.0
-
     tag "$sampleID"
-
+    
     cpus = 1
     memory = 2.GB
     time = '00:30:00'
@@ -11,7 +10,7 @@ process BCFTOOLS_GERMLINE_FILTER {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bedtools' }", pattern: "*haplotypecaller.gatk.filtered.vcf.gz", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*haplotypecaller.gatk.filtered.vcf.gz", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)

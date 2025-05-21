@@ -29,5 +29,4 @@ process CLEAN_TRANSCRIPT_LISTS {
     touch emase.pooled.fullTranscripts.info
     touch emase.fullTranscripts.info
     """
-
 }

@@ -12,7 +12,7 @@ process SNPSIFT_EXTRACT_AND_PARSE {
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'snpeff' }", pattern:"*.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern:"*.txt", mode:'copy'
 
     input:
     tuple val(sampleID), file(table)
@@ -21,7 +21,6 @@ process SNPSIFT_EXTRACT_AND_PARSE {
     tuple val(sampleID), file("*.txt"), emit: txt
 
     script:
-
     """
     python ${projectDir}/bin/pta/split_annotations.py ${table} ${sampleID}_annotated_filtered_final_table.txt
     """

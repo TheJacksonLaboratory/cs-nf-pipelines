@@ -8,7 +8,7 @@ process MACS2_CONSENSUS {
     memory 10.GB
     time '10:00:00'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'consensusCalling_'+antibody+'/macs2' : 'macs2' }", pattern: "*_peaks.*", mode: 'copy'
+    publishDir "${params.pubdir}/${'consensusCalling_' + antibody + '/macs2'}", pattern: "*_peaks.*", mode: 'copy'
 
     container 'quay.io/biocontainers/mulled-v2-2f48cc59b03027e31ead6d383fe1b8057785dd24:5d182f583f4696f4c4d9f3be93052811b383341f-0'
 

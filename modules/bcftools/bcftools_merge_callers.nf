@@ -1,35 +1,35 @@
 process BCFTOOLS_MERGECALLERS {
-  tag "$sampleID"
+    tag "$sampleID"
+    
+    cpus = 8
+    memory = 6.GB
+    time = '06:00:00'
+    errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
-  cpus = 8
-  memory = 6.GB
-  time = '06:00:00'
-  errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
+    container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
 
-  container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
+    input:
+    tuple val(sampleID), file(vcf), file(idx), val(meta), val(chrom)
 
-  input:
-  tuple val(sampleID), file(vcf), file(idx), val(meta), val(chrom)
+    output:
+    tuple val(sampleID), file("*.vcf"), val(meta), val(chrom), emit: vcf
 
-  output:
-  tuple val(sampleID), file("*.vcf"), val(meta), val(chrom), emit: vcf
+    script:
 
-  script:
-
-  """
-  bcftools \
-  merge \
-  -r ${chrom} \
-  --force-samples \
-  --no-version \
-  --threads ${task.cpus} \
-  -f PASS,SUPPORT \
-  -F x \
-  -m none \
-  -o ${sampleID}_mergedCallers_${chrom}.vcf \
-  -i called_by:join,num_callers:sum,MNV_ID:join,supported_by:join \
-  ${vcf}
-"""
+    """
+    bcftools \
+    merge \
+    -r ${chrom} \
+    --force-samples \
+    --no-version \
+    --threads ${task.cpus} \
+    -f PASS,SUPPORT \
+    -F x \
+    -m none \
+    -o ${sampleID}_mergedCallers_${chrom}.vcf \
+    -i called_by:join,num_callers:sum,MNV_ID:join,supported_by:join \
+    ${vcf}
+    """
 }
 
 

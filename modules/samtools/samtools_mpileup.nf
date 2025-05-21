@@ -15,7 +15,6 @@ process SAMTOOLS_MPILEUP {
     tuple val(sampleID), val(meta), file("*.pileup.gz"), emit: pileup
 
     script:
-
     """
     samtools mpileup -f ${params.ref_fa} -Q 20 ${bam} | gzip -c - > ${bam.baseName}.pileup.gz
     """

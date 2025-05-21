@@ -46,6 +46,7 @@ nextflow_workflow {
     test("Full Workflow -- Human -- Split Fastq and Coverage Cap") {
         tag "GRCh38"
         tag "options"
+        options "-stub-run"
         when {
             params {
                 gen_org = "human"
@@ -109,3 +110,4 @@ nextflow_workflow {
     }
 
 }
+// Additional tests to add: tumor-only for mouse and human

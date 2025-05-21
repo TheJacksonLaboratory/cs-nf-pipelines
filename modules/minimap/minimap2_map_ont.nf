@@ -1,5 +1,6 @@
 process MINIMAP2_MAP_ONT {
     tag "$sampleID"
+    
     cpus 16
     memory 24.GB
     time "24:00:00"
@@ -7,7 +8,7 @@ process MINIMAP2_MAP_ONT {
 
     container 'quay.io-biocontainers-minimap2-2.24--h7132678_1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments' : 'alignments'}", pattern: "*_aln.sam", mode:'copy', enabled: params.keep_intermediate ? true : false
+    publishDir "${params.pubdir}/${sampleID + '/alignments'}", pattern: "*_aln.sam", mode:'copy', enabled: params.keep_intermediate ? true : false
 
     input:
         tuple val(sampleID), file(fastq)

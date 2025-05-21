@@ -1,5 +1,4 @@
 process STAR_ALIGN {
-
     tag "$sampleID"
 
     cpus 12

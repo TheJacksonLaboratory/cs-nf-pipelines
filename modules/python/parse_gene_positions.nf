@@ -24,7 +24,4 @@ process PARSE_GENE_POSITONS {
     """
     touch "ref.gene_pos.ordered.npz"
     """
-
 }
-
-

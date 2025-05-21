@@ -1,4 +1,3 @@
-
 process CHECK_STRANDEDNESS {
     tag "$sampleID"
 
@@ -9,7 +8,7 @@ process CHECK_STRANDEDNESS {
 
     container 'quay.io/jaxcompsci/how-are-we-stranded-here:v1.0.1-e6ce74d'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats' : 'python' }", pattern:"*_strandedness.txt", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern:"*_strandedness.txt", mode:'copy'
 
     input:
     tuple val(sampleID), path(reads)

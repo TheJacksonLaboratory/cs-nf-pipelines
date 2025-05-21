@@ -1,14 +1,13 @@
 process BCFTOOLS_GTC2VCF {
-    
     tag "$sampleID"
-
+    
     cpus = 1
     memory 24.GB
     time '01:30:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/gtc2vcf_with_tools:v2'
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'bcftools' }", pattern: "*.{vcf,tsv}", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*.{vcf,tsv}", mode: 'copy'
 
     input:
     tuple val(sampleID), val(meta), path(gtc)

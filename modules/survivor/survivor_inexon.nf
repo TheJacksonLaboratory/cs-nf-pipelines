@@ -1,5 +1,4 @@
 process SURVIVOR_INEXON {
-
     tag "$sampleID"
 
     cpus 1
@@ -9,7 +8,7 @@ process SURVIVOR_INEXON {
 
     container 'quay.io/biocontainers/pysam:0.15.2--py36h02877da_7'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : '' }", mode:'copy', enabled: params.data_type == 'ont' ? false : true
+    publishDir "${params.pubdir}/${sampleID}", mode:'copy', enabled: params.data_type == 'ont' ? false : true
 
     input:
         tuple val(sampleID), file(survivor_vcf), file("ins.exons.bed"), file("del.exons.bed"), file("dup.exons.bed"), file("tra.exons.bed"), file("inv.exons.bed")

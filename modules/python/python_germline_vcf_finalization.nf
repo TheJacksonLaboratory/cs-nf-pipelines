@@ -8,7 +8,7 @@ process GERMLINE_VCF_FINALIZATION {
 
     container 'quay.io/jaxcompsci/py3_perl_pylibs:v2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'vcf' }", pattern: "*final.vcf", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*final.vcf", mode:'copy'
 
     input:
     tuple val(sampleID), file(vcf)
@@ -31,6 +31,5 @@ process GERMLINE_VCF_FINALIZATION {
     ${projectDir}/bin/pta/rename_csq_vcf.py \
     ${sampleID}_germline_vep_cosmic_cancerResitMut_annotated_id.vcf \
     ${sampleID}_germline_snv_indel_annotated_${output_suffix}_final.vcf
-
     """
 }

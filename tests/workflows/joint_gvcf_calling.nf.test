@@ -1,0 +1,41 @@
+nextflow_workflow {
+
+    name "Test Workflow JOINT_GVCF_CALLING"
+    script "workflows/joint_gvcf_calling.nf"
+    workflow "JOINT_GVCF_CALLING"
+
+    test("Full Workflow -- bgzip_input") {
+
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/gvcf/bgzip/GVCF_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'joint_gvcf_calling'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+    test("Full Workflow -- unzip_input") {
+
+        when {
+            params {
+                gen_org = "mouse"
+                csv_input = "https://raw.githubusercontent.com/TheJacksonLaboratory/cs-nf-test/refs/heads/main/wgs/gvcf/unzip/GVCF_input.csv"
+                pubdir = "tests/results"
+                pipeline = 'joint_gvcf_calling'
+            }
+        }
+
+        then {
+            assert workflow.success
+        }
+
+    }
+
+}

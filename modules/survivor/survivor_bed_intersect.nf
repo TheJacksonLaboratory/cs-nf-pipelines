@@ -36,6 +36,5 @@ process SURVIVOR_BED_INTERSECT {
         bedtools intersect -a ${sampleID}.inv.bed -b ${params.reg_ref} -wa -wb > ${sampleID}.inv.regulatory.bed
         bedtools intersect -a ${sampleID}.dup.bed -b ${params.reg_ref} -wa -wb > ${sampleID}.dup.regulatory.bed
         bedtools intersect -a ${sampleID}.tra.bed -b ${params.reg_ref} -wa -wb > ${sampleID}.tra.regulatory.bed
-
         """
 }

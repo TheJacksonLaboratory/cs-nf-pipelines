@@ -8,7 +8,7 @@ process SAMTOOLS_STATS {
     
     container 'quay.io/biocontainers/samtools:1.10--h9402c20_2'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/alignments' : 'alignments' }", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/alignments'}", mode:'copy'
 
     input:
         tuple val(sampleID), file(bam), file(bai)

@@ -11,7 +11,39 @@ def extract_csv(csv_file) {
         while ((line = reader.readLine()) != null) {numberOfLinesInSampleSheet++}
         if (numberOfLinesInSampleSheet < 2) {
             System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-            System.err.println(ANSI_RED + "Samplesheet had less than two lines. The sample sheet must be a csv file with a header, so at least two lines." + ANSI_RESET)
+            System.err.println(ANSI_RED + "Samplesheet had less than two lines. The sample sheet must be a csv file with a header, and at least one sample." + ANSI_RESET)
+            System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+            System.exit(1)
+        }
+
+        // Reopen the file to read and check the header
+        def headerLine
+        file(csv_file).withReader('UTF-8') { headerReader ->
+            headerLine = headerReader.readLine()
+        }
+        def headers = headerLine.split(',').collect { it.trim() }
+        def requiredHeaders = ['sampleID', 'fastq_1']
+
+        if (params.read_type == 'PE') {
+            requiredHeaders << 'fastq_2'
+        }
+        if (params.merge_inds) {
+            requiredHeaders << 'ind'
+        }
+        if (params.deepvariant) {
+            requiredHeaders << 'sex'
+        }
+        if (params.merge_replicates) {
+            requiredHeaders << 'replicate'
+        }
+
+        def requiredHeadersStr = requiredHeaders.collect { "'${it}'" }.join(', ')
+  
+        def missingHeaders = requiredHeaders.findAll { !headers.contains(it) }
+        if (missingHeaders) {
+            System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
+            System.err.println(ANSI_RED + "Missing required header(s) in CSV file: ${missingHeaders.join(', ')}" + ANSI_RESET)
+            System.err.println(ANSI_RED + "The csv file must have fields: ${requiredHeadersStr}" + ANSI_RESET)
             System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
             System.exit(1)
         }
@@ -21,7 +53,7 @@ def extract_csv(csv_file) {
         .map{ row ->
             if (!(row.sampleID) | !(row.fastq_1)){
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
-                System.err.println(ANSI_RED + "Missing field in csv file header. The csv file must have fields: 'sampleID', 'fastq_1', {fastq_2}'. Where fastq_2 is optional." + ANSI_RESET)
+                System.err.println(ANSI_RED + "Missing row data in field: 'sampleID' or 'fastq_1'. These fields can not be empty." + ANSI_RESET)
                 System.err.println(ANSI_RED + "Exiting now." + ANSI_RESET)
                 System.err.println(ANSI_RED + "-----------------------------------------------------------------------" + ANSI_RESET)
                 System.exit(1)
@@ -32,7 +64,7 @@ def extract_csv(csv_file) {
             size = rows.size()
             [rows, size]
         }.transpose()
-        .map{ row, numLanes -> //from here do the usual thing for csv parsing
+        .map{ row, numLanes ->
 
         def meta = [:]
 
@@ -46,18 +78,20 @@ def extract_csv(csv_file) {
         // If no replicate specified, replicate is not considered
         if (row.replicate) meta.replicate = row.replicate.toString()
         else meta.replicate = 'NA'
+
+        // Parse optional "ind" field
+        if (row.ind) meta.ind = row.ind.toString()
+        else meta.ind = 'NA'
+
+        // Parse optional "sex" field
+        if (row.sex) meta.sex = row.sex.toString()
+        else meta.sex = 'NA'
         
-
-        /* 
-            NOTE: Additional metadata parsing could be added here. This function is a minimal implimentation of a csv parser. 
-        */
-
+        // Define the ID field for the sample.
         meta.id = row.sampleID.toString()
-        /* 
-            NOTE: Additional ID parsing could be added here. For example a concatenation of patient and sample, if those fields were added to the csv sheet. 
-        */
-        meta.size = size
+        
         // defines the number of lanes for each sample. 
+        meta.size = size
 
         // join meta to fastq
 
@@ -115,20 +149,3 @@ def extract_csv(csv_file) {
         }
     }
 }
-
-/*
-    // Additional check of sample sheet:
-    // 1. Each row should specify a lane and the same combination of patient, sample and lane shouldn't be present in different rows.
-    // 2. The same sample shouldn't be listed for different patients.
-    def sample2patient = [:]
-
-    Channel.from(csv_file).splitCsv(header: true)
-        .map{ row ->
-            if (!sample2patient.containsKey(row.sample.toString())) {
-                sample2patient[row.sample.toString()] = row.patient.toString()
-            } else if (sample2patient[row.sample.toString()] != row.patient.toString()) {
-                log.error('The sample "' + row.sample.toString() + '" is registered for both patient "' + row.patient.toString() + '" and "' + sample2patient[row.sample.toString()] + '" in the sample sheet.')
-                System.exit(1)
-            }
-        }
-*/

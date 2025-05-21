@@ -4,7 +4,13 @@ logo = new Logo()
 println '\n'
 println logo.show()
 
+
 def param_log(){
+if (params.gen_org != "human" && params.gen_org != "mouse" && params.gen_org != "other") {
+  error "'--gen_org': \"${params.gen_org}\" is not valid, supported options are 'mouse', 'human', or 'other'" 
+}
+
+
 if (params.gen_org=='human')
 log.info """
 WGS PARAMETER LOG
@@ -24,10 +30,10 @@ ________________________________________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --csv_input                     ${params.csv_input}
 --download_data                 ${params.download_data}
+--merge_inds                    ${params.merge_inds}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
@@ -37,6 +43,7 @@ ________________________________________________________________________________
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
+--deepvariant                   ${params.deepvariant}
 --run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}
@@ -75,10 +82,10 @@ ________________________________________________________________________________
 --concat_lanes                  ${params.concat_lanes}
 --csv_input                     ${params.csv_input}
 --download_data                 ${params.download_data}
+--merge_inds                    ${params.merge_inds}
 -w                              ${workDir}
 -c                              ${params.config}
 --pubdir                        ${params.pubdir}
---organize_by                   ${params.organize_by}
 --ref_fa                        ${params.ref_fa}
 --ref_fa_indices                ${params.ref_fa_indices}
 --deduplicate_reads             ${params.deduplicate_reads}
@@ -88,6 +95,7 @@ ________________________________________________________________________________
 --quality_phred                 ${params.quality_phred}
 --unqualified_perc              ${params.unqualified_perc}
 --detect_adapter_for_pe         ${params.detect_adapter_for_pe}
+--deepvariant                   ${params.deepvariant}
 --run_gvcf                      ${params.run_gvcf}
 --dbSNP                         ${params.dbSNP}
 --snpEff_config                 ${params.snpEff_config}

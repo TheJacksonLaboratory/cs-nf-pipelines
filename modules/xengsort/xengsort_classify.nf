@@ -12,8 +12,8 @@ process XENGSORT_CLASSIFY {
     container 'quay.io/jaxcompsci/xengsort_gnu_utils:v2.0.5'
 
     // output directory
-    // publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID+'/xengsort/xengsort_classify' : 'xengsort'}", pattern: "*.fq", mode: "copy"
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/stats': 'xengsort' }", pattern: "*.txt", mode:'copy'
+    // publishDir "${params.pubdir}/${sampleID + '/xengsort/xengsort_classify'}", pattern: "*.fq", mode: "copy"
+    publishDir "${params.pubdir}/${sampleID + '/stats'}", pattern: "*.txt", mode:'copy'
 
     // inputs
     input:

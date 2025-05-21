@@ -21,6 +21,8 @@ workflow FILE_DOWNLOAD {
             it[2] and it[3] are R1 and R2 if PE. it[3] is empty if SE. 
 
         All steps expect that sampleID is in position [0] of tuples. 
+        
+        merge_replicates is used in the ATAC workflow and is used to merge replicates of one sample.
 
     */
 
@@ -31,6 +33,8 @@ workflow FILE_DOWNLOAD {
                     sampleID   = it[1].sampleID+'_'+it[1].replicate
                 } else {
                     sampleID   = it[1].sampleID
+                    ind   = it[1].ind
+                    sex   = it[1].sex
                 }
                 R1: tuple(sampleID, it[1], 'R1', it[2])
                 R2: tuple(sampleID, it[1], 'R2', it[3])
@@ -44,6 +48,8 @@ workflow FILE_DOWNLOAD {
                     sampleID   = it[1].sampleID+'_'+it[1].replicate
                 } else {
                     sampleID   = it[1].sampleID
+                    ind   = it[1].ind
+                    sex   = it[1].sex
                 }
                 R1: tuple(sampleID, it[1], 'R1', it[2])
             }
@@ -56,6 +62,8 @@ workflow FILE_DOWNLOAD {
             by sampleID downstream. 
         */
 
+        aria_download_input.view()
+
         // Download files. 
         ARIA_DOWNLOAD(aria_download_input)
 
@@ -63,6 +71,8 @@ workflow FILE_DOWNLOAD {
                             .map { it ->
                                 def meta = [:]
                                 meta.sampleID   = it[1].sampleID
+                                meta.ind        = it[1].ind
+                                meta.sex        = it[1].sex
                                 [it[0], it[1].lane, meta, it[2], it[3], it[1].size] // sampleID, laneID, meta, read_ID:[R1|R2], file, number_of_lanes
                             }
                             .map {  sampleID, laneID, meta, readID, file, size -> tuple( groupKey([sampleID, meta, readID], size), laneID, file )  }
@@ -101,6 +111,8 @@ workflow FILE_DOWNLOAD {
         .mix(no_concat_samples)
         .groupTuple(by: [0,2], size: group_size) // sampleID, meta
         .map{it -> tuple(it[0], it[2], it[4].toSorted( { a, b -> a.getName() <=> b.getName() } ) ) }
+
+        read_meta_ch.view()
 
         /*
             Mix concatenation files, with non-concat files. 'mix' allows for, all, some, or no files to have 

@@ -5,8 +5,7 @@ process FRIP_SCORE {
     memory 10.GB
     time '10:00:00'
 
-
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'immuno_precip_samples/'+ip+'_vs_'+control+'/macs2' : 'macs2' }", pattern: "*.tsv", mode: 'copy'
+    publishDir "${params.pubdir}/${'immuno_precip_samples/' + ip + '_vs_' + control + '/macs2'}", pattern: "*.tsv", mode: 'copy'
 
     container 'quay.io/biocontainers/mulled-v2-8186960447c5cb2faa697666dc1e6d919ad23f3e:3127fcae6b6bdaf8181e21a26ae61231030a9fcb-0'
 
@@ -24,15 +23,13 @@ process FRIP_SCORE {
     cat $peak | wc -l | awk -v OFS='\t' '{ print "${ip}", \$1 }' | cat $peak_count_header - > ${ip}_peaks.count_mqc.tsv
     READS_IN_PEAKS=\$(intersectBed -a ${ipbam[0]} -b $peak -bed -c -f 0.20 | awk -F '\t' '{sum += \$NF} END {print sum}')i
     grep 'mapped (' $ipflagstat | awk -v a="\$READS_IN_PEAKS" -v OFS='\t' '{print "${ip}", a/\$1}' | cat $frip_score_header - > ${ip}_peaks.FRiP_mqc.tsv
-
-
     """
 }
 
 /*
 IGV steps removed, re-add if IGV is needed: 
 
-    PUBDIR: publishDir "${params.pubdir}/${ params.organize_by=='sample' ? 'comparison/'+ip+'_vs_'+control+'/macs2' : 'macs2' }", pattern: "*.txt", mode: 'copy'
+    PUBDIR: publishDir "${params.pubdir}/${'comparison/' + ip + '_vs_' + control + '/macs2'}", pattern: "*.txt", mode: 'copy'
 
     OUTPUT: tuple val(ip), path("*.txt"), emit : txt
 

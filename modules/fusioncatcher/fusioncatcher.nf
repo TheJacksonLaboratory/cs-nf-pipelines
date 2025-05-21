@@ -1,5 +1,4 @@
 process FUSIONCATCHER {
-
     tag "$sampleID"
 
     cpus 12
@@ -9,7 +8,7 @@ process FUSIONCATCHER {
 
     container 'quay.io/biocontainers/fusioncatcher:1.33--hdfd78af_4'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/fusions': 'fusioncatcher' }", pattern: "*.{tsv,txt}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/fusions'}", pattern: "*.{tsv,txt}", mode:'copy'
 
 
     input:
@@ -36,9 +35,5 @@ process FUSIONCATCHER {
     mv final-list_candidate-fusion-genes.txt ${sampleID}_fusioncatcher_fusions.txt
     mv summary_candidate_fusions.txt ${sampleID}_fusioncatcher_summary.txt
     mv fusioncatcher.log ${sampleID}_fusioncatcher.log
-
     """
-
-
-
 }

@@ -29,6 +29,5 @@
         --genotype ${bam}
 
     gunzip ${sampleID}-smoove.genotyped.vcf.gz 
-
     """
 }

@@ -9,17 +9,17 @@ process SAMTOOLS_STATS {
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+        "${params.pubdir}/${type + sampleID + '/samtools'}"
     }, pattern: "*.flagstat", mode: 'copy', enabled: params.keep_intermediate
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+        "${params.pubdir}/${type + sampleID + '/samtools'}"
     }, pattern: "*.idxstats", mode: 'copy', enabled: params.keep_intermediate
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/samtools' : 'samtools'}"
+        "${params.pubdir}/${type + sampleID + '/samtools'}"
     }, pattern: "*.stats", mode: 'copy', enabled: params.keep_intermediate
 
 
@@ -32,7 +32,6 @@ process SAMTOOLS_STATS {
     tuple val(sampleID), file("*.stats"), emit: stats
 
     script:
-
     """
     samtools flagstat ${bam[0]} > ${bam[0]}.flagstat
     samtools idxstats ${bam[0]} > ${bam[0]}.idxstats

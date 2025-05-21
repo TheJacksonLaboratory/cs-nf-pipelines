@@ -9,7 +9,7 @@ process PICARD_MERGESAMFILES {
 
     publishDir {
         def type = "${params.workflow}" == 'chipseq' ? ( sampleID =~ /INPUT/ ? 'control_samples/' : 'immuno_precip_samples/') : ''
-        "${params.pubdir}/${ params.organize_by=='sample' ? type+sampleID+'/bam' : 'picard'}"
+        "${params.pubdir}/${type + sampleID + '/bam'}"
     }, pattern: "*.bam", mode: 'copy', enabled: params.keep_intermediate
 
 
@@ -39,5 +39,4 @@ process PICARD_MERGESAMFILES {
         ln -s ${bam_files[0]} ${prefix}.bam
         """
     }
-
 }

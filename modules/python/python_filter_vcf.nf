@@ -1,4 +1,3 @@
-
 process FILTER_VCF {
     tag "$sampleID"
 

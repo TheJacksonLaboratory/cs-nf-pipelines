@@ -1,5 +1,4 @@
 process PYTHON_ANNOT_DEPTHS {
-
     tag "$sampleID"
 
     cpus 1

@@ -8,7 +8,7 @@ process LUMPY_COMPRESS_INDEX {
 
     container 'quay.io/biocontainers/bcftools:1.15--h0ea216a_2'
     
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID + '/callers' : 'lumpy-sv' }", pattern:"*.gz", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID + '/callers'}", pattern:"*.gz", mode:'copy'
 
     input:
     tuple val(sampleID), path(vcf), val(meta), val(normal_name), val(tumor_name), val(caller)

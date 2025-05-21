@@ -1,5 +1,4 @@
 process PICARD_SORTSAM {
-	
     tag "${sampleID}"
 
     cpus 1

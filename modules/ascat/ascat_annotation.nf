@@ -1,5 +1,4 @@
 process ASCAT_ANNOTATION {
-
     tag "$sampleID"
 
     cpus = 1
@@ -9,7 +8,7 @@ process ASCAT_ANNOTATION {
 
     container 'quay.io/jaxcompsci/ascat:v3.1.3'
 
-    publishDir "${params.pubdir}/${params.organize_by == 'sample' ? sampleID : 'ascat_annotation'}", mode: 'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode: 'copy'
 
     input:
     tuple val(sampleID), val(meta), path(segments_raw), path(ploidy)

@@ -8,7 +8,7 @@ process GATK_GETPILEUPSUMMARIES {
 
     container 'broadinstitute/gatk:4.4.0.0'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : 'gatk' }", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
+    publishDir "${params.pubdir}/${sampleID}", pattern: "*_somatic.vcf.gz", mode:'copy', enabled: params.keep_intermediate
 
     input:
     tuple val(sampleID), path(bam), path(bai)

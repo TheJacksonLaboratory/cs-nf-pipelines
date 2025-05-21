@@ -1,5 +1,4 @@
 process PYTHON_ANNOT_ON_TARGET {
-
     tag "$sampleID"
 
     cpus 1
@@ -9,7 +8,7 @@ process PYTHON_ANNOT_ON_TARGET {
 
     container 'quay.io/biocontainers/pysam:0.15.2--py36h02877da_7'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : ''}", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode:'copy'
 
     input:
         tuple val(sampleID), path(vcf)

@@ -1,5 +1,4 @@
 process SEX_DETERMINATION {
-    
     tag "$sampleID"
 
     cpus 1
@@ -9,7 +8,7 @@ process SEX_DETERMINATION {
 
     container 'rocker/r-ver:4.4.1'
 
-    publishDir "${params.pubdir}/${ params.organize_by=='sample' ? sampleID : '' }", mode:'copy'
+    publishDir "${params.pubdir}/${sampleID}", mode:'copy'
 
     input:
         tuple val(sampleID), path(counts)
