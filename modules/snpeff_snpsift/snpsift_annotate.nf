@@ -2,8 +2,8 @@ process SNPSIFT_ANNOTATE {
     tag "$sampleID"
 
     cpus = 1
-    memory = 12.GB
-    time = '10:00:00'
+    memory = 20.GB
+    time = '24:00:00'
     errorStrategy {(task.exitStatus == 140) ? {log.info "\n\nError code: ${task.exitStatus} for task: ${task.name}. Likely caused by the task wall clock: ${task.time} or memory: ${task.memory} being exceeded.\nAttempting orderly shutdown.\nSee .command.log in: ${task.workDir} for more info.\n\n"; return 'finish'}.call() : 'finish'}
 
     container 'quay.io/jaxcompsci/snpeff_snpsift_5.1:v5.1d'
