@@ -1,5 +1,15 @@
 # RELEASE NOTES
 
+## Release 0.8.1
+
+In this minor release, we make minor adjustments to the WGS workflow. We adjusted the wallclock and memory allocation to the snpsift_annotate module, and save merged bam files when --merge_inds is specified
+
+### Module Changes:
+
+1. modules/samtools/samtools_index.nf: Write .bam index for WGS workflow.
+1. modules/samtools/samtools_merge.nf: Write .bam index for WGS workflow when `--merge_ind` is specified.
+1. modules/snpeff_snpsift/snpsift_annotate.nf: Increase wallclock and memory.
+
 ## Release 0.8.0
 
 In this release, we increase the required Nextflow version to >=24.04.0 to begin implementing the `array` processing directive.  
