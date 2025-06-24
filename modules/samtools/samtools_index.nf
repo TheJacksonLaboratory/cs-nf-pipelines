@@ -8,7 +8,7 @@ process SAMTOOLS_INDEX {
 
     container 'quay.io/biocontainers/samtools:1.14--hb421002_0'
 
-    publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern:"*.ba*", mode:'copy', enabled: params.workflow == 'rrbs' ? true : false
+    publishDir "${params.pubdir}/${sampleID + '/bam'}", pattern:"*.bai", mode:'copy', enabled: (params.workflow == 'rrbs' || params.workflow == 'wgs') ? true : false
 
     input:
     tuple val(sampleID), path(bam)
