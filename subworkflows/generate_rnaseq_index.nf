@@ -21,6 +21,19 @@ if (params.help){
 // log params
 param_log()
 
+def checkFileExists(filePath, name) {
+    if (filePath && !file(filePath).exists()) {
+        log.error "File not found: ${filePath} (${name})"
+        exit 1
+    }
+}
+
+checkFileExists(params.ref_fa, "ref_fa")
+checkFileExists(params.ref_gtf, "ref_gtf")
+if (params.custom_gene_fasta) {
+    checkFileExists(params.custom_gene_fasta, "custom_gene_fasta")
+}
+
 workflow GENERATE_RNASEQ_INDEX {
 
     if (params.custom_gene_fasta) {
