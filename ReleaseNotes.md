@@ -1,8 +1,12 @@
 # RELEASE NOTES
 
+## Release 0.8.2
+
+In this minor release, we update the STAR build step in `--workflow generate_rnaseq_index` to add a memory limit option, and increase the available memory provived to STAR by `rsem-prepare-reference`. This update corrects a reported error seen with larger genomes: `EXITING because of FATAL PARAMETER ERROR: limitGenomeGenerateRAM=31000000000 is too small`
+
 ## Release 0.8.1
 
-In this minor release, we make minor adjustments to the WGS workflow. We adjusted the wallclock and memory allocation to the snpsift_annotate module, and save merged bam files when --merge_inds is specified
+In this minor release, we make minor adjustments to the WGS workflow. We adjusted the wallclock and memory allocation to the snpsift_annotate module, and save merged bam files when `--merge_inds` is specified
 
 ### Module Changes:
 
